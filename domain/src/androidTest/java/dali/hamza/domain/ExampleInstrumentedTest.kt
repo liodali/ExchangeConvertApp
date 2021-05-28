@@ -1,4 +1,4 @@
-package dali.hamza.myapplication
+package dali.hamza.domain
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

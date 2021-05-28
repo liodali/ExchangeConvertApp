@@ -1,4 +1,4 @@
-package dali.hamza.myapplication
+package dali.hamza.domain
 
 import org.junit.Test
 
