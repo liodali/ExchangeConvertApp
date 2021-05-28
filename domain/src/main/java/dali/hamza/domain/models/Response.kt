@@ -2,7 +2,7 @@ package dali.hamza.domain.models
 
 open class IResponse
 
-sealed class MyResponse<T>(val data: T?, val error: Any?) : IResponse() {
+sealed  class  MyResponse<T>(val data: T?, val error: Any?) : IResponse() {
     class SuccessResponse<T>(data: T) : MyResponse<T>(data, null)
     class ErrorResponse<T>(error: Any) : MyResponse<T>(null, error = error)
 }

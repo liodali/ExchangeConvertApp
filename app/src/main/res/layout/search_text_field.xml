@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="8dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/id_search_input"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        app:boxCornerRadiusTopEnd="@dimen/radius_input_search"
+        app:boxCornerRadiusTopStart="@dimen/radius_input_search"
+        app:boxCornerRadiusBottomEnd="@dimen/radius_input_search"
+        app:boxCornerRadiusBottomStart="@dimen/radius_input_search"
+        app:startIconDrawable="@drawable/ic_baseline_search_24"
+        app:endIconDrawable="@drawable/ic_baseline_backspace_24"
+        app:endIconCheckable="true"
+        app:endIconMode="custom"
+        app:boxStrokeWidth="0dp"
+        app:boxCollapsedPaddingTop="0dp"
+        app:boxStrokeWidthFocused="0dp"
+        app:boxBackgroundColor="@color/grey_500"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+        android:hint="@string/search_label">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:textInputLayoutFocusedRectEnabled="false"/>
+    </com.google.android.material.textfield.TextInputLayout>
+</FrameLayout>

@@ -1,4 +1,4 @@
-package dali.hamza.echangecurrencyapp.ui.component
+package dali.hamza.echangecurrencyapp.ui.compose.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height

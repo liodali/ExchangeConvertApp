@@ -44,6 +44,9 @@ android {
         useIR = true
     }
     buildFeatures {
+        viewBinding {
+            enabled = true
+        }
         compose true
     }
     composeOptions {

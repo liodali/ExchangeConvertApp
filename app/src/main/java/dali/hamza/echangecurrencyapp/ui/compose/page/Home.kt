@@ -1,32 +1,36 @@
-package dali.hamza.echangecurrencyapp.ui.page
+package dali.hamza.echangecurrencyapp.ui.compose.page
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dali.hamza.echangecurrencyapp.R
-import dali.hamza.echangecurrencyapp.mainViewModelComposition
 import dali.hamza.echangecurrencyapp.models.AmountInput
-import dali.hamza.echangecurrencyapp.ui.component.CurrencySelectionCompose
-import dali.hamza.echangecurrencyapp.ui.component.ExchangesRatesGrid
-import dali.hamza.echangecurrencyapp.ui.component.SpacerHeight
-import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
+import dali.hamza.echangecurrencyapp.ui.MainActivity.Companion.mainViewModelComposition
+import dali.hamza.echangecurrencyapp.ui.compose.component.CurrencySelectionCompose
+import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
+import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 
 @ExperimentalMaterialApi
 @Composable
-fun Home() {
+fun Home(
+    openFragment: () -> Unit
+) {
     val viewModel = mainViewModelComposition.current
 
     Scaffold() {
         Column() {
-            FormCreateAutoWallet(
+            InputAmount(
                 {
                     viewModel.changeAmount(it)
                 },
@@ -35,7 +39,9 @@ fun Home() {
             SpacerHeight(
                 height = 8.dp
             )
-            CurrencySelectionCompose()
+            CurrencySelectionCompose(
+                openFragment = openFragment
+            )
             SpacerHeight(
                 height = 8.dp
             )
@@ -49,8 +55,9 @@ fun Home() {
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun FormCreateAutoWallet(
+fun InputAmount(
     onValueChanged: (String) -> Unit,
     form: AmountInput,
     modifier: Modifier = Modifier
@@ -62,6 +69,8 @@ fun FormCreateAutoWallet(
                 .padding(horizontal = 5.dp)
         )
     ) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+
         SpacerHeight(
             height = 8.dp
         )
@@ -71,15 +80,33 @@ fun FormCreateAutoWallet(
             label = {
                 Text(stringResource(id = R.string.amount_label))
             },
+            trailingIcon = {
+                showCurrencySelected()
+            },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(5.dp)
-        )
+                .padding(5.dp),
+
+            )
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun showCurrencySelected() {
+    val viewModel = mainViewModelComposition.current
+    if (viewModel.getCurrencySelection().isNotEmpty()) {
+        Text(text = viewModel.getCurrencySelection())
+    }
+}
 

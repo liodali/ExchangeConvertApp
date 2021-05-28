@@ -1,4 +1,4 @@
-package dali.hamza.echangecurrencyapp.ui.theme
+package dali.hamza.echangecurrencyapp.ui.compose.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

@@ -45,11 +45,12 @@ dependencies {
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-  // Retrofit
+    //dataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0-beta01"
+    // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
-
 
     //hilt+dagger
     implementation 'com.google.dagger:hilt-android:2.36'
@@ -59,4 +60,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.9.1"
+
+    implementation project(":domain")
 }
