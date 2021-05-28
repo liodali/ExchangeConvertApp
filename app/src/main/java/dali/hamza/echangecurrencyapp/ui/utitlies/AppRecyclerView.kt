@@ -22,9 +22,11 @@ class AppRecyclerView<T : BaseAdapter<*, *>, K : Any>(
 
     var data: MutableList<K> = emptyList<K>().toMutableList()
         set(value) {
+            val oldLen = data.size
             data.clear()
+            adapter?.notifyItemRangeRemoved(0, oldLen)
             data.addAll(value)
-            adapter?.notifyItemInserted(0)
+            adapter?.notifyItemRangeInserted(0, data.size)
             if (viewLoading.root.isVisible) {
                 viewLoading.root.gone()
                 recyclerView.visible()

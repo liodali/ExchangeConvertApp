@@ -25,10 +25,10 @@ fun View.disabled() {
 fun View.gone() {
     visibility = View.GONE
 }
-fun Currency.toCurrencyDTO(): CurrencyDTO {
+fun Currency.toCurrencyDTO(selected:Boolean = false): CurrencyDTO {
     return CurrencyDTO(
         currencyInfo = this,
-        isSelected= false
+        isSelected= selected
     )
 }
 @OptIn(InternalCoroutinesApi::class)

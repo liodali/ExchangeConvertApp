@@ -62,11 +62,12 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        emptyValueCurrency = resources.getString(R.string.default_currency_value)
+        emptyValueCurrency = ""//resources.getString(R.string.default_currency_value)
         currentCurrency = arguments?.getString(
             currentCurrencyKey, emptyValueCurrency
         ) ?: emptyValueCurrency
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -132,14 +133,17 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
                 var currenciesDTO = emptyList<CurrencyDTO>()
                 withContext(IO) {
                     currenciesDTO = list.map {
-                        it.toCurrencyDTO()
+                        it.toCurrencyDTO(it.name == (currencySelected?.name ?: ""))
                     }
                 }
-                if (list.isNotEmpty()) {
+                if (listCurrencies.isEmpty()) {
+                    viewModel.setCacheList(list)
+                }
+                if (currenciesDTO.isNotEmpty()) {
                     listCurrencies.clear()
                     listCurrencies.addAll(currenciesDTO)
                     recyclerViewApp.data = listCurrencies
-                    if (currentCurrency.isEmpty()) {
+                    if (currentCurrency.isNotEmpty()) {
                         lifecycleScope.launch(IO) {
                             val currency = listCurrencies.firstOrNull { c ->
                                 c.currencyInfo.name.trim() == currentCurrency.trim()

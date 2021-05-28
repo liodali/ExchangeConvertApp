@@ -8,7 +8,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/id_search_input"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="64dp"
         app:boxCornerRadiusTopEnd="@dimen/radius_input_search"
         app:boxCornerRadiusTopStart="@dimen/radius_input_search"
         app:boxCornerRadiusBottomEnd="@dimen/radius_input_search"
@@ -26,7 +26,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             app:textInputLayoutFocusedRectEnabled="false"/>
     </com.google.android.material.textfield.TextInputLayout>
 </FrameLayout>

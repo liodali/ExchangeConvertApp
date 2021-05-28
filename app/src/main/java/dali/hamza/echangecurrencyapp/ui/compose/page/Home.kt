@@ -1,6 +1,7 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +32,7 @@ fun Home(
     Scaffold() {
         Column() {
             InputAmount(
+                openCurrencyDialog = openFragment,
                 {
                     viewModel.changeAmount(it)
                 },
@@ -58,6 +60,7 @@ fun Home(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InputAmount(
+    openCurrencyDialog: () -> Unit,
     onValueChanged: (String) -> Unit,
     form: AmountInput,
     modifier: Modifier = Modifier
@@ -81,7 +84,7 @@ fun InputAmount(
                 Text(stringResource(id = R.string.amount_label))
             },
             trailingIcon = {
-                showCurrencySelected()
+                showCurrencySelected(openCurrencyDialog)
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
@@ -103,10 +106,14 @@ fun InputAmount(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun showCurrencySelected() {
+fun showCurrencySelected(
+    openCurrencyDialog: () -> Unit,
+) {
     val viewModel = mainViewModelComposition.current
     if (viewModel.getCurrencySelection().isNotEmpty()) {
-        Text(text = viewModel.getCurrencySelection())
+        Text(text = viewModel.getCurrencySelection(), modifier = Modifier.clickable {
+            openCurrencyDialog()
+        })
     }
 }
 

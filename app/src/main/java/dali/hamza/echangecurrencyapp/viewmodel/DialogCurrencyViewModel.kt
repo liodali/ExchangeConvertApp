@@ -7,9 +7,12 @@ import dali.hamza.core.common.SessionManager
 import dali.hamza.core.interactor.GetCurrenciesListUseCase
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.IResponse
+import dali.hamza.domain.models.MyResponse
+import dali.hamza.echangecurrencyapp.models.CurrencyDTO
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,6 +28,7 @@ class DialogCurrencyViewModel @Inject constructor(
     private val currentCurrencyFlow: StateFlow<String> by lazy {
         currentCurrencyMutableFlow
     }
+    private var cacheList: MutableList<Currency> = emptyList<Currency>().toMutableList()
 
     private var currenciesMutableFlow: MutableStateFlow<IResponse?> = MutableStateFlow(null)
     private val currenciesFlow: StateFlow<IResponse?> by lazy {
@@ -34,6 +38,10 @@ class DialogCurrencyViewModel @Inject constructor(
     fun getCurrencies() = currenciesFlow
 
     fun getCurrentCurrency() = currentCurrencyFlow
+    fun setCacheList(cacheCurrencies: List<Currency>) {
+        cacheList.clear()
+        cacheList.addAll(cacheCurrencies)
+    }
 
     private fun retrieveCurrentCurrency(): StateFlow<String> {
         val currency: MutableStateFlow<String> = MutableStateFlow("")
@@ -43,8 +51,20 @@ class DialogCurrencyViewModel @Inject constructor(
         return currency
     }
 
-    fun searchCurrencies(currencies: Any) {
+    fun searchCurrencies(searchText: String) {
+        viewModelScope.launch(IO) {
+            val listSearchableCurrency = emptyList<Currency>().toMutableList()
+            val texts = searchText.split(" ")
+            texts.asSequence().asFlow().collect { text ->
+                val lists = cacheList.filter {
+                    it.name.contains(text, ignoreCase = true)
+                }.toList()
+                listSearchableCurrency.addAll(lists)
+            }
+            currenciesMutableFlow.value =
+                MyResponse.SuccessResponse(listSearchableCurrency.toSet().toList())
 
+        }
     }
 
     fun getCurrenciesFromLocalDb() {
@@ -55,7 +75,7 @@ class DialogCurrencyViewModel @Inject constructor(
         }
     }
 
-     fun setPreferenceCurrency(currencySelected: Currency) {
+    fun setPreferenceCurrency(currencySelected: Currency) {
         viewModelScope.launch(IO) {
             sessionManager.setCurrencySelected(currency = currencySelected.name)
         }
