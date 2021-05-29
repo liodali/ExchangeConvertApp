@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface VoidFlowUseCase<in T> {
     suspend operator fun invoke(parameter: T?)
 }
+interface VoidFlowUseCase0 {
+    suspend operator fun invoke()
+}
 
 interface FlowUseCase<in T, out R : Any> {
     suspend operator fun invoke(parameter: T?): Flow<R>

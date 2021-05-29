@@ -1,12 +1,10 @@
 package dali.hamza.core.repository
 
-import dali.hamza.core.common.SessionManager
-import dali.hamza.core.common.data
-import dali.hamza.core.common.simpleData
-import dali.hamza.core.common.toCurrencyEntity
+import dali.hamza.core.common.*
 import dali.hamza.core.datasource.db.dao.CurrencyDao
 import dali.hamza.core.datasource.db.dao.HistoricRateDao
 import dali.hamza.core.datasource.db.dao.RatesCurrencyDao
+import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
 import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.domain.common.DateManager
@@ -95,6 +93,7 @@ class CurrencyRepository @Inject constructor(
                     }
                 }
                 if (listRates != null && listRates.isNotEmpty()) {
+                    archivedRatesByCurrency(currentCurrency)
                     ratesCurrencyDao.insertAll(listRates.map { r ->
                         RatesCurrencyEntity(
                             name = r.name,
@@ -109,15 +108,27 @@ class CurrencyRepository @Inject constructor(
     }
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
-        TODO("Not yet implemented")
+        return flow {
+            val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
+            ratesCurrencyDao.getListExchangeRatesCurrencies(
+                amount = amount,
+                currency = currentCurrency
+            ).collect { list ->
+                if (list.isNotEmpty()) {
+                    emit(MyResponse.SuccessResponse(list))
+                }
+            }
+
+        }
     }
 
 
-    suspend fun getRatesFromApi(
+    private suspend fun getRatesFromApi(
         currency: String,
         token: String
     ): List<CurrencyRate> {
-        val response = currencyClientAPI.getRatesListCurrencies(
+
+        return currencyClientAPI.getRatesListCurrencies(
             token, source = currency
         ).simpleData {
             it.quotes.values.map { rates ->
@@ -130,8 +141,19 @@ class CurrencyRepository @Inject constructor(
                 }
             }.first()
         }
+    }
 
-        return response
+    private suspend fun archivedRatesByCurrency(
+        currency: String
+    ) {
+        val historics = ratesCurrencyDao.getListRatesByCurrencies(currency)
+        if (historics.isNotEmpty()) {
+            historicRateDao.insertAll(historics.map {
+                it.toHistoricRatesEntity()
+            })
+            ratesCurrencyDao.deleteAll(historics)
+        }
+
     }
 
 }

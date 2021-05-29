@@ -2,6 +2,8 @@ package dali.hamza.core.common
 
 import android.util.Log
 import dali.hamza.core.datasource.db.entities.CurrencyEntity
+import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
+import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.MyResponse
 import okio.IOException
@@ -74,5 +76,14 @@ fun Currency.toCurrencyEntity(): CurrencyEntity {
     return CurrencyEntity(
         name = this.name,
         fullCountryName = this.fullCountryName
+    )
+}
+
+fun RatesCurrencyEntity.toHistoricRatesEntity(): HistoricRatesCurrencyEntity {
+    return HistoricRatesCurrencyEntity(
+        name = this.name,
+        rate = this.rate,
+        time = this.time,
+        selectedCurrency = this.selectedCurrency
     )
 }
