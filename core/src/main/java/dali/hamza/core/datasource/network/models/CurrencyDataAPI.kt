@@ -11,6 +11,10 @@ data class CurrencyData(
 )
 
 data class RatesCurrenciesDataAPI(
-    @Json(name = "quotes") val currencies: Map<String, Double>,
+    @Json(name = "quotes") val quotes: Map<String, RateData>,
+)
+
+data class RateData(
+    val rate :  Map<String, Double>
 )
 

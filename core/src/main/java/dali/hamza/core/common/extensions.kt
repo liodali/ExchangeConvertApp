@@ -50,9 +50,29 @@ fun <T, R : Any> Response<T>.data(
 
 }
 
-fun Currency.toCurrencyEntity():CurrencyEntity{
+fun <T, R : Any> Response<T>.simpleData(
+    mapTo: (T) -> R
+): R {
+    try {
+        onSuccess {
+            return mapTo(it)
+        }
+        onFailure {
+            throw Exception(it as String)
+        }
+        throw  Exception("GENERAL_NETWORK_ERROR")
+    } catch (e1: IOException) {
+        throw IOException("GENERAL_NETWORK_ERROR")
+    } catch (e: Exception) {
+        throw Exception(e.fillInStackTrace().message)
+    }
+
+}
+
+
+fun Currency.toCurrencyEntity(): CurrencyEntity {
     return CurrencyEntity(
         name = this.name,
-        fullCountryName= this.fullCountryName
+        fullCountryName = this.fullCountryName
     )
 }

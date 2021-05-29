@@ -2,14 +2,13 @@ package dali.hamza.core
 
 import com.squareup.moshi.Moshi
 import dali.hamza.core.datasource.network.CurrencyClientApi
-import dali.hamza.core.datasource.network.CurrencyConverter
+import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Test
 
-import org.junit.Assert.*
 import org.junit.Before
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -19,7 +18,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+class CurrencyRequestUnitTest {
     private var mockWebServer = MockWebServer()
 
     val moshi = Moshi.Builder()
@@ -38,7 +37,7 @@ class ExampleUnitTest {
         apiService = Retrofit.Builder()
             .addConverterFactory(MoshiConverterFactory.create(moshi))
            // .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .baseUrl(mockWebServer.url("/")) // note the URL is different from production one
+            .baseUrl(mockWebServer.url("/live")) // note the URL is different from production one
             .build()
             .create(CurrencyClientApi::class.java)
         mockWebServer.enqueue( MockResponse().setBody("{\n" +
@@ -63,7 +62,7 @@ class ExampleUnitTest {
 
 
     @Test
-    fun testParseJson()= runBlocking {
+    fun testParseCUrrenciesJson()= runBlocking {
       val  response =  apiService.getListCurrencies(
             "token"
         )

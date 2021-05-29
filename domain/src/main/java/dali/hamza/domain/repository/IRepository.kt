@@ -21,7 +21,7 @@ interface IRepository {
      * https://api.currencylayer.com/live?source={selectedCurrency}
      * and save it in local Database
      */
-    suspend fun getExchangeRates(selectedCurrency: String): Flow<IResponse>
+    suspend fun saveExchangeRatesOfCurrentCurrency()
 
     /**
      * calculate the exchange rates of selected currency

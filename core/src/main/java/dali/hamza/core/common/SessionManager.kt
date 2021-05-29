@@ -7,11 +7,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 
 
-class SessionManager  constructor(
+class SessionManager constructor(
     PREF_NAME: String,
     @ApplicationContext private val context: Context
 ) {
@@ -23,6 +24,7 @@ class SessionManager  constructor(
 
     companion object {
         val selectedCurrency = stringPreferencesKey("currency")
+        val lastTimeFetchForRates = longPreferencesKey("LastTimeRates")
     }
 
     suspend fun setCurrencySelected(currency: String) {
@@ -36,5 +38,18 @@ class SessionManager  constructor(
             preferences[selectedCurrency] ?: ""
         }
 
+    suspend fun setTimeLastUpdateRate(time: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[lastTimeFetchForRates] = time
+        }
+    }
+
+    val getLastUTimeUpdateRates: Flow<Date?> = context.dataStore.data
+        .map { preferences ->
+            when (preferences.contains(lastTimeFetchForRates)) {
+                true -> Date(preferences[lastTimeFetchForRates]!!)
+                else -> null
+            }
+        }
 
 }

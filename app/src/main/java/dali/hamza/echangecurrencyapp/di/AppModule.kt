@@ -10,7 +10,8 @@ import dagger.hilt.components.SingletonComponent
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.db.AppDB
 import dali.hamza.core.datasource.network.CurrencyClientApi
-import dali.hamza.core.datasource.network.CurrencyConverter
+import dali.hamza.core.datasource.network.converter.CurrencyConverter
+import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -53,6 +54,7 @@ object AppModule {
     fun provideMoshi(): MoshiConverterFactory {
         val moshi = Moshi.Builder()
             .add(CurrencyConverter())
+            .add(RateConverter())
             .build()
         return MoshiConverterFactory
             .create(moshi)
