@@ -76,7 +76,6 @@ class RateRequestUnitTest {
     @Test
     fun testParseCUrrenciesJson() = runBlocking {
         val response = apiService.getRatesListCurrencies(
-            "token",
             "USD"
         )
 

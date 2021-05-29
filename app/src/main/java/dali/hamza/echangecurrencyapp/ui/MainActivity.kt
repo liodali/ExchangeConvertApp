@@ -10,10 +10,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import dali.hamza.core.common.SessionManager
 import dali.hamza.echangecurrencyapp.ui.compose.page.Home
 import dali.hamza.echangecurrencyapp.ui.compose.theme.ExchangeCurrencyAppTheme
 import dali.hamza.echangecurrencyapp.ui.dialog.DialogCurrenciesFragment
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 
 @ExperimentalMaterialApi
@@ -22,6 +27,10 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
     private lateinit var dialogCurrencySelection: DialogCurrenciesFragment
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
 
     companion object {
         val mainViewModelComposition =
@@ -48,8 +57,19 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launchWhenStarted {
-            viewModel.retrieveCurrencySelection()
+            sessionManager.getCurrencyFromDataStore.collect { newCurrency ->
+                val cache = viewModel.getCurrencySelection()
+                viewModel.setCurrencySelection(newCurrency)
+                if ( cache.isNotEmpty() && cache != viewModel.getCurrencySelection()) {
+                    withContext(IO) {
+                        sessionManager.removeTimeLastUpdateRate()
+                        viewModel.retrieveOrUpdateRates(cache)
+                    }
+                }
+            }
+
         }
+
     }
 
 

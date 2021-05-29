@@ -89,7 +89,7 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
         header.positiveAction = View.OnClickListener {
-            viewModel.setPreferenceCurrency(currencySelected!!)
+            viewModel.setPreferenceCurrency(currencySelected!!.name)
             dismiss()
         }
         header.closeAction = View.OnClickListener {
@@ -183,5 +183,7 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
         header.enableOrDisablePositiveAction(true)
         currencySelected = currency
         currentCurrency = currency.name
+        //viewModel.setPreferenceCurrency(currencySelected!!.name)
+
     }
 }

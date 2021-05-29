@@ -33,6 +33,10 @@ fun Home(
         Column() {
             InputAmount(
                 openCurrencyDialog = openFragment,
+                actionCalculate = {
+                    viewModel.isLoading = true
+                    viewModel.calculateExchangeRates(viewModel.mutableFlowAutoWalletForm.amount.toDouble())
+                },
                 {
                     viewModel.changeAmount(it)
                 },
@@ -47,11 +51,7 @@ fun Home(
             SpacerHeight(
                 height = 8.dp
             )
-            ExchangesRatesGrid(
-                rates = (1..20).map {
-                    "$it"
-                }
-            )
+            ExchangesRatesGrid()
         }
     }
 
@@ -61,6 +61,7 @@ fun Home(
 @Composable
 fun InputAmount(
     openCurrencyDialog: () -> Unit,
+    actionCalculate: () -> Unit,
     onValueChanged: (String) -> Unit,
     form: AmountInput,
     modifier: Modifier = Modifier
@@ -94,6 +95,7 @@ fun InputAmount(
             keyboardActions = KeyboardActions(
                 onDone = {
                     keyboardController?.hide()
+                    actionCalculate()
                 }
             ),
             modifier = Modifier

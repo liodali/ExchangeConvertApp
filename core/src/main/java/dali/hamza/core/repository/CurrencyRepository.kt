@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -43,12 +44,12 @@ class CurrencyRepository @Inject constructor(
                     }
                     false -> {
                         val currencies = currencyClientAPI
-                            .getListCurrencies(TOKEN_APP).data {
-                                it.currencies.values.map { m ->
-                                    val list = m.currency.map { c ->
+                            .getListCurrencies().data {
+                                it.symbols.values.map { m ->
+                                    val list = m.map { c ->
                                         Currency(
-                                            name = c.key,
-                                            fullCountryName = c.value
+                                            name = c.value.code,
+                                            fullCountryName = c.value.description
                                         )
                                     }
                                     list
@@ -69,30 +70,54 @@ class CurrencyRepository @Inject constructor(
     }
 
     override suspend fun saveExchangeRatesOfCurrentCurrency() {
+        var ratesFromLocal = false
         withContext(IO) {
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             if (currentCurrency.isNotEmpty()) {
                 val lastTimeUpdated = sessionManager.getLastUTimeUpdateRates.first()
-
-                val listRates = when (lastTimeUpdated != null) {
+                val listRates = when (lastTimeUpdated != Date(0L)) {
                     true -> {
+                        /**
+                         * test if time to update list of rate more than 30 min in same currency
+                         */
                         val diff = DateManager.difference2Date(lastTimeUpdated)
-                        if (diff.days > 0 || diff.hours > 0) {
+                        if (diff.days > 0 || diff.hours > 0 || diff.minutes > 31) {
                             getRatesFromApi(
                                 currency = currentCurrency,
-                                token = TOKEN_APP
-                            )
+
+                                )
                         }
                         null
                     }
                     else -> {
-                        getRatesFromApi(
-                            currency = currentCurrency,
-                            token = TOKEN_APP
-                        )
+                        /**
+                         * get rates because currency has been changed
+                         */
+                        val date = ratesCurrencyDao.getLastTimeUpdated(currentCurrency)
+                        when (date != null) {
+                            true -> {
+                                ratesFromLocal = true
+                                val diff = DateManager.difference2Date(date)
+                                if (diff.days < 0 || diff.hours == 0 || diff.minutes < 30) {
+                                    ratesCurrencyDao.getListRatesByCurrencies(
+                                        selectedCurreny = currentCurrency
+                                    )
+                                }
+                                null
+                            }
+                            false -> {
+                                sessionManager.setTimeLastUpdateRate(DateManager.now().time)
+                                getRatesFromApi(
+                                    currency = currentCurrency,
+                                )
+                            }
+                        }
+
                     }
                 }
-                if (listRates != null && listRates.isNotEmpty()) {
+
+                if (listRates != null && listRates.isNotEmpty() && !ratesFromLocal) {
+                    sessionManager.setTimeNowLastUpdateRate()
                     archivedRatesByCurrency(currentCurrency)
                     ratesCurrencyDao.insertAll(listRates.map { r ->
                         RatesCurrencyEntity(
@@ -109,6 +134,7 @@ class CurrencyRepository @Inject constructor(
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
         return flow {
+            saveExchangeRatesOfCurrentCurrency()
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             ratesCurrencyDao.getListExchangeRatesCurrencies(
                 amount = amount,
@@ -125,11 +151,10 @@ class CurrencyRepository @Inject constructor(
 
     private suspend fun getRatesFromApi(
         currency: String,
-        token: String
     ): List<CurrencyRate> {
 
         return currencyClientAPI.getRatesListCurrencies(
-            token, source = currency
+            source = currency
         ).simpleData {
             it.quotes.values.map { rates ->
                 rates.rate.map { r ->
@@ -146,6 +171,7 @@ class CurrencyRepository @Inject constructor(
     private suspend fun archivedRatesByCurrency(
         currency: String
     ) {
+
         val historics = ratesCurrencyDao.getListRatesByCurrencies(currency)
         if (historics.isNotEmpty()) {
             historicRateDao.insertAll(historics.map {
@@ -155,5 +181,6 @@ class CurrencyRepository @Inject constructor(
         }
 
     }
+
 
 }

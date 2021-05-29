@@ -17,7 +17,7 @@ class RateConverter {
             when (reader.peek()) {
                 JsonReader.Token.NAME -> {
                     val fieldName = reader.nextName()
-                    if (fieldName == "quotes") {
+                    if (fieldName == "rates") {
                         reader.beginObject()
                         while (reader.hasNext()) {
                             map[reader.nextName()] = reader.nextDouble()
@@ -31,7 +31,8 @@ class RateConverter {
         }
 
         reader.endObject()
-        return RatesCurrenciesDataAPI(
+        return  RatesCurrenciesDataAPI(
+            success = true,
             quotes = mapOf("quotes" to RateData(map))
         )
     }

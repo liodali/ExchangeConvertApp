@@ -75,11 +75,12 @@ class DialogCurrencyViewModel @Inject constructor(
         }
     }
 
-    fun setPreferenceCurrency(currencySelected: Currency) {
+    fun setPreferenceCurrency(currencySelected: String) {
         viewModelScope.launch(IO) {
-            sessionManager.setCurrencySelected(currency = currencySelected.name)
+            sessionManager.setCurrencySelected(currency = currencySelected)
         }
     }
+
 
 
 }

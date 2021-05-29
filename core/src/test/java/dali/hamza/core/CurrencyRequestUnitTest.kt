@@ -37,19 +37,26 @@ class CurrencyRequestUnitTest {
         apiService = Retrofit.Builder()
             .addConverterFactory(MoshiConverterFactory.create(moshi))
            // .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .baseUrl(mockWebServer.url("/live")) // note the URL is different from production one
+            .baseUrl(mockWebServer.url("/")) // note the URL is different from production one
             .build()
             .create(CurrencyClientApi::class.java)
         mockWebServer.enqueue( MockResponse().setBody("{\n" +
                 "    \"success\": true,\n" +
                 "    \"terms\": \"https://currencylayer.com/terms\",\n" +
                 "    \"privacy\": \"https://currencylayer.com/privacy\",\n" +
-                "    \"currencies\": {\n" +
-                "        \"AED\": \"United Arab Emirates Dirham\",\n" +
-                "        \"AFN\": \"Afghan Afghani\",\n" +
-                "        \"ALL\": \"Albanian Lek\",\n" +
-                "        \"AMD\": \"Armenian Dram\",\n" +
-                "        \"ANG\": \"Netherlands Antillean Guilder\"  \n" +
+                "    \"symbols\": {\n" +
+                "         \"AED\": {\n" +
+                "            \"description\": \"United Arab Emirates Dirham\",\n" +
+                "            \"code\": \"AED\"\n" +
+                "        },\n" +
+                "        \"AFN\": {\n" +
+                "            \"description\": \"Afghan Afghani\",\n" +
+                "            \"code\": \"AFN\"\n" +
+                "        },\n" +
+                "        \"ALL\": {\n" +
+                "            \"description\": \"Albanian Lek\",\n" +
+                "            \"code\": \"ALL\"\n" +
+                "        }"+
                 "    }\n" +
                 "}"));
 
@@ -64,9 +71,9 @@ class CurrencyRequestUnitTest {
     @Test
     fun testParseCUrrenciesJson()= runBlocking {
       val  response =  apiService.getListCurrencies(
-            "token"
+
         )
 
-        print(response.body()?.currencies!!.size == 5)
+        print(response.body()?.symbols!!.entries.first().value.entries.first().value.code == "AED")
     }
 }

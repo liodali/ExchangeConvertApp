@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dali.hamza.domain.common.DateManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.*
@@ -29,7 +30,7 @@ class SessionManager constructor(
 
     suspend fun setCurrencySelected(currency: String) {
         context.dataStore.edit { preferences ->
-            preferences[selectedCurrency] = currency
+            preferences.putAll(selectedCurrency to currency)
         }
     }
 
@@ -44,11 +45,23 @@ class SessionManager constructor(
         }
     }
 
-    val getLastUTimeUpdateRates: Flow<Date?> = context.dataStore.data
+    suspend fun setTimeNowLastUpdateRate() {
+        context.dataStore.edit { preferences ->
+            preferences[lastTimeFetchForRates] = DateManager.now().time
+        }
+    }
+
+
+    suspend fun removeTimeLastUpdateRate() {
+        context.dataStore.edit { preferences ->
+            preferences[lastTimeFetchForRates] = 0L
+        }
+    }
+    val getLastUTimeUpdateRates: Flow<Date> = context.dataStore.data
         .map { preferences ->
             when (preferences.contains(lastTimeFetchForRates)) {
                 true -> Date(preferences[lastTimeFetchForRates]!!)
-                else -> null
+                else -> Date(0L)
             }
         }
 

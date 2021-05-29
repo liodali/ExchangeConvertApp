@@ -9,16 +9,16 @@ import retrofit2.http.Query
 
 interface CurrencyClientApi {
 
-    @GET("list")
+    @GET("symbols")
     suspend fun getListCurrencies(
-        @Query("access_key") accessKey: String
+        //@Query("access_key") accessKey: String
     ): Response<CurrenciesDataAPI>
 
 
-    @GET("live")
+    @GET("latest")
     suspend  fun getRatesListCurrencies(
-        @Query("access_key") accessKey: String,
-        @Query("source") source: String
+        //@Query("access_key") accessKey: String,
+        @Query("base") source: String
     ): Response<RatesCurrenciesDataAPI>
 
 }
