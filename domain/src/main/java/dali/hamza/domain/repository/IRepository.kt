@@ -27,4 +27,5 @@ interface IRepository {
      * calculate the exchange rates of selected currency
      */
     suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse>
+    suspend fun getListRatesCurrenciesPaging(amount: Double): Flow<Any>
 }

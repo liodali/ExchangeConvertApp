@@ -1,5 +1,6 @@
 package dali.hamza.core.repository
 
+import androidx.paging.PagingConfig
 import dali.hamza.core.common.*
 import dali.hamza.core.datasource.db.dao.CurrencyDao
 import dali.hamza.core.datasource.db.dao.HistoricRateDao
@@ -8,10 +9,6 @@ import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
 import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.domain.common.DateManager
-import dali.hamza.domain.models.Currency
-import dali.hamza.domain.models.CurrencyRate
-import dali.hamza.domain.models.IResponse
-import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +19,10 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
+import androidx.paging.Pager
+import androidx.paging.PagingData
+import dali.hamza.domain.models.*
+import dali.hamza.domain.models.Currency
 
 class CurrencyRepository @Inject constructor(
     private val currencyClientAPI: CurrencyClientApi,
@@ -133,6 +134,7 @@ class CurrencyRepository @Inject constructor(
     }
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
+
         return flow {
             saveExchangeRatesOfCurrentCurrency()
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
@@ -144,8 +146,21 @@ class CurrencyRepository @Inject constructor(
                     emit(MyResponse.SuccessResponse(list))
                 }
             }
-
         }
+
+
+    }
+
+    override suspend fun getListRatesCurrenciesPaging(amount: Double): Flow<PagingData<ExchangeRate>> {
+        saveExchangeRatesOfCurrentCurrency()
+        val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
+        return Pager(
+            PagingConfig(pageSize = 30, enablePlaceholders = true)
+        ) {
+            ratesCurrencyDao.getPagingListExchangeRatesCurrencies(amount, currentCurrency)
+        }.flow
+
+
     }
 
 
