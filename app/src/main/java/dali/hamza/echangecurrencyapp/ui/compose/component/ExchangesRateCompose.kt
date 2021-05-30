@@ -32,9 +32,6 @@ import kotlin.math.withSign
 @Composable
 fun ExchangesRatesGrid() {
     val viewModel = MainActivity.mainViewModelComposition.current
-
-
-    val amount = viewModel.mutableFlowAutoWalletForm.amount
     val loading = viewModel.isLoading
 
     val ratesResponse = viewModel.getExchangeRates().collectAsState()

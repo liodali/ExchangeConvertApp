@@ -7,7 +7,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -17,9 +20,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.models.AmountInput
+import dali.hamza.echangecurrencyapp.ui.MainActivity
 import dali.hamza.echangecurrencyapp.ui.MainActivity.Companion.mainViewModelComposition
 import dali.hamza.echangecurrencyapp.ui.compose.component.CurrencySelectionCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
+import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 
 @ExperimentalMaterialApi
@@ -27,95 +32,43 @@ import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 fun Home(
     openFragment: () -> Unit
 ) {
-    val viewModel = mainViewModelComposition.current
+    val viewModel = MainActivity.mainViewModelComposition.current
 
-    Scaffold() {
-        Column() {
-            InputAmount(
-                openCurrencyDialog = openFragment,
-                actionCalculate = {
-                    viewModel.isLoading = true
-                    viewModel.calculateExchangeRates(viewModel.mutableFlowAutoWalletForm.amount.toDouble())
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(stringResource(id = R.string.Home))
                 },
-                {
-                    viewModel.changeAmount(it)
-                },
-                form = viewModel.mutableFlowAutoWalletForm
-            )
-            SpacerHeight(
-                height = 8.dp
-            )
-            CurrencySelectionCompose(
-                openFragment = openFragment
-            )
-            SpacerHeight(
-                height = 8.dp
-            )
-            ExchangesRatesGrid()
-        }
-    }
-
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun InputAmount(
-    openCurrencyDialog: () -> Unit,
-    actionCalculate: () -> Unit,
-    onValueChanged: (String) -> Unit,
-    form: AmountInput,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.then(
-            Modifier
-                .verticalScroll(ScrollState(0))
-                .padding(horizontal = 5.dp)
-        )
-    ) {
-        val keyboardController = LocalSoftwareKeyboardController.current
-
-        SpacerHeight(
-            height = 8.dp
-        )
-        TextField(
-            form.amount,
-            onValueChanged,
-            label = {
-                Text(stringResource(id = R.string.amount_label))
-            },
-            trailingIcon = {
-                showCurrencySelected(openCurrencyDialog)
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide()
-                    actionCalculate()
+                actions = {
+                    TextButton(onClick = {
+                        viewModel.showFormAmount = true
+                    }) {
+                        Icon(imageVector = Icons.Filled.Refresh, contentDescription = "")
+                    }
                 }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-
             )
+        }
+    ) {
+        BodyHomeCompose(openFragment = openFragment)
     }
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun showCurrencySelected(
-    openCurrencyDialog: () -> Unit,
-) {
-    val viewModel = mainViewModelComposition.current
-    if (viewModel.getCurrencySelection().isNotEmpty()) {
-        Text(text = viewModel.getCurrencySelection(), modifier = Modifier.clickable {
-            openCurrencyDialog()
-        })
+fun BodyHomeCompose(openFragment: () -> Unit) {
+
+    Column() {
+        HeaderHomeCompose(
+            openFragment = openFragment
+        )
+        SpacerHeight(
+            height = 24.dp
+        )
+        ExchangesRatesGrid()
     }
 }
+
+
 

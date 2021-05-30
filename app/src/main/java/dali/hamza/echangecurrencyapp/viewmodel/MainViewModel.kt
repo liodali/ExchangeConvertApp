@@ -30,6 +30,7 @@ class MainViewModel @Inject constructor(
     private val calculateRatesUseCase: CalculateRatesUseCase
 ) : ViewModel() {
 
+     var showFormAmount: Boolean by mutableStateOf(true)
     private var selectedCurrency: String by mutableStateOf("")
 
     var isLoading: Boolean by mutableStateOf(false)
@@ -47,12 +48,12 @@ class MainViewModel @Inject constructor(
     }
 
 
-    var mutableFlowAutoWalletForm: AmountInput by mutableStateOf(initAmountInput())
+    var mutableFlowAmountForm: AmountInput by mutableStateOf(initAmountInput())
         private set
 
 
     fun changeAmount(amount: String) {
-        mutableFlowAutoWalletForm = mutableFlowAutoWalletForm.copy(
+        mutableFlowAmountForm = mutableFlowAmountForm.copy(
             amount = amount
         )
     }
