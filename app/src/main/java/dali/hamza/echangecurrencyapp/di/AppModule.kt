@@ -39,10 +39,10 @@ object AppModule {
         return SessionManager(PREF_NAME, application)
     }
 
-    @Provides
-    @Named("token")
-    fun provideTokenApp(application: Application) =
-        application.getString(R.string.token)
+//    @Provides
+//    @Named("token")
+//    fun provideTokenApp(application: Application) =
+//        application.getString(R.string.token)
 
 
     @Provides

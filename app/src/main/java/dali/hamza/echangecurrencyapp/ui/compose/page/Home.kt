@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -41,11 +42,18 @@ fun Home(
                     Text(stringResource(id = R.string.Home))
                 },
                 actions = {
-                    TextButton(onClick = {
-                        viewModel.showFormAmount = true
-                    }) {
-                        Icon(imageVector = Icons.Filled.Refresh, contentDescription = "")
+                    if(!viewModel.showFormAmount){
+                        TextButton(onClick = {
+                            viewModel.showFormAmount = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = "",
+                                tint = Color.White
+                            )
+                        }
                     }
+
                 }
             )
         }

@@ -2,14 +2,21 @@ package dali.hamza.echangecurrencyapp.ui.compose.component
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.echangecurrencyapp.ui.MainActivity
+import okhttp3.internal.format
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -22,7 +29,6 @@ fun HeaderHomeCompose(
         modifier = Modifier.animateContentSize()
     ) {
         Crossfade(targetState = viewModel.showFormAmount) { isShow ->
-
             when (!isShow) {
                 true -> {
                     Box(
@@ -31,11 +37,10 @@ fun HeaderHomeCompose(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            viewModel.mutableFlowAmountForm.amount,
-                            fontSize = 45.sp
+                        AmountConvertedCompose(
+                            amount = viewModel.mutableFlowAmountForm.amount,
+                            currency = viewModel.getCurrencySelection()!!
                         )
-
                     }
                 }
                 false -> {
@@ -44,9 +49,13 @@ fun HeaderHomeCompose(
                         actionCalculate =
                         if (isShow) {
                             {
-                                viewModel.isLoading = true
-                                viewModel.showFormAmount = false
-                                viewModel.calculateExchangeRates(viewModel.mutableFlowAmountForm.amount.toDouble())
+                                val amount = viewModel.mutableFlowAmountForm.amount
+                                if (amount.isNotEmpty() && amount.toDouble() > 0.0) {
+                                    viewModel.isLoading = true
+                                    viewModel.showFormAmount = false
+                                    viewModel.calculateExchangeRates(viewModel.mutableFlowAmountForm.amount.toDouble())
+                                }
+
                             }
                         } else null,
                         {
@@ -57,7 +66,44 @@ fun HeaderHomeCompose(
                 }
             }
         }
+    }
+}
 
+@Composable
+fun AmountConvertedCompose(
+    amount: String,
+    currency: String
+) {
+    val colorText = if (isSystemInDarkTheme()) Color.White else Color.Black
+    Column(
+//        Modifier
+//            .fillMaxWidth()
+//            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = colorText,
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                ) {
+                    append(currency)
+                }
+                append(" ")
+                withStyle(
+                    style = MaterialTheme.typography.h6.toSpanStyle().copy(
+                        color = colorText,
+                        fontSize = 35.sp
+                    )
+                ) {
+                    append(format("%.2f",amount.toDouble()))
+                }
+            }
+        )
 
     }
 }

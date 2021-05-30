@@ -23,10 +23,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingData
 import dali.hamza.domain.models.*
 import dali.hamza.domain.models.Currency
+import kotlinx.coroutines.async
 
 class CurrencyRepository @Inject constructor(
     private val currencyClientAPI: CurrencyClientApi,
-    @Named("token") private val TOKEN_APP: String,
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
@@ -76,19 +76,20 @@ class CurrencyRepository @Inject constructor(
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             if (currentCurrency.isNotEmpty()) {
                 val lastTimeUpdated = sessionManager.getLastUTimeUpdateRates.first()
-                val listRates = when (lastTimeUpdated != Date(0L)) {
+                val listRates: List<CurrencyRate> = when (lastTimeUpdated != Date(0L)) {
                     true -> {
                         /**
                          * test if time to update list of rate more than 30 min in same currency
                          */
                         val diff = DateManager.difference2Date(lastTimeUpdated)
-                        if (diff.days > 0 || diff.hours > 0 || diff.minutes > 31) {
-                            getRatesFromApi(
-                                currency = currentCurrency,
-
+                        when (diff.days > 0 || diff.hours > 0 || diff.minutes > 31) {
+                            true -> async {
+                                getRatesFromApi(
+                                    currency = currentCurrency,
                                 )
+                            }.await()
+                            else -> emptyList()
                         }
-                        null
                     }
                     else -> {
                         /**
@@ -97,14 +98,24 @@ class CurrencyRepository @Inject constructor(
                         val date = ratesCurrencyDao.getLastTimeUpdated(currentCurrency)
                         when (date != null) {
                             true -> {
-                                ratesFromLocal = true
+
                                 val diff = DateManager.difference2Date(date)
-                                if (diff.days < 0 || diff.hours == 0 || diff.minutes < 30) {
-                                    ratesCurrencyDao.getListRatesByCurrencies(
-                                        selectedCurreny = currentCurrency
-                                    )
+                                when (diff.days < 0 || diff.hours == 0 || diff.minutes < 30) {
+                                    true -> {
+                                        ratesFromLocal = true
+                                        emptyList()
+                                    }
+                                    else ->
+                                        ratesCurrencyDao.getListRatesByCurrencies(
+                                            selectedCurreny = currentCurrency
+                                        ).map {
+                                            CurrencyRate(
+                                                name = it.name,
+                                                rate = it.rate,
+                                                time = it.time
+                                            )
+                                        }
                                 }
-                                null
                             }
                             false -> {
                                 sessionManager.setTimeLastUpdateRate(DateManager.now().time)
@@ -113,11 +124,10 @@ class CurrencyRepository @Inject constructor(
                                 )
                             }
                         }
-
                     }
                 }
 
-                if (listRates != null && listRates.isNotEmpty() && !ratesFromLocal) {
+                if (listRates.isNotEmpty() && !ratesFromLocal) {
                     sessionManager.setTimeNowLastUpdateRate()
                     archivedRatesByCurrency(currentCurrency)
                     ratesCurrencyDao.insertAll(listRates.map { r ->

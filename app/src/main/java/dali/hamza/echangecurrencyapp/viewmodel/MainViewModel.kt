@@ -48,6 +48,7 @@ class MainViewModel @Inject constructor(
     }
 
 
+    private var cacheAmount: String? by mutableStateOf(null)
     var mutableFlowAmountForm: AmountInput by mutableStateOf(initAmountInput())
         private set
 
@@ -73,11 +74,21 @@ class MainViewModel @Inject constructor(
 
 
     fun calculateExchangeRates(amount: Double) {
-        viewModelScope.launch {
-            calculateRatesUseCase.invoke(amount).collect { response ->
-                mutableFlowExchangesRates.value = response
+
+        if (cacheAmount == null || (cacheAmount != null &&
+                    cacheAmount!!.isNotEmpty()
+                    && cacheAmount!!.toDouble() != amount)
+        ) {
+            viewModelScope.launch {
+                cacheAmount = amount.toString()
+                calculateRatesUseCase.invoke(amount).collect { response ->
+                    mutableFlowExchangesRates.value = response
+                }
+
             }
         }
+
+
     }
 
 

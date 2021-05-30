@@ -44,22 +44,11 @@ class RateRequestUnitTest {
             MockResponse().setBody(
                 "{\n" +
                         "    \"success\": true,\n" +
-                        "    \"terms\": \"https://currencylayer.com/terms\",\n" +
-                        "    \"privacy\": \"https://currencylayer.com/privacy\",\n" +
-                        "    \"timestamp\": 1430401802,\n" +
-                        "    \"source\": \"USD\",\n" +
-                        "    \"quotes\": {\n" +
-                        "        \"USDAED\": 3.672982,\n" +
-                        "        \"USDAFN\": 57.8936,\n" +
-                        "        \"USDALL\": 126.1652,\n" +
-                        "        \"USDAMD\": 475.306,\n" +
-                        "        \"USDANG\": 1.78952,\n" +
-                        "        \"USDAOA\": 109.216875,\n" +
-                        "        \"USDARS\": 8.901966,\n" +
-                        "        \"USDAUD\": 1.269072,\n" +
-                        "        \"USDAWG\": 1.792375,\n" +
-                        "        \"USDAZN\": 1.04945,\n" +
-                        "        \"USDBAM\": 1.757305\n" +
+                        "    \"base\": \"USD\",\n" +
+                        "    \"rates\": {\n" +
+                        "        \"AED\": 3.672982,\n" +
+                        "        \"EUR\": 0.82,\n" +
+                        "        \"TND\": 2.72\n" +
                         "    }\n" +
                         "}  "
             )
