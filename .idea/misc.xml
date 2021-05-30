@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_exchange.xml" value="0.184375" />
         <entry key="app/src/main/res/layout/app_recycler_view.xml" value="0.1640625" />
         <entry key="app/src/main/res/layout/bottom_sheet_currency_picker.xml" value="0.1705282669138091" />
         <entry key="app/src/main/res/layout/chargement.xml" value="0.1640625" />
