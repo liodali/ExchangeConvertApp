@@ -9,6 +9,7 @@ data class Currency(
 data class ExchangeRate(
     val name: String,
     val calculedAmount: Double,
+    val rate: Double,
     val time: Date,
 )
 

@@ -13,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.domain.models.ExchangeRate
+import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.ui.MainActivity
@@ -46,22 +48,19 @@ fun ExchangesRatesGrid() {
 
     val ratesState = viewModel.getExchangeRates().collectAsState()
     val ratesResponse = ratesState.value
-    if (ratesResponse == null) {
-        EmptyBox()
-    }
-    when (ratesResponse) {
-        is MyResponse.SuccessResponse<*> -> {
+    if (loading)
+        Loading()
+    when {
+        ratesResponse == null ->
+            EmptyBox()
+        ratesResponse is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
             ShowListRates(
                 ratesResponse.data as List<ExchangeRate>,
             )
         }
-        is MyResponse.ErrorResponse<*> -> ShowErrorList()
+        ratesResponse is MyResponse.ErrorResponse<*> -> ShowErrorList()
     }
-
-    if (loading)
-        Loading()
-
 }
 
 @ExperimentalComposeUiApi
@@ -86,7 +85,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
     var searchStated by remember {
         mutableStateOf(false)
     }
-    var rememberRates by remember {
+    val rememberRates = rememberSaveable {
         mutableStateOf(rates)
     }
     val scopes = rememberCoroutineScope()
@@ -120,16 +119,17 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                                     it.name.toLowerCase().contains(searchText.toLowerCase())
                                 }
                                 withContext(Main) {
-                                    rememberRates = list
+                                    rememberRates.value = list
                                 }
                             }
                             else -> {
-                                rememberRates = rates
+                                rememberRates.value = rates
                             }
                         }
                     },
                     Modifier
-                        .weight(0.65f).fillMaxWidth(0.7f)
+                        .weight(0.65f)
+                        .fillMaxWidth(0.7f)
                         .animateContentSize()
                         .focusRequester(requesterFocus)
                         .focusModifier()
@@ -164,7 +164,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                             focusManager.clearFocus()
                             searchStated = false
                             search = ""
-                            rememberRates = rates
+                            rememberRates.value = rates
                             keyboardController?.hide()
                         },
                         modifier = Modifier
@@ -185,38 +185,63 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                 Modifier.weight(0.85f)
             ) {
 
-                items(rememberRates) { item ->
-                    Card(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .padding(8.dp),
-                        elevation = 5.dp,
-                        shape = RoundedCornerShape(12.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .padding(5.dp)
-                        ) {
-                            Text(
-                                item.name,
-                                fontSize = 15.sp,
-                            )
-                            Text(
-                                text = format("%.2f", item.calculedAmount),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentWidth(align = Alignment.End)
-                            )
-                        }
-                    }
+                items(rememberRates.value) { item ->
+                    ItemExchangeRate(item)
                 }
             }
         }
     }
 
+}
+
+@Composable
+fun ItemExchangeRate(item: ExchangeRate) {
+    Card(
+        modifier = Modifier
+            .padding(2.dp)
+            .padding(8.dp),
+        elevation = 5.dp,
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(3.dp)
+                .padding(8.dp)
+        ) {
+            Text(
+                item.name,
+                fontSize = 15.sp,
+                modifier = Modifier.wrapContentWidth(align = Alignment.Start)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .padding(5.dp)
+                    .wrapContentWidth(align = Alignment.End)
+            ) {
+                Text(
+                    text = "x" + format("%.2f", item.rate),
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(align = Alignment.End)
+                        .wrapContentHeight(align = Alignment.Top)
+                )
+                Text(
+                    text = format("%.2f", item.calculedAmount),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(align = Alignment.End)
+                        .wrapContentHeight(align = Alignment.Bottom)
+
+                )
+            }
+        }
+
+    }
 }
 
 

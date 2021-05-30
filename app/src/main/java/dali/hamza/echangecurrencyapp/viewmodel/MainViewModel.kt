@@ -36,12 +36,12 @@ class MainViewModel @Inject constructor(
     var isLoading: Boolean by mutableStateOf(false)
 
     private var mutableFlowExchangesRates: MutableStateFlow<IResponse?> = MutableStateFlow(null)
-    private var exchangesRates: StateFlow<IResponse?> = mutableFlowExchangesRates
+    private var stateFlowExchangesRates: StateFlow<IResponse?> = mutableFlowExchangesRates
 
 
     fun getCurrencySelection() = selectedCurrency
 
-    fun getExchangeRates(): StateFlow<IResponse?> = exchangesRates
+    fun getExchangeRates(): StateFlow<IResponse?> = stateFlowExchangesRates
 
     fun setCurrencySelection(newCurrency: String) {
         selectedCurrency = newCurrency
@@ -84,8 +84,11 @@ class MainViewModel @Inject constructor(
         ) {
             viewModelScope.launch {
                 cacheAmount = amount.toString()
+                isLoading = true
+                mutableFlowExchangesRates.value = null
                 calculateRatesUseCase.invoke(amount).collect { response ->
                     mutableFlowExchangesRates.value = response
+                    isLoading = false
                 }
 
             }

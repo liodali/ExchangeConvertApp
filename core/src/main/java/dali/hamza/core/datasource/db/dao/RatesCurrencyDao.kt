@@ -13,13 +13,13 @@ import java.util.*
 interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
 
 
-    @Query("select rate*:amount as calculedAmount,name,time from RatesCurrencyEntity where selectedCurrency=:currency")
+    @Query("select rate*:amount as calculedAmount,rate,name,time from RatesCurrencyEntity where selectedCurrency=:currency")
     fun getListExchangeRatesCurrencies(
         amount: Double,
         currency: String
     ): Flow<List<ExchangeRate>>
 
-    @Query("select rate*:amount as calculedAmount,name,time from RatesCurrencyEntity where selectedCurrency=:currency")
+    @Query("select rate*:amount as calculedAmount,rate,name,time from RatesCurrencyEntity where selectedCurrency=:currency")
     fun getPagingListExchangeRatesCurrencies(
         amount: Double,
         currency: String
