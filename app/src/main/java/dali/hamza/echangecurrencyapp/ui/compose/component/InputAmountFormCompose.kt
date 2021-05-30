@@ -88,7 +88,8 @@ fun InputAmount(
                     if (actionCalculate != null)
                         actionCalculate()
                 },
-                enabled = form.amount.isNotEmpty() && form.amount.toDouble()>0.0 && actionCalculate != null
+                enabled = form.amount.isNotEmpty()
+                        && form.amount.toDouble() > 0.0 && actionCalculate != null
             ) {
                 Text(text = stringResource(id = R.string.convertLabel))
 

@@ -28,6 +28,7 @@ import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
 import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @Composable
 fun Home(
@@ -63,6 +64,7 @@ fun Home(
 
 }
 
+@ExperimentalComposeUiApi
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BodyHomeCompose(openFragment: () -> Unit) {

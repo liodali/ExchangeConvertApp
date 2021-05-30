@@ -12,4 +12,5 @@
     <string name="convertLabel">Convert</string>
     <string name="Home">Home</string>
     <string name="error_rates">Rates Unnavailable</string>
+    <string name="title_exchange_rates">Exchange rates</string>
 </resources>
