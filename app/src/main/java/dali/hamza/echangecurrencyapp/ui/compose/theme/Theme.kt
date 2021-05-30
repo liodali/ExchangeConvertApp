@@ -5,27 +5,30 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
-)
+    primary = Yellow200,
+    primaryVariant = Yellow500,
+    secondary = Teal300,
+    error = errorDark,
+
+    )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
-
-    /* Other default colors to override
+    primary = Yellow700,
+    primaryVariant = Yellow500,
+    secondary = Teal300,
+    secondaryVariant = Teal800,
+    error = error,
     background = Color.White,
     surface = Color.White,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
     onBackground = Color.Black,
     onSurface = Color.Black,
-    */
-)
+
+    )
 
 @Composable
 fun ExchangeCurrencyAppTheme(
