@@ -2,17 +2,12 @@ package dali.hamza.echangecurrencyapp.ui.compose.component
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -73,19 +68,31 @@ fun InputAmount(
                 .padding(5.dp),
 
             )
-        Button(
-            onClick = {
-                keyboardController?.hide()
-                if (actionCalculate != null)
-                    actionCalculate()
-            },
-            modifier = Modifier.wrapContentWidth(
-                align = Alignment.End
-            ),
-            enabled = actionCalculate != null
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(
+                    align = Alignment.End
+                ),
+            horizontalArrangement = Arrangement.End
         ) {
-            Text(text = stringResource(id = R.string.converLabel))
+            CurrencySelectionCompose(
+                openFragment = openCurrencyDialog
+            )
+            SpacerWidth(
+                width = 2.dp
+            )
+            Button(
+                onClick = {
+                    keyboardController?.hide()
+                    if (actionCalculate != null)
+                        actionCalculate()
+                },
+                // enabled = form.amount.isNotEmpty() && form.amount.toDouble()>0.0
+            ) {
+                Text(text = stringResource(id = R.string.convertLabel))
 
+            }
         }
     }
 }
@@ -96,9 +103,11 @@ fun showCurrencySelected(
     openCurrencyDialog: () -> Unit,
 ) {
     val viewModel = MainActivity.mainViewModelComposition.current
-    if (viewModel.getCurrencySelection().isNotEmpty()) {
-        Text(text = viewModel.getCurrencySelection(), modifier = Modifier.clickable {
+    val currency = viewModel.getCurrencySelection()
+    when (currency != null && currency.isNotEmpty()) {
+        true -> Text(text = currency, modifier = Modifier.clickable {
             openCurrencyDialog()
         })
+        else -> EmptyBox()
     }
 }

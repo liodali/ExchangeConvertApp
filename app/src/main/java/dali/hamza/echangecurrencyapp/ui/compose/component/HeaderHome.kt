@@ -57,11 +57,7 @@ fun HeaderHomeCompose(
                 }
             }
         }
-        SpacerHeight(
-            height = 8.dp
-        )
-        CurrencySelectionCompose(
-            openFragment = openFragment
-        )
+
+
     }
 }

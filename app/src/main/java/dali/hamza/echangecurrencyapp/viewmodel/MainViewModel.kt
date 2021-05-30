@@ -30,8 +30,8 @@ class MainViewModel @Inject constructor(
     private val calculateRatesUseCase: CalculateRatesUseCase
 ) : ViewModel() {
 
-     var showFormAmount: Boolean by mutableStateOf(true)
-    private var selectedCurrency: String by mutableStateOf("")
+    var showFormAmount: Boolean by mutableStateOf(true)
+    private var selectedCurrency: String? by mutableStateOf(null)
 
     var isLoading: Boolean by mutableStateOf(false)
 
@@ -61,7 +61,10 @@ class MainViewModel @Inject constructor(
     fun retrieveOrUpdateRates(currency: String) {
         viewModelScope.launch {
             async {
-                if (selectedCurrency.isNotEmpty() && selectedCurrency != currency) {
+                if (selectedCurrency != null
+                    && selectedCurrency!!.isNotEmpty()
+                    && selectedCurrency != currency
+                ) {
                     saveOrUpdateRatesUseCase.invoke()
                 }
             }.await()

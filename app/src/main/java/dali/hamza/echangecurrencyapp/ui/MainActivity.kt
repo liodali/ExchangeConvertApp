@@ -60,7 +60,10 @@ class MainActivity : AppCompatActivity() {
             sessionManager.getCurrencyFromDataStore.collect { newCurrency ->
                 val cache = viewModel.getCurrencySelection()
                 viewModel.setCurrencySelection(newCurrency)
-                if ( cache.isNotEmpty() && cache != viewModel.getCurrencySelection()) {
+                if (cache != null &&
+                    cache.isNotEmpty()
+                    && cache != viewModel.getCurrencySelection()
+                ) {
                     withContext(IO) {
                         sessionManager.removeTimeLastUpdateRate()
                         viewModel.retrieveOrUpdateRates(cache)
@@ -75,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openCurrenciesSelectionBottomSheet() {
         dialogCurrencySelection = DialogCurrenciesFragment.newInstance(
-            selectedCurrency = viewModel.getCurrencySelection()
+            selectedCurrency = viewModel.getCurrencySelection() ?: ""
         )
         dialogCurrencySelection.show(supportFragmentManager.also {
             val prevFrag = it.findFragmentByTag(DialogCurrenciesFragment.tag)

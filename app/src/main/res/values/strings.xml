@@ -9,6 +9,6 @@
     <string name="selectTtitleCurrency">Currency Picker</string>
     <string name="loadingText">Loading</string>
     <string name="search_label">search</string>
-    <string name="converLabel">Convert</string>
+    <string name="convertLabel">Convert</string>
     <string name="Home">Home</string>
 </resources>
