@@ -28,15 +28,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class DialogCurrenciesFragment : BottomSheetDialogFragment(),
+class DialogCurrenciesFragment(
+    private val action: DialogCurrencySelectionCallback
+) : BottomSheetDialogFragment(),
     AdapterCurrenciesPicker.CurrencyPickerCallback {
 
     companion object {
         const val currentCurrencyKey: String = "currentCurrency"
         const val tag = "currencies_list"
 
-        fun newInstance(selectedCurrency: String): DialogCurrenciesFragment {
-            return DialogCurrenciesFragment().apply {
+        fun newInstance(
+            selectedCurrency: String,
+            action: DialogCurrencySelectionCallback
+        ): DialogCurrenciesFragment {
+            return DialogCurrenciesFragment(action).apply {
                 arguments = Bundle().apply {
                     putString(currentCurrencyKey, selectedCurrency)
                 }
@@ -58,6 +63,7 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
 
     private lateinit var emptyValueCurrency: String
     private lateinit var currentCurrency: String
+    private lateinit var cacheCurrentCurrency: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +72,7 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
         currentCurrency = arguments?.getString(
             currentCurrencyKey, emptyValueCurrency
         ) ?: emptyValueCurrency
+        cacheCurrentCurrency = currentCurrency
     }
 
 
@@ -90,6 +97,9 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
         isCancelable = false
         header.positiveAction = View.OnClickListener {
             viewModel.setPreferenceCurrency(currencySelected!!.name)
+            if (cacheCurrentCurrency != currencySelected!!.name) {
+                action.resetUIState()
+            }
             dismiss()
         }
         header.closeAction = View.OnClickListener {
@@ -184,6 +194,9 @@ class DialogCurrenciesFragment : BottomSheetDialogFragment(),
         currencySelected = currency
         currentCurrency = currency.name
         //viewModel.setPreferenceCurrency(currencySelected!!.name)
+    }
 
+    interface DialogCurrencySelectionCallback {
+        fun resetUIState()
     }
 }

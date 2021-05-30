@@ -72,9 +72,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun resetExchangeRates() {
+        cacheAmount = null
+        mutableFlowExchangesRates.value = null
+    }
 
     fun calculateExchangeRates(amount: Double) {
-
         if (cacheAmount == null || (cacheAmount != null &&
                     cacheAmount!!.isNotEmpty()
                     && cacheAmount!!.toDouble() != amount)
@@ -87,8 +90,6 @@ class MainViewModel @Inject constructor(
 
             }
         }
-
-
     }
 
 

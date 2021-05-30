@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @ExperimentalMaterialApi
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrencySelectionCallback {
 
     private val viewModel: MainViewModel by viewModels()
     private lateinit var dialogCurrencySelection: DialogCurrenciesFragment
@@ -76,9 +76,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun openCurrenciesSelectionBottomSheet() {
+    private fun openCurrenciesSelectionBottomSheet() {
         dialogCurrencySelection = DialogCurrenciesFragment.newInstance(
-            selectedCurrency = viewModel.getCurrencySelection() ?: ""
+            selectedCurrency = viewModel.getCurrencySelection() ?: "",
+            this
         )
         dialogCurrencySelection.show(supportFragmentManager.also {
             val prevFrag = it.findFragmentByTag(DialogCurrenciesFragment.tag)
@@ -87,6 +88,11 @@ class MainActivity : AppCompatActivity() {
             }
             it.beginTransaction().addToBackStack(null)
         }, DialogCurrenciesFragment.tag)
+    }
+
+    override fun resetUIState() {
+        viewModel.changeAmount("")
+        viewModel.resetExchangeRates()
     }
 }
 
