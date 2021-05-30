@@ -108,25 +108,13 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
     ) {
         Column() {
             Row(Modifier.weight(0.15f)) {
-                AnimatedVisibility(visible = !searchStated) {
-                    Text(
-                        text = stringResource(id = R.string.title_exchange_rates),
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .weight(0.5f)
-                            .padding(start = 8.dp)
-                            .padding(5.dp)
-                            .fillMaxHeight()
-                            .wrapContentHeight(align = Alignment.CenterVertically),
-                        maxLines = 2
-                    )
-                }
-                SpacerWidth(width = 8.dp)
+
+                SpacerWidth(width = 12.dp)
                 OutlinedTextField(
                     value = search,
                     onValueChange = { searchText ->
                         search = searchText
-                        when (searchText.isNotEmpty()) {
+                        when (searchText.isNotEmpty() && Regex("[a-zA-Z]{1,3}").matches(searchText)) {
                             true -> scopes.launch(IO) {
                                 val list = rates.filter {
                                     it.name.toLowerCase().contains(searchText.toLowerCase())
@@ -141,7 +129,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                         }
                     },
                     Modifier
-                        .weight(0.7f)
+                        .weight(0.65f).fillMaxWidth(0.7f)
                         .animateContentSize()
                         .focusRequester(requesterFocus)
                         .focusModifier()

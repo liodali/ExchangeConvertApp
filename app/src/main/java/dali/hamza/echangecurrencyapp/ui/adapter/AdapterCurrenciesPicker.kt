@@ -19,7 +19,8 @@ class AdapterCurrenciesPicker(
         BaseViewHolder<CurrencyDTO>(binding) {
         override fun bind(data: CurrencyDTO) {
             (binding as ItemCurrencySelectionBinding)
-                .idCurrencyName.text = data.currencyInfo.name
+                .idCurrencyName.text =
+                data.currencyInfo.fullCountryName + " (${data.currencyInfo.name}) "
             (binding)
                 .idCurrencyCheckbox.isChecked = data.isSelected
 
