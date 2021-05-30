@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface HistoricRateDao:AppDao<HistoricRatesCurrencyEntity> {
 
 
-    @Query("select * from RatesCurrencyEntity where selectedCurrency=:oldSelectCurrency")
+    @Query("select * from HistoricRatesCurrencyEntity where selectedCurrency=:oldSelectCurrency")
     fun historicRate(oldSelectCurrency: String): Flow<List<HistoricRatesCurrencyEntity>>
 
 

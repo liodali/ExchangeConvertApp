@@ -29,8 +29,8 @@ interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
     fun getListRatesByCurrencies(selectedCurreny: String): List<RatesCurrencyEntity>
 
 
-    @Query("select time from RatesCurrencyEntity where selectedCurrency=:selectedCurreny ORDER BY time DESC LIMIT 1")
-    fun getLastTimeUpdated(selectedCurreny: String): Date?
+    @Query("select * from RatesCurrencyEntity ")
+    fun getLastListRatesCurrency(): List<RatesCurrencyEntity>
 
 
 }

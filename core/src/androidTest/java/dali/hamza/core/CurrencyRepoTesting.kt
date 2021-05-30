@@ -20,6 +20,7 @@ import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.common.DateManager
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.repository.IRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -156,7 +157,7 @@ class CurrencyRepoTesting {
     }
 
     @Test
-    fun testSimpleADDCurrency() = runBlocking {
+    fun testSimpleAddRatesToDb() = runBlocking {
         mockWebServer.enqueue(
             MockResponse().setBody(
                 "{\n" +
@@ -173,6 +174,66 @@ class CurrencyRepoTesting {
         repository.saveExchangeRatesOfCurrentCurrency()
 
         val list = rateDao.getListRatesByCurrencies(eur)
+
+        assert(list.isNotEmpty())
+    }
+
+    @Test
+    fun testSimpleCalculateRates() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse().setBody(
+                "{\n" +
+                        "    \"success\": true,\n" +
+                        "    \"base\": \"EUR\",\n" +
+                        "    \"rates\": {\n" +
+                        "        \"AED\": 3.672982,\n" +
+                        "        \"USD\": 1.18,\n" +
+                        "        \"TND\": 3.32\n" +
+                        "    }\n" +
+                        "}  "
+            )
+        );
+        repository.saveExchangeRatesOfCurrentCurrency()
+
+        val list = (rateDao.getListExchangeRatesCurrencies(2.0, eur)).first()
+
+        assert(list[0].calculedAmount == 3.672982 * 2.0)
+    }
+
+    @Test
+    fun testSimpleAddHistoricRates() = runBlocking {
+        mockWebServer.enqueue(
+            MockResponse().setBody(
+                "{\n" +
+                        "    \"success\": true,\n" +
+                        "    \"base\": \"EUR\",\n" +
+                        "    \"rates\": {\n" +
+                        "        \"AED\": 3.672982,\n" +
+                        "        \"USD\": 1.18,\n" +
+                        "        \"TND\": 3.32\n" +
+                        "    }\n" +
+                        "}  "
+            )
+        )
+        repository.saveExchangeRatesOfCurrentCurrency()
+        repository.sessionManager.setCurrencySelected(usd)
+        repository.sessionManager.removeTimeLastUpdateRate()
+        mockWebServer.enqueue(
+            MockResponse().setBody(
+                "{\n" +
+                        "    \"success\": true,\n" +
+                        "    \"base\": \"USD\",\n" +
+                        "    \"rates\": {\n" +
+                        "        \"AED\": 3.672982,\n" +
+                        "        \"UER\": 0.82,\n" +
+                        "        \"TND\": 2.72\n" +
+                        "    }\n" +
+                        "}  "
+            )
+        )
+        repository.saveExchangeRatesOfCurrentCurrency()
+
+        val list =( historicRateDao.historicRate(eur)).first()
 
         assert(list.isNotEmpty())
     }
