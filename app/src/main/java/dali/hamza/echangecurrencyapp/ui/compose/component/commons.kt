@@ -1,10 +1,8 @@
 package dali.hamza.echangecurrencyapp.ui.compose.component
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
@@ -21,4 +19,16 @@ fun SpacerWidth(width: Dp) {
 @Composable
 fun EmptyBox() {
     Box {}
+}
+
+@Composable
+fun Center(content: @Composable () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+        content()
+    }
 }

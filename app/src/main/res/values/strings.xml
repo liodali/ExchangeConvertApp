@@ -11,4 +11,5 @@
     <string name="search_label">search</string>
     <string name="convertLabel">Convert</string>
     <string name="Home">Home</string>
+    <string name="error_rates">Rates Unnavailable</string>
 </resources>
