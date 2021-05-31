@@ -13,4 +13,5 @@
     <string name="Home">Home</string>
     <string name="error_rates">Rates Unnavailable</string>
     <string name="title_exchange_rates">Exchange rates</string>
+    <string name="db_name">ConvertCurrencyApp.db</string>
 </resources>

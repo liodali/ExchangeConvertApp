@@ -29,9 +29,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationIdSuffix ".Build${Calendar.getInstance().time.time}"
+            resValue 'string', 'token', properties.getProperty("token", "")
         }
         debug {
             resValue 'string', 'token', properties.getProperty("token", "")
+            applicationIdSuffix ".debug"
+
         }
     }
 

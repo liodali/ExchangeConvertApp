@@ -31,6 +31,12 @@ object AppModule {
         application.resources.getString(R.string.preference_name)
 
     @Provides
+    @Named("dbname")
+    fun provideDbName(application: Application) =
+        application.resources.getString(R.string.db_name)
+
+
+    @Provides
     @Singleton
     fun provideSessionManager(
         @Named("pref") PREF_NAME: String,
@@ -90,11 +96,14 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAppDatabase(application: Application): AppDB {
+    fun provideAppDatabase(
+        application: Application,
+        @Named("dbname") DB_NAME:String,
+    ): AppDB {
         return Room.databaseBuilder(
             application,
             AppDB::class.java,
-            "ConvertCurrencyAPp.db"
+            DB_NAME
         ).build()
     }
 
