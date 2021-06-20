@@ -26,6 +26,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.focus.FocusState
 import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
@@ -116,7 +117,10 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                         when (searchText.isNotEmpty() && Regex("[a-zA-Z]{1,3}").matches(searchText)) {
                             true -> scopes.launch(IO) {
                                 val list = rates.filter {
-                                    it.name.toLowerCase().contains(searchText.toLowerCase())
+                                    it.name.lowercase()
+                                        .contains(
+                                            searchText.lowercase()
+                                        )
                                 }
                                 withContext(Main) {
                                     rememberRates.value = list
@@ -132,11 +136,11 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                         .fillMaxWidth(0.7f)
                         .animateContentSize()
                         .focusRequester(requesterFocus)
-                        .focusModifier()
+                        .focusTarget()
                         .onFocusChanged {
-                            if (it == FocusState.Active) {
+                            if (it.isFocused) {
                                 searchStated = true
-                            } else if (it == FocusState.Disabled || it == FocusState.Captured) {
+                            } else if (it.isCaptured) {
                                 searchStated = false
                             }
                         },
