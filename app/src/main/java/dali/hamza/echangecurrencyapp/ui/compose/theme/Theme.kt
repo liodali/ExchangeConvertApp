@@ -1,25 +1,25 @@
 package dali.hamza.echangecurrencyapp.ui.compose.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val DarkColorPalette = darkColors(
+private val DarkColorPalette = darkColorScheme(
     primary = Yellow200,
-    primaryVariant = Yellow500,
+    //primaryVariant = Yellow500,
     secondary = Teal300,
     error = errorDark,
 
     )
 
-private val LightColorPalette = lightColors(
+private val LightColorPalette = lightColorScheme(
     primary = Yellow700,
-    primaryVariant = Yellow500,
+  //  primaryVariant = Yellow500,
     secondary = Teal300,
-    secondaryVariant = Teal800,
+  //  secondaryVariant = Teal800,
     error = error,
     background = Color.White,
     surface = Color.White,
@@ -42,9 +42,9 @@ fun ExchangeCurrencyAppTheme(
     }
 
     MaterialTheme(
-        colors = colors,
+        colorScheme = colors,
         typography = Typography,
-        shapes = Shapes,
+        shapes = shapes,
         content = content
     )
 }

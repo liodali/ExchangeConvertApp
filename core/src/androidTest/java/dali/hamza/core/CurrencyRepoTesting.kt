@@ -108,10 +108,10 @@ class CurrencyRepoTesting {
                     .create(dali.hamza.core.datasource.network.CurrencyClientApi::class.java),
                 currencyDao,
                 rateDao,
-                historicRateDao
-            )
-            repository.sessionManager = SessionManager(
-                "Testpref", context
+                historicRateDao,
+                SessionManager(
+                    "Testpref", context
+                )
             )
             repository.sessionManager.setCurrencySelected(eur)
             repository.sessionManager.removeTimeLastUpdateRate()

@@ -17,23 +17,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Named
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import dali.hamza.domain.models.*
 import dali.hamza.domain.models.Currency
 import kotlinx.coroutines.async
 
-class CurrencyRepository @Inject constructor(
+class CurrencyRepository  constructor(
     private val currencyClientAPI: CurrencyClientApi,
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
+    val sessionManager: SessionManager
 ) : IRepository {
-
-    @Inject
-    lateinit var sessionManager: SessionManager
 
 
     override suspend fun getListCurrencies(): Flow<IResponse> {

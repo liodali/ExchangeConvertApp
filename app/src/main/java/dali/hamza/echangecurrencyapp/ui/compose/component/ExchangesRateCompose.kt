@@ -8,10 +8,21 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -40,8 +51,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.internal.format
 
 @ExperimentalComposeUiApi
-@OptIn(ExperimentalAnimationApi::class)
-@ExperimentalMaterialApi
 @Composable
 fun ExchangesRatesGrid() {
     val viewModel = MainActivity.mainViewModelComposition.current
@@ -77,7 +86,6 @@ fun ShowListRates(rates: List<ExchangeRate>) {
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ShowDataListRates(rates: List<ExchangeRate>) {
     var search: String by remember {
@@ -95,18 +103,18 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
     val focusManager = LocalFocusManager.current
 
     Card(
-        Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
+       modifier = Modifier
+           .fillMaxWidth()
+           .fillMaxHeight(),
         shape = RoundedCornerShape(
             topStart = 8.dp,
             topEnd = 8.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
         ),
-        elevation = if (isSystemInDarkTheme()) 0.dp else 5.dp
+        elevation = CardDefaults.cardElevation( defaultElevation = if (isSystemInDarkTheme()) 0.dp else 5.dp )
     ) {
-        Column() {
+        Column {
             Row(Modifier.weight(0.15f)) {
 
                 SpacerWidth(width = 12.dp)
@@ -185,7 +193,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                 }
             }
             LazyVerticalGrid(
-                cells = GridCells.Fixed(2),
+                columns = GridCells.Fixed(2),
                 Modifier.weight(0.85f)
             ) {
 
@@ -204,7 +212,7 @@ fun ItemExchangeRate(item: ExchangeRate) {
         modifier = Modifier
             .padding(2.dp)
             .padding(8.dp),
-        elevation = 5.dp,
+        elevation = CardDefaults.cardElevation( defaultElevation =  5.dp),
         shape = RoundedCornerShape(12.dp),
     ) {
         Surface(

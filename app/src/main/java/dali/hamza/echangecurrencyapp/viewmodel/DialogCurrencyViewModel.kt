@@ -2,24 +2,21 @@ package dali.hamza.echangecurrencyapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.interactor.GetCurrenciesListUseCase
+import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
-import dali.hamza.echangecurrencyapp.models.CurrencyDTO
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DialogCurrencyViewModel @Inject constructor(
-    private val getCurrenciesListUseCase: GetCurrenciesListUseCase,
+
+class DialogCurrencyViewModel  constructor(
+    private val repository: CurrencyRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -69,7 +66,7 @@ class DialogCurrencyViewModel @Inject constructor(
 
     fun getCurrenciesFromLocalDb() {
         viewModelScope.launch(IO) {
-            getCurrenciesListUseCase.invoke().collect {
+            repository.getListCurrencies().collect {
                 currenciesMutableFlow.value = it
             }
         }

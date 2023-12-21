@@ -5,29 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.map
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dali.hamza.core.common.SessionManager
-import dali.hamza.core.interactor.CalculateRatesUseCase
-import dali.hamza.core.interactor.SaveOrUpdateRatesUseCase
-import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
-import dali.hamza.domain.models.MyResponse
+import dali.hamza.domain.repository.IRepository
 import dali.hamza.echangecurrencyapp.models.AmountInput
 import dali.hamza.echangecurrencyapp.models.initAmountInput
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
-    private val saveOrUpdateRatesUseCase: SaveOrUpdateRatesUseCase,
-    private val calculateRatesUseCase: CalculateRatesUseCase
+
+class MainViewModel(
+    private val repository: IRepository
 ) : ViewModel() {
 
     var showFormAmount: Boolean by mutableStateOf(true)
@@ -66,7 +54,7 @@ class MainViewModel @Inject constructor(
                     && selectedCurrency!!.isNotEmpty()
                     && selectedCurrency != currency
                 ) {
-                    saveOrUpdateRatesUseCase.invoke()
+                    repository.saveExchangeRatesOfCurrentCurrency()
                 }
             }.await()
         }
@@ -86,7 +74,7 @@ class MainViewModel @Inject constructor(
                 cacheAmount = amount.toString()
                 isLoading = true
                 mutableFlowExchangesRates.value = null
-                calculateRatesUseCase.invoke(amount).collect { response ->
+                repository.getListRatesCurrencies(amount).collect { response ->
                     mutableFlowExchangesRates.value = response
                     isLoading = false
                 }

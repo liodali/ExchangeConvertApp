@@ -1,12 +1,8 @@
 package dali.hamza.echangecurrencyapp.di
 
-import android.app.Application
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.squareup.moshi.Moshi
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.db.AppDB
 import dali.hamza.core.datasource.network.CurrencyClientApi
@@ -14,11 +10,61 @@ import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
 import okhttp3.OkHttpClient
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import javax.inject.Named
-import javax.inject.Singleton
 
+
+val appModule =  module {
+    single (named("DB")){
+        androidContext().resources.getString(R.string.db_name)
+    }
+    single (named("PREF")){
+        androidContext().resources.getString(R.string.preference_name)
+    }
+    single (named("EXCHANGE_SERVER")){
+        androidContext().resources.getString(R.string.server)
+    }
+    single (named("TOKEN")){
+        androidContext().resources.getString(R.string.token)
+    }
+    single {
+        SessionManager(get(named("PREF")), androidContext())
+    }
+    single {
+        MoshiConverterFactory
+            .create(Moshi.Builder()
+                .add(CurrencyConverter())
+                .add(RateConverter())
+                .build())
+    }
+    single {
+        OkHttpClient
+            .Builder()
+            .build()
+    }
+    single {
+        Retrofit.Builder()
+            .baseUrl(get<String>(named("EXCHANGE_SERVER")))
+            .client(get<OkHttpClient>())
+            .addConverterFactory(get<MoshiConverterFactory>())
+            .build()
+    }
+    single {
+        get<Retrofit>().create(CurrencyClientApi::class.java)
+    }
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDB::class.java,
+            get<String>(named("DB"))
+        ).build()
+    }
+
+}
+/*
 @Module
 @InstallIn(
     SingletonComponent::class
@@ -107,4 +153,4 @@ object AppModule {
         ).build()
     }
 
-}
+}*/

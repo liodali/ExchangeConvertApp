@@ -5,11 +5,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
-import dagger.hilt.android.AndroidEntryPoint
 import dali.hamza.core.common.SessionManager
 import dali.hamza.echangecurrencyapp.ui.compose.page.Home
 import dali.hamza.echangecurrencyapp.ui.compose.page.SplashScreen
@@ -20,18 +18,16 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
+import org.koin.android.ext.android.get
 
 
-@ExperimentalMaterialApi
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrencySelectionCallback {
 
     private val viewModel: MainViewModel by viewModels()
     private lateinit var dialogCurrencySelection: DialogCurrenciesFragment
 
-    @Inject
-    lateinit var sessionManager: SessionManager
+
+     val sessionManager: SessionManager = get()
 
 
     companion object {
@@ -62,7 +58,7 @@ class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrenc
             }
             CompositionLocalProvider(mainViewModelComposition provides viewModel) {
                 ExchangeCurrencyAppTheme {
-                    Crossfade(targetState = pageInit) { page ->
+                    Crossfade(targetState = pageInit, label = "") { page ->
                         when (page) {
                             "splash" -> SplashScreen()
                             else ->

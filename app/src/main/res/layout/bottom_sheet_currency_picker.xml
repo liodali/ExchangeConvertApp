@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         app:enablePositiveAction="false"
         app:positiveButtonText="@string/selectLabel"
-        app:titleText="@string/selectTtitleCurrency" />
+        app:titleText="@string/selectTitleCurrency" />
     <include
         android:id="@+id/id_search_currency"
         layout="@layout/search_text_field"/>

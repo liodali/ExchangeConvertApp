@@ -1,35 +1,29 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dali.hamza.echangecurrencyapp.R
-import dali.hamza.echangecurrencyapp.models.AmountInput
 import dali.hamza.echangecurrencyapp.ui.MainActivity
-import dali.hamza.echangecurrencyapp.ui.MainActivity.Companion.mainViewModelComposition
-import dali.hamza.echangecurrencyapp.ui.compose.component.CurrencySelectionCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
 import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
-@ExperimentalMaterialApi
 @Composable
 fun Home(
     openFragment: () -> Unit
@@ -43,7 +37,7 @@ fun Home(
                     Text(stringResource(id = R.string.Home))
                 },
                 actions = {
-                    if(!viewModel.showFormAmount){
+                    if (!viewModel.showFormAmount) {
                         TextButton(onClick = {
                             viewModel.showFormAmount = true
                         }) {
@@ -57,19 +51,25 @@ fun Home(
 
                 }
             )
-        }
-    ) {
-        BodyHomeCompose(openFragment = openFragment)
+        },
+    ) { innerPadding ->
+        BodyHomeCompose(
+            modifier = Modifier
+                .padding(innerPadding),
+            openFragment = openFragment
+        )
     }
 
 }
 
 @ExperimentalComposeUiApi
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BodyHomeCompose(openFragment: () -> Unit) {
+fun BodyHomeCompose(
+    modifier: Modifier,
+    openFragment: () -> Unit
+) {
 
-    Column() {
+    Column(modifier = modifier) {
         HeaderHomeCompose(
             openFragment = openFragment
         )

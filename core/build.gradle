@@ -1,18 +1,14 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'kotlin-kapt'
-    id 'dagger.hilt.android.plugin'
+    id 'com.google.devtools.ksp' version '1.9.21-1.0.16'
 }
 
 android {
-    compileSdk 30
-    buildToolsVersion "30.0.3"
-
+    compileSdk 34
+    namespace = "dali.hamza.echangecurrencyapp.core"
     defaultConfig {
         minSdk 26
-        targetSdk 30
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -35,35 +31,33 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.preference:preference-ktx:1.1.1'
-    def room_version = "2.3.0"
-    def coroutines_version = "1.4.3"
-    implementation 'androidx.core:core-ktx:1.5.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    def room_version = "2.6.1"
+    def coroutines_version = "1.7.1"
+    def paging_version = "3.2.1"
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation "androidx.room:room-runtime:$room_version"
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
-//paging
-    implementation "androidx.paging:paging-runtime-ktx:3.0.0"
+    ksp "androidx.room:room-compiler:$room_version"
+    //paging
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
+    implementation "androidx.room:room-paging:$room_version"
+
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     //dataStore
-    implementation "androidx.datastore:datastore-preferences:1.0.0-beta01"
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
     // Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
 
-    //hilt+dagger
-    implementation 'com.google.dagger:hilt-android:2.36'
-    kapt 'com.google.dagger:hilt-android-compiler:2.36'
-
-    kapt "androidx.hilt:hilt-compiler:1.0.0"
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     testImplementation "com.squareup.okhttp3:mockwebserver:4.9.1"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.9.1"
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"

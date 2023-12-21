@@ -5,6 +5,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import dali.hamza.echangecurrencyapp.ui.MainActivity
 import okhttp3.internal.format
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HeaderHomeCompose(
     openFragment: () -> Unit
@@ -95,7 +96,7 @@ fun AmountConvertedCompose(
                 }
                 append(" ")
                 withStyle(
-                    style = MaterialTheme.typography.h6.toSpanStyle().copy(
+                    style = MaterialTheme.typography.bodyMedium.toSpanStyle().copy(
                         color = colorText,
                         fontSize = 35.sp
                     )

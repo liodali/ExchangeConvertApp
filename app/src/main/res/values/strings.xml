@@ -6,12 +6,12 @@
     <string name="preference_name">pref_currency</string>
     <string name="default_currency_value">USD</string>
     <string name="selectLabel">Select</string>
-    <string name="selectTtitleCurrency">Currency Picker</string>
+    <string name="selectTitleCurrency">Currency Picker</string>
     <string name="loadingText">Loading</string>
     <string name="search_label">search</string>
     <string name="convertLabel">Convert</string>
     <string name="Home">Home</string>
-    <string name="error_rates">Rates Unnavailable</string>
+    <string name="error_rates">Rates Unavailable</string>
     <string name="title_exchange_rates">Exchange rates</string>
     <string name="db_name">ConvertCurrencyApp.db</string>
 </resources>

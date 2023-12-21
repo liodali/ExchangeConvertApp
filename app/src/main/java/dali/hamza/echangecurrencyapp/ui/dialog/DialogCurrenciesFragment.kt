@@ -10,9 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputLayout
-import dagger.hilt.android.AndroidEntryPoint
 import dali.hamza.domain.models.Currency
-import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.common.onData
 import dali.hamza.echangecurrencyapp.common.toCurrencyDTO
 import dali.hamza.echangecurrencyapp.databinding.BottomSheetCurrencyPickerBinding
@@ -23,11 +21,9 @@ import dali.hamza.echangecurrencyapp.ui.utitlies.AppRecyclerView
 import dali.hamza.echangecurrencyapp.ui.utitlies.TitleBottomSheet
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@AndroidEntryPoint
 class DialogCurrenciesFragment(
     private val action: DialogCurrencySelectionCallback
 ) : BottomSheetDialogFragment(),

@@ -5,18 +5,15 @@ import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dali.hamza.domain.common.DateManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Named
 
 
 class SessionManager constructor(
     PREF_NAME: String,
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(

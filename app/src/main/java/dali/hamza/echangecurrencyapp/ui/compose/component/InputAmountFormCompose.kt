@@ -7,7 +7,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.Surface
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -49,7 +51,7 @@ fun InputAmount(
                 Text(stringResource(id = R.string.amount_label))
             },
             trailingIcon = {
-                showCurrencySelected(openCurrencyDialog)
+                ShowCurrencySelected(openCurrencyDialog)
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
@@ -98,9 +100,8 @@ fun InputAmount(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun showCurrencySelected(
+fun ShowCurrencySelected(
     openCurrencyDialog: () -> Unit,
 ) {
     val viewModel = MainActivity.mainViewModelComposition.current
