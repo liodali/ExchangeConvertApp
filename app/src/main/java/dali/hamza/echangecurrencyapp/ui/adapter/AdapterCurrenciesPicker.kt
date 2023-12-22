@@ -21,7 +21,8 @@ class AdapterCurrenciesPicker(
             (binding as ItemCurrencySelectionBinding)
                 .idCurrencyName.text =
                 buildString {
-                    append("data.currencyInfo.fullCountryName (")
+                    append(data.currencyInfo.fullCountryName)
+                    append(" (")
                     append(data.currencyInfo.name)
                     append(") ")
                 }

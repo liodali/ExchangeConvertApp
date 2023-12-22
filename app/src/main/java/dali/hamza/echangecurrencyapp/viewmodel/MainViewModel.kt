@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.repository.IRepository
 import dali.hamza.echangecurrencyapp.models.AmountInput
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 
 class MainViewModel(
-    private val repository: IRepository
+     val repository: CurrencyRepository
 ) : ViewModel() {
 
     var showFormAmount: Boolean by mutableStateOf(true)

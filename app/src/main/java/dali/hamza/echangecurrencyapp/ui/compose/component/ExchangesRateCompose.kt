@@ -3,52 +3,65 @@ package dali.hamza.echangecurrencyapp.ui.compose.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.focus.FocusState
 import dali.hamza.domain.models.ExchangeRate
-import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.ui.MainActivity
-import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.internal.format
+import java.time.Instant
+import java.util.Date
 
 @ExperimentalComposeUiApi
 @Composable
@@ -63,26 +76,21 @@ fun ExchangesRatesGrid() {
     when {
         ratesResponse == null ->
             EmptyBox()
+
         ratesResponse is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
             ShowListRates(
-                ratesResponse.data as List<ExchangeRate>,
+                rates = ratesResponse.data as List<ExchangeRate>,
             )
         }
+
         ratesResponse is MyResponse.ErrorResponse<*> -> ShowErrorList()
     }
 }
 
-@ExperimentalComposeUiApi
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun ShowListRates(rates: List<ExchangeRate>) {
-    when (rates.isNotEmpty()) {
-        true -> ShowDataListRates(rates)
-        else -> EmptyListRates()
-    }
 
-}
+
+
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -103,16 +111,16 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
     val focusManager = LocalFocusManager.current
 
     Card(
-       modifier = Modifier
-           .fillMaxWidth()
-           .fillMaxHeight(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
         shape = RoundedCornerShape(
             topStart = 8.dp,
             topEnd = 8.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
         ),
-        elevation = CardDefaults.cardElevation( defaultElevation = if (isSystemInDarkTheme()) 0.dp else 5.dp )
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 5.dp)
     ) {
         Column {
             Row(Modifier.weight(0.15f)) {
@@ -134,6 +142,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
                                     rememberRates.value = list
                                 }
                             }
+
                             else -> {
                                 rememberRates.value = rates
                             }
@@ -210,23 +219,22 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
 fun ItemExchangeRate(item: ExchangeRate) {
     Card(
         modifier = Modifier
+            .background(color=  MaterialTheme.colorScheme.background)
             .padding(2.dp)
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation( defaultElevation =  5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         shape = RoundedCornerShape(12.dp),
     ) {
         Surface(
             modifier = Modifier
+                .background(color=  MaterialTheme.colorScheme.background)
                 .padding(3.dp)
                 .padding(8.dp)
         ) {
-            Text(
-                item.name,
-                fontSize = 15.sp,
-                modifier = Modifier.wrapContentWidth(align = Alignment.Start)
-            )
+
             Column(
                 modifier = Modifier
+                    .background(color=  MaterialTheme.colorScheme.background)
                     .padding(2.dp)
                     .padding(5.dp)
                     .wrapContentWidth(align = Alignment.End)
@@ -251,6 +259,12 @@ fun ItemExchangeRate(item: ExchangeRate) {
 
                 )
             }
+            Text(
+                item.name,
+                fontSize = 15.sp,
+                color = Color.Black,
+                modifier = Modifier.wrapContentWidth(align = Alignment.Start)
+            )
         }
 
     }
@@ -283,3 +297,30 @@ fun ShowErrorList() {
 
 }
 
+@ExperimentalComposeUiApi
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ShowListRates(rates: List<ExchangeRate>) {
+    when (rates.isNotEmpty()) {
+        true -> ShowDataListRates(rates)
+        else -> EmptyListRates()
+    }
+
+}
+@OptIn(ExperimentalComposeUiApi::class)
+@Preview(widthDp = 350, heightDp = 250)
+@Composable
+fun SimpleShowListRatesPreview() {
+    ShowListRates(
+        rates = arrayListOf(
+            ExchangeRate(
+                "EUR",
+                2.0, 1.2, Date.from(Instant.EPOCH)
+            ),
+            ExchangeRate(
+                "JP",
+                3.0, 4.2, Date.from(Instant.EPOCH)
+            )
+        )
+    )
+}

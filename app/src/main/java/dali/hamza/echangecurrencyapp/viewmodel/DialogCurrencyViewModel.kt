@@ -8,6 +8,7 @@ import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
+import dali.hamza.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,9 +16,9 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.launch
 
 
-class DialogCurrencyViewModel  constructor(
-    private val repository: CurrencyRepository,
-    private val sessionManager: SessionManager
+class DialogCurrencyViewModel (
+     val repository: CurrencyRepository,
+     val sessionManager: SessionManager
 ) : ViewModel() {
 
 

@@ -9,7 +9,7 @@ import dali.hamza.core.datasource.network.models.CurrencyData
 class CurrencyConverter {
     @FromJson
     fun fromJson(reader: JsonReader): CurrenciesDataAPI {
-        val map: MutableMap<String, CurrencyData> = mutableMapOf()
+        val map: MutableMap<String, String> = mutableMapOf()
         var isSuccess = false
         reader.beginObject()
         while (reader.hasNext()) {
@@ -17,29 +17,14 @@ class CurrencyConverter {
                 JsonReader.Token.NAME -> {
                     val fieldName = reader.nextName()
                     when (fieldName) {
-                        "symbols" -> {
+                        "currencies" -> {
                             reader.beginObject()
                             while (reader.hasNext()) {
                                 when (reader.peek()) {
                                     JsonReader.Token.NAME -> {
                                         val key = reader.nextName()
-                                        reader.beginObject()
-                                        while (reader.hasNext()) {
-                                            when (reader.peek()) {
-                                                JsonReader.Token.NAME -> {
-                                                    val subName = reader.nextName()
-                                                    if (subName == "description") {
-                                                        val desc = reader.nextString()
-                                                        map[key] = CurrencyData(
-                                                            code = key,
-                                                            description = desc
-                                                        )
-                                                    }
-                                                }
-                                                else -> reader.skipValue()
-                                            }
-                                        }
-                                        reader.endObject()
+                                        val value = reader.nextString()
+                                        map[key] = value
                                     }
                                     else -> reader.skipValue()
                                 }
@@ -58,7 +43,7 @@ class CurrencyConverter {
         reader.endObject()
         return CurrenciesDataAPI(
             isSuccess,
-            symbols = mapOf("symbols" to map)
+            currencies = mapOf("symbols" to map)
         )
     }
 }

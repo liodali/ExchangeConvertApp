@@ -5,8 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputLayout
@@ -16,13 +17,14 @@ import dali.hamza.echangecurrencyapp.common.toCurrencyDTO
 import dali.hamza.echangecurrencyapp.databinding.BottomSheetCurrencyPickerBinding
 import dali.hamza.echangecurrencyapp.models.CurrencyDTO
 import dali.hamza.echangecurrencyapp.ui.adapter.AdapterCurrenciesPicker
-import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import dali.hamza.echangecurrencyapp.ui.utitlies.AppRecyclerView
 import dali.hamza.echangecurrencyapp.ui.utitlies.TitleBottomSheet
+import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DialogCurrenciesFragment(
     private val action: DialogCurrencySelectionCallback
@@ -45,7 +47,7 @@ class DialogCurrenciesFragment(
         }
     }
 
-    private val viewModel: DialogCurrencyViewModel by viewModels()
+    private val dialogCurrencyViewModel: DialogCurrencyViewModel by viewModel<DialogCurrencyViewModel>()
     private lateinit var binding: BottomSheetCurrencyPickerBinding
     private lateinit var searchTextInput: TextInputLayout
     private lateinit var header: TitleBottomSheet
@@ -92,7 +94,7 @@ class DialogCurrenciesFragment(
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
         header.positiveAction = View.OnClickListener {
-            viewModel.setPreferenceCurrency(currencySelected!!.name)
+            dialogCurrencyViewModel.setPreferenceCurrency(currencySelected!!.name)
             if (cacheCurrentCurrency != currencySelected!!.name) {
                 action.resetUIState()
             }
@@ -107,11 +109,11 @@ class DialogCurrenciesFragment(
                 endDrawableVisible = true
             }
             searchTextInput.isEndIconVisible = endDrawableVisible
-            viewModel.searchCurrencies(textEditable.toString())
+            dialogCurrencyViewModel.searchCurrencies(textEditable.toString())
         }
         searchTextInput.setEndIconOnClickListener {
             searchTextInput.editText?.text?.clear()
-            viewModel.getCurrenciesFromLocalDb()
+            dialogCurrencyViewModel.getCurrenciesFromLocalDb()
             adapter.clearPicker()
         }
 
@@ -123,66 +125,65 @@ class DialogCurrenciesFragment(
                 false
             )
         )
-        viewModel.getCurrenciesFromLocalDb()
-    }
+        dialogCurrencyViewModel.getCurrenciesFromLocalDb()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                dialogCurrencyViewModel.getCurrentCurrency()
+                dialogCurrencyViewModel.getCurrencies().onData(
+                    error = {
 
-    override fun onStart() {
-        super.onStart()
-        lifecycleScope.launchWhenStarted {
-            viewModel.getCurrentCurrency()
-            viewModel.getCurrencies().onData(
-                error = {
-
-                }
-            ) { response ->
-                val list = response.data as List<Currency>
-                var currenciesDTO = emptyList<CurrencyDTO>()
-                withContext(IO) {
-                    currenciesDTO = list.map {
-                        it.toCurrencyDTO(it.name == (currencySelected?.name ?: ""))
                     }
-                }
-                if (listCurrencies.isEmpty()) {
-                    viewModel.setCacheList(list)
-                }
-                if (currenciesDTO.isNotEmpty()) {
-                    listCurrencies.clear()
-                    listCurrencies.addAll(currenciesDTO)
-                    recyclerViewApp.data = listCurrencies
-                    if (currentCurrency.isNotEmpty()) {
-                        lifecycleScope.launch(IO) {
-                            val currency = listCurrencies.firstOrNull { c ->
-                                c.currencyInfo.name.trim() == currentCurrency.trim()
-                            }?.currencyInfo
-                            withContext(Main) {
-                                currencySelected = currency
-                            }
+                ) { response ->
+                    val list = response.data as List<Currency>
+                    var currenciesDTO = emptyList<CurrencyDTO>()
+                    withContext(IO) {
+                        currenciesDTO = list.map {
+                            it.toCurrencyDTO(it.name == (currencySelected?.name ?: ""))
                         }
                     }
-                    if (searchTextInput.editText!!.text.isEmpty()
-                        && currentCurrency != emptyValueCurrency
-                        && currentCurrency.isNotEmpty()
-                    ) {
-                        lifecycleScope.launch(IO) {
-                            val index = listCurrencies.indexOfFirst { c ->
-                                c.currencyInfo.name.trim() == currentCurrency.trim()
-                            }
-                            withContext(Main) {
-                                header.enableOrDisablePositiveAction(true)
-                                adapter.initPickedCurrency(listCurrencies[index])
-                                recyclerViewApp.goToPosition(index + 2)
+                    if (listCurrencies.isEmpty()) {
+                        dialogCurrencyViewModel.setCacheList(list)
+                    }
+                    if (currenciesDTO.isNotEmpty()) {
+                        listCurrencies.clear()
+                        listCurrencies.addAll(currenciesDTO)
+                        recyclerViewApp.data = listCurrencies
+                        if (currentCurrency.isNotEmpty()) {
+                            lifecycleScope.launch(IO) {
+                                val currency = listCurrencies.firstOrNull { c ->
+                                    c.currencyInfo.name.trim() == currentCurrency.trim()
+                                }?.currencyInfo
+                                withContext(Main) {
+                                    currencySelected = currency
+                                }
                             }
                         }
-                    } else {
-                        if (searchTextInput.editText!!.text.isNotEmpty()) {
-                            header.enableOrDisablePositiveAction(false)
-                            adapter.clearPicker()
+                        if (searchTextInput.editText!!.text.isEmpty()
+                            && currentCurrency != emptyValueCurrency
+                            && currentCurrency.isNotEmpty()
+                        ) {
+                            lifecycleScope.launch(IO) {
+                                val index = listCurrencies.indexOfFirst { c ->
+                                    c.currencyInfo.name.trim() == currentCurrency.trim()
+                                }
+                                withContext(Main) {
+                                    header.enableOrDisablePositiveAction(true)
+                                    adapter.initPickedCurrency(listCurrencies[index])
+                                    recyclerViewApp.goToPosition(index + 2)
+                                }
+                            }
+                        } else {
+                            if (searchTextInput.editText!!.text.isNotEmpty()) {
+                                header.enableOrDisablePositiveAction(false)
+                                adapter.clearPicker()
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
 
     override fun picked(currency: Currency) {

@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 
 data class CurrenciesDataAPI(
     @Json(name = "success") val success : Boolean,
-    @Json(name = "symbols") val symbols: Map<String,Map<String,CurrencyData>>,
+    @Json(name = "currencies") val currencies: Map<String,Map<String,String>>,
 )
 
 data class CurrencyData(

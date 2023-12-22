@@ -28,7 +28,8 @@ class CurrencyRepository  constructor(
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
-    val sessionManager: SessionManager
+    val sessionManager: SessionManager,
+    private  val tokenAPI:String,
 ) : IRepository {
 
 
@@ -41,12 +42,12 @@ class CurrencyRepository  constructor(
                     }
                     false -> {
                         val currencies = currencyClientAPI
-                            .getListCurrencies().data {
-                                it.symbols.values.map { m ->
+                            .getListCurrencies(accessKey = tokenAPI).data {
+                                it.currencies.values.map { m ->
                                     val list = m.map { c ->
                                         Currency(
-                                            name = c.value.code,
-                                            fullCountryName = c.value.description
+                                            name = c.key,
+                                            fullCountryName = c.value
                                         )
                                     }
                                     list
@@ -153,6 +154,7 @@ class CurrencyRepository  constructor(
     ): List<CurrencyRate> {
 
         return currencyClientAPI.getRatesListCurrencies(
+            accessKey = tokenAPI,
             source = currency
         ).simpleData {
             it.quotes.values.map { rates ->
