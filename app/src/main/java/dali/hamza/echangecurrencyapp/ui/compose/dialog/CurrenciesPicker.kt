@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,17 +65,28 @@ fun BottomSheetCurrencies(
     onClose: () -> Unit,
     onSelect: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    val viewModel = koinViewModel<DialogCurrencyViewModel>()
     Card(
         shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
-        )
+        ),
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .then(modifier)
     ) {
         Column {
             TopHeaderBottomSheetCurrencies(
-                selectedCurrency = koinViewModel<DialogCurrencyViewModel>().selectedCurrency,
+                selectedCurrency = viewModel.getCurrentCurrency().collectAsState().value,
                 onClose = onClose,
-                onSelect = onSelect
+                onSelect = { selection ->
+                    scope.launch {
+                        viewModel.setPreferenceCurrency(selection)
+                    }
+                    viewModel.mutableFlowSearchCurrency = ""
+                    onSelect(selection)
+                }
             )
             BodyCurrenciesBottomSheet()
         }
@@ -84,7 +96,7 @@ fun BottomSheetCurrencies(
 @Composable
 fun TopHeaderBottomSheetCurrencies(
     modifier: Modifier = Modifier,
-    selectedCurrency: String?,
+    selectedCurrency: String,
     onClose: () -> Unit,
     onSelect: (String) -> Unit
 ) {
@@ -116,10 +128,10 @@ fun TopHeaderBottomSheetCurrencies(
 
         Button(
             onClick = {
-                onSelect(selectedCurrency!!)
+                onSelect(selectedCurrency)
             },
             shape = RoundedCornerShape(8.dp),
-            enabled = !selectedCurrency.isNullOrEmpty(),
+            enabled = selectedCurrency.isNotEmpty(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
             ),
@@ -154,20 +166,35 @@ fun BodyCurrenciesBottomSheet(modifier: Modifier = Modifier) {
 
         else -> {
             if (response.value is MyResponse.SuccessResponse<*>) {
-                val responseData = response.value as MyResponse.SuccessResponse<*>
+                val responseData =
+                    (response.value as MyResponse.SuccessResponse<*>).data as List<Currency>
                 var listCurrencies by rememberSaveable {
-                    mutableStateOf(responseData.data as List<Currency>)
+                    mutableStateOf(responseData)
+                }
+                var scrollTo by remember {
+                    mutableStateOf(0)
+                }
+                LaunchedEffect(key1 = responseData) {
+                    val currentCurrencySelected = vm.getCurrentCurrency().value
+                    val index = listCurrencies.map { currency -> currency.name }
+                        .indexOf(currentCurrencySelected)
+                    if (index > 10) {
+                        scrollTo = index - 3
+                    } else {
+                        scrollTo = index
+                    }
                 }
                 LaunchedEffect(key1 = vm.mutableFlowSearchCurrency) {
                     if (vm.mutableFlowSearchCurrency.isEmpty()) {
-                        listCurrencies = responseData.data as List<Currency>
+                        listCurrencies = responseData
                     } else {
-                        listCurrencies = (responseData.data as List<Currency>).filter { currency ->
-                            currency.name.contains(vm.mutableFlowSearchCurrency)
+                        listCurrencies = responseData.filter { currency ->
+                            currency.name.lowercase()
+                                .contains(vm.mutableFlowSearchCurrency.lowercase())
                         }
                     }
                 }
-                Column {
+                Column(modifier = Modifier.background(color = Color.White)) {
                     SearchTextFieldCurrency(
                         text = vm.mutableFlowSearchCurrency,
                         onChange = { searchableText ->
@@ -175,10 +202,11 @@ fun BodyCurrenciesBottomSheet(modifier: Modifier = Modifier) {
                         })
                     ListCurrenciesBottomSheet(
                         currencies = listCurrencies,
-                        selected = vm.selectedCurrency,
+                        selected = vm.getCurrentCurrency().collectAsState().value,
                         onChange = { name ->
-                            vm.selectedCurrency = name
-                        }
+                            vm.setSelectedCurrency(name)
+                        },
+                        scrollToIndex = scrollTo
                     )
                 }
             } else {
@@ -237,13 +265,13 @@ fun SearchTextFieldCurrency(
 fun ListCurrenciesBottomSheet(
     modifier: Modifier = Modifier,
     currencies: List<Currency>,
-    selected: String?,
+    selected: String,
     onChange: (String) -> Unit,
     scrollToIndex: Int = 0
 ) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = currencies) {
+    LaunchedEffect(key1 = scrollToIndex) {
         scope.launch {
             if (scrollToIndex > 0) {
                 listState.animateScrollToItem(scrollToIndex)
@@ -275,7 +303,9 @@ fun ItemListCurrenciesBottomSheet(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.then(modifier)
+        modifier = Modifier
+            .padding(start = 8.dp)
+            .then(modifier)
     ) {
         Text(text = buildString {
             append(currency.fullCountryName)
