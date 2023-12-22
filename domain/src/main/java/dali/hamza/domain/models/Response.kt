@@ -15,3 +15,9 @@ inline fun <T : Any> MyResponse<T>.onSuccess(action: (T) -> Unit): MyResponse<T>
 inline fun <T : Any> MyResponse<T>.onFailure(action: (Any) -> Unit) {
     if (this is MyResponse.ErrorResponse) action(error!!)
 }
+data object NoResponse {
+    val error = "No response"
+}
+data object EmptyResponse {
+    val list = emptyList<Any>()
+}

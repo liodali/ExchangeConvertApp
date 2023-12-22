@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrenc
                     delay(200)
                     moveToHome()
                 }*/
+
                 CompositionLocalProvider(mainViewModelComposition provides mainViewModel) {
                     ExchangeCurrencyAppTheme {
                         Crossfade(targetState = "home", label = "") { page ->

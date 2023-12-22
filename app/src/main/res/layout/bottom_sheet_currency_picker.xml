@@ -15,7 +15,8 @@
         app:titleText="@string/selectTitleCurrency" />
     <include
         android:id="@+id/id_search_currency"
-        layout="@layout/search_text_field"/>
+        layout="@layout/search_text_field"
+        android:visibility="gone"/>
     <dali.hamza.echangecurrencyapp.ui.utitlies.AppRecyclerView
         android:id="@+id/id_list_bottom_picker_currency"
         android:layout_width="match_parent"

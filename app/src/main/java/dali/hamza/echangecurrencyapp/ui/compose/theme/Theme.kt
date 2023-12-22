@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColorScheme(
     primary = Yellow200,
-    //primaryVariant = Yellow500,
+    primaryContainer = Yellow500,
     secondary = Teal300,
     error = errorDark,
 
@@ -18,8 +18,10 @@ private val DarkColorPalette = darkColorScheme(
 private val LightColorPalette = lightColorScheme(
     primary = Yellow700,
   //  primaryVariant = Yellow500,
+    primaryContainer = Yellow500,
     secondary = Teal300,
   //  secondaryVariant = Teal800,
+    secondaryContainer = Teal800,
     error = error,
     background = Color.White,
     surface = Color.White,

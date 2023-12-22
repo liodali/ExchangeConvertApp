@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputLayout
 import dali.hamza.domain.models.Currency
+import dali.hamza.domain.models.EmptyResponse
+import dali.hamza.domain.models.NoResponse
 import dali.hamza.echangecurrencyapp.common.onData
 import dali.hamza.echangecurrencyapp.common.toCurrencyDTO
 import dali.hamza.echangecurrencyapp.databinding.BottomSheetCurrencyPickerBinding
@@ -130,8 +132,15 @@ class DialogCurrenciesFragment(
             repeatOnLifecycle(Lifecycle.State.STARTED){
                 dialogCurrencyViewModel.getCurrentCurrency()
                 dialogCurrencyViewModel.getCurrencies().onData(
-                    error = {
+                    error = { error ->
+                        when (error){
+                            EmptyResponse,NoResponse -> {
 
+                            }
+                            else -> {
+
+                            }
+                        }
                     }
                 ) { response ->
                     val list = response.data as List<Currency>

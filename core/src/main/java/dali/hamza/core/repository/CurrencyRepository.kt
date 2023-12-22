@@ -42,19 +42,22 @@ class CurrencyRepository  constructor(
                     }
                     false -> {
                         val currencies = currencyClientAPI
-                            .getListCurrencies(accessKey = tokenAPI).data {
-                                it.currencies.values.map { m ->
-                                    val list = m.map { c ->
+                            .getListCurrencies(accessKey = tokenAPI).data { currencies ->
+                                currencies.currencies.values.map { mJson ->
+                                    val list = mJson.map { currency ->
                                         Currency(
-                                            name = c.key,
-                                            fullCountryName = c.value
+                                            name = currency.key,
+                                            fullCountryName = currency.value
                                         )
                                     }
                                     list
                                 }.first()
                             }
-                        val mappedCurrencies = currencies.data!!.map { c ->
-                            c.toCurrencyEntity()
+                        if ( currencies.data == null || currencies.data!!.isEmpty()) {
+                            emit(MyResponse.ErrorResponse<Any>(EmptyResponse))
+                        }
+                        val mappedCurrencies = currencies.data!!.map { currencyJson ->
+                            currencyJson.toCurrencyEntity()
                         }
                         currencyDao.insertAll(mappedCurrencies)
                     }

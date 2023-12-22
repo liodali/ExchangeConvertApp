@@ -36,13 +36,11 @@ suspend inline fun Flow<IResponse?>.onData(
     crossinline error: (value: Any) -> Unit,
     crossinline success: suspend (value: MyResponse.SuccessResponse<*>) -> Unit,
 ): Unit =
-    collect(object : FlowCollector<IResponse?> {
-        override suspend fun emit(value: IResponse?) {
-            if (value != null && value is MyResponse.ErrorResponse<*>) {
-                error(value.error!!)
-            }
-            if (value != null && value is MyResponse.SuccessResponse<*>) {
-                success(value)
-            }
+    collect { value ->
+        if (value != null && value is MyResponse.ErrorResponse<*>) {
+            error(value.error!!)
         }
-    })
+        if (value != null && value is MyResponse.SuccessResponse<*>) {
+            success(value)
+        }
+    }

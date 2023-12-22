@@ -1,5 +1,8 @@
 package dali.hamza.echangecurrencyapp.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dali.hamza.core.common.SessionManager
@@ -9,10 +12,12 @@ import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
+import dali.hamza.echangecurrencyapp.models.AmountInput
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -32,6 +37,11 @@ class DialogCurrencyViewModel (
     private val currenciesFlow: StateFlow<IResponse?> by lazy {
         currenciesMutableFlow
     }
+    var isLoadingState:Boolean  by mutableStateOf(false)
+    var selectedCurrency:String? by mutableStateOf(null)
+
+    var mutableFlowSearchCurrency :String by mutableStateOf("")
+
 
     fun getCurrencies() = currenciesFlow
 
@@ -42,11 +52,13 @@ class DialogCurrencyViewModel (
     }
 
     private fun retrieveCurrentCurrency(): StateFlow<String> {
-        val currency: MutableStateFlow<String> = MutableStateFlow("")
+        val currentCurrency: MutableStateFlow<String> = MutableStateFlow("")
         viewModelScope.launch(IO) {
-
+            sessionManager.getCurrencyFromDataStore.collectLatest { currency ->
+                currentCurrency.value = currency
+            }
         }
-        return currency
+        return currentCurrency
     }
 
     fun searchCurrencies(searchText: String) {
@@ -66,9 +78,11 @@ class DialogCurrencyViewModel (
     }
 
     fun getCurrenciesFromLocalDb() {
+        isLoadingState = true
         viewModelScope.launch(IO) {
-            repository.getListCurrencies().collect {
-                currenciesMutableFlow.value = it
+            repository.getListCurrencies().collect { response ->
+                currenciesMutableFlow.value = response
+                isLoadingState = false
             }
         }
     }

@@ -29,7 +29,7 @@ fun HeaderHomeCompose(
     Column(
         modifier = Modifier.animateContentSize()
     ) {
-        Crossfade(targetState = viewModel.showFormAmount) { isShow ->
+        Crossfade(targetState = viewModel.showFormAmount, label = "") { isShow ->
             when (!isShow) {
                 true -> {
                     Box(
