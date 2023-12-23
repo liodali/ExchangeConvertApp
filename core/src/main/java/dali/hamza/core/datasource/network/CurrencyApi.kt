@@ -15,7 +15,7 @@ interface CurrencyClientApi {
     ): Response<CurrenciesDataAPI>
 
 
-    @GET("latest")
+    @GET("live")
     suspend  fun getRatesListCurrencies(
         @Query("access_key") accessKey: String,
         @Query("source") source: String

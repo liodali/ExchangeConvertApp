@@ -72,8 +72,10 @@ fun BottomSheetCurrencies(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
             .then(modifier)
     ) {
         Column {
@@ -194,7 +196,7 @@ fun BodyCurrenciesBottomSheet(modifier: Modifier = Modifier) {
                         }
                     }
                 }
-                Column(modifier = Modifier.background(color = Color.White)) {
+                Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     SearchTextFieldCurrency(
                         text = vm.mutableFlowSearchCurrency,
                         onChange = { searchableText ->

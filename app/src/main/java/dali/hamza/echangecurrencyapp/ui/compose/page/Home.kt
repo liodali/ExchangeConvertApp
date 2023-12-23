@@ -1,13 +1,14 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,9 +33,7 @@ import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
 import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 import dali.hamza.echangecurrencyapp.ui.compose.dialog.BottomSheetCurrencies
-import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
@@ -44,7 +43,7 @@ fun Home(
 ) {
     val viewModel = MainActivity.mainViewModelComposition.current
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -78,7 +77,7 @@ fun Home(
                 .padding(innerPadding),
             openFragment = {
                 scope.launch {
-                    sheetState.show()
+                    //sheetState.show()
                     showBottomSheet = true
                 }
             }
@@ -93,27 +92,27 @@ fun Home(
                 },
                 tonalElevation = 6.dp,
                 sheetState = sheetState,
-                scrimColor = Color.Transparent,
-                containerColor = Color.Transparent,
-                shape = RoundedCornerShape(6.dp)
+                scrimColor = MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(6.dp),
             ) {
                 BottomSheetCurrencies(
-                    modifier = Modifier.heightIn(
-                        min = (displayMetrics.heightPixels / 2).dp,
-                        max = (displayMetrics.heightPixels / 2.5).dp
-                    ),
                     onClose = {
                         scope.launch {
                             sheetState.hide()
                             showBottomSheet = false
                         }
-                    }, onSelect = { currency ->
+                    },
+                    onSelect = { currency ->
                         viewModel.setCurrencySelection(currency)
                         scope.launch {
                             sheetState.hide()
                         }
                         showBottomSheet = false
-                    })
+                    },
+                )
+
+
             }
         }
 

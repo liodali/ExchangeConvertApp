@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun CurrencySelectionCompose(
     openFragment: () -> Unit
-
 ) {
     val viewModel = mainViewModelComposition.current
     val currency = viewModel.getCurrencySelection()

@@ -1,35 +1,42 @@
 package dali.hamza.core.repository
 
+import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import dali.hamza.core.common.*
+import androidx.paging.PagingData
+import dali.hamza.core.common.SessionManager
+import dali.hamza.core.common.data
+import dali.hamza.core.common.simpleData
+import dali.hamza.core.common.toCurrencyEntity
+import dali.hamza.core.common.toHistoricRatesEntity
 import dali.hamza.core.datasource.db.dao.CurrencyDao
 import dali.hamza.core.datasource.db.dao.HistoricRateDao
 import dali.hamza.core.datasource.db.dao.RatesCurrencyDao
-import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
 import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.domain.common.DateManager
+import dali.hamza.domain.models.Currency
+import dali.hamza.domain.models.CurrencyRate
+import dali.hamza.domain.models.EmptyResponse
+import dali.hamza.domain.models.ExchangeRate
+import dali.hamza.domain.models.IResponse
+import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.withContext
-import java.util.*
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import dali.hamza.domain.models.*
-import dali.hamza.domain.models.Currency
-import kotlinx.coroutines.async
+import java.util.Date
 
-class CurrencyRepository  constructor(
+class CurrencyRepository(
     private val currencyClientAPI: CurrencyClientApi,
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
     val sessionManager: SessionManager,
-    private  val tokenAPI:String,
+    private val tokenAPI: String,
 ) : IRepository {
 
 
@@ -40,6 +47,7 @@ class CurrencyRepository  constructor(
                     true -> {
                         emit(MyResponse.SuccessResponse(list))
                     }
+
                     false -> {
                         val currencies = currencyClientAPI
                             .getListCurrencies(accessKey = tokenAPI).data { currencies ->
@@ -53,7 +61,7 @@ class CurrencyRepository  constructor(
                                     list
                                 }.first()
                             }
-                        if ( currencies.data == null || currencies.data!!.isEmpty()) {
+                        if (currencies.data == null || currencies.data!!.isEmpty()) {
                             emit(MyResponse.ErrorResponse<Any>(EmptyResponse))
                         }
                         val mappedCurrencies = currencies.data!!.map { currencyJson ->
@@ -88,15 +96,17 @@ class CurrencyRepository  constructor(
                                     currency = currentCurrency,
                                 )
                             }.await()
+
                             else -> emptyList()
                         }
                     }
+
                     else -> {
                         /**
                          * get rates because currency has been changed
                          */
                         val list = ratesCurrencyDao.getLastListRatesCurrency()
-                        if ( list.isNotEmpty()) {
+                        if (list.isNotEmpty()) {
                             archivedRatesByCurrency()
                         }
                         sessionManager.setTimeLastUpdateRate(DateManager.now().time)
@@ -126,6 +136,18 @@ class CurrencyRepository  constructor(
         return flow {
             saveExchangeRatesOfCurrentCurrency()
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
+           /* val date = sessionManager.getLastUTimeUpdateRates.last()
+
+            val diff = DateManager.difference2Date(date)
+            if (diff.days > 0 || diff.hours > 0 || diff.minutes > 30) {
+                ratesCurrencyDao.getListExchangeRatesCurrencies(
+                    amount = amount,
+                    currency = currentCurrency
+                )
+            } else {
+
+            }*/
+            getRatesFromApi(currentCurrency)
             ratesCurrencyDao.getListExchangeRatesCurrencies(
                 amount = amount,
                 currency = currentCurrency
@@ -161,7 +183,7 @@ class CurrencyRepository  constructor(
             source = currency
         ).simpleData {
             it.quotes.values.map { rates ->
-                rates.rate.map { r ->
+                rates.map { r ->
                     CurrencyRate(
                         name = r.key,
                         rate = r.value,

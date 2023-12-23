@@ -11,18 +11,20 @@ class RateConverter {
     @FromJson
     fun fromJson(reader: JsonReader): RatesCurrenciesDataAPI {
         val map: MutableMap<String, Double> = mutableMapOf()
-
+        var source = ""
         reader.beginObject()
         while (reader.hasNext()) {
             when (reader.peek()) {
                 JsonReader.Token.NAME -> {
                     val fieldName = reader.nextName()
-                    if (fieldName == "rates") {
+                    if (fieldName == "quotes") {
                         reader.beginObject()
                         while (reader.hasNext()) {
                             map[reader.nextName()] = reader.nextDouble()
                         }
                         reader.endObject()
+                    }else if  (fieldName == "source") {
+                        source = reader.nextString()
                     }
 
                 }
@@ -33,7 +35,8 @@ class RateConverter {
         reader.endObject()
         return  RatesCurrenciesDataAPI(
             success = true,
-            quotes = mapOf("quotes" to RateData(map))
+            source = source,
+            quotes = mapOf("quotes" to map)
         )
     }
 }

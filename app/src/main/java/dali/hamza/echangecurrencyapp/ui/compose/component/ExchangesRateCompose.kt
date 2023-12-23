@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
@@ -81,6 +82,7 @@ fun ExchangesRatesGrid() {
             viewModel.isLoading = false
             ShowListRates(
                 rates = ratesResponse.data as List<ExchangeRate>,
+                currentCurrency = viewModel.getCurrencySelection()?:""
             )
         }
 
@@ -95,7 +97,7 @@ fun ExchangesRatesGrid() {
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @Composable
-fun ShowDataListRates(rates: List<ExchangeRate>) {
+fun ShowDataListRates(rates: List<ExchangeRate>,currentCurrency: String) {
     var search: String by remember {
         mutableStateOf("")
     }
@@ -120,7 +122,8 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
             bottomStart = 0.dp,
             bottomEnd = 0.dp
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 5.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 0.dp)
     ) {
         Column {
             Row(Modifier.weight(0.15f)) {
@@ -207,7 +210,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
             ) {
 
                 items(rememberRates.value) { item ->
-                    ItemExchangeRate(item)
+                    ItemExchangeRate(item, currentCurrency = currentCurrency)
                 }
             }
         }
@@ -216,25 +219,28 @@ fun ShowDataListRates(rates: List<ExchangeRate>) {
 }
 
 @Composable
-fun ItemExchangeRate(item: ExchangeRate) {
+fun ItemExchangeRate(item: ExchangeRate,currentCurrency: String) {
     Card(
         modifier = Modifier
-            .background(color=  MaterialTheme.colorScheme.background)
+            //.background(color=  MaterialTheme.colorScheme.primary)
             .padding(2.dp)
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
         shape = RoundedCornerShape(12.dp),
     ) {
         Surface(
             modifier = Modifier
-                .background(color=  MaterialTheme.colorScheme.background)
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
                 .padding(3.dp)
                 .padding(8.dp)
         ) {
 
             Column(
                 modifier = Modifier
-                    .background(color=  MaterialTheme.colorScheme.background)
+                    .background(color=  MaterialTheme.colorScheme.surfaceVariant)
                     .padding(2.dp)
                     .padding(5.dp)
                     .wrapContentWidth(align = Alignment.End)
@@ -260,9 +266,9 @@ fun ItemExchangeRate(item: ExchangeRate) {
                 )
             }
             Text(
-                item.name,
+                item.name.split(currentCurrency).last(),
                 fontSize = 15.sp,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.wrapContentWidth(align = Alignment.Start)
             )
         }
@@ -300,9 +306,9 @@ fun ShowErrorList() {
 @ExperimentalComposeUiApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ShowListRates(rates: List<ExchangeRate>) {
+fun ShowListRates(rates: List<ExchangeRate>,currentCurrency: String) {
     when (rates.isNotEmpty()) {
-        true -> ShowDataListRates(rates)
+        true -> ShowDataListRates(rates,currentCurrency)
         else -> EmptyListRates()
     }
 
@@ -321,6 +327,7 @@ fun SimpleShowListRatesPreview() {
                 "JP",
                 3.0, 4.2, Date.from(Instant.EPOCH)
             )
-        )
+        ),
+        currentCurrency = ""
     )
 }
