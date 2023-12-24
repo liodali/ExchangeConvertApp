@@ -3,11 +3,9 @@ package dali.hamza.core.datasource.db.dao
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
-import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
 import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.domain.models.ExchangeRate
 import kotlinx.coroutines.flow.Flow
-import java.util.*
 
 @Dao
 interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
