@@ -11,7 +11,7 @@ android {
     compileSdk 34
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
-        applicationId "dali.hamza.echangecurrencyapp"
+        applicationId "dali.hamza.exchangecurrencyapp"
         minSdk 26
         versionCode 1
         versionName "1.0"

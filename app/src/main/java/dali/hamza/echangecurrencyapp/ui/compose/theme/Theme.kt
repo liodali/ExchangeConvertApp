@@ -75,7 +75,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun ExchangeCurrencyAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
          DarkColors

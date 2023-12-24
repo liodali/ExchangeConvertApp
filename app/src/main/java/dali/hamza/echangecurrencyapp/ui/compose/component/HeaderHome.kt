@@ -21,18 +21,21 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.echangecurrencyapp.ui.MainActivity
+import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import okhttp3.internal.format
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HeaderHomeCompose(
     openFragment: () -> Unit
 ) {
-    val viewModel = MainActivity.mainViewModelComposition.current
+    val viewModel = koinViewModel<MainViewModel>()
     InputAmount(
         openCurrencyDialog = openFragment,
         actionCalculate =
-        if (viewModel.getCurrencySelection()?.isNotEmpty() == true) {
+        if (viewModel.getCurrencySelection().value?.isNotEmpty() == true) {
             {
                 val amount = viewModel.mutableFlowAmountForm.amount
                 if (amount.isNotEmpty() && amount.toDouble() > 0.0) {
@@ -50,9 +53,11 @@ fun HeaderHomeCompose(
             viewModel.changeAmount("")
         },
         form = viewModel.mutableFlowAmountForm,
-        currency = viewModel.getCurrencySelection(),
+        currency = viewModel.getCurrencySelection().value,
         keyboardController = LocalSoftwareKeyboardController.current,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp)
     )
 
 }

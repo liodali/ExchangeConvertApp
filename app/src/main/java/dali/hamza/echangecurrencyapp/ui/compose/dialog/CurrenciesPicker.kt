@@ -196,7 +196,7 @@ fun BodyCurrenciesBottomSheet(modifier: Modifier = Modifier) {
                         }
                     }
                 }
-                Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
                     SearchTextFieldCurrency(
                         text = vm.mutableFlowSearchCurrency,
                         onChange = { searchableText ->
@@ -276,7 +276,7 @@ fun ListCurrenciesBottomSheet(
     LaunchedEffect(key1 = scrollToIndex) {
         scope.launch {
             if (scrollToIndex > 0) {
-                listState.animateScrollToItem(scrollToIndex)
+                listState.scrollToItem(scrollToIndex)
             }
         }
     }

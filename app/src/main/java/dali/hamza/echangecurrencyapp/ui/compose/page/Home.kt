@@ -1,7 +1,6 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,16 +23,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dali.hamza.echangecurrencyapp.R
-import dali.hamza.echangecurrencyapp.ui.MainActivity
 import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
 import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
 import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
 import dali.hamza.echangecurrencyapp.ui.compose.dialog.BottomSheetCurrencies
+import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
@@ -41,15 +41,13 @@ import kotlinx.coroutines.launch
 fun Home(
     openFragment: () -> Unit
 ) {
-    val viewModel = MainActivity.mainViewModelComposition.current
+
+    val viewModel = koinViewModel<MainViewModel>()
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
-    val displayMetrics = context.resources.displayMetrics
     Scaffold(
-
         topBar = {
             TopAppBar(
                 title = {

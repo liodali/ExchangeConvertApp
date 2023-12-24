@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,32 +47,36 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
-import dali.hamza.echangecurrencyapp.ui.MainActivity
+import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.internal.format
+import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.util.Date
 
 @ExperimentalComposeUiApi
 @Composable
 fun ExchangesRatesGrid() {
-    val viewModel = MainActivity.mainViewModelComposition.current
+    val viewModel = koinViewModel<MainViewModel>()
     val loading = viewModel.isLoading
 
     val ratesState = viewModel.getExchangeRates().collectAsState()
     val ratesResponse = ratesState.value
+    LaunchedEffect(key1 = viewModel.getCurrencySelection().value) {
+        if (viewModel.mutableFlowAmountForm.amount.isNotEmpty()) {
+            viewModel.calculateExchangeRates(viewModel.mutableFlowAmountForm.amount.toDouble())
+        }
+    }
     if (loading)
         Loading()
     when {
@@ -82,7 +87,7 @@ fun ExchangesRatesGrid() {
             viewModel.isLoading = false
             ShowListRates(
                 rates = ratesResponse.data as List<ExchangeRate>,
-                currentCurrency = viewModel.getCurrencySelection()?:""
+                currentCurrency = viewModel.getCurrencySelection().value ?: ""
             )
         }
 
@@ -91,13 +96,10 @@ fun ExchangesRatesGrid() {
 }
 
 
-
-
-
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @Composable
-fun ShowDataListRates(rates: List<ExchangeRate>,currentCurrency: String) {
+fun ShowDataListRates(rates: List<ExchangeRate>, currentCurrency: String) {
     var search: String by remember {
         mutableStateOf("")
     }
@@ -219,7 +221,7 @@ fun ShowDataListRates(rates: List<ExchangeRate>,currentCurrency: String) {
 }
 
 @Composable
-fun ItemExchangeRate(item: ExchangeRate,currentCurrency: String) {
+fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
     Card(
         modifier = Modifier
             //.background(color=  MaterialTheme.colorScheme.primary)
@@ -240,7 +242,7 @@ fun ItemExchangeRate(item: ExchangeRate,currentCurrency: String) {
 
             Column(
                 modifier = Modifier
-                    .background(color=  MaterialTheme.colorScheme.surfaceVariant)
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .padding(2.dp)
                     .padding(5.dp)
                     .wrapContentWidth(align = Alignment.End)
@@ -306,13 +308,14 @@ fun ShowErrorList() {
 @ExperimentalComposeUiApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ShowListRates(rates: List<ExchangeRate>,currentCurrency: String) {
+fun ShowListRates(rates: List<ExchangeRate>, currentCurrency: String) {
     when (rates.isNotEmpty()) {
-        true -> ShowDataListRates(rates,currentCurrency)
+        true -> ShowDataListRates(rates, currentCurrency)
         else -> EmptyListRates()
     }
 
 }
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Preview(widthDp = 350, heightDp = 250)
 @Composable

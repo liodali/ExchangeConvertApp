@@ -26,7 +26,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.withContext
 import java.util.Date
 
@@ -117,18 +116,22 @@ class CurrencyRepository(
                 }
 
                 if (listRates.isNotEmpty() && !ratesFromLocal) {
-                    sessionManager.setTimeNowLastUpdateRate()
-                    ratesCurrencyDao.insertAll(listRates.map { r ->
-                        RatesCurrencyEntity(
-                            name = r.name,
-                            rate = r.rate,
-                            time = r.time,
-                            selectedCurrency = currentCurrency
-                        )
-                    })
+                    saveRatesLocally(listRates, currentCurrency)
                 }
             }
         }
+    }
+
+    private suspend fun saveRatesLocally(listRates: List<CurrencyRate>, currentCurrency: String) {
+        sessionManager.setTimeNowLastUpdateRate()
+        ratesCurrencyDao.insertAll(listRates.map { r ->
+            RatesCurrencyEntity(
+                name = r.name,
+                rate = r.rate,
+                time = r.time,
+                selectedCurrency = currentCurrency
+            )
+        })
     }
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
@@ -136,24 +139,28 @@ class CurrencyRepository(
         return flow {
             saveExchangeRatesOfCurrentCurrency()
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
-           /* val date = sessionManager.getLastUTimeUpdateRates.last()
+            /* val date = sessionManager.getLastUTimeUpdateRates.last()
 
-            val diff = DateManager.difference2Date(date)
-            if (diff.days > 0 || diff.hours > 0 || diff.minutes > 30) {
-                ratesCurrencyDao.getListExchangeRatesCurrencies(
-                    amount = amount,
-                    currency = currentCurrency
-                )
-            } else {
+             val diff = DateManager.difference2Date(date)
+             if (diff.days > 0 || diff.hours > 0 || diff.minutes > 30) {
+                 ratesCurrencyDao.getListExchangeRatesCurrencies(
+                     amount = amount,
+                     currency = currentCurrency
+                 )
+             } else {
 
-            }*/
-            getRatesFromApi(currentCurrency)
+             }*/
+            //getRatesFromApi(currentCurrency)
             ratesCurrencyDao.getListExchangeRatesCurrencies(
                 amount = amount,
                 currency = currentCurrency
             ).collect { list ->
                 if (list.isNotEmpty()) {
                     emit(MyResponse.SuccessResponse(list))
+                } else {
+                    val listRates = getRatesFromApi(currentCurrency)
+                    saveRatesLocally(listRates,currentCurrency)
+                    emit(MyResponse.SuccessResponse(listRates))
                 }
             }
         }

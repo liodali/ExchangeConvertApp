@@ -9,11 +9,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EchangeCurrencyApp">
+        android:theme="@style/Theme.ExchangeCurrencyApp"
+        >
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.EchangeCurrencyApp.NoActionBar">
+            android:theme="@style/Theme.ExchangeCurrencyApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -13,7 +13,10 @@ import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
+import org.koin.core.definition.Definition
+import org.koin.core.module.dsl.DefinitionOptions
 import org.koin.core.qualifier.named
+import org.koin.core.qualifier.qualifier
 import org.koin.dsl.module
 
 
@@ -42,7 +45,7 @@ val coreModule = module {
     }
 
     viewModel {
-        MainViewModel(get<CurrencyRepository>())
+        MainViewModel(get<CurrencyRepository>(),get<SessionManager>())
     }
     viewModel {
         DialogCurrencyViewModel(get<CurrencyRepository>(),get<SessionManager>())
