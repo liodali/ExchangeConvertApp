@@ -1,14 +1,11 @@
 package dali.hamza.echangecurrencyapp.common
 
 import android.view.View
-import dali.hamza.core.datasource.db.entities.CurrencyEntity
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.models.CurrencyDTO
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 
 fun View.visible() {
     visibility = View.VISIBLE
@@ -25,13 +22,14 @@ fun View.disabled() {
 fun View.gone() {
     visibility = View.GONE
 }
-fun Currency.toCurrencyDTO(selected:Boolean = false): CurrencyDTO {
+
+fun Currency.toCurrencyDTO(selected: Boolean = false): CurrencyDTO {
     return CurrencyDTO(
         currencyInfo = this,
-        isSelected= selected
+        isSelected = selected
     )
 }
-@OptIn(InternalCoroutinesApi::class)
+
 suspend inline fun Flow<IResponse?>.onData(
     crossinline error: (value: Any) -> Unit,
     crossinline success: suspend (value: MyResponse.SuccessResponse<*>) -> Unit,

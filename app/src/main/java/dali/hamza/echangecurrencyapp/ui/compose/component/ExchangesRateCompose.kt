@@ -64,6 +64,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
 import java.util.Date
 
+@Suppress("UNCHECKED_CAST")
 @ExperimentalComposeUiApi
 @Composable
 fun ExchangesRatesGrid() {
@@ -79,15 +80,20 @@ fun ExchangesRatesGrid() {
     }
     if (loading)
         Loading()
+
     when (ratesResponse) {
         null ->
             EmptyBox()
+
         is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
-            ShowListRates(
-                rates = ratesResponse.data as List<ExchangeRate>,
-                currentCurrency = viewModel.getCurrencySelection().value
-            )
+            if ((ratesResponse.data as List<*>).isEmpty()) {
+                EmptyBox()
+            } else
+                ShowListRates(
+                    rates = ratesResponse.data as List<ExchangeRate>,
+                    currentCurrency = viewModel.getCurrencySelection().value
+                )
         }
 
         is MyResponse.ErrorResponse<*> -> ShowErrorList()

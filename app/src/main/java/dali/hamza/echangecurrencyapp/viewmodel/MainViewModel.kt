@@ -60,7 +60,7 @@ class MainViewModel(
         )
     }
 
-    fun loadingCurrentCurrency() {
+    private fun loadingCurrentCurrency() {
         viewModelScope.launch(Dispatchers.Main) {
             sessionManager.getCurrencyFromDataStore.collect { currency ->
                 if (selectedCurrency.value != currency
