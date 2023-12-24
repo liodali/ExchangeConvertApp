@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -136,14 +137,14 @@ fun AmountTextField(
 
     ) {
     var size by rememberSaveable { mutableIntStateOf(64) }
-    var action by rememberSaveable { mutableIntStateOf(0) }
+    var action:ImeAction by remember { mutableStateOf(ImeAction.None) }
     BasicTextField(
         initValue,
         onValueChange = { newAmount ->
-            if (currency.isNullOrEmpty() || newAmount.isEmpty()) {
-                action = 0
+            if (currency.isNullOrEmpty() || newAmount.isEmpty() || newAmount.toDouble() == 0.0 ) {
+                action = ImeAction.None
             } else {
-                action = 7
+                action = ImeAction.Done
             }
             onValueChanged(newAmount)
         },
@@ -156,7 +157,7 @@ fun AmountTextField(
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
-            imeAction = if (action == 0) ImeAction.None else ImeAction.Done
+            imeAction = action
         ),
         //visualTransformation = AmountTransformation(currency),
         keyboardActions = KeyboardActions(onDone = {

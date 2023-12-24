@@ -80,14 +80,14 @@ fun ExchangesRatesGrid() {
     if (loading)
         Loading()
     when {
-        ratesResponse == null ->
+        ratesResponse is MyResponse.ErrorResponse<*> ->
             EmptyBox()
 
         ratesResponse is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
             ShowListRates(
                 rates = ratesResponse.data as List<ExchangeRate>,
-                currentCurrency = viewModel.getCurrencySelection().value ?: ""
+                currentCurrency = viewModel.getCurrencySelection().value
             )
         }
 
@@ -257,7 +257,7 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
                         .wrapContentHeight(align = Alignment.Top)
                 )
                 Text(
-                    text = format("%.2f", item.calculedAmount),
+                    text = format("%.2f", item.calculatedAmount),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier

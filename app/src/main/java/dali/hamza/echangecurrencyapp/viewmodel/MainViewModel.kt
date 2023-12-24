@@ -95,6 +95,7 @@ class MainViewModel(
                 cacheAmount = amount.toString()
                 isLoading = true
                 mutableFlowExchangesRates.value = null
+                retrieveOrUpdateRates()
                 repository.getListRatesCurrencies(amount).collect { response ->
                     mutableFlowExchangesRates.value = response
                     isLoading = false

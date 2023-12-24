@@ -35,7 +35,7 @@ fun HeaderHomeCompose(
     InputAmount(
         openCurrencyDialog = openFragment,
         actionCalculate =
-        if (viewModel.getCurrencySelection().value?.isNotEmpty() == true) {
+        if (viewModel.getCurrencySelection().value.isNotEmpty()) {
             {
                 val amount = viewModel.mutableFlowAmountForm.amount
                 if (amount.isNotEmpty() && amount.toDouble() > 0.0) {

@@ -158,9 +158,7 @@ class CurrencyRepository(
                 if (list.isNotEmpty()) {
                     emit(MyResponse.SuccessResponse(list))
                 } else {
-                    val listRates = getRatesFromApi(currentCurrency)
-                    saveRatesLocally(listRates,currentCurrency)
-                    emit(MyResponse.SuccessResponse(listRates))
+                    emit(MyResponse.SuccessResponse(list))
                 }
             }
         }

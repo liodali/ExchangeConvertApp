@@ -116,7 +116,9 @@ class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrenc
                             onSelect = { nCurrency ->
                                // mainViewModel.setCurrencySelection(nCurrency)
                                // mainViewModel.setCurrencySelection(nCurrency)
-                                navController.navigate("home")
+                                navController.navigate("home") {
+                                    popUpTo("selectCurrency")
+                                }
                             }
                         )
                     }
