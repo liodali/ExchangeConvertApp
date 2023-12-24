@@ -79,11 +79,10 @@ fun ExchangesRatesGrid() {
     }
     if (loading)
         Loading()
-    when {
-        ratesResponse == null ->
+    when (ratesResponse) {
+        null ->
             EmptyBox()
-
-        ratesResponse is MyResponse.SuccessResponse<*> -> {
+        is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
             ShowListRates(
                 rates = ratesResponse.data as List<ExchangeRate>,
@@ -91,7 +90,7 @@ fun ExchangesRatesGrid() {
             )
         }
 
-        ratesResponse is MyResponse.ErrorResponse<*> -> ShowErrorList()
+        is MyResponse.ErrorResponse<*> -> ShowErrorList()
     }
 }
 
@@ -281,8 +280,8 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
 
 @Composable
 fun EmptyListRates() {
-    Center() {
-        Column() {
+    Center {
+        Column {
             Text(
                 stringResource(id = R.string.error_rates),
                 style = TextStyle(color = Color.Gray)
