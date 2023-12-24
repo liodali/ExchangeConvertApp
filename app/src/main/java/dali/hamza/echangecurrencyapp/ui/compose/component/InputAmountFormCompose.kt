@@ -1,8 +1,6 @@
 package dali.hamza.echangecurrencyapp.ui.compose.component
 
-import android.content.res.Configuration
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.CurrencyExchange
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,17 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
+
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
@@ -81,7 +72,6 @@ fun InputAmount(
             if (showText) {
                 TextAmountWithCurrency(
                     amount = form.amount,
-                    currency = currency,
                     modifier = Modifier.clickable {
                         if (showText) {
                             showText = false
@@ -125,7 +115,7 @@ fun InputAmount(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AmountTextField(
     modifier: Modifier,
@@ -141,10 +131,10 @@ fun AmountTextField(
     BasicTextField(
         initValue,
         onValueChange = { newAmount ->
-            if (currency.isNullOrEmpty() || newAmount.isEmpty() || newAmount.toDouble() == 0.0 ) {
-                action = ImeAction.None
+            action = if (currency.isNullOrEmpty() || newAmount.isEmpty() || newAmount.toDouble() == 0.0 ) {
+                ImeAction.None
             } else {
-                action = ImeAction.Done
+                ImeAction.Done
             }
             onValueChanged(newAmount)
         },
@@ -215,7 +205,6 @@ fun AmountSideSetting(
 fun TextAmountWithCurrency(
     modifier: Modifier,
     amount: String,
-    currency: String?,
 ) {
     Text(
         text = amount,
@@ -224,11 +213,10 @@ fun TextAmountWithCurrency(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Preview(widthDp = 350, heightDp = 92)
 @Composable
 fun ShowTextAmount() {
-    TextAmountWithCurrency(amount = "12", currency = "Tnd", modifier = Modifier)
+    TextAmountWithCurrency(amount = "12",  modifier = Modifier)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -253,19 +241,4 @@ fun ShowFieldAmount() {
             // MaterialTheme.colorScheme.background)
         )
     }
-}
-
-class AmountTransformation(val currency: String?) : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        return TransformedText(
-            buildAnnotatedString {
-                this.append(text.text)
-                withStyle(style = SpanStyle(fontSize = 14.sp)) {
-                    append(" ${currency ?: ""}")
-                }
-
-            }, OffsetMapping.Identity
-        )
-    }
-
 }

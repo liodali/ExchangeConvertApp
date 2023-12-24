@@ -51,13 +51,13 @@ class CurrencyRepository(
                         val currencies = currencyClientAPI
                             .getListCurrencies(accessKey = tokenAPI).data { currencies ->
                                 currencies.currencies.values.map { mJson ->
-                                    val list = mJson.map { currency ->
+                                     mJson.map { currency ->
                                         Currency(
                                             name = currency.key,
                                             fullCountryName = currency.value
                                         )
                                     }
-                                    list
+
                                 }.first()
                             }
                         if (currencies.data == null || currencies.data!!.isEmpty()) {
@@ -78,7 +78,6 @@ class CurrencyRepository(
     }
 
     override suspend fun saveExchangeRatesOfCurrentCurrency() {
-        var ratesFromLocal = false
         withContext(IO) {
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             if (currentCurrency.isNotEmpty()) {
@@ -115,7 +114,7 @@ class CurrencyRepository(
                     }
                 }
 
-                if (listRates.isNotEmpty() && !ratesFromLocal) {
+                if (listRates.isNotEmpty()) {
                     saveRatesLocally(listRates, currentCurrency)
                 }
             }
