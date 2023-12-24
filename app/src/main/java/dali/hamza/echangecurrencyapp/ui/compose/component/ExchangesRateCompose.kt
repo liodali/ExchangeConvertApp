@@ -80,7 +80,7 @@ fun ExchangesRatesGrid() {
     if (loading)
         Loading()
     when {
-        ratesResponse is MyResponse.ErrorResponse<*> ->
+        ratesResponse == null ->
             EmptyBox()
 
         ratesResponse is MyResponse.SuccessResponse<*> -> {
@@ -294,8 +294,8 @@ fun EmptyListRates() {
 
 @Composable
 fun ShowErrorList() {
-    Center() {
-        Column() {
+    Center {
+        Column {
             Text(
                 stringResource(id = R.string.error_rates),
                 style = TextStyle(color = Color.Gray)

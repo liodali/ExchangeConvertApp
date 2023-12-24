@@ -4,10 +4,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -23,8 +21,6 @@ import dali.hamza.core.common.SessionManager
 import dali.hamza.echangecurrencyapp.ui.compose.page.Home
 import dali.hamza.echangecurrencyapp.ui.compose.page.SelectCurrencyPage
 import dali.hamza.echangecurrencyapp.ui.compose.theme.ExchangeCurrencyAppTheme
-import dali.hamza.echangecurrencyapp.ui.dialog.DialogCurrenciesFragment
-import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import dali.hamza.echangecurrencyapp.viewmodel.State
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -32,24 +28,15 @@ import org.koin.android.ext.android.inject
 import org.koin.compose.KoinContext
 
 
-class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrencySelectionCallback {
+class MainActivity : AppCompatActivity() {
 
-    //private val mainViewModel: MainViewModel by  viewModel<MainViewModel>()
-    private lateinit var dialogCurrencySelection: DialogCurrenciesFragment
 
-    var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
-    var firstDestination: String by mutableStateOf("home")
+    private var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
+    private var firstDestination: String by mutableStateOf("home")
     private val sessionManager: SessionManager by inject()
 
 
-    /*companion object {
-        @JvmStatic
-        val mainViewModelComposition =
-            compositionLocalOf<MainViewModel> { error("No viewModel found!") }
 
-    }*/
-
-    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
@@ -113,7 +100,7 @@ class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrenc
                     KoinContext {
                         SelectCurrencyPage(
                             modifier = Modifier,
-                            onSelect = { nCurrency ->
+                            onSelect = { _ ->
                                // mainViewModel.setCurrencySelection(nCurrency)
                                // mainViewModel.setCurrencySelection(nCurrency)
                                 navController.navigate("home") {
@@ -127,23 +114,5 @@ class MainActivity : AppCompatActivity(), DialogCurrenciesFragment.DialogCurrenc
         }
     }
 
-    private fun openCurrenciesSelectionBottomSheet() {
-        /*dialogCurrencySelection = DialogCurrenciesFragment.newInstance(
-            selectedCurrency = mainViewModel.getCurrencySelection() ?: "",
-            this
-        )
-        dialogCurrencySelection.show(supportFragmentManager.also {
-            val prevFrag = it.findFragmentByTag(DialogCurrenciesFragment.tag)
-            if (prevFrag != null) {
-                it.beginTransaction().remove(prevFrag)
-            }
-            it.beginTransaction().addToBackStack(null)
-        }, DialogCurrenciesFragment.tag)*/
-    }
-
-    override fun resetUIState() {
-        //mainViewModel.changeAmount("")
-        // mainViewModel.resetExchangeRates()
-    }
 }
 
