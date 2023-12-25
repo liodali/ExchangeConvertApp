@@ -52,20 +52,6 @@ fun Home(
             TopAppBar(
                 title = {
                     Text(stringResource(id = R.string.Home))
-                },
-                actions = {
-                    if (!viewModel.showFormAmount) {
-                        TextButton(onClick = {
-                            viewModel.showFormAmount = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = "",
-                                tint = Color.White
-                            )
-                        }
-                    }
-
                 }
             )
         },

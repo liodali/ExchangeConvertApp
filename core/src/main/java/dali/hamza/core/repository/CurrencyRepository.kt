@@ -51,7 +51,7 @@ class CurrencyRepository(
                         val currencies = currencyClientAPI
                             .getListCurrencies(accessKey = tokenAPI).data { currencies ->
                                 currencies.currencies.values.map { mJson ->
-                                     mJson.map { currency ->
+                                    mJson.map { currency ->
                                         Currency(
                                             name = currency.key,
                                             fullCountryName = currency.value
@@ -95,7 +95,19 @@ class CurrencyRepository(
                                 )
                             }.await()
 
-                            else -> emptyList()
+                            else -> {
+                                val list = ratesCurrencyDao.getLastListRatesCurrency()
+                                if (list.isNotEmpty()) {
+                                    sessionManager.setTimeLastUpdateRate(DateManager.now().time)
+                                    getRatesFromApi(
+                                        currency = currentCurrency,
+                                    )
+                                } else {
+                                    emptyList()
+                                }
+
+
+                            }
                         }
                     }
 
@@ -103,11 +115,11 @@ class CurrencyRepository(
                         /**
                          * get rates because currency has been changed
                          */
-                        val list = ratesCurrencyDao.getLastListRatesCurrency()
+                        val list =
+                            ratesCurrencyDao.getListRatesByCurrency(currency = currentCurrency)
                         if (list.isNotEmpty()) {
                             archivedRatesByCurrency()
                         }
-                        sessionManager.setTimeLastUpdateRate(DateManager.now().time)
                         getRatesFromApi(
                             currency = currentCurrency,
                         )
@@ -115,7 +127,9 @@ class CurrencyRepository(
                 }
 
                 if (listRates.isNotEmpty()) {
-                    saveRatesLocally(listRates, currentCurrency)
+                    async {
+                        saveRatesLocally(listRates, currentCurrency)
+                    }.await()
                 }
             }
         }
@@ -134,9 +148,9 @@ class CurrencyRepository(
     }
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
-
+        saveExchangeRatesOfCurrentCurrency()
         return flow {
-            saveExchangeRatesOfCurrentCurrency()
+
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             /* val date = sessionManager.getLastUTimeUpdateRates.last()
 
@@ -150,16 +164,21 @@ class CurrencyRepository(
 
              }*/
             //getRatesFromApi(currentCurrency)
-            ratesCurrencyDao.getListExchangeRatesCurrencies(
-                amount = amount,
-                currency = currentCurrency
-            ).collect { list ->
-                if (list.isNotEmpty()) {
-                    emit(MyResponse.SuccessResponse(list))
-                } else {
-                    emit(MyResponse.SuccessResponse(list))
-                }
+            val listRates = withContext(IO) {
+                async {
+                    ratesCurrencyDao.getListExchangeRatesCurrencies(
+                        amount = amount,
+                        currency = currentCurrency
+                    )
+                }.await()
+
             }
+            if (listRates.isNotEmpty()) {
+                emit(MyResponse.SuccessResponse(listRates))
+            } else {
+                emit(MyResponse.ErrorResponse<Any>(EmptyResponse))
+            }
+
         }
 
 

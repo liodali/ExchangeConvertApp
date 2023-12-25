@@ -44,8 +44,8 @@ class RateRequestUnitTest {
             MockResponse().setBody(
                 "{\n" +
                         "    \"success\": true,\n" +
-                        "    \"base\": \"USD\",\n" +
-                        "    \"rates\": {\n" +
+                        "    \"source\": \"USD\",\n" +
+                        "    \"quotes\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"EUR\": 0.82,\n" +
                         "        \"TND\": 2.72\n" +
@@ -63,11 +63,11 @@ class RateRequestUnitTest {
 
 
     @Test
-    fun testParseCUrrenciesJson() = runBlocking {
+    fun testParseCurrenciesJson() = runBlocking {
         val response = apiService.getRatesListCurrencies(
-            "USD"
+            "","USD"
         )
 
-        print(response.body()?.quotes!!.values.first().rate.values.first() == 3.672982)
+        print(response.body()?.quotes!!.values.first().values.first() == 3.672982)
     }
 }

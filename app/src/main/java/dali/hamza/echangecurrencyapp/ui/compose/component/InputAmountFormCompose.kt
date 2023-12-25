@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.SoftwareKeyboardController
 
 import androidx.compose.ui.text.TextStyle
@@ -156,6 +157,7 @@ fun AmountTextField(
                 actionCalculate()
             }
         }),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
         onTextLayout = { textLayoutResult ->
             var baseSize = 20
             val textWithoutCurrency = textLayoutResult.layoutInput.text

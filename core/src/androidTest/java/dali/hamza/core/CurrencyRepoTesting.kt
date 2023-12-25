@@ -2,7 +2,6 @@ package dali.hamza.core
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStoreFile
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.Preference
 import androidx.room.Room
@@ -18,8 +17,6 @@ import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.common.DateManager
-import dali.hamza.domain.models.IResponse
-import dali.hamza.domain.repository.IRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -29,7 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import  org.mockito.kotlin.mock
+import org.mockito.kotlin.mock
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -111,41 +108,12 @@ class CurrencyRepoTesting {
                 historicRateDao,
                 SessionManager(
                     "Testpref", context
-                )
+                ),
+                tokenAPI = ""
             )
             repository.sessionManager.setCurrencySelected(eur)
             repository.sessionManager.removeTimeLastUpdateRate()
 
-            /*
-            rateDao.insertAll(
-                arrayListOf(
-                    RatesCurrencyEntity(
-                        name = usd,
-                        rate = 1.0,
-                        time = DateManager.now(),
-                        selectedCurrency = usd
-                    ),
-                    RatesCurrencyEntity(
-                        name = "TND",
-                        rate = 2.7,
-                        time = DateManager.now(),
-                        selectedCurrency = usd
-                    ),
-                    RatesCurrencyEntity(
-                        name = eur,
-                        rate = 0.82,
-                        time = DateManager.now(),
-                        selectedCurrency = usd
-                    ),
-                    RatesCurrencyEntity(
-                        name = "AED",
-                        rate = 3.76,
-                        time = DateManager.now(),
-                        selectedCurrency = usd
-                    )
-                )
-            )
-            */
         }
     }
 
@@ -162,8 +130,8 @@ class CurrencyRepoTesting {
             MockResponse().setBody(
                 "{\n" +
                         "    \"success\": true,\n" +
-                        "    \"base\": \"EUR\",\n" +
-                        "    \"rates\": {\n" +
+                        "    \"source\": \"EUR\",\n" +
+                        "    \"quotes\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"USD\": 1.18,\n" +
                         "        \"TND\": 3.32\n" +
@@ -184,8 +152,8 @@ class CurrencyRepoTesting {
             MockResponse().setBody(
                 "{\n" +
                         "    \"success\": true,\n" +
-                        "    \"base\": \"EUR\",\n" +
-                        "    \"rates\": {\n" +
+                        "    \"source\": \"EUR\",\n" +
+                        "    \"quotes\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"USD\": 1.18,\n" +
                         "        \"TND\": 3.32\n" +
@@ -197,7 +165,7 @@ class CurrencyRepoTesting {
 
         val list = (rateDao.getListExchangeRatesCurrencies(2.0, eur)).first()
 
-        assert(list[0].calculedAmount == 3.672982 * 2.0)
+        assert(list[0].calculatedAmount == 3.672982 * 2.0)
     }
 
     @Test
@@ -206,8 +174,8 @@ class CurrencyRepoTesting {
             MockResponse().setBody(
                 "{\n" +
                         "    \"success\": true,\n" +
-                        "    \"base\": \"EUR\",\n" +
-                        "    \"rates\": {\n" +
+                        "    \"source\": \"EUR\",\n" +
+                        "    \"quotes\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"USD\": 1.18,\n" +
                         "        \"TND\": 3.32\n" +
@@ -223,7 +191,7 @@ class CurrencyRepoTesting {
                 "{\n" +
                         "    \"success\": true,\n" +
                         "    \"base\": \"USD\",\n" +
-                        "    \"rates\": {\n" +
+                        "    \"quotes\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"UER\": 0.82,\n" +
                         "        \"TND\": 2.72\n" +

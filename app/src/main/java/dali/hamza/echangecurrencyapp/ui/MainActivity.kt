@@ -22,6 +22,7 @@ import dali.hamza.echangecurrencyapp.ui.compose.page.Home
 import dali.hamza.echangecurrencyapp.ui.compose.page.SelectCurrencyPage
 import dali.hamza.echangecurrencyapp.ui.compose.theme.ExchangeCurrencyAppTheme
 import dali.hamza.echangecurrencyapp.viewmodel.State
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -36,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     private val sessionManager: SessionManager by inject()
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().setKeepOnScreenCondition {
@@ -46,9 +46,9 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(state = Lifecycle.State.STARTED) {
                 isLoadingCurrentCurrency = State.LOADING
                 sessionManager.getCurrencyFromDataStore.collectLatest { currency ->
-                    if(currency.isEmpty()){
+                    if (currency.isEmpty()) {
                         firstDestination = "selectCurrency"
-
+                        delay(200)
                     }
                     isLoadingCurrentCurrency = State.FINISH
 
@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun App(
-      //  mainViewModel: MainViewModel,
         navController: NavHostController,
         firstPage: String = "home"
     ) {
@@ -101,11 +100,11 @@ class MainActivity : AppCompatActivity() {
                         SelectCurrencyPage(
                             modifier = Modifier,
                             onSelect = { _ ->
-                               // mainViewModel.setCurrencySelection(nCurrency)
-                               // mainViewModel.setCurrencySelection(nCurrency)
-                                navController.navigate("home") {
-                                    popUpTo("selectCurrency")
-                                }
+                                // mainViewModel.setCurrencySelection(nCurrency)
+                                // mainViewModel.setCurrencySelection(nCurrency)
+                                //navController.popBackStack("selectCurrency")
+                                navController.popBackStack()
+                                navController.navigate("home")
                             }
                         )
                     }
