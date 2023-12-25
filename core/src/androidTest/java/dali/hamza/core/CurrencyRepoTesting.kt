@@ -165,7 +165,7 @@ class CurrencyRepoTesting {
 
         val list = (rateDao.getListExchangeRatesCurrencies(2.0, eur)).first()
 
-        assert(list[0].calculatedAmount == 3.672982 * 2.0)
+        assert(list.calculatedAmount == 3.672982 * 2.0)
     }
 
     @Test
