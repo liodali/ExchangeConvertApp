@@ -6,30 +6,21 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.repository.CurrencyRepository
-import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
-import dali.hamza.domain.models.NoResponse
 import dali.hamza.echangecurrencyapp.models.AmountInput
 import dali.hamza.echangecurrencyapp.models.initAmountInput
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -43,7 +34,6 @@ class MainViewModel(
     private val repository: CurrencyRepository,
     private val sessionManager: SessionManager,
 ) : ViewModel() {
-    private val lifecycleOwner = MyViewModelLifecycleOwner()
 
     // var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
     var showFormAmount: Boolean by mutableStateOf(true)
@@ -130,10 +120,6 @@ class MainViewModel(
         }
     }
 
-    fun resetExchangeRates() {
-        cacheAmount = null
-        //mutableFlowExchangesRates.value = null
-    }
 
     fun calculateExchangeRates(amount: Double) {
         if (amount != 0.0) {
@@ -150,9 +136,9 @@ class MainViewModel(
 
 }
 
-class MyViewModelLifecycleOwner : LifecycleOwner {
+/*class MyViewModelLifecycleOwner : LifecycleOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
 
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
-}
+}*/
