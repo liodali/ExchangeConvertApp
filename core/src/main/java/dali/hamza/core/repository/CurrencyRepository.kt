@@ -21,6 +21,8 @@ import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +38,7 @@ class CurrencyRepository(
     private val historicRateDao: HistoricRateDao,
     val sessionManager: SessionManager,
     private val tokenAPI: String,
+    private val defaultDispatcherContext: CoroutineDispatcher = Dispatchers.Default,
 ) : IRepository {
 
 
@@ -77,8 +80,8 @@ class CurrencyRepository(
         TODO("Not yet implemented")
     }
 
-    override suspend fun saveExchangeRatesOfCurrentCurrency() {
-        withContext(IO) {
+    override suspend fun saveExchangeRatesOfCurrentCurrency(dispatcherContext: CoroutineDispatcher?) {
+        withContext(dispatcherContext ?: defaultDispatcherContext) {
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
             if (currentCurrency.isNotEmpty()) {
                 val lastTimeUpdated = sessionManager.getLastUTimeUpdateRates.first()
@@ -148,7 +151,7 @@ class CurrencyRepository(
     }
 
     override suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse> {
-        saveExchangeRatesOfCurrentCurrency()
+        saveExchangeRatesOfCurrentCurrency(defaultDispatcherContext)
         return flow {
 
             val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
@@ -185,7 +188,7 @@ class CurrencyRepository(
     }
 
     override suspend fun getListRatesCurrenciesPaging(amount: Double): Flow<PagingData<ExchangeRate>> {
-        saveExchangeRatesOfCurrentCurrency()
+        saveExchangeRatesOfCurrentCurrency(defaultDispatcherContext)
         val currentCurrency = sessionManager.getCurrencyFromDataStore.first()
         return Pager(
             PagingConfig(pageSize = 30, enablePlaceholders = true)
@@ -200,7 +203,6 @@ class CurrencyRepository(
     private suspend fun getRatesFromApi(
         currency: String,
     ): List<CurrencyRate> {
-
         return currencyClientAPI.getRatesListCurrencies(
             accessKey = tokenAPI,
             source = currency
