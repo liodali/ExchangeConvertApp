@@ -1,6 +1,8 @@
 package dali.hamza.domain.repository
 
 import dali.hamza.domain.models.IResponse
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 
 interface IRepository {
@@ -21,7 +23,7 @@ interface IRepository {
      * https://api.currencylayer.com/live?source={selectedCurrency}
      * and save it in local Database
      */
-    suspend fun saveExchangeRatesOfCurrentCurrency()
+    suspend fun saveExchangeRatesOfCurrentCurrency( dispatcherContext: CoroutineDispatcher? = null)
 
     /**
      * calculate the exchange rates of selected currency

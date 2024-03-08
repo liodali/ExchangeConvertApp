@@ -1,20 +1,37 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package dali.hamza.echangecurrencyapp.viewmodel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.repository.CurrencyRepository
+import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
+import dali.hamza.domain.models.MyResponse
+import dali.hamza.domain.models.NoResponse
 import dali.hamza.echangecurrencyapp.models.AmountInput
 import dali.hamza.echangecurrencyapp.models.initAmountInput
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,23 +43,53 @@ class MainViewModel(
     private val repository: CurrencyRepository,
     private val sessionManager: SessionManager,
 ) : ViewModel() {
+    private val lifecycleOwner = MyViewModelLifecycleOwner()
 
     // var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
     var showFormAmount: Boolean by mutableStateOf(true)
+    var mutableStateAmountForm: AmountInput by mutableStateOf(initAmountInput())
+
     private var selectedCurrency: MutableState<String> = mutableStateOf("")
 
     var isLoading: Boolean by mutableStateOf(false)
+    private var mutableFlowAmountForm: MutableStateFlow<AmountInput> =
+        MutableStateFlow(initAmountInput())
+    private var stateFlowExchangesRates: StateFlow<IResponse> =
+        mutableFlowAmountForm.transformLatest { amountInput ->
+            val rate = amountInput.amount.toDoubleOrNull()
+            when {
+                rate == null || rate == 0.0 -> {
+                    emit(MyResponse.NoResponse<Any>())
+                }
 
-    private var mutableFlowExchangesRates: MutableStateFlow<IResponse?> = MutableStateFlow(null)
-    private var stateFlowExchangesRates: StateFlow<IResponse?> = mutableFlowExchangesRates
+                else -> {
+                    viewModelScope.launch {
+                        repository.getListRatesCurrencies(rate)
+                            .collect { response ->
+                                emit(response)
+                                withContext(Main) {
+                                    isLoading = false
+                                }
+                            }
+                    }
+                }
+            }
+
+        }/*.flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)*/.stateIn(
+            scope = viewModelScope,
+            initialValue = MyResponse.NoResponse<Any>(),
+            started = SharingStarted.WhileSubscribed(),
+        )
+
 
     init {
         loadingCurrentCurrency()
     }
 
     fun getCurrencySelection() = selectedCurrency
+    fun hasCurrencySelection() = selectedCurrency.value.isNotEmpty()
 
-    fun getExchangeRates(): StateFlow<IResponse?> = stateFlowExchangesRates
+    fun getExchangeRates(): StateFlow<IResponse> = stateFlowExchangesRates
 
     fun setCurrencySelection(newCurrency: String) {
         selectedCurrency.value = newCurrency
@@ -50,23 +97,22 @@ class MainViewModel(
 
 
     private var cacheAmount: String? by mutableStateOf(null)
-    var mutableFlowAmountForm: AmountInput by mutableStateOf(initAmountInput())
-        private set
 
 
     fun changeAmount(amount: String) {
-        mutableFlowAmountForm = mutableFlowAmountForm.copy(
+        mutableStateAmountForm = mutableStateAmountForm.copy(
             amount = amount
         )
     }
 
+
     private fun loadingCurrentCurrency() {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Main) {
             sessionManager.getCurrencyFromDataStore.collect { currency ->
                 if (selectedCurrency.value != currency
                     && selectedCurrency.value.isNotEmpty()
                 ) {
-                    withContext(Dispatchers.IO) {
+                    withContext(IO) {
                         sessionManager.removeTimeLastUpdateRate()
                         retrieveOrUpdateRates()
                     }
@@ -79,31 +125,34 @@ class MainViewModel(
     private fun retrieveOrUpdateRates() {
         viewModelScope.launch {
             async {
-                repository.saveExchangeRatesOfCurrentCurrency()
+                repository.saveExchangeRatesOfCurrentCurrency(IO)
             }.await()
         }
     }
 
     fun resetExchangeRates() {
         cacheAmount = null
-        mutableFlowExchangesRates.value = null
+        //mutableFlowExchangesRates.value = null
     }
 
     fun calculateExchangeRates(amount: Double) {
         if (amount != 0.0) {
             viewModelScope.launch {
+
                 cacheAmount = amount.toString()
                 isLoading = true
-                mutableFlowExchangesRates.value = null
+                //mutableFlowExchangesRates.value = null
                 retrieveOrUpdateRates()
-                repository.getListRatesCurrencies(amount).collect { response ->
-                    mutableFlowExchangesRates.value = response
-                    isLoading = false
-                }
-
+                mutableFlowAmountForm.value = mutableStateAmountForm
             }
         }
     }
 
+}
 
+class MyViewModelLifecycleOwner : LifecycleOwner {
+    private val lifecycleRegistry = LifecycleRegistry(this)
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 }

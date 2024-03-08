@@ -27,7 +27,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,25 +66,21 @@ import java.util.Date
 @Suppress("UNCHECKED_CAST")
 @ExperimentalComposeUiApi
 @Composable
-fun ExchangesRatesGrid() {
-    val viewModel = koinViewModel<MainViewModel>()
+fun ExchangesRatesGrid(viewModel: MainViewModel = koinViewModel<MainViewModel>()) {
+
     val loading = viewModel.isLoading
 
     val ratesState = viewModel.getExchangeRates().collectAsState()
     val ratesResponse = ratesState.value
-    LaunchedEffect(key1 = viewModel.getCurrencySelection().value) {
-        if (viewModel.mutableFlowAmountForm.amount.isNotEmpty()) {
-            viewModel.calculateExchangeRates(viewModel.mutableFlowAmountForm.amount.toDouble())
-        }
-    }
-    if (loading)
-        Loading()
 
-    when (ratesResponse) {
-        null ->
+
+
+    when {
+        loading -> Loading()
+        ratesResponse is MyResponse.NoResponse<*> ->
             EmptyBox()
 
-        is MyResponse.SuccessResponse<*> -> {
+        ratesResponse is MyResponse.SuccessResponse<*> -> {
             viewModel.isLoading = false
             if ((ratesResponse.data as List<*>).isEmpty()) {
                 EmptyBox()
@@ -96,7 +91,7 @@ fun ExchangesRatesGrid() {
                 )
         }
 
-        is MyResponse.ErrorResponse<*> -> ShowErrorList()
+        ratesResponse is MyResponse.ErrorResponse<*> -> ShowErrorList()
     }
 }
 
@@ -328,14 +323,14 @@ fun SimpleShowListRatesPreview() {
     ShowListRates(
         rates = arrayListOf(
             ExchangeRate(
-                "EUR",
+                "TNDEUR",
                 2.0, 1.2, Date.from(Instant.EPOCH)
             ),
             ExchangeRate(
-                "JP",
+                "TNDJP",
                 3.0, 4.2, Date.from(Instant.EPOCH)
             )
         ),
-        currentCurrency = ""
+        currentCurrency = "TND"
     )
 }

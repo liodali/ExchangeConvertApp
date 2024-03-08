@@ -4,6 +4,7 @@ open class IResponse
 
 sealed  class  MyResponse<T>(val data: T?, val error: Any?) : IResponse() {
     class SuccessResponse<T>(data: T) : MyResponse<T>(data, null)
+    class NoResponse<T>() : MyResponse<T>(null, null)
     class ErrorResponse<T>(error: Any) : MyResponse<T>(null, error = error)
 }
 
