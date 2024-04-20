@@ -16,7 +16,7 @@
     <string name="error_rates">Rates Unavailable</string>
     <string name="title_exchange_rates">Exchange rates</string>
     <string name="db_name">ConvertCurrencyApp.db</string>
-    <string name="flag_country_svg_url">https://github.com/Lissy93/currency-flags/tree/master/assets/</string>
+    <string name="flag_country_svg_url">https://raw.githubusercontent.com/Lissy93/currency-flags/master/assets/flags_png_rectangle/%1$s.png</string>
 
     <array name="currencies">
         <item>AED:United Arab Emirates Dirham</item>

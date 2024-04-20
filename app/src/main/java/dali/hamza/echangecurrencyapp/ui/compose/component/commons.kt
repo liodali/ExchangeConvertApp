@@ -9,19 +9,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalProvider
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.models.DataUIState
 import dali.hamza.echangecurrencyapp.models.ErrorUIState
 import dali.hamza.echangecurrencyapp.models.LoadingUIState
@@ -108,8 +116,35 @@ fun Center(content: @Composable () -> Unit) {
     }
 }
 
+@Composable
+fun CurrencyFlagImage(
+    currencyFlagURL: String = stringResource(id = R.string.flag_country_svg_url, "usd"),
+    size: Dp
+) {
+    AsyncImage(
+        model = currencyFlagURL,
+        contentDescription = "currency flag",
+        contentScale = ContentScale.FillHeight,
+        modifier = Modifier
+            .clip(CircleShape)
+            .size(size)
+    )
+}
+
+@Preview(widthDp = 120, heightDp = 48)
+@Composable
+fun ShowImagePreview() {
+    Scaffold {
+       Box(modifier = Modifier.padding(it)) {
+           CurrencyFlagImage(size = 24.dp)
+       }
+    }
+}
+
+
 @Preview
 @Composable
 fun ShowEmptyDataPreview() {
     EmptyData(text = "No currencies available")
 }
+
