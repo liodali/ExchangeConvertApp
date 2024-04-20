@@ -1,13 +1,22 @@
 package dali.hamza.echangecurrencyapp.di
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.SessionManager
-import dali.hamza.core.datasource.db.AppDB
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import mohamedali.hamza.database.AppDB
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -30,8 +39,17 @@ val appModule = module {
     single(named("TOKEN")) {
         androidContext().resources.getString(R.string.token)
     }
+    single<DataStore<Preferences>> {
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = ReplaceFileCorruptionHandler(
+                produceNewData = { emptyPreferences() }
+            ),
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+            produceFile = { androidContext().preferencesDataStoreFile(get(named("PREF"))) }
+        )
+    }
     single<SessionManager> {
-        SessionManager(get(named("PREF")), androidContext())
+        SessionManager(get<DataStore<Preferences>>())
     }
     single {
         MoshiConverterFactory

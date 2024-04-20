@@ -1,15 +1,15 @@
-package dali.hamza.core.datasource.db
+package mohamedali.hamza.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import dali.hamza.core.datasource.db.dao.CurrencyDao
-import dali.hamza.core.datasource.db.dao.HistoricRateDao
-import dali.hamza.core.datasource.db.dao.RatesCurrencyDao
-import dali.hamza.core.datasource.db.entities.CurrencyEntity
-import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
-import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
-import dali.hamza.core.datasource.db.utilities.Converter
+import mohamedali.hamza.database.dao.CurrencyDao
+import mohamedali.hamza.database.dao.HistoricRateDao
+import mohamedali.hamza.database.dao.RatesCurrencyDao
+import mohamedali.hamza.database.entities.CurrencyEntity
+import mohamedali.hamza.database.entities.HistoricRatesCurrencyEntity
+import mohamedali.hamza.database.entities.RatesCurrencyEntity
+import mohamedali.hamza.database.utilities.Converter
 
 @Database(
     version = 1,

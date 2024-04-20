@@ -10,10 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.repository.CurrencyRepository
-import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.models.AmountInput
+import dali.hamza.echangecurrencyapp.models.LoadingUIState
+import dali.hamza.echangecurrencyapp.models.NoDataUIState
+import dali.hamza.echangecurrencyapp.models.UIState
 import dali.hamza.echangecurrencyapp.models.initAmountInput
+import dali.hamza.echangecurrencyapp.models.toUIState
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,33 +44,29 @@ class MainViewModel(
 
     private var selectedCurrency: MutableState<String> = mutableStateOf("")
 
-    var isLoading: Boolean by mutableStateOf(false)
+
     private var mutableFlowAmountForm: MutableStateFlow<AmountInput> =
         MutableStateFlow(initAmountInput())
-    private var stateFlowExchangesRates: StateFlow<IResponse> =
+    private var stateFlowExchangesRates: StateFlow<UIState> =
         mutableFlowAmountForm.transformLatest { amountInput ->
             val rate = amountInput.amount.toDoubleOrNull()
+            emit(LoadingUIState())
             when {
                 rate == null || rate == 0.0 -> {
-                    emit(MyResponse.NoResponse<Any>())
+                    emit(MyResponse.NoResponse<Any>().toUIState())
                 }
 
                 else -> {
                     viewModelScope.launch {
-                        repository.getListRatesCurrencies(rate)
-                            .collect { response ->
-                                emit(response)
-                                withContext(Main) {
-                                    isLoading = false
-                                }
-                            }
+                        val response = repository.getListRatesCurrencies(rate)
+                        emit(response.toUIState())
                     }
                 }
             }
 
         }/*.flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)*/.stateIn(
             scope = viewModelScope,
-            initialValue = MyResponse.NoResponse<Any>(),
+            initialValue = NoDataUIState(),
             started = SharingStarted.WhileSubscribed(),
         )
 
@@ -79,7 +78,7 @@ class MainViewModel(
     fun getCurrencySelection() = selectedCurrency
     fun hasCurrencySelection() = selectedCurrency.value.isNotEmpty()
 
-    fun getExchangeRates(): StateFlow<IResponse> = stateFlowExchangesRates
+    fun getExchangeRates(): StateFlow<UIState> = stateFlowExchangesRates
 
     fun setCurrencySelection(newCurrency: String) {
         selectedCurrency.value = newCurrency
@@ -126,9 +125,7 @@ class MainViewModel(
             viewModelScope.launch {
 
                 cacheAmount = amount.toString()
-                isLoading = true
-                //mutableFlowExchangesRates.value = null
-                retrieveOrUpdateRates()
+
                 mutableFlowAmountForm.value = mutableStateAmountForm
             }
         }

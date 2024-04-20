@@ -8,7 +8,7 @@ interface IRepository {
     /**
      * recuperation of list currencies from local database
      */
-    suspend fun getListCurrencies(): Flow<IResponse>
+    suspend fun getListCurrencies(): IResponse
 
     /**
      * recuperation of list currencies from
@@ -27,6 +27,6 @@ interface IRepository {
     /**
      * calculate the exchange rates of selected currency
      */
-    suspend fun getListRatesCurrencies(amount: Double): Flow<IResponse>
+    suspend fun getListRatesCurrencies(amount: Double): IResponse
     suspend fun getListRatesCurrenciesPaging(amount: Double): Flow<Any>
 }

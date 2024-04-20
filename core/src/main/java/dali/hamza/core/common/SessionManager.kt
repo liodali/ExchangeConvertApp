@@ -1,24 +1,41 @@
 package dali.hamza.core.common
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dali.hamza.domain.common.DateManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.*
+import java.util.Date
 
 
-class SessionManager constructor(
-    PREF_NAME: String,
-    private val context: Context
+class SessionManager(
+    private val dataStore: DataStore<Preferences>
 ) {
 
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = PREF_NAME
-    )
+    internal constructor(
+        prefName: String,
+        context: Context
+    ) : this(PreferenceDataStoreFactory.create(
+        corruptionHandler = ReplaceFileCorruptionHandler(
+            produceNewData = { emptyPreferences() }
+        ),
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+        produceFile = { context.preferencesDataStoreFile(prefName) }
+    ))
+    /* private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+         name = PREF_NAME
+     )*/
 
 
     companion object {
@@ -26,36 +43,43 @@ class SessionManager constructor(
         val lastTimeFetchForRates = longPreferencesKey("LastTimeRates")
     }
 
+    suspend fun clear() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
     suspend fun setCurrencySelected(currency: String) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences.putAll(selectedCurrency to currency)
         }
     }
 
-    val getCurrencyFromDataStore: Flow<String> = context.dataStore.data
+    val getCurrencyFromDataStore: Flow<String> = dataStore.data
         .map { preferences ->
             preferences[selectedCurrency] ?: ""
         }
 
     suspend fun setTimeLastUpdateRate(time: Long) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = time
         }
     }
 
     suspend fun setTimeNowLastUpdateRate() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = DateManager.now().time
         }
     }
 
 
     suspend fun removeTimeLastUpdateRate() {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = 0L
         }
     }
-    val getLastUTimeUpdateRates: Flow<Date> = context.dataStore.data
+
+    val getLastUTimeUpdateRates: Flow<Date> = dataStore.data
         .map { preferences ->
             when (preferences.contains(lastTimeFetchForRates)) {
                 true -> Date(preferences[lastTimeFetchForRates]!!)

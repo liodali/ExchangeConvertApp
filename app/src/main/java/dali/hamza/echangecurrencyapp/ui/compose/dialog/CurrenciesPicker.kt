@@ -31,6 +31,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,10 +50,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.domain.models.Currency
-import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.ui.compose.component.EmptyData
 import dali.hamza.echangecurrencyapp.ui.compose.component.Loading
+import dali.hamza.echangecurrencyapp.ui.compose.component.StateBuilder
 import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -151,74 +152,70 @@ fun TopHeaderBottomSheetCurrencies(
 }
 
 @Composable
-fun BodyCurrenciesBottomSheet(modifier: Modifier = Modifier) {
-    val vm = koinViewModel<DialogCurrencyViewModel>()
-    val response = koinViewModel<DialogCurrencyViewModel>().getCurrencies().collectAsState()
+fun BodyCurrenciesBottomSheet(
+    modifier: Modifier = Modifier,
+    viewModel: DialogCurrencyViewModel = koinViewModel<DialogCurrencyViewModel>()
+) {
+
+    val state = viewModel.getCurrencies().collectAsState().value
     val coroutineScope = rememberCoroutineScope()
-    val loading = vm.isLoadingState
-    LaunchedEffect(key1 = vm) {
+
+    LaunchedEffect(key1 = viewModel) {
         coroutineScope.launch {
-            vm.getCurrenciesFromLocalDb()
+            viewModel.getCurrenciesFromLocalDb()
         }
     }
-    when (loading) {
-        true -> {
-            Loading()
-        }
+    state.StateBuilder<List<Currency>>(
+        loadingUI = { Loading() },
+        emptyUI = { EmptyData(text = "No currencies available") }
 
-        else -> {
-            if (response.value is MyResponse.SuccessResponse<*>) {
-                val responseData =
-                    (response.value as MyResponse.SuccessResponse<*>).data as List<Currency>
-                var listCurrencies by rememberSaveable {
-                    mutableStateOf(responseData)
-                }
-                var scrollTo by remember {
-                    mutableStateOf(0)
-                }
-                LaunchedEffect(key1 = responseData) {
-                    val currentCurrencySelected = vm.getCurrentCurrency().value
-                    val index = listCurrencies.map { currency -> currency.name }
-                        .indexOf(currentCurrencySelected)
-                    if (index > 10) {
-                        scrollTo = index - 3
-                    } else {
-                        scrollTo = index
-                    }
-                }
-                LaunchedEffect(key1 = vm.mutableFlowSearchCurrency) {
-                    if (vm.mutableFlowSearchCurrency.isEmpty()) {
-                        listCurrencies = responseData
-                    } else {
-                        listCurrencies = responseData.filter { currency ->
-                            currency.name.lowercase()
-                                .contains(vm.mutableFlowSearchCurrency.lowercase())
-                        }
-                    }
-                }
-                Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
-                    SearchTextFieldCurrency(
-                        text = vm.mutableFlowSearchCurrency,
-                        onChange = { searchableText ->
-                            vm.mutableFlowSearchCurrency = searchableText
-                        })
-                    ListCurrenciesBottomSheet(
-                        currencies = listCurrencies,
-                        selected = vm.getCurrentCurrency().collectAsState().value,
-                        onChange = { name ->
-                            vm.setSelectedCurrency(name)
-                        },
-                        scrollToIndex = scrollTo
-                    )
-                }
+    ) { responseData ->
+
+        var listCurrencies by rememberSaveable {
+            mutableStateOf(responseData)
+        }
+        var scrollTo by remember {
+            mutableIntStateOf(0)
+        }
+        LaunchedEffect(key1 = responseData) {
+            val currentCurrencySelected = viewModel.getCurrentCurrency().value
+            val index = listCurrencies.map { currency -> currency.name }
+                .indexOf(currentCurrencySelected)
+            scrollTo = if (index > 10) {
+                index - 3
             } else {
-                EmptyData(text = "No currencies available")
+                index
             }
+        }
+        LaunchedEffect(key1 = viewModel.mutableFlowSearchCurrency) {
+            listCurrencies = if (viewModel.mutableFlowSearchCurrency.isEmpty()) {
+                responseData
+            } else {
+                responseData.filter { currency ->
+                    currency.name.lowercase()
+                        .contains(viewModel.mutableFlowSearchCurrency.lowercase())
+                }
+            }
+        }
+        Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
+            SearchTextFieldCurrency(
+                text = viewModel.mutableFlowSearchCurrency,
+                onChange = { searchableText ->
+                    viewModel.mutableFlowSearchCurrency = searchableText
+                })
+            ListCurrenciesBottomSheet(
+                currencies = listCurrencies,
+                selected = viewModel.getCurrentCurrency().collectAsState().value,
+                onChange = { name ->
+                    viewModel.setSelectedCurrency(name)
+                },
+                scrollToIndex = scrollTo
+            )
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+
 @Composable
 fun SearchTextFieldCurrency(
     modifier: Modifier = Modifier,

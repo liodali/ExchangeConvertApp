@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import dali.hamza.echangecurrencyapp.R
 
@@ -16,13 +17,14 @@ import dali.hamza.echangecurrencyapp.R
 fun Loading() {
     Column(
         modifier = Modifier
+            .testTag("loading")
             .fillMaxWidth()
             .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        CircularProgressIndicator()
-        Text(stringResource(id = R.string.loadingText))
+        CircularProgressIndicator(Modifier.testTag("progressIndicator"))
+        Text(stringResource(id = R.string.loadingText), modifier = Modifier.testTag("loadingText"))
 
     }
 }

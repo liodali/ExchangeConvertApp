@@ -1,11 +1,11 @@
 package dali.hamza.core.common
 
 import android.util.Log
-import dali.hamza.core.datasource.db.entities.CurrencyEntity
-import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
-import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.MyResponse
+import mohamedali.hamza.database.entities.CurrencyEntity
+import mohamedali.hamza.database.entities.HistoricRatesCurrencyEntity
+import mohamedali.hamza.database.entities.RatesCurrencyEntity
 import okio.IOException
 import retrofit2.Response
 
@@ -62,7 +62,7 @@ fun <T, R : Any> Response<T>.simpleData(
         onFailure {
             throw Exception(it as String)
         }
-        throw  Exception("GENERAL_NETWORK_ERROR")
+        throw Exception("GENERAL_NETWORK_ERROR")
     } catch (e1: IOException) {
         throw IOException("GENERAL_NETWORK_ERROR")
     } catch (e: Exception) {

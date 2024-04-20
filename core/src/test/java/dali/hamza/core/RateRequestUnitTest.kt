@@ -7,9 +7,8 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
-import org.junit.Test
-
 import org.junit.Before
+import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -65,9 +64,9 @@ class RateRequestUnitTest {
     @Test
     fun testParseCurrenciesJson() = runBlocking {
         val response = apiService.getRatesListCurrencies(
-            "","USD"
+            "", "USD"
         )
 
-        print(response.body()?.quotes!!.values.first().values.first() == 3.672982)
+        assert(response.body()?.quotes!!.values.first().values.first() == 3.672982)
     }
 }

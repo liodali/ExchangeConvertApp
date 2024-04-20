@@ -51,7 +51,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.domain.models.ExchangeRate
-import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.R
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers.IO
@@ -67,31 +66,14 @@ import java.util.Date
 @ExperimentalComposeUiApi
 @Composable
 fun ExchangesRatesGrid(viewModel: MainViewModel = koinViewModel<MainViewModel>()) {
-
-    val loading = viewModel.isLoading
-
-    val ratesState = viewModel.getExchangeRates().collectAsState()
-    val ratesResponse = ratesState.value
-
-
-
-    when {
-        loading -> Loading()
-        ratesResponse is MyResponse.NoResponse<*> ->
-            EmptyBox()
-
-        ratesResponse is MyResponse.SuccessResponse<*> -> {
-            viewModel.isLoading = false
-            if ((ratesResponse.data as List<*>).isEmpty()) {
-                EmptyBox()
-            } else
-                ShowListRates(
-                    rates = ratesResponse.data as List<ExchangeRate>,
-                    currentCurrency = viewModel.getCurrencySelection().value
-                )
-        }
-
-        ratesResponse is MyResponse.ErrorResponse<*> -> ShowErrorList()
+    val ratesState = viewModel.getExchangeRates().collectAsState().value
+    ratesState.StateBuilder<List<ExchangeRate>>(
+        loadingUI = { Loading() },
+        emptyUI = { EmptyBox() }) { data ->
+        ShowListRates(
+            rates = data,
+            currentCurrency = viewModel.getCurrencySelection().value
+        )
     }
 }
 

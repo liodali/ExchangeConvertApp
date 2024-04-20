@@ -1,13 +1,10 @@
-package dali.hamza.core.datasource.db.dao
+package mohamedali.hamza.database.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
-import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.domain.models.ExchangeRate
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.internal.ChannelFlow
+import mohamedali.hamza.database.entities.RatesCurrencyEntity
 
 @Dao
 interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
@@ -23,7 +20,7 @@ interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
     fun getPagingListExchangeRatesCurrencies(
         amount: Double,
         currency: String
-    ): PagingSource<Int,ExchangeRate>
+    ): PagingSource<Int, ExchangeRate>
 
     @Query("select * from RatesCurrencyEntity where selectedCurrency=:selectedCurrency")
     fun getListRatesByCurrencies(selectedCurrency: String): List<RatesCurrencyEntity>
@@ -33,5 +30,5 @@ interface RatesCurrencyDao : AppDao<RatesCurrencyEntity> {
     fun getLastListRatesCurrency(): List<RatesCurrencyEntity>
 
     @Query("select * from RatesCurrencyEntity  where selectedCurrency=:currency")
-    fun getListRatesByCurrency(currency:String): List<RatesCurrencyEntity>
+    fun getListRatesByCurrency(currency: String): List<RatesCurrencyEntity>
 }

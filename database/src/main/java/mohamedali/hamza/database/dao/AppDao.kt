@@ -1,4 +1,4 @@
-package dali.hamza.core.datasource.db.dao
+package mohamedali.hamza.database.dao
 
 import androidx.room.*
 

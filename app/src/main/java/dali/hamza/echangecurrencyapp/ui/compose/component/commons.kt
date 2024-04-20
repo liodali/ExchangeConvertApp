@@ -22,6 +22,44 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dali.hamza.echangecurrencyapp.models.DataUIState
+import dali.hamza.echangecurrencyapp.models.ErrorUIState
+import dali.hamza.echangecurrencyapp.models.LoadingUIState
+import dali.hamza.echangecurrencyapp.models.NoDataUIState
+import dali.hamza.echangecurrencyapp.models.UIState
+
+
+@Composable
+fun <T> UIState.StateBuilder(
+    loadingUI: (@Composable () -> Unit)?,
+    emptyUI: (@Composable () -> Unit)?,
+    errorUI: (@Composable () -> Unit)? = null,
+    content: @Composable (T) -> Unit,
+) {
+    when (this) {
+        is LoadingUIState -> when {
+            loadingUI != null -> loadingUI()
+            else -> Loading()
+        }
+
+        is NoDataUIState -> when {
+            emptyUI != null -> emptyUI()
+            else -> EmptyBox()
+        }
+
+        is DataUIState<*> ->
+            content(data!! as T)
+
+
+        is ErrorUIState -> when {
+            errorUI != null -> errorUI()
+            else -> ShowErrorList()
+        }
+
+        else -> EmptyBox()
+    }
+}
+
 
 @Composable
 fun SpacerHeight(height: Dp) {

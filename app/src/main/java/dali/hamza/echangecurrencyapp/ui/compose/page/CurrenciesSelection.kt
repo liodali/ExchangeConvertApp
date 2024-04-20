@@ -2,7 +2,6 @@ package dali.hamza.echangecurrencyapp.ui.compose.page
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.Button
@@ -20,12 +19,13 @@ import dali.hamza.echangecurrencyapp.ui.compose.dialog.BodyCurrenciesBottomSheet
 import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import org.koin.androidx.compose.koinViewModel
 
+
 @Composable
 fun SelectCurrencyPage(
     modifier: Modifier,
     onSelect: (String) -> Unit
 ) {
-    val viewModel = koinViewModel<DialogCurrencyViewModel>()
+
     Scaffold(topBar = {
         SelectCurrencyTopBar()
     }, modifier = modifier) { innerPadding ->
@@ -36,22 +36,7 @@ fun SelectCurrencyPage(
             BodyCurrenciesBottomSheet(
                 modifier = Modifier.weight(0.9f)
             )
-            Button(
-                onClick = {
-                    viewModel.mutableFlowSearchCurrency = ""
-                    viewModel.setPreferenceCurrency(viewModel.getCurrentCurrency().value)
-                    onSelect(viewModel.getCurrentCurrency().value)
-                },
-                enabled = !viewModel.isLoadingState || viewModel.getCurrentCurrency()
-                    .collectAsState().value.isNotEmpty(),
-                modifier = Modifier
-                    .weight(0.1f)
-                    .requiredHeight(48.dp)
-                    .fillMaxWidth()
-                    .padding(horizontal = 6.dp, vertical = 3.dp)
-            ) {
-                Text(text = stringResource(id = R.string.continueLabel))
-            }
+            SelectCurrencyButton(onSelect = onSelect, modifier = Modifier.weight(0.1f))
         }
     }
 }
@@ -65,4 +50,30 @@ fun SelectCurrencyTopBar(
         title = { Text(text = stringResource(id = R.string.selectTitleCurrencyTopBarPage)) },
         modifier = Modifier.then(modifier),
     )
+}
+
+@Composable
+fun SelectCurrencyButton(
+    modifier: Modifier = Modifier,
+    onSelect: (String) -> Unit,
+    viewModel: DialogCurrencyViewModel = koinViewModel<DialogCurrencyViewModel>()
+) {
+    val state = viewModel.getCurrentCurrency()
+        .collectAsState()
+
+    Button(
+        onClick = {
+            viewModel.mutableFlowSearchCurrency = ""
+            viewModel.setPreferenceCurrency(viewModel.getCurrentCurrency().value)
+            onSelect(viewModel.getCurrentCurrency().value)
+        },
+        enabled = state.value.isNotEmpty(),
+        modifier = modifier
+
+            .requiredHeight(48.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 3.dp)
+    ) {
+        Text(text = stringResource(id = R.string.continueLabel))
+    }
 }

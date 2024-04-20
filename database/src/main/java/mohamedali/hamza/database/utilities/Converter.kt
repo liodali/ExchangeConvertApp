@@ -1,4 +1,4 @@
-package dali.hamza.core.datasource.db.utilities
+package mohamedali.hamza.database.utilities
 
 import androidx.room.TypeConverter
 import java.util.*

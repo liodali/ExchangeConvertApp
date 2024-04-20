@@ -9,26 +9,26 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.SessionManager
-import dali.hamza.core.datasource.db.AppDB
-import dali.hamza.core.datasource.db.dao.CurrencyDao
-import dali.hamza.core.datasource.db.dao.HistoricRateDao
-import dali.hamza.core.datasource.db.dao.RatesCurrencyDao
-import dali.hamza.core.datasource.db.entities.RatesCurrencyEntity
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.common.DateManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import mohamedali.hamza.database.AppDB
+import mohamedali.hamza.database.dao.CurrencyDao
+import mohamedali.hamza.database.dao.HistoricRateDao
+import mohamedali.hamza.database.dao.RatesCurrencyDao
+import mohamedali.hamza.database.entities.RatesCurrencyEntity
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 import org.mockito.kotlin.mock
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.io.IOException
 
 private interface CurrencyClientApi {}
 private open class Api : CurrencyClientApi {}
@@ -201,7 +201,7 @@ class CurrencyRepoTesting {
         )
         repository.saveExchangeRatesOfCurrentCurrency()
 
-        val list =( historicRateDao.historicRate(eur)).first()
+        val list = (historicRateDao.historicRate(eur)).first()
 
         assert(list.isNotEmpty())
     }

@@ -8,9 +8,10 @@ import androidx.lifecycle.viewModelScope
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.models.Currency
-import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
-import kotlinx.coroutines.Dispatchers
+import dali.hamza.echangecurrencyapp.models.LoadingUIState
+import dali.hamza.echangecurrencyapp.models.UIState
+import dali.hamza.echangecurrencyapp.models.toUIState
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,12 +21,10 @@ import kotlinx.coroutines.launch
 
 
 class DialogCurrencyViewModel(
-    val repository: CurrencyRepository,
-    val sessionManager: SessionManager
+    private val repository: CurrencyRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
-
-    var isLoadingState: Boolean by mutableStateOf(false)
 
     var mutableFlowSearchCurrency: String by mutableStateOf("")
 
@@ -35,14 +34,14 @@ class DialogCurrencyViewModel(
     }
     private var cacheList: MutableList<Currency> = emptyList<Currency>().toMutableList()
 
-    private var currenciesMutableFlow: MutableStateFlow<IResponse?> = MutableStateFlow(null)
-    private val currenciesFlow: StateFlow<IResponse?> by lazy {
+    private var currenciesMutableFlow: MutableStateFlow<UIState> =
+        MutableStateFlow(LoadingUIState())
+    private val currenciesFlow: StateFlow<UIState> by lazy {
         currenciesMutableFlow
     }
 
 
     fun getCurrencies() = currenciesFlow
-
 
 
     fun getCurrentCurrency() = currentCurrencyFlow
@@ -54,7 +53,7 @@ class DialogCurrencyViewModel(
     private fun retrieveCurrentCurrency(): MutableStateFlow<String> {
         val currentCurrency: MutableStateFlow<String> = MutableStateFlow("")
         viewModelScope.launch(IO) {
-            sessionManager.getCurrencyFromDataStore.collectLatest{ currency ->
+            sessionManager.getCurrencyFromDataStore.collectLatest { currency ->
                 currentCurrency.value = currency
             }
         }
@@ -72,18 +71,15 @@ class DialogCurrencyViewModel(
                 listSearchableCurrency.addAll(lists)
             }
             currenciesMutableFlow.value =
-                MyResponse.SuccessResponse(listSearchableCurrency.toSet().toList())
+                MyResponse.SuccessResponse(listSearchableCurrency.toSet().toList()).toUIState()
         }
     }
 
     fun getCurrenciesFromLocalDb() {
-        isLoadingState = true
+        currenciesMutableFlow.value = LoadingUIState()
         viewModelScope.launch(IO) {
-            repository.getListCurrencies().collect { response ->
-                currenciesMutableFlow.value = response
-                isLoadingState = false
-
-            }
+            val response = repository.getListCurrencies()
+            currenciesMutableFlow.value = response.toUIState()
         }
     }
 
@@ -92,6 +88,7 @@ class DialogCurrencyViewModel(
             sessionManager.setCurrencySelected(currency = currencySelected)
         }
     }
+
     fun setSelectedCurrency(currencySelected: String) {
         currentCurrencyMutableFlow.value = currencySelected
     }

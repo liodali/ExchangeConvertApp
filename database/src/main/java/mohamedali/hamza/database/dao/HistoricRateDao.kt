@@ -1,13 +1,12 @@
-package dali.hamza.core.datasource.db.dao
+package mohamedali.hamza.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import dali.hamza.core.datasource.db.entities.HistoricRatesCurrencyEntity
-import dali.hamza.domain.models.Currency
 import kotlinx.coroutines.flow.Flow
+import mohamedali.hamza.database.entities.HistoricRatesCurrencyEntity
 
 @Dao
-interface HistoricRateDao:AppDao<HistoricRatesCurrencyEntity> {
+interface HistoricRateDao : AppDao<HistoricRatesCurrencyEntity> {
 
 
     @Query("select * from HistoricRatesCurrencyEntity where selectedCurrency=:oldSelectCurrency")

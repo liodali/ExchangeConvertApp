@@ -22,7 +22,6 @@ fun HeaderHomeCompose(
             {
                 val amount = amountForm.amount
                 if (amount.isNotEmpty() && amount.toDouble() > 0.0) {
-                    viewModel.isLoading = true
                     viewModel.showFormAmount = false
                     viewModel.calculateExchangeRates(amount.toDouble())
                 }

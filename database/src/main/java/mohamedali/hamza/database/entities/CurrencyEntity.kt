@@ -1,9 +1,9 @@
-package dali.hamza.core.datasource.db.entities
+package mohamedali.hamza.database.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import java.util.*
+import java.util.Date
 
 @Entity
 data class CurrencyEntity(
@@ -34,6 +34,7 @@ data class RatesCurrencyEntity(
         "selectedCurrency",
         "time"
     ]
+
 )
 data class HistoricRatesCurrencyEntity(
     val name: String,

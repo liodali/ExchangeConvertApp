@@ -30,8 +30,7 @@ class CurrencyRequestUnitTest {
 
     @Before
     fun setUp() {
-        // checkthis blogpost for more details about mock server
-        // https://medium.com/@hanru.yeh/unit-test-retrofit-and-mockwebserver-a3e4e81fd2a2
+        // check this blogpost for more details about mock server
         mockWebServer.start()
 
         apiService = Retrofit.Builder()
@@ -58,7 +57,7 @@ class CurrencyRequestUnitTest {
             MockResponse().setBody(
                 json
             )
-        );
+        )
 
     }
 
@@ -73,7 +72,6 @@ class CurrencyRequestUnitTest {
         val response = apiService.getListCurrencies(
             ""
         )
-
-        print(response.body()?.currencies!!.keys.first() == "AED")
+        assert(response.body()?.currencies!!.keys.first() == "AED")
     }
 }

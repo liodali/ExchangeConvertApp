@@ -1,4 +1,4 @@
-package dali.hamza.echangecurrencyapp
+package mohamedali.hamza.database
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("dali.hamza.echangecurrencyapp", appContext.packageName)
+        assertEquals("mohamedali.hamza.database.test", appContext.packageName)
     }
 }

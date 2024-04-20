@@ -1,8 +1,8 @@
 package dali.hamza.echangecurrencyapp.ui
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +29,7 @@ import org.koin.android.ext.android.inject
 import org.koin.compose.KoinContext
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
 
     private var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
@@ -57,15 +57,6 @@ class MainActivity : AppCompatActivity() {
         }
         setContent {
             val navController = rememberNavController()
-
-
-            /*LaunchedEffect(mainViewModel.getCurrencySelection()) {
-                if (mainViewModel.getCurrencySelection().isNullOrEmpty()
-                    && mainViewModel.isLoadingCurrentCurrency == State.FINISH
-                ) {
-                    firstDestination = "selectCurrency"
-                }
-            }*/
             KoinContext {
                 App(
                     //mainViewModel = mainViewModel,
@@ -88,11 +79,7 @@ class MainActivity : AppCompatActivity() {
             NavHost(navController = navController, startDestination = firstPage) {
                 composable("home") {
                     KoinContext {
-                        Home(
-                            openFragment = {
-                                // openCurrenciesSelectionBottomSheet()
-                            }
-                        )
+                        Home()
                     }
                 }
                 composable("selectCurrency") {
@@ -100,9 +87,6 @@ class MainActivity : AppCompatActivity() {
                         SelectCurrencyPage(
                             modifier = Modifier,
                             onSelect = { _ ->
-                                // mainViewModel.setCurrencySelection(nCurrency)
-                                // mainViewModel.setCurrencySelection(nCurrency)
-                                //navController.popBackStack("selectCurrency")
                                 navController.popBackStack()
                                 navController.navigate("home")
                             }
