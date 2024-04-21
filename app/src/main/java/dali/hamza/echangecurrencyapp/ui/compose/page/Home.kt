@@ -1,6 +1,9 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,41 +22,89 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import dali.hamza.echangecurrencyapp.R
-import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
-import dali.hamza.echangecurrencyapp.ui.compose.component.HeaderHomeCompose
-import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerHeight
+import dali.hamza.echangecurrencyapp.ui.compose.component.Center
+import dali.hamza.echangecurrencyapp.ui.compose.component.NavigationBottom
+import dali.hamza.echangecurrencyapp.ui.compose.component.NavigationBottomItemEnum
 import dali.hamza.echangecurrencyapp.ui.compose.dialog.BottomSheetCurrencies
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.scope.KoinScope
+import org.koin.core.annotation.KoinExperimentalAPI
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, KoinExperimentalAPI::class)
 @ExperimentalComposeUiApi
 @Composable
 fun Home() {
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(id = R.string.Home))
+    val nestedNavController = rememberNavController()
+    Scaffold(topBar = {
+        TopAppBar(title = {
+            Text(stringResource(id = R.string.Home))
+        })
+    }, bottomBar = {
+        NavigationBottom(initSelected = NavigationBottomItemEnum.Rates,
+            bottomNavigate = { item ->
+                nestedNavController.navigate(item.name) {
+                    popUpTo(nestedNavController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-        },
-    ) { innerPadding ->
-        BodyHomeCompose(
-            modifier = Modifier
-                .padding(innerPadding),
-            openFragment = {
-                scope.launch {
-                    //sheetState.show()
-                    showBottomSheet = true
+            })
+    }) { innerPadding ->
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .padding(12.dp)) {
+            NavHost(
+                navController = nestedNavController,
+                startDestination = NavigationBottomItemEnum.Rates.name,
+                exitTransition = {
+                    slideOut(animationSpec = tween(1200), targetOffset = {
+                        IntOffset.Zero
+                    })
+                },
+                enterTransition = {
+                    slideIn(tween(1500), initialOffset = { IntOffset.Zero })
+                },
+
+                ) {
+                composable(NavigationBottomItemEnum.Conversion.name) {
+                    KoinScope<ConverterCurrencyScope>(scopeID = "ConverterCurrencyScope") {
+                        ConverterCurrency()
+                    }
+                }
+                composable(NavigationBottomItemEnum.Rates.name) {
+
+                    RatesPageCompose(modifier = Modifier,
+                        openFragment = {
+                            scope.launch {
+                                //sheetState.show()
+                                showBottomSheet = true
+                            }
+                        })
+                }
+                composable(NavigationBottomItemEnum.Historic.name) {
+                    Center {
+                        Text(text = "coming soon")
+                    }
+                }
+                composable(NavigationBottomItemEnum.Setting.name) {
+                    Center {
+                        Text(text = "coming soon")
+                    }
                 }
             }
-        )
+        }
         if (showBottomSheet) {
             BottomSheetCurrencySelection(bottomSheetAction = { action ->
                 showBottomSheet = action
@@ -64,23 +115,6 @@ fun Home() {
 
 }
 
-@ExperimentalComposeUiApi
-@Composable
-fun BodyHomeCompose(
-    modifier: Modifier,
-    openFragment: () -> Unit
-) {
-
-    Column(modifier = modifier) {
-        HeaderHomeCompose(
-            openFragment = openFragment
-        )
-        SpacerHeight(
-            height = 24.dp
-        )
-        ExchangesRatesGrid()
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
