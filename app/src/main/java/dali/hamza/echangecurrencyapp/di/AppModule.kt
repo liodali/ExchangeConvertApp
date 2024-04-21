@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.squareup.moshi.Moshi
+import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.converter.CurrencyConverter
@@ -48,7 +49,7 @@ val appModule = module {
             produceFile = { androidContext().preferencesDataStoreFile(get(named("PREF"))) }
         )
     }
-    single<SessionManager> {
+    single<ISessionManager> {
         SessionManager(get<DataStore<Preferences>>())
     }
     single {
@@ -86,7 +87,7 @@ val appModule = module {
             get<String>(named("DB"))
         ).build()
     }
-    includes(coreModule)
+    includes(coreModule,currencyConverterModule)
 }
 /*
 @Module

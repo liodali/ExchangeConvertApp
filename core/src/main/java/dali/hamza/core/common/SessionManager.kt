@@ -18,10 +18,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.Date
 
+interface ISessionManager {
+    val getLastUTimeUpdateRates: Flow<Date>
+    val getCurrencyFromDataStore: Flow<String>
+    suspend fun setCurrencySelected(currency: String)
 
+    suspend fun setTimeNowLastUpdateRate()
+    suspend fun setTimeLastUpdateRate(time: Long)
+
+    suspend fun removeTimeLastUpdateRate()
+    suspend fun clear()
+}
 class SessionManager(
     private val dataStore: DataStore<Preferences>
-) {
+) :ISessionManager{
 
     internal constructor(
         prefName: String,
@@ -43,43 +53,43 @@ class SessionManager(
         val lastTimeFetchForRates = longPreferencesKey("LastTimeRates")
     }
 
-    suspend fun clear() {
+    override suspend fun clear() {
         dataStore.edit { preferences ->
             preferences.clear()
         }
     }
 
-    suspend fun setCurrencySelected(currency: String) {
+    override suspend fun setCurrencySelected(currency: String) {
         dataStore.edit { preferences ->
             preferences.putAll(selectedCurrency to currency)
         }
     }
 
-    val getCurrencyFromDataStore: Flow<String> = dataStore.data
+    override  val getCurrencyFromDataStore: Flow<String> = dataStore.data
         .map { preferences ->
             preferences[selectedCurrency] ?: ""
         }
 
-    suspend fun setTimeLastUpdateRate(time: Long) {
+    override suspend fun setTimeLastUpdateRate(time: Long) {
         dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = time
         }
     }
 
-    suspend fun setTimeNowLastUpdateRate() {
+    override suspend fun setTimeNowLastUpdateRate() {
         dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = DateManager.now().time
         }
     }
 
 
-    suspend fun removeTimeLastUpdateRate() {
+    override  suspend fun removeTimeLastUpdateRate() {
         dataStore.edit { preferences ->
             preferences[lastTimeFetchForRates] = 0L
         }
     }
 
-    val getLastUTimeUpdateRates: Flow<Date> = dataStore.data
+    override val getLastUTimeUpdateRates: Flow<Date> = dataStore.data
         .map { preferences ->
             when (preferences.contains(lastTimeFetchForRates)) {
                 true -> Date(preferences[lastTimeFetchForRates]!!)
