@@ -51,8 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.domain.models.Currency
 import dali.hamza.echangecurrencyapp.R
+import dali.hamza.echangecurrencyapp.ui.compose.component.CurrencyFlagImage
 import dali.hamza.echangecurrencyapp.ui.compose.component.EmptyData
 import dali.hamza.echangecurrencyapp.ui.compose.component.Loading
+import dali.hamza.echangecurrencyapp.ui.compose.component.SpacerWidth
 import dali.hamza.echangecurrencyapp.ui.compose.component.StateBuilder
 import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import kotlinx.coroutines.cancel
@@ -62,9 +64,7 @@ import java.util.Locale
 
 @Composable
 fun BottomSheetCurrencies(
-    modifier: Modifier = Modifier,
-    onClose: () -> Unit,
-    onSelect: (String) -> Unit
+    modifier: Modifier = Modifier, onClose: () -> Unit, onSelect: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<DialogCurrencyViewModel>()
@@ -76,12 +76,11 @@ fun BottomSheetCurrencies(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        modifier = Modifier
-            .then(modifier)
+        modifier = Modifier.then(modifier)
     ) {
         Column {
-            TopHeaderBottomSheetCurrencies(
-                selectedCurrency = viewModel.getCurrentCurrency().collectAsState().value,
+            TopHeaderBottomSheetCurrencies(selectedCurrency = viewModel.getCurrentCurrency()
+                .collectAsState().value,
                 onClose = onClose,
                 onSelect = { selection ->
                     scope.launch {
@@ -89,8 +88,7 @@ fun BottomSheetCurrencies(
                     }
                     viewModel.mutableFlowSearchCurrency = ""
                     onSelect(selection)
-                }
-            )
+                })
             BodyCurrenciesBottomSheet()
         }
     }
@@ -113,8 +111,7 @@ fun TopHeaderBottomSheetCurrencies(
             .then(modifier)
     ) {
         IconButton(
-            onClick = onClose,
-            modifier = Modifier.weight(.4f)
+            onClick = onClose, modifier = Modifier.weight(.4f)
         ) {
             Icon(Icons.Default.Close, contentDescription = "close BottomSheet")
         }
@@ -165,56 +162,61 @@ fun BodyCurrenciesBottomSheet(
             viewModel.getCurrenciesFromLocalDb()
         }
     }
-    state.StateBuilder<List<Currency>>(
-        loadingUI = { Loading() },
+    state.StateBuilder<List<Currency>>(loadingUI = { Loading() },
         emptyUI = { EmptyData(text = "No currencies available") }
 
     ) { responseData ->
 
-        var listCurrencies by rememberSaveable {
-            mutableStateOf(responseData)
-        }
-        var scrollTo by remember {
-            mutableIntStateOf(0)
-        }
-        LaunchedEffect(key1 = responseData) {
-            val currentCurrencySelected = viewModel.getCurrentCurrency().value
-            val index = listCurrencies.map { currency -> currency.name }
-                .indexOf(currentCurrencySelected)
-            scrollTo = if (index > 10) {
-                index - 3
-            } else {
-                index
-            }
-        }
-        LaunchedEffect(key1 = viewModel.mutableFlowSearchCurrency) {
-            listCurrencies = if (viewModel.mutableFlowSearchCurrency.isEmpty()) {
-                responseData
-            } else {
-                responseData.filter { currency ->
-                    currency.name.lowercase()
-                        .contains(viewModel.mutableFlowSearchCurrency.lowercase())
-                }
-            }
-        }
-        Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
-            SearchTextFieldCurrency(
-                text = viewModel.mutableFlowSearchCurrency,
-                onChange = { searchableText ->
-                    viewModel.mutableFlowSearchCurrency = searchableText
-                })
-            ListCurrenciesBottomSheet(
-                currencies = listCurrencies,
-                selected = viewModel.getCurrentCurrency().collectAsState().value,
-                onChange = { name ->
-                    viewModel.setSelectedCurrency(name)
-                },
-                scrollToIndex = scrollTo
-            )
-        }
+        ListViewCurrenciesSelection(
+            modifier = modifier, currencies = responseData, viewModel = viewModel
+        )
     }
 }
 
+@Composable
+fun ListViewCurrenciesSelection(
+    modifier: Modifier = Modifier, currencies: List<Currency>, viewModel: DialogCurrencyViewModel
+) {
+    var listCurrencies by rememberSaveable {
+        mutableStateOf(currencies)
+    }
+    var scrollTo by remember {
+        mutableIntStateOf(0)
+    }
+    LaunchedEffect(key1 = currencies) {
+        val currentCurrencySelected = viewModel.getCurrentCurrency().value
+        val index =
+            listCurrencies.map { currency -> currency.name }.indexOf(currentCurrencySelected)
+        scrollTo = if (index > 10) {
+            index - 3
+        } else {
+            index
+        }
+    }
+    LaunchedEffect(key1 = viewModel.mutableFlowSearchCurrency) {
+        listCurrencies = if (viewModel.mutableFlowSearchCurrency.isEmpty()) {
+            currencies
+        } else {
+            currencies.filter { currency ->
+                currency.name.lowercase().contains(viewModel.mutableFlowSearchCurrency.lowercase())
+            }
+        }
+    }
+    Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
+        SearchTextFieldCurrency(text = viewModel.mutableFlowSearchCurrency,
+            onChange = { searchableText ->
+                viewModel.mutableFlowSearchCurrency = searchableText
+            })
+        ListCurrenciesBottomSheet(
+            currencies = listCurrencies,
+            selected = viewModel.getCurrentCurrency().collectAsState().value,
+            onChange = { name ->
+                viewModel.setSelectedCurrency(name)
+            },
+            scrollToIndex = scrollTo
+        )
+    }
+}
 
 @Composable
 fun SearchTextFieldCurrency(
@@ -243,15 +245,12 @@ fun SearchTextFieldCurrency(
         ),
         shape = RoundedCornerShape(2.dp),
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
+            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
         ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
 
-            }
-        ),
+        }),
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
@@ -285,9 +284,7 @@ fun ListCurrenciesBottomSheet(
     LazyColumn(modifier = modifier, state = listState) {
         items(count = currencies.size) { index ->
             ItemListCurrenciesBottomSheet(
-                currency = currencies[index],
-                selected = selected,
-                onChange = onChange
+                currency = currencies[index], selected = selected, onChange = onChange
             )
         }
     }
@@ -295,10 +292,7 @@ fun ListCurrenciesBottomSheet(
 
 @Composable
 fun ItemListCurrenciesBottomSheet(
-    modifier: Modifier = Modifier,
-    currency: Currency,
-    selected: String?,
-    onChange: (String) -> Unit
+    modifier: Modifier = Modifier, currency: Currency, selected: String?, onChange: (String) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -306,14 +300,17 @@ fun ItemListCurrenciesBottomSheet(
             .padding(start = 8.dp)
             .then(modifier)
     ) {
+        CurrencyFlagImage(
+            currency = currency.name.lowercase(), size = 24.dp
+        )
+        SpacerWidth(width = 5.dp)
         Text(text = buildString {
             append(currency.fullCountryName)
             append(" (")
             append(currency.name)
             append(") ")
         }, modifier = Modifier.weight(2f))
-        Checkbox(
-            checked = currency.name.lowercase(Locale.ROOT) == selected?.lowercase(Locale.ROOT),
+        Checkbox(checked = currency.name.lowercase(Locale.ROOT) == selected?.lowercase(Locale.ROOT),
             onCheckedChange = { isSelected ->
                 if (isSelected) {
                     onChange(currency.name)
@@ -342,10 +339,9 @@ fun ShowSearchCurrencyPreview() {
 @Preview(widthDp = 350, heightDp = 100)
 @Composable
 fun ShowItemListCurrenciesPreview() {
-    ItemListCurrenciesBottomSheet(
-        modifier = Modifier
-            .padding(start = 6.dp)
-            .background(color = Color.White),
+    ItemListCurrenciesBottomSheet(modifier = Modifier
+        .padding(start = 6.dp)
+        .background(color = Color.White),
         currency = Currency(name = "EUR", fullCountryName = "Europe"),
         selected = "EUR",
         onChange = {
@@ -356,10 +352,9 @@ fun ShowItemListCurrenciesPreview() {
 @Preview(widthDp = 350, heightDp = 100)
 @Composable
 fun ShowItemListCurrencies2Preview() {
-    ItemListCurrenciesBottomSheet(
-        modifier = Modifier
-            .padding(start = 6.dp)
-            .background(color = Color.White),
+    ItemListCurrenciesBottomSheet(modifier = Modifier
+        .padding(start = 6.dp)
+        .background(color = Color.White),
         currency = Currency(name = "EUR", fullCountryName = "Europe"),
         selected = "TND",
         onChange = {
@@ -370,13 +365,14 @@ fun ShowItemListCurrencies2Preview() {
 @Preview(widthDp = 350, heightDp = 150)
 @Composable
 fun ShowListCurrenciesPreview() {
-    ListCurrenciesBottomSheet(
-        modifier = Modifier.background(color = Color.White),
+    ListCurrenciesBottomSheet(modifier = Modifier.background(color = Color.White),
         currencies = arrayListOf(
             Currency(name = "EUR", fullCountryName = "Europe"),
             Currency(name = "USD", fullCountryName = "US"),
             Currency(name = "JP", fullCountryName = "Japon"),
-        ), selected = "EUR", onChange = {
+        ),
+        selected = "EUR",
+        onChange = {
 
         }
 

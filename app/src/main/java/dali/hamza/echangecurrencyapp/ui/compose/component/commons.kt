@@ -118,16 +118,19 @@ fun Center(content: @Composable () -> Unit) {
 
 @Composable
 fun CurrencyFlagImage(
-    currencyFlagURL: String = stringResource(id = R.string.flag_country_svg_url, "usd"),
-    size: Dp
+    modifier: Modifier = Modifier,
+    currency: String,
+    size: Dp,
 ) {
     AsyncImage(
-        model = currencyFlagURL,
+        model = stringResource(id = R.string.flag_country_svg_url, currency),
         contentDescription = "currency flag",
         contentScale = ContentScale.FillHeight,
-        modifier = Modifier
-            .clip(CircleShape)
-            .size(size)
+        modifier = modifier.then(
+            Modifier
+                .clip(CircleShape)
+                .size(size)
+        )
     )
 }
 
@@ -135,9 +138,9 @@ fun CurrencyFlagImage(
 @Composable
 fun ShowImagePreview() {
     Scaffold {
-       Box(modifier = Modifier.padding(it)) {
-           CurrencyFlagImage(size = 24.dp)
-       }
+        Box(modifier = Modifier.padding(it)) {
+            CurrencyFlagImage(currency = "usd", size = 24.dp)
+        }
     }
 }
 

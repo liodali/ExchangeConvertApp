@@ -98,10 +98,7 @@ fun AmountTextField(
         placeholder = { Text("Amount") },
         leadingIcon = {
             CurrencyFlagImage(
-                currencyFlagURL = stringResource(
-                    id = R.string.flag_country_svg_url,
-                    currency!!.lowercase()
-                ),
+                currency=  currency!!.lowercase(),
                 size = 24.dp
             )
         },
