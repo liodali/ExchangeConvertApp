@@ -17,7 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import dali.hamza.core.common.SessionManager
+import dali.hamza.core.common.ISessionManager
 import dali.hamza.echangecurrencyapp.ui.compose.page.Home
 import dali.hamza.echangecurrencyapp.ui.compose.page.SelectCurrencyPage
 import dali.hamza.echangecurrencyapp.ui.compose.theme.ExchangeCurrencyAppTheme
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
     private var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
     private var firstDestination: String by mutableStateOf("home")
-    private val sessionManager: SessionManager by inject()
+    private val sessionManager: ISessionManager by inject()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

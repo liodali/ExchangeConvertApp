@@ -3,7 +3,7 @@ package dali.hamza.core.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import dali.hamza.core.common.SessionManager
+import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.data
 import dali.hamza.core.common.simpleData
 import dali.hamza.core.common.toCurrencyEntity
@@ -35,7 +35,7 @@ class CurrencyRepository(
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
-    val sessionManager: SessionManager,
+    val sessionManager: ISessionManager,
     private val tokenAPI: String,
     private val defaultDispatcherContext: CoroutineDispatcher = Dispatchers.Default,
 ) : IRepository {
