@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -62,46 +63,17 @@ fun Home() {
                 }
             })
     }) { innerPadding ->
-        Box(modifier = Modifier
-            .padding(innerPadding)
-            .padding(12.dp)) {
-            NavHost(
-                navController = nestedNavController,
-                startDestination = NavigationBottomItemEnum.Rates.name,
-                exitTransition = {
-                    slideOut(animationSpec = tween(1200), targetOffset = {
-                        IntOffset.Zero
-                    })
-                },
-                enterTransition = {
-                    slideIn(tween(1500), initialOffset = { IntOffset.Zero })
-                },
-
-                ) {
-                composable(NavigationBottomItemEnum.Conversion.name) {
-                    KoinScope<ConverterCurrencyScope>(scopeID = "ConverterCurrencyScope") {
-                        ConverterCurrency()
-                    }
-                }
-                composable(NavigationBottomItemEnum.Rates.name) {
-
-                    RatesPageCompose(modifier = Modifier,
-                        openFragment = {
-                            scope.launch {
-                                //sheetState.show()
-                                showBottomSheet = true
-                            }
-                        })
-                }
-                composable(NavigationBottomItemEnum.Historic.name) {
-                    Center {
-                        Text(text = "coming soon")
-                    }
-                }
-                composable(NavigationBottomItemEnum.Setting.name) {
-                    Center {
-                        Text(text = "coming soon")
-                    }
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(12.dp)
+        ) {
+            HomeNavigationBody(
+                nestedNavController
+            ) {
+                scope.launch {
+                    //sheetState.show()
+                    showBottomSheet = true
                 }
             }
         }
@@ -115,6 +87,51 @@ fun Home() {
 
 }
 
+@KoinExperimentalAPI
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun HomeNavigationBody(
+    nestedNavController: NavHostController,
+    openBottomSheet: () -> Unit
+
+) {
+    NavHost(
+        navController = nestedNavController,
+        startDestination = NavigationBottomItemEnum.Rates.name,
+        exitTransition = {
+            slideOut(animationSpec = tween(1200), targetOffset = {
+                IntOffset.Zero
+            })
+        },
+        enterTransition = {
+            slideIn(tween(1500), initialOffset = { IntOffset.Zero })
+        },
+
+        ) {
+        composable(NavigationBottomItemEnum.Conversion.name) {
+            KoinScope<ConverterCurrencyScope>(scopeID = "ConverterCurrencyScope") {
+                ConverterCurrency()
+            }
+        }
+        composable(NavigationBottomItemEnum.Rates.name) {
+
+            RatesPageCompose(
+                modifier = Modifier,
+                openFragment = openBottomSheet,
+            )
+        }
+        composable(NavigationBottomItemEnum.Historic.name) {
+            Center {
+                Text(text = "coming soon")
+            }
+        }
+        composable(NavigationBottomItemEnum.Setting.name) {
+            Center {
+                Text(text = "coming soon")
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalComposeUiApi
