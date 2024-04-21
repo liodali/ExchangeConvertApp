@@ -31,9 +31,6 @@ fun HeaderHomeCompose(
         onValueChanged = { amount ->
             viewModel.changeAmount(amount)
         },
-        clearText = {
-            viewModel.changeAmount("")
-        },
         form = amountForm,
         currency = viewModel.getCurrencySelection().value,
         keyboardController = LocalSoftwareKeyboardController.current,

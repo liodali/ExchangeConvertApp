@@ -3,6 +3,8 @@ package dali.hamza.echangecurrencyapp.di
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.repository.CurrencyRepository
+import dali.hamza.echangecurrencyapp.ui.compose.page.ConverterCurrencyScope
+import dali.hamza.echangecurrencyapp.viewmodel.CurrencyConvertViewModel
 import dali.hamza.echangecurrencyapp.viewmodel.DialogCurrencyViewModel
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import mohamedali.hamza.database.AppDB
@@ -43,5 +45,13 @@ val coreModule = module {
     }
     viewModel {
         DialogCurrencyViewModel(get<CurrencyRepository>(), get<SessionManager>())
+    }
+
+}
+val currencyConverterModule = module {
+    scope<ConverterCurrencyScope> {
+        viewModel {
+            CurrencyConvertViewModel( get<SessionManager>())
+        }
     }
 }

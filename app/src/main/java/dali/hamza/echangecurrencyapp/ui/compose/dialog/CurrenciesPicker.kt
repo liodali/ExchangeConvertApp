@@ -175,7 +175,9 @@ fun BodyCurrenciesBottomSheet(
 
 @Composable
 fun ListViewCurrenciesSelection(
-    modifier: Modifier = Modifier, currencies: List<Currency>, viewModel: DialogCurrencyViewModel
+    modifier: Modifier = Modifier,
+    currencies: List<Currency>,
+    viewModel: DialogCurrencyViewModel
 ) {
     var listCurrencies by rememberSaveable {
         mutableStateOf(currencies)

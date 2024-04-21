@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.domain.models.Currency
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 
 class DialogCurrencyViewModel(
     private val repository: CurrencyRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: ISessionManager
 ) : ViewModel() {
 
 
