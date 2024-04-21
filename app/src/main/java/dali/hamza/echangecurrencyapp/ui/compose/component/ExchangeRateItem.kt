@@ -81,51 +81,37 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
                         modifier = Modifier.wrapContentWidth(align = Alignment.Start)
                     )
                 }
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+
                 ) {
+
+                    Text(
+                        text = format("%.2f",item.calculatedAmount),
+                        fontSize = when {
+                            item.rate > 10000 -> 18.sp
+                            else -> 22.sp
+                        },
+                        style = TextStyle(textAlign = TextAlign.End),
+                        maxLines = 1,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .wrapContentWidth(align = Alignment.CenterHorizontally)
+                            .wrapContentHeight(align = Alignment.CenterVertically)
+
+                    )
                     Text(
                         text = "x" + format("%.2f", item.rate),
-                        fontSize = when {
-                            item.rate > 99 -> 10.sp
-                            else -> 12.sp
-                        },
+                        fontSize = 12.sp,
                         color = Color.Gray,
                         maxLines = 1,
                         textAlign = TextAlign.End,
                         modifier = Modifier
-                            .weight(when{
-                            item.rate > 99 -> 0.25f
-                            else -> 0.5f
-                        })
                             .padding(bottom = 1.dp)
-                            .wrapContentWidth(align = Alignment.End)
-                            .wrapContentHeight(align = Alignment.Bottom)
-                    )
-                    Text(
-                        text = format(
-                            when {
-                                item.calculatedAmount > 100 -> "%.1f"
-                                else -> "%.2f"
-                            }, item.calculatedAmount
-                        ),
-                        fontSize = when {
-                            item.rate > 99 -> 15.sp
-                            else -> 20.sp
-                        },
-                        style = TextStyle(textAlign = TextAlign.End,),
-                        maxLines = 1,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .weight(when{
-                                item.rate > 99 -> 0.8f
-                                else -> 0.65f
-                            })
                             .wrapContentWidth(align = Alignment.CenterHorizontally)
-                            .wrapContentHeight(align = Alignment.Top)
-
+                            .wrapContentHeight(align = Alignment.CenterVertically)
                     )
                 }
 
