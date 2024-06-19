@@ -62,4 +62,6 @@
     <color name="md_theme_dark_outlineVariant">#42474E</color>
     <color name="md_theme_dark_scrim">#000000</color>
     <color name="grey_500">#BDBDBD</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+
 </resources>

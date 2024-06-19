@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    id("com.google.devtools.ksp") version "1.9.24-1.0.20"
 }
 
 android {
@@ -35,8 +35,8 @@ android {
 
 dependencies {
     val roomVersion = "2.6.1"
-    val pagingVersion = "3.2.1"
-    implementation("androidx.core:core-ktx:1.13.0")
+    val pagingVersion = "3.3.0"
+    implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.room:room-runtime:$roomVersion")
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$roomVersion")
