@@ -1,24 +1,29 @@
 package dali.hamza.core.datasource.network
 
-import dali.hamza.core.datasource.network.models.CurrenciesDataAPI
 import dali.hamza.core.datasource.network.models.RatesCurrenciesDataAPI
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface CurrencyClientApi {
 
-    @GET("list")
+    @GET("currencies")
     suspend fun getListCurrencies(
-        @Query("access_key") accessKey: String
-    ): Response<CurrenciesDataAPI>
+    ): Response<List<Map<String, String>>>
 
 
-    @GET("live")
-    suspend  fun getRatesListCurrencies(
-        @Query("access_key") accessKey: String,
-        @Query("source") source: String
+    @GET("api")
+    suspend fun getRatesListCurrencies(
+        @Query("base") source: String,
+        @Query("symbol") symbol: String? = null
+    ): Response<RatesCurrenciesDataAPI>
+
+    @GET("historic")
+    suspend fun historicCurrency(
+        @Query("base") source: String,
+        @Query("from") from: String,
+        @Query("to") to: String?,
+        @Query("symbol") symbol: String?
     ): Response<RatesCurrenciesDataAPI>
 
 }

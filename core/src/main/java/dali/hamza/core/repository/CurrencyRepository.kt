@@ -36,7 +36,6 @@ class CurrencyRepository(
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
     val sessionManager: ISessionManager,
-    private val tokenAPI: String,
     private val defaultDispatcherContext: CoroutineDispatcher = Dispatchers.Default,
 ) : IRepository {
 
@@ -48,15 +47,12 @@ class CurrencyRepository(
 
             false -> {
                 val currencies = currencyClientAPI
-                    .getListCurrencies(accessKey = tokenAPI).data { currencies ->
-                        currencies.currencies.values.map { mJson ->
-                            mJson.map { currency ->
-                                Currency(
-                                    name = currency.key,
-                                    fullCountryName = currency.value
-                                )
-                            }
-                        }.first()
+                    .getListCurrencies().data { currencies ->
+                        currencies.map { mJson ->
+                            Currency(
+                                mJson
+                            )
+                        }
                     }
                 if (currencies.data == null || currencies.data!!.isEmpty()) {
                     return MyResponse.ErrorResponse<Any>(EmptyResponse)
@@ -157,18 +153,15 @@ class CurrencyRepository(
         currency: String,
     ): List<CurrencyRate> {
         val currencies = currencyClientAPI.getRatesListCurrencies(
-            accessKey = tokenAPI,
             source = currency
         ).simpleData {
-            it.quotes.values.map { rates ->
-                rates.map { r ->
-                    CurrencyRate(
-                        name = r.key,
-                        rate = r.value,
-                        time = DateManager.now()
-                    )
-                }
-            }.first()
+            it.quotes.map { jsonRate ->
+                CurrencyRate(
+                    name = jsonRate.key,
+                    rate = jsonRate.value,
+                    time = DateManager.now()
+                )
+            }
         }
         sessionManager.setTimeNowLastUpdateRate()
         return currencies

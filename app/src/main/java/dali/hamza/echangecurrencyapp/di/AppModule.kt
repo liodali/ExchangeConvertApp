@@ -11,7 +11,6 @@ import com.squareup.moshi.Moshi
 import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.network.CurrencyClientApi
-import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
 import kotlinx.coroutines.CoroutineScope
@@ -56,7 +55,7 @@ val appModule = module {
         MoshiConverterFactory
             .create(
                 Moshi.Builder()
-                    .add(CurrencyConverter())
+                    //.add(CurrencyConverter())
                     .add(RateConverter())
                     .build()
             )
@@ -87,7 +86,7 @@ val appModule = module {
             get<String>(named("DB"))
         ).build()
     }
-    includes(coreModule,currencyConverterModule)
+    includes(coreModule, currencyConverterModule)
 }
 /*
 @Module

@@ -11,7 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.network.CurrencyClientApi
-import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel

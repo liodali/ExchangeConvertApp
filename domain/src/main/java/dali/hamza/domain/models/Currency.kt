@@ -1,11 +1,17 @@
 package dali.hamza.domain.models
 
-import java.util.*
+import java.util.Date
 
 data class Currency(
     val name: String,
     val fullCountryName: String
-)
+) {
+    constructor(json: Map<String, String>) : this(
+        name = json["currecny"]!!,
+        fullCountryName = json["name"]!!
+    )
+}
+
 data class ExchangeRate(
     val name: String,
     val calculatedAmount: Double,

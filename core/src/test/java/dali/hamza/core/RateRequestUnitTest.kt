@@ -42,9 +42,9 @@ class RateRequestUnitTest {
         mockWebServer.enqueue(
             MockResponse().setBody(
                 "{\n" +
-                        "    \"success\": true,\n" +
-                        "    \"source\": \"USD\",\n" +
-                        "    \"quotes\": {\n" +
+
+                        "    \"base\": \"USD\",\n" +
+                        "    \"rates\": {\n" +
                         "        \"AED\": 3.672982,\n" +
                         "        \"EUR\": 0.82,\n" +
                         "        \"TND\": 2.72\n" +
@@ -67,6 +67,6 @@ class RateRequestUnitTest {
             "", "USD"
         )
 
-        assert(response.body()?.quotes!!.values.first().values.first() == 3.672982)
+        assert(response.body()?.quotes!!.values.first() == 3.672982)
     }
 }

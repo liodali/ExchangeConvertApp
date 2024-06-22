@@ -3,7 +3,6 @@ package dali.hamza.core
 import com.google.gson.Gson
 import com.squareup.moshi.Moshi
 import dali.hamza.core.datasource.network.CurrencyClientApi
-import dali.hamza.core.datasource.network.converter.CurrencyConverter
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -22,7 +21,7 @@ class CurrencyRequestUnitTest {
     private var mockWebServer = MockWebServer()
 
     val moshi = Moshi.Builder()
-        .add(CurrencyConverter())
+        //.add(CurrencyConverter())
         .build()
 
     private lateinit var apiService: CurrencyClientApi
@@ -40,18 +39,23 @@ class CurrencyRequestUnitTest {
             .build()
             .create(CurrencyClientApi::class.java)
 
-        val innerJ = mapOf(
-            "AED" to "United Arab Emirates Dirham",
-            "AFN" to "Afghan Afghan",
-            "ALL" to "Albanian Lek",
+        val innerJ = arrayOf(
+            mapOf(
+                "currency" to "AED",
+                "name" to "United Arab Emirates Dirham",
+            ),
+
+            mapOf(
+                "currency" to "AFN",
+                "name" to "Afghan Afghan",
+            ),
+            mapOf(
+                "currency" to "ALL",
+                "name" to "Albanian Lek",
+            ),
         )
         val json = Gson().toJson(
-            mapOf(
-                "success" to true,
-                "terms" to "https://currencylayer.com/terms",
-                "privacy" to "https://currencylayer.com/privacy",
-                "currencies" to innerJ
-            )
+            innerJ
         ).toString()
         mockWebServer.enqueue(
             MockResponse().setBody(
@@ -69,9 +73,7 @@ class CurrencyRequestUnitTest {
 
     @Test
     fun testParseCurrenciesJson() = runBlocking {
-        val response = apiService.getListCurrencies(
-            ""
-        )
-        assert(response.body()?.currencies!!.keys.first() == "AED")
+        val response = apiService.getListCurrencies()
+        assert(response.body()!!.first()["currency"] == "AED")
     }
 }

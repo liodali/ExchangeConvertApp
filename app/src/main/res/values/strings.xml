@@ -2,7 +2,7 @@
     <string name="app_name">Exchange Rate Currency</string>
     <string name="amount_label">Amount</string>
     <string name="select_currency_label_bt">select an currency</string>
-    <string name="server">http://api.exchangerate.host/</string>
+    <string name="server">https://www.openexchangerate.tn/api</string>
     <string name="preference_name">pref_currency</string>
     <string name="default_currency_value">USD</string>
     <string name="selectLabel">Select</string>
