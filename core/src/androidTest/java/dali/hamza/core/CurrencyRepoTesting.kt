@@ -109,8 +109,8 @@ class CurrencyRepoTesting {
                 SessionManager(
                     "Testpref", context
                 ),
-                tokenAPI = ""
-            )
+
+                )
             repository.sessionManager.setCurrencySelected(eur)
             repository.sessionManager.removeTimeLastUpdateRate()
 

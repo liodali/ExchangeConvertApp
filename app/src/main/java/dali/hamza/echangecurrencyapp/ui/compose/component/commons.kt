@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -120,16 +119,19 @@ fun Center(content: @Composable () -> Unit) {
 fun CurrencyFlagImage(
     modifier: Modifier = Modifier,
     currency: String,
-    size: Dp,
+    //size: Dp,
 ) {
     AsyncImage(
         model = stringResource(id = R.string.flag_country_svg_url, currency),
         contentDescription = "currency flag",
-        contentScale = ContentScale.FillHeight,
+        contentScale = ContentScale.FillBounds,
+
         modifier = modifier.then(
             Modifier
                 .clip(CircleShape)
-                .size(size)
+                .fillMaxHeight()
+                .fillMaxWidth()
+            //.size(size)
         )
     )
 }
@@ -139,7 +141,7 @@ fun CurrencyFlagImage(
 fun ShowImagePreview() {
     Scaffold {
         Box(modifier = Modifier.padding(it)) {
-            CurrencyFlagImage(currency = "usd", size = 24.dp)
+            CurrencyFlagImage(currency = "tnd" /*size = 48.dp*/)
         }
     }
 }

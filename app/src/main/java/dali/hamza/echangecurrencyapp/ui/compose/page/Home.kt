@@ -1,8 +1,8 @@
 package dali.hamza.echangecurrencyapp.ui.compose.page
 
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -52,16 +51,15 @@ fun Home() {
             Text(stringResource(id = R.string.Home))
         })
     }, bottomBar = {
-        NavigationBottom(initSelected = NavigationBottomItemEnum.Rates,
-            bottomNavigate = { item ->
-                nestedNavController.navigate(item.name) {
-                    popUpTo(nestedNavController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
+        NavigationBottom(initSelected = NavigationBottomItemEnum.Rates, bottomNavigate = { item ->
+            nestedNavController.navigate(item.name) {
+                popUpTo(nestedNavController.graph.findStartDestination().id) {
+                    saveState = true
                 }
-            })
+                launchSingleTop = true
+                restoreState = true
+            }
+        })
     }) { innerPadding ->
         Box(
             modifier = Modifier
@@ -91,23 +89,29 @@ fun Home() {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeNavigationBody(
-    nestedNavController: NavHostController,
-    openBottomSheet: () -> Unit
+    nestedNavController: NavHostController, openBottomSheet: () -> Unit
 
 ) {
     NavHost(
         navController = nestedNavController,
         startDestination = NavigationBottomItemEnum.Rates.name,
         exitTransition = {
-            slideOut(animationSpec = tween(1200), targetOffset = {
-                IntOffset.Zero
-            })
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
+                animationSpec = tween(200)
+            )
         },
         enterTransition = {
-            slideIn(tween(1500), initialOffset = { IntOffset.Zero })
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.End, tween(250)
+            )
         },
-
-        ) {
+        popExitTransition = {
+            fadeOut(
+                tween(250)
+            )
+        }
+    ) {
         composable(NavigationBottomItemEnum.Conversion.name) {
             KoinScope<ConverterCurrencyScope>(scopeID = "ConverterCurrencyScope") {
                 ConverterCurrency()

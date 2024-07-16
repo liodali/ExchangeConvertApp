@@ -36,8 +36,8 @@ val coreModule = module {
             ratesCurrencyDao = get<RatesCurrencyDao>(),
             historicRateDao = get<HistoricRateDao>(),
             sessionManager = get<ISessionManager>(),
-            tokenAPI = get(named("TOKEN"))
-        )
+
+            )
     }
 
     viewModel {

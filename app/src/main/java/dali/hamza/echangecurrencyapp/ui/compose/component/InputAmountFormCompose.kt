@@ -1,6 +1,8 @@
 package dali.hamza.echangecurrencyapp.ui.compose.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -98,10 +100,12 @@ fun AmountTextField(
         },
         placeholder = { Text("Amount") },
         leadingIcon = prefixIcon ?: {
-            CurrencyFlagImage(
-                currency = currency!!.lowercase(),
-                size = 24.dp
-            )
+            Box(Modifier.size(24.dp)) {
+                CurrencyFlagImage(
+                    currency = currency!!.lowercase(),
+
+                )
+            }
         },
 
         trailingIcon = suffixIcon ?: {
@@ -129,14 +133,25 @@ fun AmountTextField(
             keyboardType = KeyboardType.Number,
             imeAction = action
         ),
-        visualTransformation = { text ->
+        /*visualTransformation = { text ->
             TransformedText(
                 text = AnnotatedString(
                     DoubleFormatter.format(text.text)
                 ),
-                offsetMapping = OffsetMapping.Identity,
+                offsetMapping = object : OffsetMapping {
+                    override fun originalToTransformed(offset: Int): Int {
+                        if(text.text.contains(',')){
+                            return offset +1
+                        }
+                        return offset
+                    }
+
+                    override fun transformedToOriginal(offset: Int): Int {
+                        return text.length
+                    }
+                },
             )
-        },
+        },*/
         //visualTransformation = AmountTransformation(currency),
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
@@ -170,7 +185,6 @@ fun ShowTextAmount() {
     TextAmountWithCurrency(amount = "12.0", modifier = Modifier)
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @UiMode
 @Preview(
     widthDp = 350, heightDp = 92,

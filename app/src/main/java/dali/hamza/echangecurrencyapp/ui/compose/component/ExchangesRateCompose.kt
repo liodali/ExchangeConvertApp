@@ -4,10 +4,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -79,21 +81,21 @@ fun ShowDataListRates(
         mutableStateOf(rates)
     }
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(),
-        shape = RoundedCornerShape(
+      /*  shape = RoundedCornerShape(
             topStart = 8.dp,
             topEnd = 8.dp,
             bottomStart = 0.dp,
             bottomEnd = 0.dp
-        ),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 0.dp)
+        ),*/
+      //  colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+     //   elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 0.dp)
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
+            columns = GridCells.Fixed(2),
             Modifier.fillMaxWidth()
         ) {
 

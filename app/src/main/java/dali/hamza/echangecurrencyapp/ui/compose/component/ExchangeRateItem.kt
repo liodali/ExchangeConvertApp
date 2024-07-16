@@ -2,6 +2,7 @@ package dali.hamza.echangecurrencyapp.ui.compose.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +56,7 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
 
 
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -65,13 +66,20 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 3.dp)
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(bottom = 3.dp).width(72.dp)
                 ) {
-                    CurrencyFlagImage(
-                        currency = item.name.split(currentCurrency).last().lowercase(),
-                        size = 18.dp,
-                        modifier = Modifier.padding(end = 6.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(26.dp).padding(end = 6.dp)
+                    ) {
+                        CurrencyFlagImage(
+                            currency = item.name.split(currentCurrency).last().lowercase(),
+                            //size = 28.dp,
+                            modifier = Modifier.padding(2.dp)
+                        )
+                    }
                     Text(
                         item.name.split(currentCurrency).last(),
                         fontSize = 15.sp,
@@ -83,13 +91,13 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
                 }
                 Column(
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.End,
                     modifier = Modifier.fillMaxWidth()
 
                 ) {
 
                     Text(
-                        text = format("%.2f",item.calculatedAmount),
+                        text = format("%.2f", item.calculatedAmount),
                         fontSize = when {
                             item.rate > 10000 -> 18.sp
                             else -> 22.sp

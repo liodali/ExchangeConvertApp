@@ -67,8 +67,7 @@ class UIInstrumentedTest {
         context, AppDB::class.java
     ).build()
     private val moshi = Moshi.Builder()
-        .add(RateConverter())
-        .add(CurrencyConverter()).build()
+        .add(RateConverter()).build()
     private lateinit var rateDao: RatesCurrencyDao
     private lateinit var historicRateDao: HistoricRateDao
     private lateinit var currencyDao: CurrencyDao
@@ -96,8 +95,8 @@ class UIInstrumentedTest {
             rateDao,
             historicRateDao,
             sessionManager,
-            ""
-        )
+
+            )
         /*val json = Gson().toJson(
             mapOf(
                 "success" to true,

@@ -61,7 +61,7 @@ class ViewModelUnitTests {
     ).build()
     private val moshi = Moshi.Builder()
         .add(RateConverter())
-        .add(CurrencyConverter()).build()
+        .build()
     private lateinit var rateDao: RatesCurrencyDao
     private lateinit var historicRateDao: HistoricRateDao
     private lateinit var currencyDao: CurrencyDao
@@ -89,8 +89,8 @@ class ViewModelUnitTests {
             rateDao,
             historicRateDao,
             sessionManager,
-            ""
-        )
+
+            )
         mainViewModel = MainViewModel(repository, sessionManager)
     }
 

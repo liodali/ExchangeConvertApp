@@ -2,11 +2,13 @@ package dali.hamza.echangecurrencyapp.ui.compose.dialog
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -302,9 +304,11 @@ fun ItemListCurrenciesBottomSheet(
             .padding(start = 8.dp)
             .then(modifier)
     ) {
-        CurrencyFlagImage(
-            currency = currency.name.lowercase(), size = 24.dp
-        )
+        Box(Modifier.size(24.dp)) {
+            CurrencyFlagImage(
+                currency = currency.name.lowercase(), /*size = 24.dp*/
+            )
+        }
         SpacerWidth(width = 5.dp)
         Text(text = buildString {
             append(currency.fullCountryName)

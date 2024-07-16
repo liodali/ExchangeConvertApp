@@ -7,7 +7,7 @@ data class Currency(
     val fullCountryName: String
 ) {
     constructor(json: Map<String, String>) : this(
-        name = json["currecny"]!!,
+        name = json["currency"]!!,
         fullCountryName = json["name"]!!
     )
 }

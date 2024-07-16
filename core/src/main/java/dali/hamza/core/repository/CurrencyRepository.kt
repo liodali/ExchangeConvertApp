@@ -83,26 +83,23 @@ class CurrencyRepository(
                          */
                         val diff = DateManager.difference2Date(lastTimeUpdated)
                         val list = ratesCurrencyDao.getListRatesByCurrencies(currentCurrency)
-                        when {
-
-                            diff.hours >= 1 && list.isEmpty() -> async {
+                        if (diff.hours >= 1) {
+                            async {
                                 val rates = getRatesFromApi(
                                     currency = currentCurrency,
                                 )
                                 saveRatesLocally(rates, currentCurrency)
                             }.await()
-
-                            diff.hours >= 1 -> async {
-                                archivedRatesByCurrency(currentCurrency)
-                                val rates = getRatesFromApi(
-                                    currency = currentCurrency,
-                                )
-                                saveRatesLocally(rates, currentCurrency)
-                            }.await()
-
                         }
                     }
 
+                    else -> {
+                        archivedRatesByCurrency(currentCurrency)
+                        val rates = getRatesFromApi(
+                            currency = currentCurrency,
+                        )
+                        saveRatesLocally(rates, currentCurrency)
+                    }
                 }
             }
         }

@@ -12,7 +12,7 @@ interface CurrencyClientApi {
     ): Response<List<Map<String, String>>>
 
 
-    @GET("api")
+    @GET("latest")
     suspend fun getRatesListCurrencies(
         @Query("base") source: String,
         @Query("symbol") symbol: String? = null
