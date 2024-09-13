@@ -1,11 +1,15 @@
 package dali.hamza.echangecurrencyapp.common
 
 import android.view.View
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
 import dali.hamza.domain.models.Currency
+import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.echangecurrencyapp.models.CurrencyDTO
 import kotlinx.coroutines.flow.Flow
+import java.util.Date
 
 fun View.visible() {
     visibility = View.VISIBLE
@@ -42,3 +46,32 @@ suspend inline fun Flow<IResponse?>.onData(
             success(value)
         }
     }
+
+val ratesSaver: Saver<List<ExchangeRate>, Any> = run {
+    val nameKey = "Name"
+    val amountKey = "amount"
+    val rateKey = "rate"
+    val timeKey = "time"
+    listSaver(
+        save = {
+            it.map { rate ->
+                mapOf(
+                    nameKey to rate.name,
+                    amountKey to rate.calculatedAmount,
+                    rateKey to rate.rate,
+                    timeKey to rate.time.time
+                )
+            }.toList()
+        },
+        restore = {
+            it.map { rateMap ->
+                ExchangeRate(
+                    rateMap[nameKey] as String,
+                    rateMap[amountKey] as Double,
+                    rateMap[rateKey] as Double,
+                    Date(rateMap[timeKey] as Long)
+                )
+            }.toList()
+        }
+    )
+}

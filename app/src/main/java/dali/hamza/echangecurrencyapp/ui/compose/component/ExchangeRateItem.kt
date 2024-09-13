@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -41,7 +40,7 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
                 vertical = 6.dp,
                 horizontal = 4.dp
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             contentColor = MaterialTheme.colorScheme.surfaceVariant
         ),
@@ -67,12 +66,15 @@ fun ItemExchangeRate(item: ExchangeRate, currentCurrency: String) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(bottom = 3.dp).width(72.dp)
+                    modifier = Modifier
+                        .padding(bottom = 3.dp)
+                        .width(72.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .width(32.dp)
-                            .height(26.dp).padding(end = 6.dp)
+                            .height(26.dp)
+                            .padding(end = 6.dp)
                     ) {
                         CurrencyFlagImage(
                             currency = item.name.split(currentCurrency).last().lowercase(),

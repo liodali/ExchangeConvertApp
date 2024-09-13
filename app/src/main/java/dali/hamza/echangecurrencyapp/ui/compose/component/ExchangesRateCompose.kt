@@ -4,27 +4,21 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +39,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.echangecurrencyapp.R
+import dali.hamza.echangecurrencyapp.common.ratesSaver
+import dali.hamza.echangecurrencyapp.models.UIState
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
@@ -56,7 +53,10 @@ import java.util.Date
 @ExperimentalComposeUiApi
 @Composable
 fun ExchangesRatesGrid(viewModel: MainViewModel = koinViewModel<MainViewModel>()) {
-    val ratesState = viewModel.getExchangeRates().collectAsState().value
+
+    val ratesState: UIState =
+        viewModel.getExchangeRates()
+            .collectAsStateWithLifecycle().value
     ratesState.StateBuilder<List<ExchangeRate>>(
         loadingUI = { Loading() },
         emptyUI = { EmptyBox() }) { data ->
@@ -75,33 +75,21 @@ fun ShowDataListRates(
     rates: List<ExchangeRate>,
     currentCurrency: String,
 
-) {
+    ) {
 
-    val rememberRates = rememberSaveable {
-        mutableStateOf(rates)
+    val rememberRates = rememberSaveable(saver = ratesSaver) {
+        rates
     }
 
-    Box(
-        modifier = Modifier
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        Modifier
             .fillMaxWidth()
             .fillMaxHeight(),
-      /*  shape = RoundedCornerShape(
-            topStart = 8.dp,
-            topEnd = 8.dp,
-            bottomStart = 0.dp,
-            bottomEnd = 0.dp
-        ),*/
-      //  colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-     //   elevation = CardDefaults.cardElevation(defaultElevation = if (isSystemInDarkTheme()) 0.dp else 0.dp)
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            Modifier.fillMaxWidth()
-        ) {
 
-            items(rememberRates.value) { item ->
-                ItemExchangeRate(item, currentCurrency = currentCurrency)
-            }
+        items(rememberRates) { item ->
+            ItemExchangeRate(item, currentCurrency = currentCurrency)
         }
     }
 

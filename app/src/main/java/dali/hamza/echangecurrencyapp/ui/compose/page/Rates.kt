@@ -20,7 +20,7 @@ fun RatesPageCompose(
             openFragment = openFragment
         )
         SpacerHeight(
-            height = 24.dp
+            height = 18.dp
         )
         ExchangesRatesGrid()
     }

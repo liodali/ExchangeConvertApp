@@ -64,7 +64,7 @@ fun Home() {
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(12.dp)
+                .padding(horizontal = 12.dp)
         ) {
             HomeNavigationBody(
                 nestedNavController
