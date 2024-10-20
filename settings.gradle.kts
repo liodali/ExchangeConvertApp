@@ -3,11 +3,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
     }
 }
 rootProject.name = "EchangeCurrencyApp"
-include ':app'
-include ':core'
-include ':domain'
-include ':database'
+include("app")
+include("core")
+include("domain")
+include("database")
