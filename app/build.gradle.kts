@@ -5,7 +5,8 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "1.9.24-1.0.20" apply true
+    id("com.google.devtools.ksp") version "2.0.21-1.0.25" apply true
+    alias(libs.plugins.compose.compiler) apply true
 }
 // Properties loading
 val properties = Properties().apply {
@@ -39,21 +40,21 @@ android {
                 "proguard-rules.pro"
             )
             applicationIdSuffix = ".Build${Calendar.getInstance().time.time}"
-            resValue("string", "token", properties.getProperty("token", ""))
+            resValue("string", "token", properties.getOrDefault("token", "").toString())
         }
         debug {
-            resValue("string", "token", properties.getProperty("token", ""))
+            resValue("string", "token", properties.getOrDefault("token", "").toString())
             applicationIdSuffix = ".debug"
 
         }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
@@ -61,31 +62,34 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeVersion
-        kotlinCompilerVersion = kotlinVersion
+        //kotlinCompilerVersion = kotlinVersion
+    }
+    composeCompiler {
+        enableStrongSkippingMode = true
     }
 }
 
 dependencies {
 
     val room_version = "2.6.1"
-    val lifecycle_version = "2.8.5"
+    val lifecycle_version = "2.8.6"
 
     val paging_version = "3.3.2"
 
-    val coroutines_version = "1.4.3"
+    val coroutines_version = "1.9.0"
     val workerManager_version = "2.9.1"
-    val nav_version = "2.8.0"
+    val nav_version = "2.8.3"
     val koin_android_version = "4.0.0-RC1"
     val composeBom = platform("androidx.compose:compose-bom:2024.09.01")
     implementation(composeBom)
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
-    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.activity:activity-compose:1.9.3")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
 
     // compose
     implementation("androidx.compose.material3:material3")
@@ -146,9 +150,9 @@ dependencies {
 
 
     //fragment ktx
-    implementation("androidx.fragment:fragment-ktx:1.8.3")
+    implementation("androidx.fragment:fragment-ktx:1.8.4")
     // Activity KTX for viewModels()
-    implementation("androidx.activity:activity-ktx:1.9.2")
+    implementation("androidx.activity:activity-ktx:1.9.3")
 
     // WorkerManager dependencies
     implementation("androidx.work:work-runtime-ktx:$workerManager_version")
@@ -168,7 +172,7 @@ dependencies {
     androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
 
     // Jetpack Compose Integration
-    implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("androidx.navigation:navigation-compose:2.8.3")
 
     //Koin
     implementation("io.insert-koin:koin-android:$koin_android_version")
@@ -178,6 +182,11 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-navigation:$koin_android_version")
     // jetpack compose
     implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
+
+
+    val ktorVersion = "3.0.0"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+
 
     implementation(project(":database"))
     implementation(project(":core"))
@@ -192,11 +201,11 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    testImplementation("com.squareup.okhttp3:mockwebser)ver:4.9.1")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
     androidTestImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     androidTestImplementation("org.mockito:mockito-android:3.10.0")
-    androidTestImplementation("com.google.code.gson:gson:2.10.1")
+    androidTestImplementation("com.google.code.gson:gson:2.11.0")
     // Optional -- UI testing with Compose
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")

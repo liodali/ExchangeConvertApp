@@ -8,14 +8,13 @@ import retrofit2.http.Query
 interface CurrencyClientApi {
 
     @GET("currencies")
-    suspend fun getListCurrencies(
-    ): Response<List<Map<String, String>>>
+    suspend fun getListCurrencies(): Response<List<Map<String, String>>>
 
 
     @GET("latest")
     suspend fun getRatesListCurrencies(
         @Query("base") source: String,
-        @Query("symbol") symbol: String? = null
+        @Query("symbol") symbol: String? = null,
     ): Response<RatesCurrenciesDataAPI>
 
     @GET("historic")

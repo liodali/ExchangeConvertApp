@@ -4,11 +4,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import dali.hamza.core.common.ISessionManager
-import dali.hamza.core.common.data
-import dali.hamza.core.common.simpleData
 import dali.hamza.core.common.toCurrencyEntity
 import dali.hamza.core.common.toHistoricRatesEntity
 import dali.hamza.core.datasource.network.CurrencyClientApi
+import dali.hamza.core.datasource.network.models.RatesCurrenciesDataAPI
 import dali.hamza.domain.common.DateManager
 import dali.hamza.domain.models.Currency
 import dali.hamza.domain.models.CurrencyRate
@@ -17,6 +16,11 @@ import dali.hamza.domain.models.ExchangeRate
 import dali.hamza.domain.models.IResponse
 import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -37,6 +41,7 @@ class CurrencyRepository(
     private val historicRateDao: HistoricRateDao,
     val sessionManager: ISessionManager,
     private val defaultDispatcherContext: CoroutineDispatcher = Dispatchers.Default,
+    private val client: HttpClient
 ) : IRepository {
 
 
@@ -46,22 +51,26 @@ class CurrencyRepository(
             true -> MyResponse.SuccessResponse(list)
 
             false -> {
-                val currencies = currencyClientAPI
-                    .getListCurrencies().data { currencies ->
-                        currencies.map { mJson ->
-                            Currency(
-                                mJson
-                            )
-                        }
-                    }
-                if (currencies.data == null || currencies.data!!.isEmpty()) {
+//                val currencies = currencyClientAPI
+//                    .getListCurrencies().data { currencies ->
+//                        currencies.map { mJson ->
+//                            Currency(
+//                                mJson
+//                            )
+//                        }
+//                    }
+                val response = client.post("currencies")
+                val currencies = response.body<List<Currency>>()
+
+                if (response.status == HttpStatusCode.OK || currencies.isEmpty()) {
                     return MyResponse.ErrorResponse<Any>(EmptyResponse)
                 }
-                val mappedCurrencies = currencies.data!!.map { currencyJson ->
+
+                val mappedCurrencies = currencies.map { currencyJson ->
                     currencyJson.toCurrencyEntity()
                 }
                 currencyDao.insertAll(mappedCurrencies)
-                return MyResponse.SuccessResponse(currencies.data!!)
+                return MyResponse.SuccessResponse(currencies)
             }
         }
 
@@ -149,19 +158,27 @@ class CurrencyRepository(
     private suspend fun getRatesFromApi(
         currency: String,
     ): List<CurrencyRate> {
-        val currencies = currencyClientAPI.getRatesListCurrencies(
-            source = currency
-        ).simpleData {
-            it.quotes.map { jsonRate ->
-                CurrencyRate(
-                    name = jsonRate.key,
-                    rate = jsonRate.value,
-                    time = DateManager.now()
-                )
-            }
+//        val currencies = currencyClientAPI.getRatesListCurrencies(
+//            source = currency
+//        ).simpleData {
+//            it.quotes.map { jsonRate ->
+//                CurrencyRate(
+//                    name = jsonRate.key,
+//                    rate = jsonRate.value,
+//                    time = DateManager.now()
+//                )
+//            }
+//        }
+        val response = client.get("latest")
+        val data = response.body<RatesCurrenciesDataAPI>().quotes.map { jsonRate ->
+            CurrencyRate(
+                name = jsonRate.key,
+                rate = jsonRate.value,
+                time = DateManager.now()
+            )
         }
         sessionManager.setTimeNowLastUpdateRate()
-        return currencies
+        return data
     }
 
     private suspend fun archivedRatesByCurrency(currency: String) {

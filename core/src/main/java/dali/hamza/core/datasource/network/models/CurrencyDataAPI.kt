@@ -1,6 +1,7 @@
 package dali.hamza.core.datasource.network.models
 
 import com.squareup.moshi.Json
+import kotlinx.serialization.Serializable
 
 
 data class CurrencyData(
@@ -9,6 +10,7 @@ data class CurrencyData(
     //val currency :  Map<String, String>
 )
 
+@Serializable
 data class RatesCurrenciesDataAPI(
     @Json(name = "base") val source: String,
     @Json(name = "rates") val quotes: Map<String, Double>,
