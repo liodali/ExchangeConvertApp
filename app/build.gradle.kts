@@ -5,8 +5,9 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "2.0.21-1.0.25" apply true
+    id("com.google.devtools.ksp") version "2.1.20-2.0.0" apply true
     alias(libs.plugins.compose.compiler) apply true
+
 }
 // Properties loading
 val properties = Properties().apply {
@@ -18,7 +19,7 @@ val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
         applicationId = "dali.hamza.exchangecurrencyapp"
@@ -64,68 +65,65 @@ android {
         kotlinCompilerExtensionVersion = composeVersion
         //kotlinCompilerVersion = kotlinVersion
     }
-    composeCompiler {
-        enableStrongSkippingMode = true
-    }
 }
 
 dependencies {
 
-    val room_version = "2.6.1"
-    val lifecycle_version = "2.8.6"
+    val room_version = "2.7.1"
+    val lifecycle_version = "2.8.7"
 
     val paging_version = "3.3.2"
 
-    val coroutines_version = "1.9.0"
+    val coroutines_version = "1.10.2"
     val workerManager_version = "2.9.1"
     val nav_version = "2.8.3"
     val koin_android_version = "4.0.0-RC1"
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.01")
+    val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
     implementation(composeBom)
 
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
+    implementation(libs.core.ktx)
+    implementation(libs.appcompat)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation(libs.material)
+    implementation(libs.core.splashscreen)
+    implementation(libs.lifecycle.runtime.compose)
 
     // compose
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.foundation:foundation")
+    implementation(libs.material3)
+    implementation(libs.foundation)
     // such as input and measurement/layout
-    implementation("androidx.compose.ui:ui")
+    implementation(libs.ui)
 
     // Android Studio Preview support
-    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation(libs.ui.tooling.preview)
 
     // the icons but not the material library (e.g. when using Material3 or a
     // custom design system based on Foundation)
-    implementation("androidx.compose.material:material-icons-core")
+    implementation(libs.material.icons.core)
     // Optional - Add full set of material icons
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.material.icons.extended)
     // Optional - Add window size utils
-    implementation("androidx.compose.material3:material3-window-size-class")
+    implementation(libs.material3.window.size.class1)
 
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation(libs.ui.tooling)
 
 
     //coil
     // implementation "com.google.accompanist:accompanist-coil:0.34.0"
-    implementation("io.coil-kt:coil-compose:2.6.0")//io.coil-kt.coil3:coil:3.0.0-alpha01
-    implementation("io.coil-kt.coil3:coil-compose-core:3.0.0-alpha07")
+    implementation(libs.coil.compose)//io.coil-kt.coil3:coil:3.0.0-alpha01
+    implementation(libs.coil.compose.core)
 //io.coil-kt.coil3:coil:3.0.0-alpha01
 
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-service:$lifecycle_version")
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.service)
 
     // alternatively - without Android dependencies for tests
     testImplementation("androidx.paging:paging-common-ktx:$paging_version")
@@ -143,10 +141,10 @@ dependencies {
     implementation("com.squareup.picasso:picasso:2.71828")
 
     //room
-    implementation("androidx.room:room-runtime:$room_version")
+    implementation(libs.room.runtime)
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:$room_version")
-    ksp("androidx.room:room-compiler:$room_version")
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
 
     //fragment ktx
@@ -172,7 +170,7 @@ dependencies {
     androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
 
     // Jetpack Compose Integration
-    implementation("androidx.navigation:navigation-compose:2.8.3")
+    implementation("androidx.navigation:navigation-compose:2.8.9")
 
     //Koin
     implementation("io.insert-koin:koin-android:$koin_android_version")

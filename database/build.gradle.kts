@@ -1,12 +1,12 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp") version "2.0.20-1.0.25"
+    id("com.google.devtools.ksp") //"2.1.20-1.0.32"//"2.1.20-2.0.0"
 }
 
 android {
     namespace = "mohamedali.hamza.database"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
@@ -34,16 +34,14 @@ android {
 }
 
 dependencies {
-    val roomVersion = "2.6.1"
-    val pagingVersion = "3.3.2"
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation(libs.core.ktx)
+    implementation(libs.room.runtime)
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
     //paging
-    implementation("androidx.paging:paging-runtime-ktx:$pagingVersion")
-    implementation("androidx.room:room-paging:$roomVersion")
+    implementation(libs.paging.runtime.ktx)
+    implementation(libs.room.paging)
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")

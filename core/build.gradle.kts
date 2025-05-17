@@ -1,12 +1,12 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "1.9.24"
+    kotlin("plugin.serialization") version "2.1.20"
 
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "dali.hamza.exchangecurrencyapp.core"
     defaultConfig {
         minSdk = 26
@@ -29,20 +29,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 
 dependencies {
     implementation("androidx.test.ext:junit-ktx:1.2.1")
-    implementation("androidx.paging:paging-common-ktx:3.3.5")
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.paging:paging-common-ktx:3.3.6")
+    implementation("androidx.room:room-ktx:2.7.1")
 
-    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core-ktx:1.16.0")
 
     //ktor
     val ktorVersion = "3.0.0"
@@ -50,10 +50,10 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     //serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
-    val coroutinesVersion = "1.9.0"
+    val coroutinesVersion = "1.10.1"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     //dataStore
