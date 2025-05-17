@@ -10,7 +10,6 @@ import androidx.room.Room
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.SessionManager
-import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +21,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 
@@ -68,17 +66,17 @@ val appModule = module {
             })
             .build()
     }
-    single {
+    /*single {
         Retrofit.Builder()
             .baseUrl(get<String>(named("EXCHANGE_SERVER")))
             .client(get<OkHttpClient>())
             .addConverterFactory(get<MoshiConverterFactory>())
 
             .build()
-    }
-    single<CurrencyClientApi> {
+    }*/
+    /*single<CurrencyClientApi> {
         get<Retrofit>().create(CurrencyClientApi::class.java)
-    }
+    }*/
     single<AppDB> {
         Room.databaseBuilder(
             androidContext(),

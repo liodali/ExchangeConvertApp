@@ -2,7 +2,7 @@
     <string name="app_name">Exchange Rate Currency</string>
     <string name="amount_label">Amount</string>
     <string name="select_currency_label_bt">select an currency</string>
-    <string name="server">https://www.openexchangerate.tn/api/</string>
+    <string name="server">api.openexchangerate.tn</string>
     <string name="preference_name">pref_currency</string>
     <string name="default_currency_value">USD</string>
     <string name="selectLabel">Select</string>
@@ -16,7 +16,7 @@
     <string name="error_rates">Rates Unavailable</string>
     <string name="title_exchange_rates">Exchange rates</string>
     <string name="db_name">ConvertCurrencyApp.db</string>
-    <string name="flag_country_svg_url">https://www.openexchangerate.tn/api/currency/png/%1$s</string>
+    <string name="flag_country_svg_url">https://api.openexchangerate.tn/currency/png/%1$s</string>
 
     <array name="currencies">
         <item>AED:United Arab Emirates Dirham</item>

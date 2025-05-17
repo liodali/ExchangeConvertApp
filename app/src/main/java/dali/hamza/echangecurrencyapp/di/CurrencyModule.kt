@@ -1,7 +1,6 @@
 package dali.hamza.echangecurrencyapp.di
 
 import dali.hamza.core.common.ISessionManager
-import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.echangecurrencyapp.ui.compose.page.ConverterCurrencyScope
 import dali.hamza.echangecurrencyapp.viewmodel.CurrencyConvertViewModel
@@ -29,15 +28,16 @@ val coreModule = module {
         val database = get<AppDB>()
         database.RatesCurrencyDao()
     }
+
     single<CurrencyRepository> {
         CurrencyRepository(
-            currencyClientAPI = get<CurrencyClientApi>(),
+//            currencyClientAPI = get<CurrencyClientApi>(),
             currencyDao = get<CurrencyDao>(),
             ratesCurrencyDao = get<RatesCurrencyDao>(),
             historicRateDao = get<HistoricRateDao>(),
             sessionManager = get<ISessionManager>(),
-
-            )
+            serverURL = get<String>(named("EXCHANGE_SERVER"))
+        )
     }
 
     viewModel {

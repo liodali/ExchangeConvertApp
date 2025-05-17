@@ -38,27 +38,31 @@ android {
 }
 
 dependencies {
-    implementation("androidx.test.ext:junit-ktx:1.2.1")
-    implementation("androidx.paging:paging-common-ktx:3.3.6")
-    implementation("androidx.room:room-ktx:2.7.1")
+    implementation(libs.junit.ktx)
+    implementation(libs.paging.common.ktx)
+    implementation(libs.room.ktx)
 
-    implementation("androidx.core:core-ktx:1.16.0")
+    implementation(libs.core.ktx)
 
     //ktor
-    val ktorVersion = "3.0.0"
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    val ktorVersion = "3.1.2"
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.cio)
+
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
     //serialization
     implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
-    val coroutinesVersion = "1.10.1"
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    val coroutinesVersion = "1.10.2"
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
     //dataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation(libs.datastore.preferences)
+    implementation(libs.preference.ktx)
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")

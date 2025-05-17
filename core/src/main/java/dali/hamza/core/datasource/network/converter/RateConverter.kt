@@ -32,8 +32,8 @@ class RateConverter {
 
         reader.endObject()
         return RatesCurrenciesDataAPI(
-            source = source,
-            quotes = map
+            base = source,
+            rates = map
         )
     }
 }

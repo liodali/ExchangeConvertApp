@@ -1,12 +1,12 @@
 package dali.hamza.core.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.toCurrencyEntity
 import dali.hamza.core.common.toHistoricRatesEntity
-import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.models.RatesCurrenciesDataAPI
 import dali.hamza.domain.common.DateManager
 import dali.hamza.domain.models.Currency
@@ -18,9 +18,17 @@ import dali.hamza.domain.models.MyResponse
 import dali.hamza.domain.repository.IRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLProtocol
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -28,6 +36,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import mohamedali.hamza.database.commons.toRateEntity
 import mohamedali.hamza.database.dao.CurrencyDao
 import mohamedali.hamza.database.dao.HistoricRateDao
@@ -35,31 +44,48 @@ import mohamedali.hamza.database.dao.RatesCurrencyDao
 import java.util.Date
 
 class CurrencyRepository(
-    private val currencyClientAPI: CurrencyClientApi,
+//    private val currencyClientAPI: CurrencyClientApi,
     private val currencyDao: CurrencyDao,
     private val ratesCurrencyDao: RatesCurrencyDao,
     private val historicRateDao: HistoricRateDao,
     val sessionManager: ISessionManager,
     private val defaultDispatcherContext: CoroutineDispatcher = Dispatchers.Default,
-    private val client: HttpClient
+    private val serverURL: String
 ) : IRepository {
 
+    private val client: HttpClient by lazy {
+        HttpClient(CIO.create()) {
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Log.d("HTTP Family Client", " : $message")
+                    }
+                }
+                level = LogLevel.ALL
+            }
+            install(ContentNegotiation) {
+                json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                })
+            }
+            install(DefaultRequest) {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = serverURL
+                }
+            }
+        }
+    }
 
     override suspend fun getListCurrencies(): IResponse {
         val list = currencyDao.getListCurrencies()
         return when (list.isNotEmpty()) {
-            true -> MyResponse.SuccessResponse(list)
+            true -> MyResponse.SuccessResponse(list.map { Currency(it.name, it.fullCountryName) })
 
             false -> {
-//                val currencies = currencyClientAPI
-//                    .getListCurrencies().data { currencies ->
-//                        currencies.map { mJson ->
-//                            Currency(
-//                                mJson
-//                            )
-//                        }
-//                    }
-                val response = client.post("currencies")
+                val response = client.post("currencies") {
+                }
                 val currencies = response.body<List<Currency>>()
 
                 if (response.status == HttpStatusCode.OK || currencies.isEmpty()) {
@@ -169,8 +195,12 @@ class CurrencyRepository(
 //                )
 //            }
 //        }
-        val response = client.get("latest")
-        val data = response.body<RatesCurrenciesDataAPI>().quotes.map { jsonRate ->
+        val response = client.get("latest") {
+            url {
+                parameters.append("base", currency)
+            }
+        }
+        val data = response.body<RatesCurrenciesDataAPI>().rates.map { jsonRate ->
             CurrencyRate(
                 name = jsonRate.key,
                 rate = jsonRate.value,
