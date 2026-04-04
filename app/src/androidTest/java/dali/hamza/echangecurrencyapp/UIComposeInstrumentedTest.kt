@@ -14,7 +14,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.Gson
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.SessionManager
-import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.echangecurrencyapp.ui.compose.component.ExchangesRatesGrid
@@ -35,8 +34,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -59,7 +56,7 @@ class UIInstrumentedTest {
         PreferenceDataStoreFactory.create(
             scope = testCoroutineScope,
             produceFile =
-            { context.preferencesDataStoreFile("test_prefs") }
+                { context.preferencesDataStoreFile("test_prefs") }
         )
 
 
@@ -85,18 +82,13 @@ class UIInstrumentedTest {
         historicRateDao = db.HistoricRateDao()
         currencyDao = db.CurrencyDao()
         val repository = CurrencyRepository(
-            Retrofit.Builder()
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                // .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .baseUrl(mockWebServer.url("/")) // note the URL is different from production one
-                .build()
-                .create(CurrencyClientApi::class.java),
+
             currencyDao,
             rateDao,
             historicRateDao,
             sessionManager,
-
-            )
+            serverURL = mockWebServer.url("/").toUrl().toString()
+        )
         /*val json = Gson().toJson(
             mapOf(
                 "success" to true,

@@ -28,7 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.domain.models.ExchangeRate
-import okhttp3.internal.format
+import java.lang.String.format
+
 import java.util.Calendar
 
 @Composable

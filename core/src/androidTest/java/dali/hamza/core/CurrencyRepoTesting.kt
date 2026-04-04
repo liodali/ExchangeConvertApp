@@ -26,8 +26,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 
 private interface CurrencyClientApi {}
@@ -95,22 +93,26 @@ class CurrencyRepoTesting {
             rateDao = db.RatesCurrencyDao()
             historicRateDao = db.HistoricRateDao()
             currencyDao = db.CurrencyDao()
-
-            repository = CurrencyRepository(
-                Retrofit.Builder()
+            /*
+            Retrofit.Builder()
                     .addConverterFactory(MoshiConverterFactory.create(moshi))
                     // .addCallAdapterFactory(CoroutineCallAdapterFactory())
                     .baseUrl(mockWebServer.url("/")) // note the URL is different from production one
                     .build()
                     .create(dali.hamza.core.datasource.network.CurrencyClientApi::class.java),
+             */
+            repository = CurrencyRepository(
+
                 currencyDao,
                 rateDao,
                 historicRateDao,
-                SessionManager(
+                sessionManager = SessionManager(
                     "Testpref", context
                 ),
+                serverURL =
+                    mockWebServer.url("/").toString()
 
-                )
+            )
             repository.sessionManager.setCurrencySelected(eur)
             repository.sessionManager.removeTimeLastUpdateRate()
 

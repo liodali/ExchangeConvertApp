@@ -5,7 +5,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "2.1.20-2.0.0" apply true
+    id("com.google.devtools.ksp") version "2.3.6" apply true
     alias(libs.plugins.compose.compiler) apply true
 
 }
@@ -19,7 +19,7 @@ val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
         applicationId = "dali.hamza.exchangecurrencyapp"
@@ -51,12 +51,15 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
+
     buildFeatures {
         viewBinding = true
         compose = true
@@ -69,22 +72,14 @@ android {
 
 dependencies {
 
-    val room_version = "2.7.1"
-    val lifecycle_version = "2.8.7"
 
-    val paging_version = "3.3.2"
-
-    val coroutines_version = "1.10.2"
-    val workerManager_version = "2.9.1"
-    val nav_version = "2.8.3"
-    val koin_android_version = "4.0.0-RC1"
     val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
     implementation(composeBom)
 
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.lifecycle.runtime.ktx)
-    implementation("androidx.activity:activity-compose:1.10.1")
+    implementation(libs.androidx.activity.compose)
     implementation(libs.material)
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.compose)
@@ -126,19 +121,19 @@ dependencies {
     implementation(libs.lifecycle.service)
 
     // alternatively - without Android dependencies for tests
-    testImplementation("androidx.paging:paging-common-ktx:$paging_version")
+    testImplementation(libs.paging.common.ktx)
     //paging
-    implementation("androidx.paging:paging-runtime-ktx:$paging_version")
+    implementation(libs.paging.runtime.ktx)
 
     // optional - Jetpack Compose integration
-    implementation("androidx.paging:paging-compose:$paging_version")
+    implementation(libs.paging.compose)
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.logging.interceptor)
 
     //picasso
-    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation(libs.picasso)
 
     //room
     implementation(libs.room.runtime)
@@ -148,65 +143,64 @@ dependencies {
 
 
     //fragment ktx
-    implementation("androidx.fragment:fragment-ktx:1.8.4")
+    implementation(libs.androidx.fragment.ktx)
     // Activity KTX for viewModels()
-    implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation(libs.androidx.activity.ktx)
 
     // WorkerManager dependencies
-    implementation("androidx.work:work-runtime-ktx:$workerManager_version")
+    implementation(libs.androidx.work.runtime.ktx)
     //dataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation(libs.datastore.preferences)
+    implementation(libs.preference.ktx)
 
     // Kotlin
-    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
-    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
 
 
     // Feature module Support
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
+    implementation(libs.androidx.navigation.dynamic.features.fragment)
 
     // Testing Navigation
-    androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
+    androidTestImplementation(libs.androidx.navigation.testing)
 
     // Jetpack Compose Integration
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation(libs.androidx.navigation.compose)
 
     //Koin
-    implementation("io.insert-koin:koin-android:$koin_android_version")
+    implementation(libs.koin.android)
     // Jetpack WorkManager
-    implementation("io.insert-koin:koin-androidx-workmanager:$koin_android_version")
+    implementation(libs.koin.androidx.workmanager)
     // Navigation Graph
-    implementation("io.insert-koin:koin-androidx-navigation:$koin_android_version")
+    implementation(libs.koin.androidx.navigation)
     // jetpack compose
-    implementation("io.insert-koin:koin-androidx-compose:$koin_android_version")
+    implementation(libs.koin.androidx.compose)
 
 
-    val ktorVersion = "3.0.0"
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation(libs.ktor.client.core)
 
 
     implementation(project(":database"))
     implementation(project(":core"))
     implementation(project(":domain"))
 
-    testImplementation("androidx.test:core-ktx:1.6.1")
-    testImplementation("androidx.preference:preference-ktx:1.2.1")
-    testImplementation("androidx.datastore:datastore-core:1.1.1")
-    testImplementation("androidx.datastore:datastore-preferences:1.1.1")
-    androidTestImplementation("com.android.support.test.espresso:espresso-intents:3.3.0")
-    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:3.3.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
-    androidTestImplementation("org.mockito:mockito-android:3.10.0")
-    androidTestImplementation("com.google.code.gson:gson:2.11.0")
+    testImplementation(libs.androidx.core.ktx)
+    testImplementation(libs.preference.ktx)
+    testImplementation(libs.androidx.datastore.core)
+    testImplementation(libs.datastore.preferences)
+    androidTestImplementation(libs.espresso.intents)
+    androidTestImplementation(libs.espresso.contrib)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    testImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.gson)
     // Optional -- UI testing with Compose
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
+    androidTestImplementation(libs.androidx.ui.test.junit4.android)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     androidTestImplementation(composeBom)
 

@@ -10,7 +10,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.squareup.moshi.Moshi
 import dali.hamza.core.common.SessionManager
-import dali.hamza.core.datasource.network.CurrencyClientApi
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.core.repository.CurrencyRepository
 import dali.hamza.echangecurrencyapp.viewmodel.MainViewModel
@@ -29,8 +28,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 
 /**
@@ -52,7 +49,7 @@ class ViewModelUnitTests {
         PreferenceDataStoreFactory.create(
             scope = testCoroutineScope,
             produceFile =
-            { context.preferencesDataStoreFile("test_prefs") }
+                { context.preferencesDataStoreFile("test_prefs") }
         )
 
 
@@ -79,18 +76,12 @@ class ViewModelUnitTests {
         historicRateDao = db.HistoricRateDao()
         currencyDao = db.CurrencyDao()
         val repository = CurrencyRepository(
-            Retrofit.Builder()
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                // .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .baseUrl(mockWebServer.url("/")) // note the URL is different from production one
-                .build()
-                .create(CurrencyClientApi::class.java),
             currencyDao,
             rateDao,
             historicRateDao,
             sessionManager,
-
-            )
+            serverURL = mockWebServer.url("/").toString(),
+        )
         mainViewModel = MainViewModel(repository, sessionManager)
     }
 

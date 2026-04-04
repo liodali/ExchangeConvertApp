@@ -14,22 +14,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dali.hamza.echangecurrencyapp.common.DoubleFormatter
 import dali.hamza.echangecurrencyapp.models.AmountInput
 import dali.hamza.echangecurrencyapp.ui.compose.theme.DarkColors
 
@@ -104,7 +98,7 @@ fun AmountTextField(
                 CurrencyFlagImage(
                     currency = currency!!.lowercase(),
 
-                )
+                    )
             }
         },
 
@@ -185,7 +179,7 @@ fun ShowTextAmount() {
     TextAmountWithCurrency(amount = "12.0", modifier = Modifier)
 }
 
-@UiMode
+
 @Preview(
     widthDp = 350, heightDp = 92,
     showBackground = true

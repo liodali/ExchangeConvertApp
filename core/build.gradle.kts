@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
     namespace = "dali.hamza.exchangecurrencyapp.core"
     defaultConfig {
         minSdk = 26
@@ -29,12 +29,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
+  
 }
 
 dependencies {
@@ -64,18 +67,18 @@ dependencies {
     implementation(libs.datastore.preferences)
     implementation(libs.preference.ktx)
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.9.1")
-    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
-    androidTestImplementation("org.mockito:mockito-android:3.10.0")
-    testImplementation("com.google.code.gson:gson:2.11.0")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
+    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
+    androidTestImplementation("org.mockito:mockito-android:5.23.0")
+    testImplementation("com.google.code.gson:gson:2.13.2")
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:$coroutinesVersion")
 
 

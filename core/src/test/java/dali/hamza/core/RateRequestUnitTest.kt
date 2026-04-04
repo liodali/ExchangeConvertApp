@@ -67,6 +67,6 @@ class RateRequestUnitTest {
             "", "USD"
         )
 
-        assert(response.body()?.quotes!!.values.first() == 3.672982)
+        assert(response.body()?.rates?.values?.first() == 3.672982)
     }
 }
