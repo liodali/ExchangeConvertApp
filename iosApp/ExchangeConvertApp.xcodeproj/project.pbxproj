@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		170ACD9411DAF9C221893337 /* Pods_ExchangeConvertApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */; };
 		A1000001 /* ExchangeConvertAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* ExchangeConvertAppApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* CurrencyConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* CurrencyConverterView.swift */; };
@@ -15,6 +16,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExchangeConvertApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExchangeConvertApp.release.xcconfig"; path = "Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp.release.xcconfig"; sourceTree = "<group>"; };
+		53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExchangeConvertApp.debug.xcconfig"; path = "Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp.debug.xcconfig"; sourceTree = "<group>"; };
 		A2000001 /* ExchangeConvertAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeConvertAppApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* CurrencyConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverterView.swift; sourceTree = "<group>"; };
@@ -29,18 +33,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000005 /* shared.framework in Frameworks */,
+				170ACD9411DAF9C221893337 /* Pods_ExchangeConvertApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7BF594EB6D96C9ADB3E7D728 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */,
+				4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		A5000001 = {
 			isa = PBXGroup;
 			children = (
 				A5000002 /* ExchangeConvertApp */,
 				A5000003 /* Products */,
 				A5000004 /* Frameworks */,
+				7BF594EB6D96C9ADB3E7D728 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				A3000001 /* shared.framework */,
+				3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -78,9 +95,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A7000003 /* Build configuration list for PBXNativeTarget "ExchangeConvertApp" */;
 			buildPhases = (
+				F6767E92BF4B10B9F5710ED6 /* [CP] Check Pods Manifest.lock */,
 				A6000002 /* Sources */,
 				A4000001 /* Frameworks */,
 				A6000003 /* Resources */,
+				B015C75B3BFC2CFB68FFC879 /* [CP] Copy Pods Resources */,
+				8C71A92A8C867D10071F8413 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -133,6 +153,65 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8C71A92A8C867D10071F8413 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B015C75B3BFC2CFB68FFC879 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F6767E92BF4B10B9F5710ED6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ExchangeConvertApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A6000002 /* Sources */ = {
@@ -270,12 +349,14 @@
 		};
 		A9000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Exchange Convert App";
@@ -300,6 +381,7 @@
 		};
 		A9000004 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
