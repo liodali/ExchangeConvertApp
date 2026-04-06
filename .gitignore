@@ -17,3 +17,7 @@ local.properties
 /gradle/
 /.idea/
 /.idea/*
+shared/build/**
+.kotlin
+Pods
+Podfile.lock

@@ -1,0 +1,56 @@
+-- Currency entity table
+CREATE TABLE IF NOT EXISTS Currency (
+    name TEXT NOT NULL,
+    fullCountryName TEXT NOT NULL,
+    PRIMARY KEY (name)
+);
+
+-- Currency rates table
+CREATE TABLE IF NOT EXISTS CurrencyRate (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    rate REAL NOT NULL,
+    time INTEGER NOT NULL,
+    baseCurrency TEXT NOT NULL
+);
+
+-- Historic rates table
+CREATE TABLE IF NOT EXISTS HistoricRate (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    rate REAL NOT NULL,
+    time INTEGER NOT NULL,
+    baseCurrency TEXT NOT NULL,
+    calculatedAmount REAL NOT NULL
+);
+
+-- Queries for Currency table
+selectCurrencies:
+SELECT * FROM Currency;
+
+insertCurrency:
+INSERT OR REPLACE INTO Currency (name, fullCountryName)
+VALUES (?, ?);
+
+-- Queries for CurrencyRate table
+selectRatesByBaseCurrency:
+SELECT * FROM CurrencyRate
+WHERE baseCurrency = ?
+ORDER BY time DESC;
+
+insertRate:
+INSERT OR REPLACE INTO CurrencyRate (name, rate, time, baseCurrency)
+VALUES (?, ?, ?, ?);
+
+deleteAllRates:
+DELETE FROM CurrencyRate;
+
+-- Queries for HistoricRate table
+selectHistoricRates:
+SELECT * FROM HistoricRate
+WHERE baseCurrency = ?
+ORDER BY time DESC;
+
+insertHistoricRate:
+INSERT INTO HistoricRate (name, rate, time, baseCurrency, calculatedAmount)
+VALUES (?, ?, ?, ?, ?);
