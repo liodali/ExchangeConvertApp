@@ -7,26 +7,27 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-class CurrencyApi(private val httpClient: HttpClient, private val baseUrl: String) {
-    
+class CurrencyApi(private val httpClient: HttpClient) {
+
     /**
+     * private val baseUrl: String (old attribute)
      * Get list of all supported currencies
      */
     suspend fun getCurrencies(): Result<List<CurrencyApiModel>> {
         return try {
-            val response = httpClient.get("$baseUrl/currencies")
+            val response = httpClient.get("currencies")//$baseUrl/
             Result.success(response.body())
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    
+
     /**
      * Get latest exchange rates for a base currency
      */
     suspend fun getLatestRates(base: String): Result<RatesCurrenciesDataAPI> {
         return try {
-            val response = httpClient.get("$baseUrl/latest") {
+            val response = httpClient.get("latest") {
                 parameter("base", base)
             }
             Result.success(response.body())
@@ -34,7 +35,7 @@ class CurrencyApi(private val httpClient: HttpClient, private val baseUrl: Strin
             Result.failure(e)
         }
     }
-    
+
     /**
      * Get historic exchange rates for a specific date
      */
@@ -44,7 +45,7 @@ class CurrencyApi(private val httpClient: HttpClient, private val baseUrl: Strin
         symbols: String? = null
     ): Result<RatesCurrenciesDataAPI> {
         return try {
-            val response = httpClient.get("$baseUrl/historic/$date") {
+            val response = httpClient.get("historic/$date") {
                 parameter("base", base)
                 symbols?.let { parameter("symbols", it) }
             }

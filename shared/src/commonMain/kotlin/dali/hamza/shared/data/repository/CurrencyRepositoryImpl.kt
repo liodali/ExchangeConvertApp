@@ -42,11 +42,11 @@ class CurrencyRepositoryImpl(
     override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> {
         // Implementation will fetch rates and calculate amounts
         // This will be implemented with platform-specific storage
-        TODO("Implement with database access")
+        return MyResponse.Error("Not yet implemented - database access pending")
     }
     
     override suspend fun getCurrentCurrency(): String {
         // Implementation will use platform-specific storage
-        TODO("Implement with platform-specific storage")
+        throw NotImplementedError("Implementation pending - platform-specific storage required")
     }
 }
