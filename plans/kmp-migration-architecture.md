@@ -76,15 +76,38 @@ The `shared` module will contain all common business logic and will be compiled 
 - SQLDelight (for multiplatform database)
 - Compose Multiplatform (for shared UI)
 
-### 2. Database Module Migration
+### 2. Database Module Migration (Hybrid Approach)
 
-The existing Room database will be migrated to **SQLDelight** for KMP support.
+We will use a **hybrid database approach**: **Room for Android** and **SQLDelight for iOS**.
 
-**Why SQLDelight?**
-- Native KMP support with iOS target
-- Type-safe SQL queries
-- Generated Kotlin code
-- Works with both Android (SQLite) and iOS (SQLite)
+**Why Hybrid Approach?**
+- Keep existing Room code on Android - minimal changes
+- SQLDelight for iOS - mature and stable KMP support
+- Leverages existing Android instrumented tests
+- Avoids Room Multiplatform alpha stage risks
+
+**Architecture:**
+```
+shared/
+├── commonMain/
+│   └── database/
+│       ├── DatabaseDao.kt (common interface)
+│       └── DatabaseEntity.kt (common data class)
+├── androidMain/
+│   └── database/
+│       ├── AppDatabase.kt (Room @Database)
+│       ├── RoomDatabaseDao.kt (Room @Dao implementation)
+│       └── Entities.kt (Room @Entity)
+└── iosMain/
+    └── database/
+        ├── DatabaseDriverFactory.kt (SQLDelight driver)
+        └── SqlDelightDatabaseDao.kt (SQLDelight implementation)
+```
+
+**Trade-offs:**
+- Need to maintain two database implementations
+- Manual schema synchronization between Room and SQLDelight
+- expect/actual pattern required for database access layer
 
 ### 3. Android App Module
 
@@ -115,17 +138,29 @@ Reasons:
 - Easier dependency management for existing iOS projects
 - SPM support in KMP is still stabilizing
 
-### 2. Database: SQLDelight vs Room Multiplatform
+### 2. Database: Hybrid Approach (Room Android + SQLDelight iOS)
 
-**Decision: SQLDelight**
+**Decision: Room for Android, SQLDelight for iOS**
 
 Reasons:
-- Full KMP support including iOS
-- Room Multiplatform is still in alpha
-- Better iOS integration
-- Similar query language to Room
+- Keep existing Room code on Android - minimal changes required
+- SQLDelight has mature and stable iOS support
+- Leverages existing Android instrumented tests with Room
+- Avoids Room Multiplatform alpha stage risks
+- Single common interface with expect/actual pattern
 
-### 3. UI Strategy: Hybrid SwiftUI + Compose Multiplatform
+### 3. Networking: Complete Ktor Migration
+
+**Decision: Full Ktor client migration, replacing Retrofit**
+
+Reasons:
+- Ktor is already partially used in the project
+- Full KMP support with platform-specific engines
+- Consistent API across Android and iOS
+- Better integration with Kotlin coroutines and flows
+- No need for Retrofit + Ktor duplication
+
+### 4. UI Strategy: Hybrid SwiftUI + Compose Multiplatform
 
 **Decision: Compose Multiplatform for specific screens embedded in SwiftUI**
 
@@ -135,7 +170,7 @@ Reasons:
 - Gradual migration path
 - Best of both worlds: native performance + shared UI
 
-### 4. Dependency Injection: Koin Multiplatform
+### 5. Dependency Injection: Koin Multiplatform
 
 **Decision: Use Koin for KMP**
 
@@ -159,15 +194,20 @@ Reasons:
 3. Set up expect/actual for platform-specific types
 
 ### Phase 3: Core Layer Migration
-1. Migrate network layer to Ktor (already partially done)
+1. Complete migration from Retrofit to Ktor client
 2. Move repository implementations to shared/commonMain
-3. Set up platform-specific HTTP client engines
+3. Set up platform-specific HTTP client engines (OkHttp for Android, Darwin for iOS)
 
-### Phase 4: Database Migration
-1. Add SQLDelight plugin
-2. Migrate Room entities to SQLDelight schemas
-3. Migrate DAOs to SQLDelight queries
-4. Set up expect/actual for database driver
+### Phase 4: Database Migration (Hybrid)
+1. **Android (Room)**: Keep existing Room database in `androidMain`
+2. **iOS (SQLDelight)**:
+   - Add SQLDelight Gradle plugin
+   - Create `.sq` schema files from existing Room entities
+   - Create SQLDelight DAO interfaces
+3. Set up expect/actual pattern:
+   - Common interface in `commonMain`
+   - Room implementation in `androidMain`
+   - SQLDelight implementation in `iosMain`
 
 ### Phase 5: UI Layer
 1. Create Compose Multiplatform screens in shared module
@@ -242,7 +282,7 @@ org.jetbrains.compose
 // Coroutines
 kotlinx-coroutines-core
 
-// Networking
+// Networking (complete Ktor migration - no Retrofit)
 ktor-client-core
 ktor-client-content-negotiation
 ktor-serialization-kotlinx-json
@@ -252,11 +292,19 @@ ktor-client-darwin (ios)
 // Serialization
 kotlinx-serialization-json
 
-// Database
-com.squareup.sqldelight.runtime
-com.squareup.sqldelight.coroutines
-com.squareup.sqldelight.androidx.sqlite.driver (android)
-com.squareup.sqldelight.native.driver (ios)
+// Database - Hybrid Approach (Room Android + SQLDelight iOS)
+// Common (interface only - no dependency)
+
+// Android (Room - keep existing)
+androidx.room:room-runtime
+androidx.room:room-ktx
+androidx.room:room-paging
+ksp (for Room compiler)
+
+// iOS (SQLDelight)
+com.squareup.sqldelight:runtime
+com.squareup.sqldelight:coroutines-extensions
+com.squareup.sqldelight:native-driver
 
 // DI
 io.insert-koin:koin-core
@@ -291,7 +339,9 @@ end
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| SQLDelight migration complexity | Medium | Gradual migration, keep Room temporarily |
+| Complete Retrofit to Ktor migration | Medium | Thorough testing, gradual endpoint migration |
+| Hybrid database (Room + SQLDelight) complexity | Medium | Clear expect/actual interface, careful schema synchronization |
+| Manual schema synchronization between Room and SQLDelight | Medium | Document mapping process, keep schemas in sync |
 | Compose Multiplatform iOS limitations | Low | Use hybrid approach with SwiftUI |
 | CocoaPods integration issues | Low | Follow official KMP documentation |
 | Build time increase | Medium | Optimize Gradle configuration |
