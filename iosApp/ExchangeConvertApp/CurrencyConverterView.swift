@@ -1,82 +1,124 @@
 import SwiftUI
-import shared
+import SharedKMP
 
+/// CurrencyConverterView - Main SwiftUI view for currency conversion
 struct CurrencyConverterView: View {
-    @ObservedObject var viewModel: CurrencyViewModel
+    @StateObject var viewModel = CurrencyViewModel()
+    @State private var amount: String = ""
+    @State private var showFromPicker = false
+    @State private var showToPicker = false
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Amount Input
-            TextField("Amount", text: $viewModel.amount)
-                .keyboardType(.decimalPad)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+        NavigationView {
+            VStack(spacing: 20) {
+                // Amount Input
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Amount")
+                        .font(.headline)
+                    TextField("Enter amount", text: $amount)
+                        .keyboardType(.decimalPad)
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                }
                 .padding(.horizontal)
-            
-            // From Currency Selection
-            Picker("From", selection: $viewModel.selectedFromCurrency) {
-                Text("Select Currency").tag(nil as Currency?)
-                ForEach(viewModel.currencies, id: \.name) { currency in
-                    Text("\(currency.name) - \(currency.fullCountryName)").tag(currency as Currency?)
+                
+                // Currency Selection
+                HStack(spacing: 16) {
+                    // From Currency
+                    Button(action: { showFromPicker = true }) {
+                        VStack {
+                            Text("From")
+                                .font(.caption)
+                            Text(viewModel.selectedFromCurrency?.name ?? "USD")
+                                .font(.headline)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                    
+                    // Swap Button
+                    Button(action: {
+                        viewModel.swapCurrencies()
+                    }) {
+                        Image(systemName: "arrow.left.arrow.right")
+                            .font(.title2)
+                    }
+                    
+                    // To Currency
+                    Button(action: { showToPicker = true }) {
+                        VStack {
+                            Text("To")
+                                .font(.caption)
+                            Text(viewModel.selectedToCurrency?.name ?? "EUR")
+                                .font(.headline)
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(8)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Convert Button
+                Button(action: {
+                    viewModel.amount = amount
+                    viewModel.calculateRates()
+                }) {
+                    Text("Convert")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                
+                // Results
+                if !viewModel.exchangeRates.isEmpty {
+                    List(viewModel.exchangeRates, id: \.name) { rate in
+                        HStack {
+                            Text(rate.name)
+                            Spacer()
+                            Text(String(format: "%.4f", rate.rate))
+                        }
+                    }
+                }
+                
+                // Error Message
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
                 }
             }
-            .pickerStyle(MenuPickerStyle())
-            .padding(.horizontal)
-            
-            // Swap Button
-            Button(action: {
-                viewModel.swapCurrencies()
-            }) {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.title2)
+            .navigationTitle("Currency Converter")
+            .sheet(isPresented: $showFromPicker) {
+                CurrencyPickerView(
+                    currencies: viewModel.currencies,
+                    selectedCurrency: viewModel.selectedFromCurrency,
+                    onSelect: { currency in
+                        viewModel.selectedFromCurrency = currency
+                    }
+                )
             }
-            .padding()
-            
-            // To Currency Selection
-            Picker("To", selection: $viewModel.selectedToCurrency) {
-                Text("Select Currency").tag(nil as Currency?)
-                ForEach(viewModel.currencies, id: \.name) { currency in
-                    Text("\(currency.name) - \(currency.fullCountryName)").tag(currency as Currency?)
-                }
+            .sheet(isPresented: $showToPicker) {
+                CurrencyPickerView(
+                    currencies: viewModel.currencies,
+                    selectedCurrency: viewModel.selectedToCurrency,
+                    onSelect: { currency in
+                        viewModel.selectedToCurrency = currency
+                    }
+                )
             }
-            .pickerStyle(MenuPickerStyle())
-            .padding(.horizontal)
-            
-            // Calculate Button
-            Button(action: {
-                viewModel.calculateRates()
-            }) {
-                Text("Convert")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
-            
-            // Loading Indicator
-            if viewModel.isLoading {
-                ProgressView("Loading...")
-                    .padding()
-            }
-            
-            // Error Message
-            if let errorMessage = viewModel.errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-            }
-            
-            Spacer()
-        }
-        .onAppear {
-            viewModel.loadCurrencies()
         }
     }
 }
 
-struct CurrencyConverterView_Previews: PreviewProvider {
-    static var previews: some View {
-        CurrencyConverterView(viewModel: CurrencyViewModel())
-    }
+#Preview {
+    CurrencyConverterView()
 }
