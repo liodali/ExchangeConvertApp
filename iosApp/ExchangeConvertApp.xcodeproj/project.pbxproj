@@ -7,24 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		170ACD9411DAF9C221893337 /* Pods_ExchangeConvertApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */; };
 		A1000001 /* ExchangeConvertAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* ExchangeConvertAppApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000003 /* CurrencyConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* CurrencyConverterView.swift */; };
 		A1000004 /* CurrencyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004 /* CurrencyViewModel.swift */; };
-		A1000005 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A3000001 /* shared.framework */; };
+		A1000006 /* RatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006 /* RatesView.swift */; };
+		A1000007 /* RateCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007 /* RateCardView.swift */; };
+		A1000008 /* QuickExchangeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008 /* QuickExchangeSection.swift */; };
+		A1000009 /* HistoryGraphSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009 /* HistoryGraphSection.swift */; };
+		A1000010 /* SharedKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A0000002 /* SharedKMP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExchangeConvertApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExchangeConvertApp.release.xcconfig"; path = "Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp.release.xcconfig"; sourceTree = "<group>"; };
-		53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExchangeConvertApp.debug.xcconfig"; path = "Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp.debug.xcconfig"; sourceTree = "<group>"; };
 		A2000001 /* ExchangeConvertAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeConvertAppApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A2000003 /* CurrencyConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverterView.swift; sourceTree = "<group>"; };
 		A2000004 /* CurrencyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyViewModel.swift; sourceTree = "<group>"; };
 		A2000005 /* ExchangeConvertApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExchangeConvertApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A3000001 /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = ../shared/build/cocoapods/framework/shared.framework; sourceTree = "<group>"; };
+		A2000006 /* RatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatesView.swift; sourceTree = "<group>"; };
+		A2000007 /* RateCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateCardView.swift; sourceTree = "<group>"; };
+		A2000008 /* QuickExchangeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExchangeSection.swift; sourceTree = "<group>"; };
+		A2000009 /* HistoryGraphSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGraphSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,31 +35,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1000005 /* shared.framework in Frameworks */,
-				170ACD9411DAF9C221893337 /* Pods_ExchangeConvertApp.framework in Frameworks */,
+				A1000010 /* SharedKMP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7BF594EB6D96C9ADB3E7D728 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */,
-				4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		A5000001 = {
 			isa = PBXGroup;
 			children = (
 				A5000002 /* ExchangeConvertApp */,
 				A5000003 /* Products */,
 				A5000004 /* Frameworks */,
-				7BF594EB6D96C9ADB3E7D728 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +58,10 @@
 				A2000002 /* ContentView.swift */,
 				A2000003 /* CurrencyConverterView.swift */,
 				A2000004 /* CurrencyViewModel.swift */,
+				A2000006 /* RatesView.swift */,
+				A2000007 /* RateCardView.swift */,
+				A2000008 /* QuickExchangeSection.swift */,
+				A2000009 /* HistoryGraphSection.swift */,
 			);
 			path = ExchangeConvertApp;
 			sourceTree = "<group>";
@@ -82,8 +77,6 @@
 		A5000004 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A3000001 /* shared.framework */,
-				3E5D4A06D9215DCB19CE5428 /* Pods_ExchangeConvertApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -95,18 +88,18 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A7000003 /* Build configuration list for PBXNativeTarget "ExchangeConvertApp" */;
 			buildPhases = (
-				F6767E92BF4B10B9F5710ED6 /* [CP] Check Pods Manifest.lock */,
 				A6000002 /* Sources */,
 				A4000001 /* Frameworks */,
 				A6000003 /* Resources */,
-				B015C75B3BFC2CFB68FFC879 /* [CP] Copy Pods Resources */,
-				8C71A92A8C867D10071F8413 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = ExchangeConvertApp;
+			packageProductDependencies = (
+				A0000002 /* SharedKMP */,
+			);
 			productName = ExchangeConvertApp;
 			productReference = A2000005 /* ExchangeConvertApp.app */;
 			productType = "com.apple.product-type.application";
@@ -135,6 +128,9 @@
 				Base,
 			);
 			mainGroup = A5000001;
+			packageReferences = (
+				A0000001 /* XCLocalSwiftPackageReference "SharedKMP" */,
+			);
 			productRefGroup = A5000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -154,65 +150,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		8C71A92A8C867D10071F8413 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B015C75B3BFC2CFB68FFC879 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ExchangeConvertApp/Pods-ExchangeConvertApp-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F6767E92BF4B10B9F5710ED6 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-ExchangeConvertApp-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		A6000002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -222,6 +159,10 @@
 				A1000002 /* ContentView.swift in Sources */,
 				A1000003 /* CurrencyConverterView.swift in Sources */,
 				A1000004 /* CurrencyViewModel.swift in Sources */,
+				A1000006 /* RatesView.swift in Sources */,
+				A1000007 /* RateCardView.swift in Sources */,
+				A1000008 /* QuickExchangeSection.swift in Sources */,
+				A1000009 /* HistoryGraphSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,7 +290,6 @@
 		};
 		A9000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 53AE2C91B93FDAEBB5206671 /* Pods-ExchangeConvertApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -358,6 +298,7 @@
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Exchange Convert App";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -371,6 +312,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lsqlite3",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = dali.hamza.ExchangeConvertApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -381,7 +326,6 @@
 		};
 		A9000004 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4111B0B2FFFBA5278DE22CDB /* Pods-ExchangeConvertApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -389,6 +333,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Exchange Convert App";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
@@ -402,6 +347,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lsqlite3",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = dali.hamza.ExchangeConvertApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -432,6 +381,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A0000001 /* XCLocalSwiftPackageReference "SharedKMP" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = SharedKMP;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A0000002 /* SharedKMP */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SharedKMP;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A8000001 /* Project object */;
 }

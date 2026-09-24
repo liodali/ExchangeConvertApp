@@ -19,5 +19,4 @@ local.properties
 /.idea/*
 shared/build/**
 .kotlin
-Pods
-Podfile.lock
+xcuserdata

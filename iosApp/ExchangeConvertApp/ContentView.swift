@@ -1,5 +1,5 @@
 import SwiftUI
-import shared
+import SharedKMP
 
 struct ContentView: View {
     @StateObject private var viewModel = CurrencyViewModel()
