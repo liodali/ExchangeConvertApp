@@ -23,7 +23,7 @@ fun IResponse.toUIState(): UIState {
             if (data is List<*> && (data as List<*>).isEmpty()) {
                 return NoDataUIState()
             }
-            return DataUIState(data)
+            DataUIState(data)
         }
 
         is MyResponse.NoResponse<*> -> NoDataUIState()
