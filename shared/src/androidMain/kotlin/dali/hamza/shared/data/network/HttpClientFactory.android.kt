@@ -27,6 +27,7 @@ actual fun createHttpClient(serverURL: String): HttpClient {
                 prettyPrint = true
                 isLenient = true
                 ignoreUnknownKeys = true
+                allowStructuredMessageKeys = true
             })
         }
         defaultRequest {

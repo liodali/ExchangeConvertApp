@@ -16,7 +16,8 @@ class CurrencyApi(private val httpClient: HttpClient) {
     suspend fun getCurrencies(): Result<List<CurrencyApiModel>> {
         return try {
             val response = httpClient.get("currencies")//$baseUrl/
-            Result.success(response.body())
+            val list: List<CurrencyApiModel> = response.body()
+            Result.success(list)
         } catch (e: Exception) {
             Result.failure(e)
         }
