@@ -20,3 +20,11 @@ local.properties
 shared/build/**
 .kotlin
 xcuserdata
+
+# Local agent tooling
+.kilo/
+.kilocode/
+
+# Design assets
+design/
+ui-design.pen
