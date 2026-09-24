@@ -36,16 +36,18 @@ import dali.hamza.echangecurrencyapp.models.NoDataUIState
 import dali.hamza.echangecurrencyapp.models.UIState
 
 
-@Composable
-fun <T> UIState.StateBuilder(
-    loadingUI: (@Composable () -> Unit)?,
-    emptyUI: (@Composable () -> Unit)?,
-    errorUI: (@Composable () -> Unit)? = null,
-    content: @Composable (T) -> Unit,
+inline fun <T> UIState.StateBuilder(
+    noinline loadingUI: (@Composable () -> Unit)?,
+    noinline emptyUI: (@Composable () -> Unit)?,
+    noinline errorUI: (@Composable () -> Unit)? = null,
+    crossinline content: @Composable (T) -> Unit,
 ) {
     when (this) {
         is LoadingUIState -> when {
-            loadingUI != null -> loadingUI()
+            loadingUI != null -> {
+                loadingUI()
+            }
+
             else -> Loading()
         }
 
@@ -54,8 +56,9 @@ fun <T> UIState.StateBuilder(
             else -> EmptyBox()
         }
 
-        is DataUIState<*> ->
+        is DataUIState<*> -> {
             content(data!! as T)
+        }
 
 
         is ErrorUIState -> when {
@@ -66,7 +69,6 @@ fun <T> UIState.StateBuilder(
         else -> EmptyBox()
     }
 }
-
 
 @Composable
 fun SpacerHeight(height: Dp) {

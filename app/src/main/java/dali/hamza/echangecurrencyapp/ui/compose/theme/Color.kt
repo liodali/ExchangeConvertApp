@@ -64,5 +64,17 @@ val md_theme_dark_surfaceTint = Color(0xFF9DCAFF)
 val md_theme_dark_outlineVariant = Color(0xFF42474E)
 val md_theme_dark_scrim = Color(0xFF000000)
 
+// Design system colors from ui-design.pen
+val design_background = Color(0xFF131313)
+val design_surface = Color(0xFF1c1b1b)
+val design_surface_variant = Color(0xFF2a2a2a)
+val design_on_background = Color(0xFFe5e2e1)
+val design_on_surface = Color(0xFFc5c6cd)
+val design_on_surface_muted = Color(0xFF8f9097)
+val design_stroke = Color(0xFF44474d)
+val design_success = Color(0xFF4edea3)
+val design_error = Color(0xFFffb4ab)
+val design_card_background = Color(0xFF201f1f)
+val design_button_background = Color(0xFF353534)
 
 val seed = Color(0xFF40A5FF)
