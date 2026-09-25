@@ -1,5 +1,11 @@
 # KMP Migration Architecture Plan
 
+> **Update (2026-09-25):** The iOS integration was migrated from CocoaPods to a **local
+> SwiftPM package** ([`iosApp/SharedKMP`](iosApp/SharedKMP)) built by the
+> `:shared:embedAndSignAppleFrameworkForXcode` Gradle task (Xcode scheme pre-action).
+> References to CocoaPods/Podfile/podspec below describe the earlier architecture and
+> are kept for historical context. See [`agents.md`](agents.md) for the current setup.
+
 ## Overview
 
 This document outlines the architecture and migration plan for converting the ExchangeCurrencyApp to a Kotlin Multiplatform (KMP) project with iOS support using CocoaPods integration and a hybrid SwiftUI + Compose Multiplatform approach.
