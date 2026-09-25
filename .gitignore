@@ -14,7 +14,6 @@
 .cxx
 local.properties
 /build/
-/gradle/
 /.idea/
 /.idea/*
 shared/build/**
