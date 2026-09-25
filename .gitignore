@@ -20,6 +20,8 @@ local.properties
 shared/build/**
 .kotlin
 xcuserdata
+# iOS secrets (token) — committed template: Secrets.swift.example
+iosApp/ExchangeConvertApp/Secrets.swift
 
 # Local agent tooling
 .kilo/
