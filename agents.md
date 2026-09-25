@@ -78,6 +78,7 @@ The project is **actively migrating** from a pure-Android Clean Architecture set
 | **core** | Android Library | DEPRECATING | Repository implementations, network layer, SessionManager (moving to `shared`) |
 | **database** | Android Library | DEPRECATING | Room database, DAOs, entities (Android: Room, iOS: SQLDelight via `shared`) |
 | **shared** | KMP Module | ACTIVE (new) | Shared business logic: domain, data, network, database (SQLDelight), Compose MP UI |
+| **exchange-api** | Ktor backend (git submodule → `liodali/OpenExchangeRate`) | ACTIVE (separate deploy) | Rates aggregator: multi-provider rotation + Postgres cache + `/currencies`, `/latest`, `/historic`, flag icons, metrics |
 | **iosApp** | iOS Application | ACTIVE (new) | SwiftUI shell hosting the shared Compose Multiplatform UI (Kotlin framework via local SwiftPM package) |
 
 ### 3.3 Dependency Graph
@@ -381,6 +382,23 @@ open iosApp/ExchangeConvertApp.xcodeproj
 ./gradlew :shared:build
 ./gradlew :shared:iosSimulatorArm64Test  # iOS simulator tests
 ```
+
+### 7.4 Backend (`exchange-api` — git submodule, own repo: `liodali/OpenExchangeRate`)
+
+```bash
+cd exchange-api
+./gradlew compileKotlin   # verify build (Gradle 9.4.1 wrapper, JDK 25, Kotlin 2.3.21)
+./gradlew run             # local run (needs Postgres; see docker-compose.local.yml / db/)
+docker compose -f docker-compose.local.yml up   # full local stack (+ observability)
+```
+
+Endpoints: `/currencies`, `/latest?base=&amount=&symbol=`, `/historic?base=&symbol=&from=&to=`,
+`/currency/{png,svg}` (flags), `/health`, `/metrics`. Provider rotation (Beacon, currency-api,
+exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching.
+
+> The submodule holds its own git history. Local fixes there (Kotlin 2.3.21 bump, tolerant
+> `key.properties`, Gradle 9.4.1 wrapper, `rateRepository` visibility) are **uncommitted** in the
+> submodule — commit/push inside `exchange-api/` first, then bump the parent's gitlink.
 
 ---
 
