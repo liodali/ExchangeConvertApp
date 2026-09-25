@@ -399,6 +399,10 @@ exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching.
 > The submodule holds its own git history. Local fixes there (Kotlin 2.3.21 bump, tolerant
 > `key.properties`, Gradle 9.4.1 wrapper, `rateRepository` visibility) are **uncommitted** in the
 > submodule — commit/push inside `exchange-api/` first, then bump the parent's gitlink.
+>
+> Deployment tooling lives in the submodule: staging on Railway (`railway.json` +
+> `Dockerfile.railway`) and production on the VPS via Ansible (`deploy/ansible/`) —
+> see [`exchange-api/deploy/README.md`](exchange-api/deploy/README.md).
 
 ---
 
