@@ -9,25 +9,18 @@
 /* Begin PBXBuildFile section */
 		A1000001 /* ExchangeConvertAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* ExchangeConvertAppApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
-		A1000003 /* CurrencyConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000003 /* CurrencyConverterView.swift */; };
-		A1000004 /* CurrencyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000004 /* CurrencyViewModel.swift */; };
-		A1000006 /* RatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000006 /* RatesView.swift */; };
-		A1000007 /* RateCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000007 /* RateCardView.swift */; };
-		A1000008 /* QuickExchangeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000008 /* QuickExchangeSection.swift */; };
-		A1000009 /* HistoryGraphSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000009 /* HistoryGraphSection.swift */; };
 		A1000010 /* SharedKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A0000002 /* SharedKMP */; };
+		A1000011 /* ComposeViewControllerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* ComposeViewControllerProvider.swift */; };
+		A1000012 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* Secrets.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A2000001 /* ExchangeConvertAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeConvertAppApp.swift; sourceTree = "<group>"; };
 		A2000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A2000003 /* CurrencyConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverterView.swift; sourceTree = "<group>"; };
-		A2000004 /* CurrencyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyViewModel.swift; sourceTree = "<group>"; };
 		A2000005 /* ExchangeConvertApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExchangeConvertApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A2000006 /* RatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatesView.swift; sourceTree = "<group>"; };
-		A2000007 /* RateCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateCardView.swift; sourceTree = "<group>"; };
-		A2000008 /* QuickExchangeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExchangeSection.swift; sourceTree = "<group>"; };
-		A2000009 /* HistoryGraphSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGraphSection.swift; sourceTree = "<group>"; };
+		A2000010 /* ComposeViewControllerProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeViewControllerProvider.swift; sourceTree = "<group>"; };
+		A2000011 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		A2000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,12 +49,9 @@
 			children = (
 				A2000001 /* ExchangeConvertAppApp.swift */,
 				A2000002 /* ContentView.swift */,
-				A2000003 /* CurrencyConverterView.swift */,
-				A2000004 /* CurrencyViewModel.swift */,
-				A2000006 /* RatesView.swift */,
-				A2000007 /* RateCardView.swift */,
-				A2000008 /* QuickExchangeSection.swift */,
-				A2000009 /* HistoryGraphSection.swift */,
+				A2000010 /* ComposeViewControllerProvider.swift */,
+				A2000011 /* Secrets.swift */,
+				A2000012 /* Info.plist */,
 			);
 			path = ExchangeConvertApp;
 			sourceTree = "<group>";
@@ -88,6 +78,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A7000003 /* Build configuration list for PBXNativeTarget "ExchangeConvertApp" */;
 			buildPhases = (
+				A6000004 /* Prepare Secrets */,
 				A6000002 /* Sources */,
 				A4000001 /* Frameworks */,
 				A6000003 /* Resources */,
@@ -150,6 +141,29 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A6000004 /* Prepare Secrets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Prepare Secrets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ ! -f \"$SRCROOT/ExchangeConvertApp/Secrets.swift\" ]; then\n    cp \"$SRCROOT/ExchangeConvertApp/Secrets.swift.example\" \"$SRCROOT/ExchangeConvertApp/Secrets.swift\"\n    echo \"Created Secrets.swift from template - fill in your exchangerate.host access key.\"\nfi\n";
+			alwaysOutOfDate = 1;
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A6000002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -157,12 +171,8 @@
 			files = (
 				A1000001 /* ExchangeConvertAppApp.swift in Sources */,
 				A1000002 /* ContentView.swift in Sources */,
-				A1000003 /* CurrencyConverterView.swift in Sources */,
-				A1000004 /* CurrencyViewModel.swift in Sources */,
-				A1000006 /* RatesView.swift in Sources */,
-				A1000007 /* RateCardView.swift in Sources */,
-				A1000008 /* QuickExchangeSection.swift in Sources */,
-				A1000009 /* HistoryGraphSection.swift in Sources */,
+				A1000011 /* ComposeViewControllerProvider.swift in Sources */,
+				A1000012 /* Secrets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +310,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ExchangeConvertApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Exchange Convert App";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -335,6 +346,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ExchangeConvertApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Exchange Convert App";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

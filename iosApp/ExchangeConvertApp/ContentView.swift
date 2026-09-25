@@ -2,15 +2,10 @@ import SwiftUI
 import SharedKMP
 
 struct ContentView: View {
-    @StateObject private var viewModel = CurrencyViewModel()
-    
     var body: some View {
-        NavigationView {
-            CurrencyConverterView(
-                viewModel: viewModel
-            )
-            .navigationTitle("Currency Converter")
-        }
+        // Shared Compose Multiplatform app (same UI code as Android).
+        ComposeViewControllerProvider()
+            .ignoresSafeArea()
     }
 }
 
