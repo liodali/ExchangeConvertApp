@@ -3,6 +3,7 @@ plugins {
     id("com.android.library")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlinxSerialization)
     id("com.google.devtools.ksp")
     id("app.cash.sqldelight")
 }
@@ -68,7 +69,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             // SQLDelight Android Driver
-            implementation(libs.androidx.driver)
+            implementation(libs.android.driver)
 
             // Room (for hybrid database approach - Android only)
             // Using stable version to avoid alpha-related risks
