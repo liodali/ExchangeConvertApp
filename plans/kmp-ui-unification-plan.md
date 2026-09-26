@@ -10,7 +10,7 @@
 > | 4 — Shared logic/DI | ✅ Mostly done | `SharedViewModel` (StateFlow, KMP-safe) + `di/SharedKoin.kt` (`initSharedKoin(serverURL, accessKey)`) + `ISessionStorage` (iOS: NSUserDefaults; Android: SharedPreferences, needs `createSessionStorage(context)`). `UIState`/`AmountInput`/`DecimalFormatter` from the Android app were intentionally NOT ported — the shared `SharedUiState` replaces them. |
 > | 5 — Replace iOS SwiftUI with shared Compose | ✅ Done | `MainViewController()` (`ComposeUIViewController`) hosted via `ComposeViewControllerProvider.swift`. SwiftUI duplicates + `CurrencyViewModel.swift` deleted. App bundle id `dali.hamza.ExchangeConvertApp`. |
 > | 6 — Tests | ⬜ Not started | |
-> | 7 — Redesign | ⬜ Not started | |
+> | 7 — Redesign | ◐ Planned | Executable strategy: [plans/redesign-migration-strategy.md](redesign-migration-strategy.md) (Sovereign Ledger UI from `ui-design.pen`; decisions: Navigation-Compose MP, real transactions/historical data, design copy adopted, 3 tabs Home·History·Account). |
 >
 > Deviation from the original plan: Android keeps its current Compose UI (wiring `ExchangeCurrencyApp`
 > into `MainActivity` is a separate follow-up); the iOS token is provided by a git-ignored

@@ -443,6 +443,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 
 - [`plans/kmp-migration-architecture.md`](plans/kmp-migration-architecture.md) — Architecture decisions
 - [`plans/kmp-ui-unification-plan.md`](plans/kmp-ui-unification-plan.md) — UI unification strategy
+- [`plans/redesign-migration-strategy.md`](plans/redesign-migration-strategy.md) — **Phase 7 redesign strategy** (Sovereign Ledger UI from `ui-design.pen`): design tokens, screen↔logic mapping, 8 phases with the business-logic freeze rules
 
 ### 9.2 Migration Rules for AI Agents
 

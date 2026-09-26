@@ -12,6 +12,7 @@
 		A1000010 /* SharedKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A0000002 /* SharedKMP */; };
 		A1000011 /* ComposeViewControllerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* ComposeViewControllerProvider.swift */; };
 		A1000012 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* Secrets.swift */; };
+		A1000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000013 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		A2000010 /* ComposeViewControllerProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeViewControllerProvider.swift; sourceTree = "<group>"; };
 		A2000011 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		A2000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +54,7 @@
 				A2000010 /* ComposeViewControllerProvider.swift */,
 				A2000011 /* Secrets.swift */,
 				A2000012 /* Info.plist */,
+				A2000013 /* Assets.xcassets */,
 			);
 			path = ExchangeConvertApp;
 			sourceTree = "<group>";
@@ -136,6 +139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000013 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
