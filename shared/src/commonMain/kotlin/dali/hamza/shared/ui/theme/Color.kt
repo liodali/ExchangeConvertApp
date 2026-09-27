@@ -2,80 +2,58 @@ package dali.hamza.shared.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Material 3 palette (ported from app/ui/compose/theme/Color.kt — single source of truth)
-val md_theme_light_primary = Color(0xFF0061A3)
-val md_theme_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_light_primaryContainer = Color(0xFFD1E4FF)
-val md_theme_light_onPrimaryContainer = Color(0xFF001D36)
-val md_theme_light_secondary = Color(0xFF006684)
-val md_theme_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_light_secondaryContainer = Color(0xFFBDE9FF)
-val md_theme_light_onSecondaryContainer = Color(0xFF001F2A)
-val md_theme_light_tertiary = Color(0xFF0061A3)
-val md_theme_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_light_tertiaryContainer = Color(0xFFD1E4FF)
-val md_theme_light_onTertiaryContainer = Color(0xFF001D36)
-val md_theme_light_error = Color(0xFFBA1A1A)
-val md_theme_light_errorContainer = Color(0xFFFFDAD6)
-val md_theme_light_onError = Color(0xFFFFFFFF)
-val md_theme_light_onErrorContainer = Color(0xFF410002)
-val md_theme_light_background = Color(0xFFFDFCFF)
-val md_theme_light_onBackground = Color(0xFF1A1C1E)
-val md_theme_light_surface = Color(0xFFFDFCFF)
-val md_theme_light_onSurface = Color(0xFF1A1C1E)
-val md_theme_light_surfaceVariant = Color(0xFFDFE2EB)
-val md_theme_light_onSurfaceVariant = Color(0xFF42474E)
-val md_theme_light_outline = Color(0xFF73777F)
-val md_theme_light_inverseOnSurface = Color(0xFFF1F0F4)
-val md_theme_light_inverseSurface = Color(0xFF2F3033)
-val md_theme_light_inversePrimary = Color(0xFF9DCAFF)
-val md_theme_light_shadow = Color(0xFF000000)
-val md_theme_light_surfaceTint = Color(0xFF0061A3)
-val md_theme_light_outlineVariant = Color(0xFFC3C7CF)
-val md_theme_light_scrim = Color(0xFF000000)
+/**
+ * Sovereign Ledger palette — extracted from `ui-design.pen` (see
+ * `plans/redesign-migration-strategy.md` §1.3, the design spec of record).
+ *
+ * Dark-only theme (v1): the design file defines a single dark palette.
+ * Semantic M3 roles ([LedgerColors] in Theme.kt) map onto these values so
+ * screens keep using `MaterialTheme.colorScheme.*` exclusively.
+ */
+object LedgerColors {
 
-val md_theme_dark_primary = Color(0xFF9DCAFF)
-val md_theme_dark_onPrimary = Color(0xFF003258)
-val md_theme_dark_primaryContainer = Color(0xFF00497C)
-val md_theme_dark_onPrimaryContainer = Color(0xFFD1E4FF)
-val md_theme_dark_secondary = Color(0xFF68D3FF)
-val md_theme_dark_onSecondary = Color(0xFF003546)
-val md_theme_dark_secondaryContainer = Color(0xFF004D64)
-val md_theme_dark_onSecondaryContainer = Color(0xFFBDE9FF)
-val md_theme_dark_tertiary = Color(0xFF9DCAFF)
-val md_theme_dark_onTertiary = Color(0xFF003258)
-val md_theme_dark_tertiaryContainer = Color(0xFF00497C)
-val md_theme_dark_onTertiaryContainer = Color(0xFFD1E4FF)
-val md_theme_dark_error = Color(0xFFFFB4AB)
-val md_theme_dark_errorContainer = Color(0xFF93000A)
-val md_theme_dark_onError = Color(0xFF690005)
-val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
-val md_theme_dark_background = Color(0xFF1A1C1E)
-val md_theme_dark_onBackground = Color(0xFFE2E2E6)
-val md_theme_dark_surface = Color(0xFF1A1C1E)
-val md_theme_dark_onSurface = Color(0xFFE2E2E6)
-val md_theme_dark_surfaceVariant = Color(0xFF42474E)
-val md_theme_dark_onSurfaceVariant = Color(0xFFC3C7CF)
-val md_theme_dark_outline = Color(0xFF8D9199)
-val md_theme_dark_inverseOnSurface = Color(0xFF1A1C1E)
-val md_theme_dark_inverseSurface = Color(0xFFE2E2E6)
-val md_theme_dark_inversePrimary = Color(0xFF0061A3)
-val md_theme_dark_shadow = Color(0xFF000000)
-val md_theme_dark_surfaceTint = Color(0xFF9DCAFF)
-val md_theme_dark_outlineVariant = Color(0xFF42474E)
-val md_theme_dark_scrim = Color(0xFF000000)
+    // ---- Backgrounds (layered) ----
+    val Canvas = Color(0xFF0E0E0E)          // app background (deepest)
+    val Surface = Color(0xFF131313)         // screen scaffold
+    val SurfaceElevated = Color(0xFF1C1B1B) // raised panels
+    val SurfaceRaised = Color(0xFF201F1F)   // cards / active nav pill
 
-// Design system colors from ui-design.pen
-val design_background = Color(0xFF131313)
-val design_surface = Color(0xFF1c1b1b)
-val design_surface_variant = Color(0xFF2a2a2a)
-val design_on_background = Color(0xFFe5e2e1)
-val design_on_surface = Color(0xFFc5c6cd)
-val design_on_surface_muted = Color(0xFF8f9097)
-val design_stroke = Color(0xFF44474d)
-val design_success = Color(0xFF4edea3)
-val design_error = Color(0xFFffb4ab)
-val design_card_background = Color(0xFF201f1f)
-val design_button_background = Color(0xFF353534)
+    // ---- Card / surface fills ----
+    val Card = Color(0xFF2A2A2A)
+    val CardAlt = Color(0xFF353534)
+    val CardHigh = Color(0xFF393939)
 
-val seed = Color(0xFF40A5FF)
+    // ---- Text ----
+    val TextPrimary = Color(0xFFE5E2E1)     // warm white
+    val TextOnColor = Color(0xFFFFFFFF)
+    val TextSecondary = Color(0xFFC5C6CD)
+    val TextTertiary = Color(0xFF8F9097)
+
+    // ---- Muted labels / dividers-adjacent ----
+    val TextMuted = Color(0xFF64748B)
+    val TextMutedAlt = Color(0xFF74829D)
+
+    // ---- Deep navy info surfaces ----
+    val NavyPanel = Color(0xFF0D1C32)
+    val NavyDeep = Color(0xFF0A192F)
+    val Steel = Color(0xFF44474D)
+
+    // ---- Accents ----
+    val Green = Color(0xFF4EDEA3)           // positive change, live indicators
+    val Gold = Color(0xFFE9C349)            // sovereign/premium highlights
+    val Blue = Color(0xFFB9C7E4)            // info accents (balance, finance icons)
+    val BlueSoft = Color(0xFFD6E3FF)
+
+    // ---- Status ----
+    val Error = Color(0xFFFFB4AB)
+
+    // ---- Overlays ----
+    val Scrim = Color(0xFF020617)
+
+    // ---- Alpha helpers (glows / glass tints used by the design) ----
+    val GreenGlow = Green.copy(alpha = 0.12f)   // #4edea31a-ish
+    val GreenSoft = Green.copy(alpha = 0.20f)   // #4edea333
+    val GoldGlow = Gold.copy(alpha = 0.12f)     // #e9c3491a
+    val BlueGlow = Blue.copy(alpha = 0.12f)     // #b9c7e41a
+    val SurfaceBlur = Surface.copy(alpha = 0.70f) // #131313b2 — translucent nav/app bars
+}
