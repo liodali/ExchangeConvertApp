@@ -544,7 +544,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 - The KMP migration is incomplete — `domain`, `core`, and `database` modules still referenced but targeted for deprecation
 - Android app is NOT yet wired to the shared UI — `MainActivity` still uses the app-local Compose UI and the legacy Retrofit repository; the legacy `strings.xml` server (`api.openexchangerate.com`) is a dead host
 - Android `actual`s of the shared storage/driver need a `Context` (`createSessionStorage(context)`, `createDatabaseDriver(context)`) until the shared module is initialized from `ExchangeApplication`
-- Shared UI icons are text glyphs until the Phase 7 redesign ships real icons
+- Shared UI icons are now real Material icons (`compose.materialIconsExtended`, added in Phase 1 of the redesign); the Ledger component library + bundled Manrope/Inter fonts live in `shared/ui/components/` + `shared/ui/theme/`
 
 ---
 
