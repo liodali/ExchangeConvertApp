@@ -53,11 +53,43 @@ jobs:
 
       - name: Derive version from tag
         run: |
-          VERSION_NAME="${GITHUB_REF_NAME#app-v}"
-          # workflow_dispatch (no tag) falls back to a dev label
-          if [ "$VERSION_NAME" = "${GITHUB_REF_NAME}" ]; then VERSION_NAME="1.0.0-dev.${GITHUB_RUN_NUMBER}"; fi
+          # Tag scheme: app-vX.Y.Z+BUILD[-dev]  (e.g. app-v1.0.1+42, app-v1.0.1+43-dev)
+          # Also accepts dev before the build: app-v1.0.1-dev+44
+          #   versionName = X.Y.Z ("-dev" appended when marked)
+          #   versionCode = BUILD (Play requires strictly increasing)
+          # No +BUILD → fall back to the run number with a warning.
+          TAG="${GITHUB_REF_NAME#app-v}"
+          if [ "$TAG" = "$GITHUB_REF_NAME" ]; then
+            # workflow_dispatch / non-tag: dev build from the run number
+            VERSION_NAME="1.0.0-dev.$GITHUB_RUN_NUMBER"
+            VERSION_CODE="$GITHUB_RUN_NUMBER"
+          else
+            BASE="${TAG%%+*}"
+            IS_DEV=false
+            if [[ "$BASE" == *"-dev" ]]; then IS_DEV=true; BASE="${BASE%-dev}"; fi
+            if [[ "$TAG" == *"-dev" ]]; then IS_DEV=true; fi
+            CODE=""
+            if [[ "$TAG" == *"+"* ]]; then
+              CODE="${TAG#*+}"
+              CODE="${CODE%-dev}"
+            fi
+            if ! [[ "$CODE" =~ ^[0-9]+$ ]]; then
+              echo "::warning::tag '$GITHUB_REF_NAME' has no +BUILD — using run number as versionCode"
+              CODE="$GITHUB_RUN_NUMBER"
+            fi
+            if [ "$CODE" -gt 2100000000 ]; then
+              echo "::error::versionCode $CODE exceeds Play's 2100000000 limit"; exit 1
+            fi
+            if [ "$IS_DEV" = true ]; then
+              VERSION_NAME="$BASE-dev"
+            else
+              VERSION_NAME="$BASE"
+            fi
+            VERSION_CODE="$CODE"
+          fi
           echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
-          echo "VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "release: versionName=$VERSION_NAME versionCode=$VERSION_CODE"
 
       - name: Build release AAB
         env:

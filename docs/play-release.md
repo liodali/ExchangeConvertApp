@@ -52,17 +52,27 @@ the app can never be updated on Play).
    - Ads: no ads · Content rating questionnaire · Target audience 18+ · App access: all functionality available
 6. **Internal testing** track → add testers (emails or a Google Group).
 
-## 4. Ship it
+## 4. Ship it — version & build number come from the tag
+
+Tag scheme: **`app-vX.Y.Z+BUILD[-dev]`** — the tag is the single source of truth:
+
+| Tag | versionName | versionCode |
+|---|---|---|
+| `app-v1.0.1+42` | `1.0.1` | `42` |
+| `app-v1.0.1+43-dev` | `1.0.1-dev` | `43` |
+| `app-v1.0.1-dev+44` | `1.0.1-dev` | `44` (dev before `+` also accepted) |
+| `app-v1.0.1` (no `+BUILD`) | `1.0.1` | run number (warning logged) |
 
 ```bash
-GIT_EDITOR=true git tag -a app-v1.0.0 -m "Sovereign Ledger 1.0.0"
-git push origin app-v1.0.0
+GIT_EDITOR=true git tag -a app-v1.0.1+42 -m "Sovereign Ledger 1.0.1 (build 42)"
+git push origin app-v1.0.1+42
 ```
 
-GitHub Actions builds the signed AAB (`versionCode` = run number, `versionName`
-from the tag) and uploads it to the internal track. Testers get the opt-in link
-from Console → Internal testing. Promote internal → closed → production from the
-Console when ready.
+Keep `BUILD` strictly increasing (Play requires it for every upload) — a simple
+`+1` per release is all it takes. The workflow validates the Play limit
+(2 100 000 000) and falls back to the run number with a warning when `+BUILD`
+is missing. Testers get the opt-in link from Console → Internal testing;
+promote internal → closed → production from the Console when ready.
 
 ## Listing assets (ready in `qa/store/`)
 
@@ -75,5 +85,5 @@ Console when ready.
 
 - Debug builds install as `com.sovereignledger.app.debug` (separate from release).
 - The AAB artifact is attached to every workflow run even without Play secrets.
-- `docs:` the version scheme is `app-vMAJOR.MINOR.PATCH`; `versionCode` always
-  comes from the CI run number so it strictly increases.
+- Version scheme: `app-vX.Y.Z+BUILD[-dev]` — both versionName and versionCode
+  are defined by the tag; the workflow derives and validates them.
