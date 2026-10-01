@@ -29,11 +29,37 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            currentFocus?.clearFocus()
             (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
                 .hideSoftInputFromWindow(window.decorView.windowToken, 0)
         }
         return super.dispatchTouchEvent(event)
+    }
+
+    /**
+     * Covers warm resume (reopen from recents): any focus and IME left over
+     * from the previous session are cleared. onResume never fires during
+     * keyboard interaction, so it cannot fight the user typing.
+     */
+    override fun onResume() {
+        super.onResume()
+        currentFocus?.clearFocus()
+        (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+    }
+
+    /**
+     * Compose RESTORES the saved focus of the amount field during the first
+     * composition — AFTER onResume — and the restored editor re-opens the
+     * IME even with stateHidden. This hook fires last, when the window
+     * actually gains focus, and clears it. It never fires while the user is
+     * typing (opening the soft IME does not change activity window focus).
+     */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -2,6 +2,11 @@ package dali.hamza.shared.ui
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -62,8 +69,17 @@ fun ExchangeCurrencyApp(
     modifier: Modifier = Modifier,
 ) {
     ExchangeCurrencyAppTheme {
-        val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
+        // Focus sink: an invisible, non-input focus target. Tapping anywhere
+        // moves focus HERE instead of "clearing" it — Compose's root focus
+        // restoration would otherwise re-focus the amount field and reopen
+        // the keyboard.
+        val focusSink = remember { FocusRequester() }
+        var sinkHasFocus by remember { mutableStateOf(false) }
+        val sinkModifier = Modifier
+            .focusRequester(focusSink)
+            .onFocusChanged { sinkHasFocus = it.isFocused }
+            .focusTarget()
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
@@ -75,7 +91,8 @@ fun ExchangeCurrencyApp(
             // on another input re-focus it and the keyboard stays.
             contentWindowInsets = WindowInsets(0.dp),
             modifier = modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .then(sinkModifier),
             bottomBar = {
                 if (currentRoute in Routes.topLevel) {
                     LedgerBottomNav(
@@ -94,17 +111,22 @@ fun ExchangeCurrencyApp(
             NavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
-                // ANY touch inside screen content clears Compose focus + hides
-                // the IME (observing, non-consuming; interactive elements still
-                // receive their taps, inputs re-focus and keep the keyboard)
+                // Keyboard UX: on touch-DOWN focus moves to the invisible
+                // sink (never clearFocus — Compose's focus restoration would
+                // re-focus the amount field). After the gesture ENDS, the IME
+                // is hidden as the final word — but only if no input re-took
+                // the focus (tapping the field itself keeps the keyboard).
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown(requireUnconsumed = false)
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
+                            runCatching { focusSink.requestFocus() }
+                            waitForUpOrCancellation()
+                            if (sinkHasFocus) {
+                                keyboardController?.hide()
+                            }
                         }
                     },
             ) {
