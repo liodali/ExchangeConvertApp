@@ -29,4 +29,5 @@ iosApp/ExchangeConvertApp/Secrets.swift
 # Design assets
 design/*
 !design/logo.svg
+qa/
 ui-design.pen

@@ -61,6 +61,7 @@ fun LedgerBottomNav(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(LedgerColors.SurfaceBlur)
             .navigationBarsPadding(),
     ) {
