@@ -165,7 +165,16 @@ fun ExchangeCurrencyApp(
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                     )
                 }
-                composable(Routes.CONVERTER) { ConverterCurrencyScreen(viewModel) }
+                composable(Routes.CONVERTER) {
+                    ConverterCurrencyScreen(
+                        viewModel = viewModel,
+                        // separate instance from the History tab (Koin factory)
+                        historyViewModel = remember {
+                            KoinPlatform.getKoin()?.get<HistoryViewModel>() ?: historyViewModel
+                        },
+                        onBack = { navController.popBackStack() },
+                    )
+                }
                 composable(Routes.FAQ) {
                     FaqScreen(
                         onBack = { navController.popBackStack() },

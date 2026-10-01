@@ -41,6 +41,8 @@ data class HistoryUiState(
     val bestTimestamp: Long? = null,
     val transactions: List<Transaction> = emptyList(),
     val balances: List<AssetBalance> = emptyList(),
+    /** Day-over-day % change per symbol, for the rates grid (converter page). */
+    val gridDeltas: Map<String, Double> = emptyMap(),
     val topPercentile: Int? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -60,16 +62,16 @@ class HistoryViewModel(
     val state: StateFlow<HistoryUiState> = _state.asStateFlow()
 
     /** Load everything for the active pair (session base → selected quote). */
-    fun load(base: String?, quote: String?) {
+    fun load(base: String?, quote: String?, range: HistoryRange = HistoryRange.ONE_WEEK) {
         if (base == null || quote == null || base == quote) {
             _state.update { it.copy(error = "Select two different currencies to see history") }
             return
         }
-        _state.update { it.copy(base = base, quote = quote, error = null, isLoading = true) }
+        _state.update { it.copy(base = base, quote = quote, error = null, isLoading = true, range = range) }
         viewModelScope.launch {
             refreshLiveRate(base, quote)
             loadTransactions(base, quote)
-            loadSeries(base, quote, _state.value.range)
+            loadSeries(base, quote, range)
             _state.update { it.copy(isLoading = false) }
         }
     }
@@ -79,6 +81,40 @@ class HistoryViewModel(
         val quote = _state.value.quote ?: return
         _state.update { it.copy(range = range) }
         viewModelScope.launch { loadSeries(base, quote, range) }
+    }
+
+    /**
+     * Day-over-day % change for the rates grid: yesterday vs the latest
+     * available point of each symbol's short series (converter page,
+     * design `2XSA3` "Available Rates" cards).
+     */
+    fun loadGridDeltas(base: String, symbols: List<String>) {
+        if (symbols.isEmpty()) return
+        val today = DateUtils.epochDayOf(nowMillis())
+        val from = DateUtils.toIsoDate(today - 2)
+        val to = DateUtils.toIsoDate(today)
+        viewModelScope.launch {
+            when (
+                val response = repository.getHistoricalRates(
+                    base, symbols.take(30), from, to
+                )
+            ) {
+                is MyResponse.Success -> {
+                    val deltas = response.data.mapNotNull { (symbol, series) ->
+                        val first = series.firstOrNull()?.rate ?: return@mapNotNull null
+                        val last = series.lastOrNull()?.rate ?: return@mapNotNull null
+                        if (first == 0.0) {
+                            null
+                        } else {
+                            symbol to (last - first) / first * 100.0
+                        }
+                    }.toMap()
+                    _state.update { it.copy(gridDeltas = deltas) }
+                }
+
+                else -> Unit // deltas are optional decoration — never block the grid
+            }
+        }
     }
 
     private suspend fun refreshLiveRate(base: String, quote: String) {

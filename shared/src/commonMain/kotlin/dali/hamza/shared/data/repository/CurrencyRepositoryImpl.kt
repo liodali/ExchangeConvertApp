@@ -150,6 +150,31 @@ class CurrencyRepositoryImpl(
             )
     }
 
+    override suspend fun getHistoricalRates(
+        base: String,
+        symbols: List<String>,
+        from: String,
+        to: String,
+    ): MyResponse<Map<String, List<HistoricalRate>>> = withContext(Dispatchers.Default) {
+        currencyApi.getHistoricalSeries(base, symbols.joinToString(","), from, to)
+            .fold(
+                onSuccess = { dto ->
+                    val series = dto.rates.orEmpty()
+                        .flatMap { (date, values) ->
+                            values.map { (symbol, rate) -> symbol to HistoricalRate(date, rate) }
+                        }
+                        .groupBy({ it.first }, { it.second })
+                        .mapValues { (_, points) -> points.sortedBy { it.date } }
+                    if (series.isEmpty()) {
+                        MyResponse.Error("No historical rates for $base")
+                    } else {
+                        MyResponse.Success(series)
+                    }
+                },
+                onFailure = { MyResponse.Error(it.message ?: "Historical rates unavailable") },
+            )
+    }
+
     override suspend fun getTransactions(): List<Transaction> =
         withContext(Dispatchers.Default) {
             database.transactionsQueries

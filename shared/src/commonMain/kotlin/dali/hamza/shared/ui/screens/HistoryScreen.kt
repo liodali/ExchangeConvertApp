@@ -104,17 +104,6 @@ fun HistoryScreen(
                 Spacer(Modifier.height(12.dp))
             }
 
-            // ============ Your balance ====================================
-            Text(
-                text = "YOUR BALANCE",
-                style = MaterialTheme.typography.bodyMedium,
-                color = LedgerColors.TextSecondary,
-            )
-            Spacer(Modifier.height(16.dp))
-            BalanceCard(balances = state.balances)
-
-            Spacer(Modifier.height(16.dp))
-
             // ============ Premium benefit =================================
             BentoCard(fill = LedgerColors.Canvas, cornerRadius = 24.dp) {
                 Row(
@@ -439,92 +428,6 @@ fun HistoryScreen(
 // ---------------------------------------------------------------------------
 // sections
 // ---------------------------------------------------------------------------
-
-@Composable
-private fun BalanceCard(balances: List<AssetBalance>) {
-    BentoCard(fill = LedgerColors.SurfaceRaised) {
-        if (balances.isEmpty()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.Blue.copy(alpha = 0.10f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Wallet,
-                        contentDescription = null,
-                        tint = LedgerColors.Blue,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                Text(
-                    text = "No exchanges yet — your wallets fill as you convert.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LedgerColors.TextSecondary,
-                )
-            }
-        } else {
-            balances.take(3).forEachIndexed { index, balance ->
-                if (index > 0) Spacer(Modifier.height(16.dp))
-                BalanceRow(
-                    balance = balance,
-                    tint = if (index % 2 == 0) LedgerColors.Blue else LedgerColors.Gold,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BalanceRow(balance: AssetBalance, tint: Color) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(LedgerColors.Canvas)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(tint.copy(alpha = 0.20f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Key,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "${balance.currency} Wallet",
-                style = MaterialTheme.typography.labelMedium,
-                color = LedgerColors.TextSecondary,
-            )
-            Text(
-                text = "${formatAmount(balance.balance)} ${balance.currency}",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = LedgerColors.TextOnColor,
-            )
-        }
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = LedgerColors.TextTertiary.copy(alpha = 0.40f),
-            modifier = Modifier.size(14.dp),
-        )
-    }
-}
 
 @Composable
 private fun TransactionRow(tx: Transaction) {

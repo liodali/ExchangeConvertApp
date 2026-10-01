@@ -62,6 +62,18 @@ interface IRepository {
     ): MyResponse<List<HistoricalRate>>
 
     /**
+     * Daily historical series for several symbols at once (rates grid deltas).
+     * The backend accepts a comma-joined `symbol` list; results are keyed by
+     * symbol, each series sorted by date.
+     */
+    suspend fun getHistoricalRates(
+        base: String,
+        symbols: List<String>,
+        from: String,
+        to: String,
+    ): MyResponse<Map<String, List<HistoricalRate>>>
+
+    /**
      * All recorded conversion transactions, newest first.
      */
     suspend fun getTransactions(): List<Transaction>

@@ -65,6 +65,14 @@ private class FakeRepository : IRepository {
         }
     }
 
+    override suspend fun getHistoricalRates(
+        base: String,
+        symbols: List<String>,
+        from: String,
+        to: String,
+    ): MyResponse<Map<String, List<HistoricalRate>>> =
+        MyResponse.Success(emptyMap())
+
     override suspend fun getTransactions(): List<Transaction> = transactions
 
     override suspend fun recordTransaction(transaction: Transaction) {
