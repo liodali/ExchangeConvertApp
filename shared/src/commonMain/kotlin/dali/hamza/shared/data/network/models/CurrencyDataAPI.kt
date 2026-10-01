@@ -19,6 +19,17 @@ data class LatestRatesDataAPI(
     @SerialName("rates") val rates: Map<String, Double>? = null,
 )
 
+/**
+ * GET /historic?base=&symbol=&from=&to= — daily series for one pair.
+ * `rates` is keyed by ISO date: {"2026-09-02": {"USD": 0.3435}, ...}
+ */
+@Serializable
+data class HistoricSeriesDataAPI(
+    @SerialName("base") val base: String? = null,
+    @SerialName("time") val time: String? = null,
+    @SerialName("rates") val rates: Map<String, Map<String, Double>>? = null,
+)
+
 // ---------------------------------------------------------------------------
 // Legacy exchangerate.host DTOs (currencylayer-compatible). The /live and
 // /convert flows now use LatestRatesDataAPI against our own exchange-api

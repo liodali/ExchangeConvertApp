@@ -7,7 +7,9 @@ import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.database.AppDatabase
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
+import dali.hamza.shared.domain.models.HistoricalRate
 import dali.hamza.shared.domain.models.MyResponse
+import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -121,4 +123,64 @@ class CurrencyRepositoryImpl(
         sessionStorage.setLastUpdate(0L)
         saveExchangeRatesOfCurrentCurrency()
     }
+
+    override suspend fun getHistoricalRates(
+        base: String,
+        symbol: String,
+        from: String,
+        to: String,
+    ): MyResponse<List<HistoricalRate>> = withContext(Dispatchers.Default) {
+        currencyApi.getHistoricalSeries(base, symbol, from, to)
+            .fold(
+                onSuccess = { dto ->
+                    val series = dto.rates
+                        ?.mapNotNull { (date, symbols) ->
+                            val rate = symbols[symbol]
+                            if (rate != null) HistoricalRate(date, rate) else null
+                        }
+                        ?.sortedBy { it.date }
+                        .orEmpty()
+                    if (series.isEmpty()) {
+                        MyResponse.Error("No historical rates for $base/$symbol")
+                    } else {
+                        MyResponse.Success(series)
+                    }
+                },
+                onFailure = { MyResponse.Error(it.message ?: "Historical rates unavailable") },
+            )
+    }
+
+    override suspend fun getTransactions(): List<Transaction> =
+        withContext(Dispatchers.Default) {
+            database.transactionsQueries
+                .selectTransactions()
+                .executeAsList()
+                .map { row ->
+                    Transaction(
+                        id = row.id,
+                        base = row.base,
+                        quote = row.quote,
+                        amountBase = row.amountBase,
+                        amountQuote = row.amountQuote,
+                        rate = row.rate,
+                        timestamp = row.timestamp,
+                        direction = row.direction,
+                    )
+                }
+        }
+
+    override suspend fun recordTransaction(transaction: Transaction) =
+        withContext(Dispatchers.Default) {
+            database.transactionsQueries.transaction {
+                database.transactionsQueries.insertTransaction(
+                    base = transaction.base,
+                    quote = transaction.quote,
+                    amountBase = transaction.amountBase,
+                    amountQuote = transaction.amountQuote,
+                    rate = transaction.rate,
+                    timestamp = transaction.timestamp,
+                    direction = transaction.direction,
+                )
+            }
+        }
 }

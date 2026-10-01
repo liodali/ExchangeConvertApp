@@ -2,6 +2,7 @@ package dali.hamza.shared.data.network
 
 import dali.hamza.shared.data.network.models.LatestRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricRatesDataAPI
+import dali.hamza.shared.data.network.models.HistoricSeriesDataAPI
 import dali.hamza.shared.data.network.models.LiveRatesDataAPI
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -58,6 +59,31 @@ class CurrencyApi(
                 parameter("amount", amount)
             }
             Result.success(response.body<LatestRatesDataAPI>().rates?.get(to))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Daily historical series for one pair (Phase 4 — History cluster).
+     * `GET historic?base=BASE&symbol=SYM&from=yyyy-MM-dd&to=yyyy-MM-dd`
+     * → `{base, time, rates: {"2026-09-02": {"USD": 0.3435}, ...}}`
+     */
+    suspend fun getHistoricalSeries(
+        base: String,
+        symbol: String,
+        from: String,
+        to: String,
+    ): Result<HistoricSeriesDataAPI> {
+        return try {
+            val response = httpClient.get("historic") {
+                parameter("access_key", accessKey)
+                parameter("base", base)
+                parameter("symbol", symbol)
+                parameter("from", from)
+                parameter("to", to)
+            }
+            Result.success(response.body<HistoricSeriesDataAPI>())
         } catch (e: Exception) {
             Result.failure(e)
         }

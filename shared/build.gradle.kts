@@ -63,6 +63,11 @@ kotlin {
 
 
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
         androidMain.dependencies {
             // Ktor Android Engine
             implementation(libs.ktor.client.core)

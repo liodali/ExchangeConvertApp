@@ -1,9 +1,11 @@
 package dali.hamza.shared.ui.viewmodel
 
 import dali.hamza.shared.data.CurrenciesCatalog
+import dali.hamza.shared.common.nowMillis
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.MyResponse
+import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -130,6 +132,27 @@ class SharedViewModel(
     fun convert() {
         viewModelScope.launch {
             loadRates()
+            // Phase 4: record every successful exchange in the ledger
+            // (the only permitted SharedViewModel data hook — see plan §3.3)
+            val current = _state.value
+            val amount = current.amount.replace(',', '.').toDoubleOrNull()
+            val from = current.fromCurrency?.name
+            val to = current.toCurrency?.name
+            val converted = current.convertedAmount
+            if (amount != null && amount > 0.0 && from != null && to != null &&
+                from != to && converted != null && converted > 0.0
+            ) {
+                repository.recordTransaction(
+                    Transaction(
+                        base = from,
+                        quote = to,
+                        amountBase = amount,
+                        amountQuote = converted,
+                        rate = converted / amount,
+                        timestamp = nowMillis(),
+                    )
+                )
+            }
         }
     }
 

@@ -1,0 +1,38 @@
+-- Conversion transactions (Phase 4 — History cluster).
+-- Table name avoids the SQL keyword TRANSACTION.
+CREATE TABLE IF NOT EXISTS ConversionTransaction (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    base TEXT NOT NULL,
+    quote TEXT NOT NULL,
+    amountBase REAL NOT NULL,
+    amountQuote REAL NOT NULL,
+    rate REAL NOT NULL,
+    timestamp INTEGER NOT NULL,
+    direction TEXT NOT NULL
+);
+
+insertTransaction:
+INSERT INTO ConversionTransaction(base, quote, amountBase, amountQuote, rate, timestamp, direction)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+selectTransactions:
+SELECT * FROM ConversionTransaction
+ORDER BY timestamp DESC;
+
+selectTransactionsForPair:
+SELECT * FROM ConversionTransaction
+WHERE base = ? AND quote = ?
+ORDER BY timestamp DESC;
+
+selectBestRateForPair:
+SELECT MAX(rate) AS rate FROM ConversionTransaction
+WHERE base = ? AND quote = ?;
+
+selectBestRateTimestampForPair:
+SELECT timestamp FROM ConversionTransaction
+WHERE base = ? AND quote = ?
+ORDER BY rate DESC, timestamp DESC
+LIMIT 1;
+
+deleteAllTransactions:
+DELETE FROM ConversionTransaction;
