@@ -5,14 +5,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.DataTier
+import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.currentEpochMillis
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /**
  * Account cluster state (design frame `qDCZE`) — KMP-safe, no platform
- * ViewModel base. Backed ONLY by [ISessionStorage] preference keys
- * (Phase 3 rule: additive, zero data-layer risk).
+ * ViewModel base. Backed by [ISessionStorage] preference keys; the
+ * repository is optional (guest-mode ledger clearing).
  */
-class AccountViewModel(private val storage: ISessionStorage) {
+class AccountViewModel(
+    private val storage: ISessionStorage,
+    private val repository: IRepository? = null,
+) {
+
+    private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     /** Profile display name — shared with the dashboard top bar. */
     var username by mutableStateOf(storage.getUsername())
@@ -40,6 +50,18 @@ class AccountViewModel(private val storage: ISessionStorage) {
         if (name.isEmpty()) return
         storage.setUsername(name)
         username = storage.getUsername()
+    }
+
+    /**
+     * Guest-mode "Clear Local Ledger" — wipes every recorded exchange
+     * from this device. No-op when the repository isn't wired.
+     */
+    fun clearLedger(onCleared: () -> Unit = {}) {
+        val repo = repository ?: return
+        viewModelScope.launch {
+            repo.clearTransactions()
+            onCleared()
+        }
     }
 
     /** Footer copy: "JUST NOW" / "4M AGO" / "2H AGO" (design: "2M AGO"). */

@@ -34,6 +34,14 @@ object LedgerStrings {
         const val CHANGE_PASSWORD = "Change Password"
         const val BIOMETRIC_UNLOCK = "Biometric Unlock"
 
+        /** Guest-mode local-data section (no session to log out of). */
+        const val LOCAL_DATA_SECTION = "LOCAL DATA"
+        const val CLEAR_LEDGER = "Clear Local Ledger"
+        const val CLEAR_LEDGER_TITLE = "Clear local ledger?"
+        const val CLEAR_LEDGER_MESSAGE =
+            "All exchanges recorded on this device will be removed."
+        const val CONFIRM_CLEAR = "Clear"
+
         const val PREFERENCES = "PREFERENCES"
         const val PUSH_NOTIFICATIONS = "Push Notifications"
         const val ENABLED = "Enabled"

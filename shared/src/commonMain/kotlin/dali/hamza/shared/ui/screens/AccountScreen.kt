@@ -83,7 +83,9 @@ fun AccountScreen(
     onOpenSupport: () -> Unit,
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
+    var showClearDialog by remember { mutableStateOf(false) }
     var biometricUnlock by remember { mutableStateOf(true) }
+    val isSovereign = viewModel.dataTier == DataTier.SOVEREIGN
 
     Column(
         modifier = Modifier
@@ -197,14 +199,17 @@ fun AccountScreen(
             Spacer(Modifier.height(24.dp))
 
             // ============ Security & authentication =======================
+            // guests have no password — that row waits for Sovereign login
             BentoCard {
                 SectionLabel(LedgerStrings.Account.SECURITY_SECTION)
                 Spacer(Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    LedgerListRow(
-                        label = LedgerStrings.Account.CHANGE_PASSWORD,
-                        icon = Icons.Outlined.Password,
-                    )
+                    if (isSovereign) {
+                        LedgerListRow(
+                            label = LedgerStrings.Account.CHANGE_PASSWORD,
+                            icon = Icons.Outlined.Password,
+                        )
+                    }
                     LedgerListRow(
                         label = LedgerStrings.Account.BIOMETRIC_UNLOCK,
                         icon = Icons.Outlined.Fingerprint,
@@ -259,19 +264,34 @@ fun AccountScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ============ Vault management ================================
-            BentoCard {
-                SectionLabel(LedgerStrings.Account.VAULT_SECTION)
-                Spacer(Modifier.height(16.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // ============ Vault management / local data ===================
+            if (isSovereign) {
+                BentoCard {
+                    SectionLabel(LedgerStrings.Account.VAULT_SECTION)
+                    Spacer(Modifier.height(16.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LedgerListRow(
+                            label = LedgerStrings.Account.LOG_OUT,
+                            icon = Icons.AutoMirrored.Outlined.Logout,
+                            emphasize = true,
+                        )
+                        LedgerListRow(
+                            label = LedgerStrings.Account.DELETE_ACCOUNT,
+                            icon = Icons.Outlined.DeleteOutline,
+                            emphasize = true,
+                        )
+                    }
+                }
+            } else {
+                // guests have no session to log out of — local data instead
+                BentoCard {
+                    SectionLabel(LedgerStrings.Account.LOCAL_DATA_SECTION)
+                    Spacer(Modifier.height(16.dp))
                     LedgerListRow(
-                        label = LedgerStrings.Account.LOG_OUT,
-                        icon = Icons.AutoMirrored.Outlined.Logout,
-                        emphasize = true,
-                    )
-                    LedgerListRow(
-                        label = LedgerStrings.Account.DELETE_ACCOUNT,
+                        label = LedgerStrings.Account.CLEAR_LEDGER,
                         icon = Icons.Outlined.DeleteOutline,
+                        iconTint = LedgerColors.Error,
+                        onClick = { showClearDialog = true },
                         emphasize = true,
                     )
                 }
@@ -340,6 +360,41 @@ fun AccountScreen(
                 showEditDialog = false
             },
         )
+    }
+
+    if (showClearDialog) {
+        Dialog(onDismissRequest = { showClearDialog = false }) {
+            BentoCard(fill = LedgerColors.SurfaceElevated) {
+                Text(
+                    text = LedgerStrings.Account.CLEAR_LEDGER_TITLE,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = LedgerColors.TextPrimary,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = LedgerStrings.Account.CLEAR_LEDGER_MESSAGE,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LedgerColors.TextSecondary,
+                )
+                Spacer(Modifier.height(24.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LedgerButton(
+                        text = LedgerStrings.Account.DIALOG_CANCEL,
+                        onClick = { showClearDialog = false },
+                        variant = LedgerButtonVariant.TONAL,
+                        modifier = Modifier.weight(1f),
+                    )
+                    LedgerButton(
+                        text = LedgerStrings.Account.CONFIRM_CLEAR,
+                        onClick = {
+                            showClearDialog = false
+                            viewModel.clearLedger()
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
     }
 }
 

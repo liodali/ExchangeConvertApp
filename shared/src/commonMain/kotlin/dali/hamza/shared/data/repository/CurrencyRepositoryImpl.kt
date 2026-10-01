@@ -220,6 +220,10 @@ class CurrencyRepositoryImpl(
             }
         }
 
+    override suspend fun clearTransactions(): Unit = withContext(Dispatchers.Default) {
+        database.transactionsQueries.deleteAllTransactions()
+    }
+
     companion object {
         /**
          * Live-rates refresh window per data tier — guests hourly, Sovereign

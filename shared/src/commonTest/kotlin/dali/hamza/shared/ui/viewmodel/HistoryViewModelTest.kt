@@ -78,6 +78,10 @@ private class FakeRepository : IRepository {
     override suspend fun recordTransaction(transaction: Transaction) {
         recorded.add(transaction)
     }
+
+    override suspend fun clearTransactions() {
+        recorded.clear()
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

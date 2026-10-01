@@ -41,7 +41,7 @@ fun sharedModule(
         )
     }
     factory { SharedViewModel(get()) }
-    factory { AccountViewModel(get()) }
+    factory { AccountViewModel(storage = get(), repository = get()) }
     factory { HistoryViewModel(get()) }
     factory { HomeViewModel(get()) }
 }

@@ -83,4 +83,9 @@ interface IRepository {
      * `SharedViewModel.convert()` success path).
      */
     suspend fun recordTransaction(transaction: Transaction)
+
+    /**
+     * Remove all recorded transactions (guest-mode "Clear Local Ledger").
+     */
+    suspend fun clearTransactions()
 }
