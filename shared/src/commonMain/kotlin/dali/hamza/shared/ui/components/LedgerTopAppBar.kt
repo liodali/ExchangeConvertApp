@@ -54,6 +54,8 @@ fun LedgerTopAppBar(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     leadingIcon: ImageVector? = null,
+    /** Custom leading mark (e.g. the logo) — takes precedence over [leadingIcon]. */
+    leading: (@Composable () -> Unit)? = null,
     /** Optional greeting line above the title (dashboard: "Good Afternoon"). */
     greeting: String? = null,
     avatarInitials: String? = null,
@@ -89,6 +91,11 @@ fun LedgerTopAppBar(
                             tint = LedgerColors.Blue,
                         )
                     }
+                }
+
+                leading != null -> {
+                    leading()
+                    Spacer(Modifier.width(12.dp))
                 }
 
                 leadingIcon != null -> {

@@ -61,6 +61,7 @@ import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
 import dali.hamza.shared.ui.components.LedgerInput
+import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -94,7 +95,7 @@ fun HomeScreen(
     ) {
         LedgerTopAppBar(
             title = state.username,
-            leadingIcon = Icons.Outlined.CurrencyExchange,
+            leading = { LedgerLogoMark() },
             greeting = remember { greetingForHour(currentHourOfDay()) },
             avatarInitials = state.username,
             trailing = {

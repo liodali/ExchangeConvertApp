@@ -8,6 +8,7 @@ import dali.hamza.shared.database.AppDatabase
 import dali.hamza.shared.database.createDatabaseDriver
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
+import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
@@ -40,6 +41,7 @@ fun sharedModule(
     }
     factory { SharedViewModel(get()) }
     factory { AccountViewModel(get()) }
+    factory { HistoryViewModel(get()) }
 }
 
 private var koinInstance: Koin? = null

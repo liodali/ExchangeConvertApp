@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,18 +26,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.ui.components.LedgerBottomNav
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
 import dali.hamza.shared.ui.screens.ContactSupportScreen
 import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
+import dali.hamza.shared.ui.screens.HistoryScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
-import dali.hamza.shared.ui.screens.RatesScreen
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
+import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 import org.koin.mp.KoinPlatform
 
@@ -85,11 +88,17 @@ fun ExchangeCurrencyApp(
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
-        // Hosts always start Koin before composing — resolve the account VM
+        // Hosts always start Koin before composing — resolve the cluster VMs
         // from the shared container (same instance both platforms use).
         val accountViewModel = remember {
             KoinPlatform.getKoin()?.get<AccountViewModel>()
                 ?: AccountViewModel(dali.hamza.shared.data.storage.createSessionStorage())
+        }
+        val historyViewModel = remember {
+            HistoryViewModel(
+                KoinPlatform.getKoin()?.get<IRepository>()
+                    ?: error("initSharedKoin() must run before ExchangeCurrencyApp()")
+            )
         }
 
         Scaffold(
@@ -145,9 +154,10 @@ fun ExchangeCurrencyApp(
                     )
                 }
                 composable(Routes.HISTORY) {
-                    // Placeholder until Phase 4 (History cluster) — shows the
-                    // current rates list so the tab stays useful.
-                    RatesScreen(viewModel)
+                    HistoryScreen(
+                        sharedViewModel = viewModel,
+                        historyViewModel = historyViewModel,
+                    )
                 }
                 composable(Routes.ACCOUNT) {
                     AccountScreen(
