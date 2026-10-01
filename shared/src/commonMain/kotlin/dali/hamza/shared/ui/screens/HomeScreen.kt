@@ -222,7 +222,7 @@ private fun PairCard(
             // pair label on two lines: quote / (line 1), base (line 2)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = quote,
+                    text = "$quote /",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -230,7 +230,7 @@ private fun PairCard(
                     color = LedgerColors.TextPrimary,
                 )
                 Text(
-                    text = "/ $base",
+                    text = base,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
