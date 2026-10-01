@@ -1,6 +1,5 @@
 package dali.hamza.echangecurrencyapp.ui
 
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
@@ -16,28 +15,23 @@ import org.koin.core.context.GlobalContext
 /**
  * Hosts the shared Compose Multiplatform UI (Sovereign Ledger).
  *
- * The legacy app-local UI (Home / SelectCurrencyPage / converter pages) is
- * retired from hosting; its files stay in the tree until Phase 6 cleanup
- * verifies full feature parity (plans/redesign-migration-strategy.md).
+ * Keyboard UX (both platform-level — the Compose focus observer in the
+ * shared root covers iOS):
+ * - `stateHidden` (manifest): the IME is NEVER restored open on launch —
+ *   no autofocus when the app opens.
+ * - `dispatchTouchEvent`: every touch first clears focus and hides the
+ *   IME. Tapping a text field re-requests focus during the same gesture,
+ *   so inputs keep working; tapping anywhere else dismisses the keyboard.
+ *   (No bounds check on purpose: in Compose, `currentFocus` is the whole
+ *   Compose surface, so a bounds test can never detect "outside".)
  */
 class MainActivity : ComponentActivity() {
 
-    /**
-     * Tap-outside dismisses the keyboard (platform-level, 100% reliable):
-     * any touch that starts outside the focused editor clears focus and
-     * hides the IME. Compose's own focus system follows.
-     */
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            currentFocus?.let { focused ->
-                val rect = Rect()
-                focused.getGlobalVisibleRect(rect)
-                if (!rect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-                    focused.clearFocus()
-                    (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .hideSoftInputFromWindow(focused.windowToken, 0)
-                }
-            }
+            currentFocus?.clearFocus()
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(window.decorView.windowToken, 0)
         }
         return super.dispatchTouchEvent(event)
     }
