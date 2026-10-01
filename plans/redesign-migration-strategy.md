@@ -297,8 +297,16 @@ manual smoke on both platforms. Commit per phase; UI-only and data phases never 
 
 ## 6. Open items / decisions needed
 
+0. **Guest mode / login** (added 2026-10-01): Profile should support a guest mode
+   (browse + convert without an account) alongside a future login. Decision parked —
+   affects AccountScreen persona fields, transaction ledger ownership, and backend
+   auth. Do NOT build accounts before this is decided.
+
 1. **App display name**: keep `Exchange Convert App` (launcher) while in-app copy says
    "Sovereign Ledger", or rename everywhere? (Info.plist `CFBundleDisplayName`, Android label, store listings.)
+   Brand logo added 2026-10-01 (`design/logo.svg` — abstract gold rate-line mark): in-app top bars,
+   Android adaptive icon + splash, full iOS AppIcon set, landing header (needs `exchange-api` deploy ≥ v0.4.3-dev.17).
+   Launcher *label* still undecided.
 2. **Conversion recording**: record *every* conversion (recommend yes) and whether
    failed/offline conversions are recorded (recommend no).
 3. **Contact/Feedback submit**: no backend endpoint exists in `exchange-api` — ship with
