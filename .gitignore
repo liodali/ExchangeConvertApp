@@ -30,4 +30,7 @@ iosApp/ExchangeConvertApp/Secrets.swift
 design/*
 !design/logo.svg
 qa/
+.env
+key.properties
+keystores/
 ui-design.pen

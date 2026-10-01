@@ -6,25 +6,26 @@
 - Store identity: `com.sovereignledger.app` · display name **Sovereign Ledger**
 - Privacy policy (live after backend ≥ v0.4.3-dev.18): https://api.exchange.dev.adetify.com/privacy
 
-## 1. One-time keystore (local, ~2 min)
+## 1. Keystore — managed by `script/keystore.sh`
+
+Configuration lives in **`script/key.properties`** (gitignored; bootstrapped
+with random passwords on first run). The keystore lives in the central Android
+keys folder, outside the repo:
+
+```
+KEYSTORE_PATH=/Users/dalihamza/Desktop/FlutterApps/androidKeys/exchangerate-app/sovereign-ledger-release.jks
+```
 
 ```bash
-keytool -genkeypair -v \
-  -keystore sovereign-ledger-release.jks \
-  -alias sovereign-ledger \
-  -keyalg RSA -keysize 4096 -validity 10000
+./script/keystore.sh            # generate if missing + sync local.properties
+./script/keystore.sh verify     # show the certificate
+./script/keystore.sh secrets    # print the GitHub secret values to paste
 ```
 
-**Back this file + passwords up somewhere safe** (lose it → you can never update
-the app). It is never committed. For local release builds add to
-`local.properties`:
-
-```properties
-signing.keystore.path=/absolute/path/to/sovereign-ledger-release.jks
-signing.store.password=…
-signing.key.alias=sovereign-ledger
-signing.key.password=…
-```
+The script writes the `signing.*` entries into `local.properties` —
+`app/build.gradle.kts` picks them up (env vars take precedence, which is what
+CI uses). **Back up the keystore + key.properties somewhere safe** (lose them →
+the app can never be updated on Play).
 
 ## 2. GitHub secrets (repo → Settings → Secrets → Actions)
 
