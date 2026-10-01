@@ -27,5 +27,6 @@ iosApp/ExchangeConvertApp/Secrets.swift
 .kilocode/
 
 # Design assets
-design/
+design/*
+!design/logo.svg
 ui-design.pen
