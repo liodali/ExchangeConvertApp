@@ -26,7 +26,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRightAlt
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.ArrowDropUp
 import androidx.compose.material.icons.outlined.CurrencyExchange
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.SwapHoriz
@@ -36,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +55,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.platform.currentHourOfDay
+import dali.hamza.shared.common.DateUtils
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
+import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.EmptyState
@@ -63,8 +67,11 @@ import dali.hamza.shared.ui.components.LedgerButtonVariant
 import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
+import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.ui.viewmodel.HomeViewModel
+import dali.hamza.shared.ui.viewmodel.PairCardData
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 
 /**
@@ -83,10 +90,28 @@ import dali.hamza.shared.ui.viewmodel.SharedViewModel
 @Composable
 fun HomeScreen(
     viewModel: SharedViewModel,
+    homeViewModel: HomeViewModel,
     onOpenConverter: () -> Unit,
+    onOpenHistory: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val homeState by homeViewModel.state.collectAsState()
     var pickerFor by remember { mutableStateOf<Boolean?>(null) } // true=from, false=to, null=hidden
+
+    val topRates = state.rates.topPairs()
+
+    // pair cards: reload when the base or top rates change
+    LaunchedEffect(state.fromCurrency?.name, topRates) {
+        homeViewModel.load(state.fromCurrency?.name, topRates)
+    }
+    // recent activity: keep fresh while Home is visible
+    LaunchedEffect(Unit) {
+        homeViewModel.loadTransactions()
+        while (true) {
+            kotlinx.coroutines.delay(10_000)
+            homeViewModel.refreshTransactions()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -115,7 +140,11 @@ fun HomeScreen(
             Spacer(Modifier.height(24.dp))
 
             // ============ 1. Market Overview ================================
-            MarketOverviewSection(base = state.fromCurrency, rates = state.rates.topPairs())
+            MarketOverviewSection(
+                pairCards = homeState.pairCards.ifEmpty {
+                    topRates.take(3).map { PairCardData(quote = it.name, rate = it.rate) }
+                },
+            )
 
             Spacer(Modifier.height(32.dp))
 
@@ -138,7 +167,10 @@ fun HomeScreen(
             Spacer(Modifier.height(32.dp))
 
             // ============ 3. Recent Activity (minimized) ====================
-            RecentActivitySection()
+            RecentActivitySection(
+                transactions = homeState.recentTransactions,
+                onOpenHistory = onOpenHistory,
+            )
 
             Spacer(Modifier.height(48.dp))
         }
@@ -168,11 +200,21 @@ private fun List<ExchangeRate>.topPairs(): List<ExchangeRate> =
     TOP_PAIRS.mapNotNull { symbol -> firstOrNull { it.name == symbol } }
 
 @Composable
-private fun MarketOverviewSection(base: Currency?, rates: List<ExchangeRate>) {
-    SectionHeader(title = "Market Overview", icon = Icons.Outlined.CurrencyExchange)
+private fun MarketOverviewSection(pairCards: List<PairCardData>) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SectionHeader(
+            title = "Market Overview",
+            icon = Icons.Outlined.CurrencyExchange,
+            modifier = Modifier.weight(1f),
+        )
+        LiveChip()
+    }
     Spacer(Modifier.height(16.dp))
 
-    if (rates.isEmpty()) {
+    if (pairCards.isEmpty()) {
         BentoCard(fill = LedgerColors.Card) {
             Text(
                 text = "Loading live rates…",
@@ -184,46 +226,27 @@ private fun MarketOverviewSection(base: Currency?, rates: List<ExchangeRate>) {
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        rates.chunked(2).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { rate ->
-                    PairCard(
-                        quote = rate.name,
-                        quoteName = shortCurrencyName(rate.name),
-                        base = base?.name ?: "USD",
-                        rate = rate.rate,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
+        pairCards.forEach { card ->
+            PairCard(card = card)
         }
     }
 }
 
 /**
- * Design "EUR/USD Card": pair title (Manrope 700/18) + full name (Inter 12)
- * + LIVE chip + big rate (Manrope 700/30). The +% change badge and mini
- * chart arrive with Phase 4 (/historical).
+ * Design "EUR/USD Card" (updated pen): full-width #2A2A2A card —
+ * one-line pair title + full name, 7-day delta chip, 4-decimal rate
+ * (Manrope 700/30) and the 64dp warm-white sparkline.
  */
 @Composable
-private fun PairCard(
-    quote: String,
-    quoteName: String,
-    base: String,
-    rate: Double,
-    modifier: Modifier = Modifier,
-) {
+private fun PairCard(card: PairCardData) {
     BentoCard(
-        modifier = modifier,
         fill = LedgerColors.Card,
         padding = PaddingValues(20.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // pair label on two lines: quote / (line 1), base (line 2)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "$quote /",
+                    text = card.quote,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -231,30 +254,66 @@ private fun PairCard(
                     color = LedgerColors.TextPrimary,
                 )
                 Text(
-                    text = base,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                    ),
-                    color = LedgerColors.TextPrimary,
-                )
-                Text(
-                    text = quoteName,
+                    text = shortCurrencyName(card.quote),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
             }
-            LiveChip()
+            card.deltaPercent?.let { delta ->
+                DeltaChip(percent = delta)
+            }
         }
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
         Text(
-            text = formatLedgerNumber(rate),
+            text = formatRateDigits(card.rate, 4),
             style = MaterialTheme.typography.titleLarge.copy(
-                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
             ),
             color = LedgerColors.TextPrimary,
+        )
+        if (card.spark.size >= 2) {
+            Spacer(Modifier.height(16.dp))
+            Sparkline(
+                values = card.spark,
+                color = LedgerColors.TextPrimary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+            )
+        }
+    }
+}
+
+/** 7-day change chip: tiny direction arrow + Inter 600/14, green/red. */
+@Composable
+private fun DeltaChip(percent: Double) {
+    val positive = percent >= 0
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(
+                (if (positive) LedgerColors.Green else LedgerColors.Error).copy(alpha = 0.10f)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Icon(
+            imageVector = if (positive) {
+                Icons.Outlined.ArrowDropUp
+            } else {
+                Icons.Outlined.ArrowDropDown
+            },
+            contentDescription = null,
+            tint = if (positive) LedgerColors.Green else LedgerColors.Error,
+            modifier = Modifier.size(14.dp),
+        )
+        Text(
+            text = (if (positive) "+" else "-") +
+                formatLedgerNumber(kotlin.math.abs(percent)).trimEnd('0').trimEnd('.') + "%",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = if (positive) LedgerColors.Green else LedgerColors.Error,
         )
     }
 }
@@ -451,24 +510,139 @@ private fun CurrencyRow(
 // ----------------------------------------------------- 3. recent activity
 
 @Composable
-private fun RecentActivitySection() {
+private fun RecentActivitySection(
+    transactions: List<Transaction>,
+    onOpenHistory: () -> Unit,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
     ) {
-        SectionHeader(
-            title = "Recent Activity",
-            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+        Text(
+            text = "Recent Activity",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            ),
+            color = LedgerColors.TextPrimary,
+            modifier = Modifier.weight(1f),
         )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.clickable(onClick = onOpenHistory),
+        ) {
+            Text(
+                text = "History",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = LedgerColors.Blue,
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowRightAlt,
+                contentDescription = "Open history",
+                tint = LedgerColors.Blue,
+                modifier = Modifier.size(12.dp),
+            )
+        }
     }
     Spacer(Modifier.height(16.dp))
 
-    BentoCard(fill = LedgerColors.Card) {
-        EmptyState(
-            title = "No activity yet",
-            message = "Your exchanges will appear here once recorded (Phase 4).",
-            icon = Icons.Outlined.History,
+    BentoCard(fill = LedgerColors.SurfaceElevated) {
+        if (transactions.isEmpty()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(LedgerColors.Green.copy(alpha = 0.10f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.History,
+                        contentDescription = null,
+                        tint = LedgerColors.Green,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+                Text(
+                    text = "No exchanges yet — execute a conversion to start your ledger.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = LedgerColors.TextSecondary,
+                )
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                transactions.forEachIndexed { index, tx ->
+                    ActivityRow(tx = tx, tint = if (index % 2 == 0) LedgerColors.Green else LedgerColors.Blue)
+                }
+            }
+        }
+    }
+}
+
+/** Design activity row: icon tile + "Exchanged X to Y" + time, +received on the right. */
+@Composable
+private fun ActivityRow(tx: Transaction, tint: androidx.compose.ui.graphics.Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(LedgerColors.Card.copy(alpha = 0.50f))
+            .padding(16.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(tint.copy(alpha = 0.10f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.CurrencyExchange,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Exchanged ${tx.base} to ${tx.quote}",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+            )
+            Text(
+                text = activityTimeLabel(tx.timestamp),
+                style = MaterialTheme.typography.labelSmall,
+                color = LedgerColors.TextTertiary,
+            )
+        }
+        Text(
+            text = "+" + formatLedgerNumber(tx.amountQuote) + " " + tx.quote,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = LedgerColors.Green,
         )
+    }
+}
+
+/** "Today, 15:30" / "Yesterday, 08:15" / "Oct 12, 09:05" style labels. */
+private fun activityTimeLabel(timestamp: Long): String {
+    val now = dali.hamza.shared.common.nowMillis()
+    val today = dali.hamza.shared.common.DateUtils.epochDayOf(now)
+    val day = dali.hamza.shared.common.DateUtils.epochDayOf(timestamp)
+    val time = DateUtils.formatDateTime(timestamp).substringAfter(' ')
+    return when (today - day) {
+        0L -> "Today, $time"
+        1L -> "Yesterday, $time"
+        else -> DateUtils.formatDateTime(timestamp).let {
+            it.substring(5, 10).replace('-', '/') + ", " + time
+        }
     }
 }
 

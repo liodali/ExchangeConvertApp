@@ -539,3 +539,14 @@ internal fun formatRate(value: Double): String =
     fixed(kotlin.math.abs(value), if (kotlin.math.abs(value) >= 1.0) 4 else 6)
 
 internal fun formatAmount(value: Double): String = formatLedgerNumber(value)
+
+/** Fixed-decimal rate display (design pair cards: "1.0842" — 4 digits). */
+internal fun formatRateDigits(value: Double, precision: Int): String {
+    var factor = 1.0
+    repeat(precision) { factor *= 10.0 }
+    val rounded = kotlin.math.round(value * factor) / factor
+    var text = rounded.toString()
+    if (!text.contains('.')) text += ".0"
+    while (text.substringAfter('.').length < precision) text += "0"
+    return text
+}

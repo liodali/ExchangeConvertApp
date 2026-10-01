@@ -38,6 +38,7 @@ import dali.hamza.shared.ui.screens.HistoryScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
+import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
@@ -152,7 +153,21 @@ fun ExchangeCurrencyApp(
                 composable(Routes.HOME) {
                     HomeScreen(
                         viewModel = viewModel,
-                        onOpenConverter = { navController.navigate(Routes.CONVERTER) }
+                        homeViewModel = remember {
+                            KoinPlatform.getKoin()?.get<HomeViewModel>()
+                                ?: HomeViewModel(
+                                    KoinPlatform.getKoin()?.get<IRepository>()
+                                        ?: error("initSharedKoin() must run first")
+                                )
+                        },
+                        onOpenConverter = { navController.navigate(Routes.CONVERTER) },
+                        onOpenHistory = {
+                            navController.navigate(Routes.HISTORY) {
+                                popUpTo(Routes.HOME) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                     )
                 }
                 composable(Routes.HISTORY) {
