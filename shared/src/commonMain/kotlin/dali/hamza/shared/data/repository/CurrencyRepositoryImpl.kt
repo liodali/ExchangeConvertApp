@@ -6,6 +6,7 @@ import dali.hamza.shared.data.network.CurrencyApi
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.database.AppDatabase
 import dali.hamza.shared.domain.models.Currency
+import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.HistoricalRate
 import dali.hamza.shared.domain.models.MyResponse
@@ -17,8 +18,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
-/** Minimum delay between two live-rates API calls. */
+/** Minimum delay between two live-rates API calls (logged-in tier). */
 private const val REFRESH_INTERVAL_MS = 30L * 60L * 1000L
+
+/** Guest tier: rates refresh at most hourly (guest-mode decision, Oct 2026). */
+private const val GUEST_REFRESH_INTERVAL_MS = 60L * 60L * 1000L
 
 class CurrencyRepositoryImpl(
     private val currencyApi: CurrencyApi,
@@ -54,7 +58,7 @@ class CurrencyRepositoryImpl(
         val currentCurrency = sessionStorage.getCurrency()
         val now = nowMillis()
         val lastUpdate = sessionStorage.getLastUpdate()
-        if (lastUpdate != 0L && now - lastUpdate < REFRESH_INTERVAL_MS) {
+        if (lastUpdate != 0L && now - lastUpdate < refreshIntervalMs(sessionStorage.getDataTier())) {
             return@withContext
         }
         currencyApi.getLiveRates(currentCurrency)
@@ -120,6 +124,13 @@ class CurrencyRepositoryImpl(
     }
 
     override suspend fun refreshExchangeRates() = withContext(Dispatchers.Default) {
+        // Guest tier: even manual refreshes respect the hourly window —
+        // guests see hourly data, login unlocks realtime (DataTier.SOVEREIGN).
+        val now = nowMillis()
+        val lastUpdate = sessionStorage.getLastUpdate()
+        if (lastUpdate != 0L && now - lastUpdate < refreshIntervalMs(sessionStorage.getDataTier())) {
+            return@withContext
+        }
         sessionStorage.setLastUpdate(0L)
         saveExchangeRatesOfCurrentCurrency()
     }
@@ -208,4 +219,15 @@ class CurrencyRepositoryImpl(
                 )
             }
         }
+
+    companion object {
+        /**
+         * Live-rates refresh window per data tier — guests hourly, Sovereign
+         * (login, coming soon) every 30 minutes.
+         */
+        fun refreshIntervalMs(tier: DataTier): Long = when (tier) {
+            DataTier.GUEST -> GUEST_REFRESH_INTERVAL_MS
+            DataTier.SOVEREIGN -> REFRESH_INTERVAL_MS
+        }
+    }
 }

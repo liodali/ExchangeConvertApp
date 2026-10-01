@@ -1,5 +1,6 @@
 package dali.hamza.shared.data.storage
 
+import dali.hamza.shared.domain.models.DataTier
 import platform.Foundation.NSUserDefaults
 
 /**
@@ -50,7 +51,18 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(pair, forKey = KEY_DEFAULT_PAIR)
     }
 
+    override fun getDataTier(): DataTier =
+        when (defaults.stringForKey(KEY_DATA_TIER)) {
+            DataTier.SOVEREIGN.name -> DataTier.SOVEREIGN
+            else -> DataTier.GUEST
+        }
+
+    override fun setDataTier(tier: DataTier) {
+        defaults.setObject(tier.name, forKey = KEY_DATA_TIER)
+    }
+
     private companion object {
+        const val KEY_DATA_TIER = "data_tier"
         const val KEY_CURRENCY = "currency"
         const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"

@@ -1,6 +1,7 @@
 package dali.hamza.shared.data.storage
 
 import android.content.Context
+import dali.hamza.shared.domain.models.DataTier
 
 /**
  * Android implementation backed by SharedPreferences.
@@ -44,6 +45,16 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_DEFAULT_PAIR, pair).apply()
     }
 
+    override fun getDataTier(): DataTier =
+        when (preferences.getString(KEY_DATA_TIER, null)) {
+            DataTier.SOVEREIGN.name -> DataTier.SOVEREIGN
+            else -> DataTier.GUEST
+        }
+
+    override fun setDataTier(tier: DataTier) {
+        preferences.edit().putString(KEY_DATA_TIER, tier.name).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -51,6 +62,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_LAST_UPDATE = "last_time_update_rates"
         const val KEY_NOTIFICATIONS = "notifications_enabled"
         const val KEY_DEFAULT_PAIR = "default_pair"
+        const val KEY_DATA_TIER = "data_tier"
     }
 }
 

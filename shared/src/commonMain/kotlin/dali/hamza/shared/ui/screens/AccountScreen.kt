@@ -22,10 +22,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material3.Icon
@@ -64,6 +66,7 @@ import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
+import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 
 /**
@@ -112,6 +115,45 @@ fun AccountScreen(
             )
 
             Spacer(Modifier.height(32.dp))
+
+            // ============ Account access (guest mode) ====================
+            // login ships later — guests only manage their display name
+            BentoCard {
+                LedgerListRow(
+                    label = LedgerStrings.Account.LOGIN,
+                    icon = Icons.Outlined.ManageAccounts,
+                    trailing = {
+                        LedgerChip(
+                            text = LedgerStrings.Account.COMING_SOON,
+                            tint = LedgerColors.Gold,
+                            cornerRadius = 4.dp,
+                        )
+                    },
+                )
+                Spacer(Modifier.height(16.dp))
+                LedgerListRow(
+                    label = LedgerStrings.Account.DATA_PLAN,
+                    icon = Icons.Outlined.Star,
+                    iconTint = if (viewModel.dataTier == DataTier.SOVEREIGN) {
+                        LedgerColors.Green
+                    } else {
+                        LedgerColors.TextTertiary
+                    },
+                    value = if (viewModel.dataTier == DataTier.SOVEREIGN) {
+                        LedgerStrings.Account.dataPlanSovereign()
+                    } else {
+                        LedgerStrings.Account.dataPlanGuest()
+                    },
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = LedgerStrings.Account.DATA_PLAN_NOTE,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LedgerColors.TextTertiary,
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
 
             // ============ Personal information =============================
             BentoCard {

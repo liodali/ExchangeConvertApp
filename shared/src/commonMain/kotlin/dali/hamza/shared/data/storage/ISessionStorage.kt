@@ -1,5 +1,7 @@
 package dali.hamza.shared.data.storage
 
+import dali.hamza.shared.domain.models.DataTier
+
 /**
  * Minimal key-value session storage for the shared module
  * (current base currency + last rates update timestamp).
@@ -42,6 +44,15 @@ interface ISessionStorage {
     fun getDefaultPair(): String = DEFAULT_PAIR
 
     fun setDefaultPair(pair: String) {}
+
+    /**
+     * Account data tier — guests get hourly-refreshed rates, Sovereign
+     * (logged-in) gets realtime. Defaults to guest; the future login flow
+     * flips it.
+     */
+    fun getDataTier(): DataTier = DataTier.GUEST
+
+    fun setDataTier(tier: DataTier) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

@@ -51,6 +51,15 @@ object LedgerStrings {
             "Access our FAQ, contact support, and explore helpful resources."
         const val SUPPORT_CARD_CTA = "Explore Support Hub"
 
+        // ---- guest mode / login (coming soon) ----
+        const val LOGIN = "Sovereign Login"
+        const val COMING_SOON = "COMING SOON"
+        const val DATA_PLAN = "Data Plan"
+        const val DATA_PLAN_NOTE =
+            "Guest plan refreshes rates hourly. Sovereign login unlocks realtime data."
+        fun dataPlanGuest() = "Hourly rates · Guest"
+        fun dataPlanSovereign() = "Realtime · Sovereign"
+
         const val VERSION = "V1.0.0"
         fun footer(lastSync: String) = "SOVEREIGN LEDGER NODE $VERSION • LAST SYNC: $lastSync"
 

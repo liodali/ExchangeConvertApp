@@ -297,10 +297,13 @@ manual smoke on both platforms. Commit per phase; UI-only and data phases never 
 
 ## 6. Open items / decisions needed
 
-0. **Guest mode / login** (added 2026-10-01): Profile should support a guest mode
-   (browse + convert without an account) alongside a future login. Decision parked —
-   affects AccountScreen persona fields, transaction ledger ownership, and backend
-   auth. Do NOT build accounts before this is decided.
+0. **Guest mode / login** (added 2026-10-01, DECIDED 2026-10-01): guest is the
+   default tier — profile manages only the display name; Account shows a
+   "Sovereign Login · COMING SOON" row and the data plan. Data tiering:
+   `DataTier.GUEST` refreshes rates at most hourly (even manual refresh),
+   `DataTier.SOVEREIGN` (login, future) unlocks realtime (30-min + on-demand).
+   Tier persisted in `ISessionStorage`; `CurrencyRepositoryImpl.refreshIntervalMs`
+   is the single gate. Future login flow flips the tier.
 
 1. **App display name**: keep `Exchange Convert App` (launcher) while in-app copy says
    "Sovereign Ledger", or rename everywhere? (Info.plist `CFBundleDisplayName`, Android label, store listings.)

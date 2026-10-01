@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dali.hamza.shared.data.storage.ISessionStorage
+import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.platform.currentEpochMillis
 
 /**
@@ -20,6 +21,9 @@ class AccountViewModel(private val storage: ISessionStorage) {
     /** Push notifications preference (persisted). */
     var notificationsEnabled by mutableStateOf(storage.getNotificationsEnabled())
         private set
+
+    /** Account data tier — guests get hourly rates, Sovereign realtime. */
+    val dataTier: DataTier get() = storage.getDataTier()
 
     /** Design persona email, derived from the username. */
     val email: String
