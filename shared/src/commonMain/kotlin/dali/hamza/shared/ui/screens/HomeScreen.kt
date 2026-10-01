@@ -219,9 +219,18 @@ private fun PairCard(
         padding = PaddingValues(20.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            // pair label on two lines: quote / (line 1), base (line 2)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "$quote / $base",
+                    text = quote,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                    ),
+                    color = LedgerColors.TextPrimary,
+                )
+                Text(
+                    text = "/ $base",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
