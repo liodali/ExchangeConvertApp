@@ -33,6 +33,7 @@ import dali.hamza.shared.ui.screens.AccountScreen
 import dali.hamza.shared.ui.screens.ContactSupportScreen
 import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
+import dali.hamza.shared.ui.screens.FullConverterScreen
 import dali.hamza.shared.ui.screens.HistoryScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
@@ -54,6 +55,7 @@ object Routes {
     const val HISTORY = "history"
     const val ACCOUNT = "account"
     const val CONVERTER = "converter"
+    const val FULL_CONVERTER = "full-converter"
     const val FAQ = "faq"
     const val SUPPORT = "support"
     const val CONTACT = "contact"
@@ -172,6 +174,13 @@ fun ExchangeCurrencyApp(
                         historyViewModel = remember {
                             KoinPlatform.getKoin()?.get<HistoryViewModel>() ?: historyViewModel
                         },
+                        onBack = { navController.popBackStack() },
+                        onOpenFullConverter = { navController.navigate(Routes.FULL_CONVERTER) },
+                    )
+                }
+                composable(Routes.FULL_CONVERTER) {
+                    FullConverterScreen(
+                        viewModel = viewModel,
                         onBack = { navController.popBackStack() },
                     )
                 }

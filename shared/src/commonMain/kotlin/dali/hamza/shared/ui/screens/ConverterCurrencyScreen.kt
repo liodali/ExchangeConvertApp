@@ -65,6 +65,7 @@ fun ConverterCurrencyScreen(
     viewModel: SharedViewModel,
     historyViewModel: HistoryViewModel,
     onBack: () -> Unit,
+    onOpenFullConverter: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val historyState by historyViewModel.state.collectAsState()
@@ -115,17 +116,35 @@ fun ConverterCurrencyScreen(
             Spacer(Modifier.height(24.dp))
 
             // ============ Quick Exchange ===================================
-            Text(
-                text = "Quick Exchange",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
-                color = LedgerColors.TextPrimary,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "Convert currencies using live rates",
-                style = MaterialTheme.typography.bodySmall,
-                color = LedgerColors.TextTertiary,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Quick Exchange",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                        ),
+                        color = LedgerColors.TextPrimary,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Convert currencies using live rates",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                }
+                Text(
+                    text = "FULL CONVERTER",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = LedgerColors.Blue,
+                    modifier = Modifier.clickable(onClick = onOpenFullConverter),
+                )
+            }
             Spacer(Modifier.height(16.dp))
 
             BentoCard(fill = LedgerColors.SurfaceElevated, cornerRadius = 16.dp) {
@@ -157,6 +176,8 @@ fun ConverterCurrencyScreen(
                     )
                 }
 
+                Spacer(Modifier.height(20.dp))
+
                 // ---- result ----------------------------------------------
                 Column(
                     modifier = Modifier
@@ -170,6 +191,7 @@ fun ConverterCurrencyScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = state.convertedAmount?.let { fixed(it, 2) } ?: "0.00",
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
