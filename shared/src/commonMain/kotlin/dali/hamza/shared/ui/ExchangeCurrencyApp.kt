@@ -1,12 +1,16 @@
 package dali.hamza.shared.ui
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -55,15 +59,24 @@ fun ExchangeCurrencyApp(
     modifier: Modifier = Modifier,
 ) {
     ExchangeCurrencyAppTheme {
+        val focusManager = LocalFocusManager.current
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
 
         Scaffold(
             // full-bleed canvas — hosts opt into system-bar insets where the
-            // design needs them (Android runs immersive fullscreen)
+            // design needs them. ANY touch clears focus first (observing,
+            // non-consuming): taps on empty space dismiss the keyboard; taps
+            // on another input re-focus it and the keyboard stays.
             modifier = modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        focusManager.clearFocus()
+                    }
+                },
             bottomBar = {
                 if (currentRoute in Routes.topLevel) {
                     LedgerBottomNav(

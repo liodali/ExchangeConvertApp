@@ -184,7 +184,7 @@ private fun MarketOverviewSection(base: Currency?, rates: List<ExchangeRate>) {
                 row.forEach { rate ->
                     PairCard(
                         quote = rate.name,
-                        quoteName = CurrenciesCatalog.byCode(rate.name)?.fullCountryName ?: "",
+                        quoteName = shortCurrencyName(rate.name),
                         base = base?.name ?: "USD",
                         rate = rate.rate,
                         modifier = Modifier.weight(1f),
@@ -472,6 +472,41 @@ internal fun formatLedgerNumber(value: Double): String {
     if (!text.contains('.')) text += ".0"
     while (text.substringAfter('.').length < precision) text += "0"
     return text
+}
+
+/**
+ * Short display names for pair cards — curated for majors, falls back to
+ * the catalog's full name.
+ */
+internal fun shortCurrencyName(code: String): String = when (code) {
+    "EUR" -> "Euro"
+    "GBP" -> "Pound"
+    "USD" -> "US Dollar"
+    "MAD" -> "Dirham"
+    "DZD" -> "Dinar"
+    "TND" -> "Dinar"
+    "JPY" -> "Yen"
+    "CHF" -> "Franc"
+    "CAD" -> "Cad Dollar"
+    "AUD" -> "Aus Dollar"
+    "NZD" -> "NZ Dollar"
+    "CNY" -> "Yuan"
+    "TRY" -> "Lira"
+    "SAR" -> "Riyal"
+    "AED" -> "Emir. Dirham"
+    "EGP" -> "Egypt. Pound"
+    "ZAR" -> "Rand"
+    "INR" -> "Rupee"
+    "SEK" -> "Krona"
+    "NOK", "DKK" -> "Krone"
+    "PLN" -> "Zloty"
+    "CZK" -> "Koruna"
+    "HKD" -> "HK Dollar"
+    "SGD" -> "SG Dollar"
+    "KRW" -> "Won"
+    "BRL" -> "Real"
+    "MXN" -> "Peso"
+    else -> CurrenciesCatalog.byCode(code)?.fullCountryName ?: code
 }
 
 /** KMP-safe 10^n for small integer exponents. */
