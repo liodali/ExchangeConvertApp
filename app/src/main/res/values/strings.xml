@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Exchange Rate Currency</string>
+    <string name="app_name">Sovereign Ledger</string>
     <string name="amount_label">Amount</string>
     <string name="select_currency_label_bt">select an currency</string>
     <string name="server">https://api.openexchangerate.com/</string>

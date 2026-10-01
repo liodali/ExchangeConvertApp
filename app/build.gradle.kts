@@ -22,14 +22,38 @@ android {
     compileSdk = 36
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
-        applicationId = "dali.hamza.exchangecurrencyapp"
+        applicationId = "com.sovereignledger.app"
         minSdk = 26
-        versionCode = 1
-        versionName = "1.0"
+        // injectable from CI (-PversionCode=… / -PversionName=…)
+        versionCode = (properties.getOrDefault("versionCode", "1") as String).toInt()
+        versionName = (properties.getOrDefault("versionName", "1.0.0") as String)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    // Release signing: keystore NEVER committed — credentials come from
+    // local.properties (local) or environment variables (CI). See
+    // docs/play-release.md.
+    val releaseKeystorePath = providers.environmentVariable("SIGNING_KEYSTORE_PATH").orNull
+        ?: properties.getOrDefault("signing.keystore.path", "").toString()
+    val releaseStorePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull
+        ?: properties.getOrDefault("signing.store.password", "").toString()
+    val releaseKeyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").orNull
+        ?: properties.getOrDefault("signing.key.alias", "").toString()
+    val releaseKeyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull
+        ?: properties.getOrDefault("signing.key.password", "").toString()
+
+    signingConfigs {
+        if (releaseKeystorePath.isNotBlank()) {
+            create("release") {
+                storeFile = file(releaseKeystorePath)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
@@ -40,8 +64,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            applicationIdSuffix = ".Build${Calendar.getInstance().time.time}"
             resValue("string", "token", properties.getOrDefault("token", "").toString())
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
         debug {
             resValue("string", "token", properties.getOrDefault("token", "").toString())
