@@ -39,6 +39,7 @@ kotlin {
             implementation(compose.components.resources)
             // Real icon set for the Sovereign Ledger redesign (replaces text glyphs)
             implementation(compose.materialIconsExtended)
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.0-beta01")
 
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
