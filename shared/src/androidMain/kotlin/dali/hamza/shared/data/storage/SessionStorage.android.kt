@@ -19,6 +19,13 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
     override fun getLastUpdate(): Long =
         preferences.getLong(KEY_LAST_UPDATE, 0L)
 
+    override fun getUsername(): String =
+        preferences.getString(KEY_USERNAME, DEFAULT_USERNAME) ?: DEFAULT_USERNAME
+
+    override fun setUsername(value: String) {
+        preferences.edit().putString(KEY_USERNAME, value).apply()
+    }
+
     override fun setLastUpdate(timestamp: Long) {
         preferences.edit().putLong(KEY_LAST_UPDATE, timestamp).apply()
     }
@@ -26,6 +33,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
+        const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"
     }
 }

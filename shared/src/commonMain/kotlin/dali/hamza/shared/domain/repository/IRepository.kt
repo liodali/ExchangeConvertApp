@@ -42,4 +42,9 @@ interface IRepository {
      * Force a refresh of the exchange rates, bypassing the rate-limit cache
      */
     suspend fun refreshExchangeRates()
+
+    /**
+     * Profile display name (top bar) — additive, for the Account phase.
+     */
+    suspend fun getUsername(): String = ""
 }

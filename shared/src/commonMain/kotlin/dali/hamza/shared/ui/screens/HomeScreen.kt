@@ -22,12 +22,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowRightAlt
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.CurrencyExchange
 import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.Icon
@@ -46,8 +47,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.ui.components.BentoCard
@@ -60,17 +64,19 @@ import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
-import dali.hamza.shared.ui.viewmodel.SharedUiState
 
 /**
  * Sovereign Market Dashboard (design frame `RbQhR`) — Home tab.
  *
- * - Market overview: top pairs for the session base currency, from the
- *   existing [SharedViewModel] rates (single source of truth — no duplicate
- *   fetching or conversion logic; the design-migration contract).
- * - Quick Exchange: the existing conversion flow (amount, from/to pickers,
- *   swap, convert).
- * - Recent activity: placeholder until the transactions table (Phase 4).
+ * Layout follows the pen file section by section:
+ * 1. Market Overview — top pairs with live rates (mini charts land with
+ *    Phase 4 /historical data)
+ * 2. Asset Explorer & Conversion Tool — Quick Exchange with fee row
+ *    (design copy) and "Execute Exchange" action
+ * 3. Recent Activity — minimized bento; transactions arrive in Phase 4
+ *
+ * The top bar shows the profile username (design: "SOVEREIGN"), not the
+ * app name.
  */
 @Composable
 fun HomeScreen(
@@ -86,7 +92,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "Sovereign Ledger",
+            title = state.username,
             trailing = {
                 IconButton(onClick = viewModel::refresh) {
                     Icon(
@@ -98,16 +104,18 @@ fun HomeScreen(
             },
         )
 
+        // ---- design rhythm: 24dp side margins, 32dp between sections -----
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
-            // ---- Market overview -------------------------------------------
-            SectionHeader(title = "Market Overview", icon = Icons.Outlined.CurrencyExchange)
-            MarketOverview(base = state.fromCurrency, rates = state.rates.topPairs())
             Spacer(Modifier.height(24.dp))
 
-            // ---- Quick Exchange ---------------------------------------------
-            SectionHeader(title = "Quick Exchange", icon = Icons.Outlined.SwapHoriz)
-            QuickExchangeCard(
+            // ============ 1. Market Overview ================================
+            MarketOverviewSection(base = state.fromCurrency, rates = state.rates.topPairs())
+
+            Spacer(Modifier.height(32.dp))
+
+            // ============ 2. Quick Exchange =================================
+            QuickExchangeSection(
                 amount = state.amount,
                 onAmountChange = viewModel::onAmountChange,
                 from = state.fromCurrency,
@@ -118,22 +126,16 @@ fun HomeScreen(
                 onPickFrom = { pickerFor = true },
                 onPickTo = { pickerFor = false },
                 onSwap = viewModel::swapCurrencies,
-                onConvert = viewModel::convert,
+                onExecute = viewModel::convert,
                 onOpenConverter = onOpenConverter,
             )
-            Spacer(Modifier.height(24.dp))
 
-            // ---- Recent activity (placeholder until Phase 4) ------------------
-            SectionHeader(title = "Recent Activity", icon = Icons.AutoMirrored.Outlined.ReceiptLong)
-            BentoCard(fill = LedgerColors.Card) {
-                EmptyState(
-                    title = "No activity yet",
-                    message = "Your conversion history will appear here.",
-                    icon = Icons.Outlined.History,
-                )
-            }
+            Spacer(Modifier.height(32.dp))
 
-            Spacer(Modifier.height(120.dp))
+            // ============ 3. Recent Activity (minimized) ====================
+            RecentActivitySection()
+
+            Spacer(Modifier.height(48.dp))
         }
     }
 
@@ -152,16 +154,19 @@ fun HomeScreen(
     }
 }
 
-// ------------------------------------------------------------------ overview
+// ------------------------------------------------------ 1. market overview
 
-/** Top pairs shown in the overview — majors first, MAD included (design). */
+/** Top pairs — majors first, MAD included (design shows EUR/BTC/XAU rows). */
 private val TOP_PAIRS = listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD")
 
 private fun List<ExchangeRate>.topPairs(): List<ExchangeRate> =
     TOP_PAIRS.mapNotNull { symbol -> firstOrNull { it.name == symbol } }
 
 @Composable
-private fun MarketOverview(base: Currency?, rates: List<ExchangeRate>) {
+private fun MarketOverviewSection(base: Currency?, rates: List<ExchangeRate>) {
+    SectionHeader(title = "Market Overview", icon = Icons.Outlined.CurrencyExchange)
+    Spacer(Modifier.height(16.dp))
+
     if (rates.isEmpty()) {
         BentoCard(fill = LedgerColors.Card) {
             Text(
@@ -172,13 +177,15 @@ private fun MarketOverview(base: Currency?, rates: List<ExchangeRate>) {
         }
         return
     }
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         rates.chunked(2).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEach { rate ->
                     PairCard(
-                        base = base?.name ?: "—",
-                        symbol = rate.name,
+                        quote = rate.name,
+                        quoteName = CurrenciesCatalog.byCode(rate.name)?.fullCountryName ?: "",
+                        base = base?.name ?: "USD",
                         rate = rate.rate,
                         modifier = Modifier.weight(1f),
                     )
@@ -189,41 +196,58 @@ private fun MarketOverview(base: Currency?, rates: List<ExchangeRate>) {
     }
 }
 
+/**
+ * Design "EUR/USD Card": pair title (Manrope 700/18) + full name (Inter 12)
+ * + LIVE chip + big rate (Manrope 700/30). The +% change badge and mini
+ * chart arrive with Phase 4 (/historical).
+ */
 @Composable
 private fun PairCard(
+    quote: String,
+    quoteName: String,
     base: String,
-    symbol: String,
     rate: Double,
     modifier: Modifier = Modifier,
 ) {
     BentoCard(
         modifier = modifier,
         fill = LedgerColors.Card,
-        padding = PaddingValues(16.dp),
+        padding = PaddingValues(20.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "$base / $symbol",
-                style = MaterialTheme.typography.labelMedium,
-                color = LedgerColors.TextSecondary,
-            )
-            Spacer(Modifier.width(8.dp))
-            LiveDot()
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "$quote / $base",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                    ),
+                    color = LedgerColors.TextPrimary,
+                )
+                Text(
+                    text = quoteName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LedgerColors.TextTertiary,
+                )
+            }
+            LiveChip()
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(14.dp))
         Text(
             text = formatLedgerNumber(rate),
             style = MaterialTheme.typography.titleLarge.copy(
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
             ),
             color = LedgerColors.TextPrimary,
         )
     }
 }
 
+/** Design "LIVE" badge (Inter 600/10, green). */
 @Composable
-private fun LiveDot() {
+private fun LiveChip() {
     val transition = rememberInfiniteTransition(label = "live")
     val alpha by transition.animateFloat(
         initialValue = 0.35f,
@@ -231,19 +255,33 @@ private fun LiveDot() {
         animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
         label = "live-alpha",
     )
-    Box(
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .size(7.dp)
-            .alpha(alpha)
-            .clip(CircleShape)
-            .background(LedgerColors.Green)
-    )
+            .clip(RoundedCornerShape(8.dp))
+            .background(LedgerColors.GreenGlow)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .alpha(alpha)
+                .clip(CircleShape)
+                .background(LedgerColors.Green)
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = "LIVE",
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = LedgerColors.Green,
+        )
+    }
 }
 
-// ------------------------------------------------------------- quick exchange
+// ------------------------------------------------------- 2. quick exchange
 
 @Composable
-private fun QuickExchangeCard(
+private fun QuickExchangeSection(
     amount: String,
     onAmountChange: (String) -> Unit,
     from: Currency?,
@@ -254,15 +292,19 @@ private fun QuickExchangeCard(
     onPickFrom: () -> Unit,
     onPickTo: () -> Unit,
     onSwap: () -> Unit,
-    onConvert: () -> Unit,
+    onExecute: () -> Unit,
     onOpenConverter: () -> Unit,
 ) {
+    SectionHeader(title = "Quick Exchange", icon = Icons.Outlined.SwapHoriz)
+    Spacer(Modifier.height(16.dp))
+
     BentoCard(fill = LedgerColors.NavyPanel) {
         LedgerInput(
             value = amount,
             onValueChange = onAmountChange,
             label = "Amount",
             placeholder = "0.00",
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
         Spacer(Modifier.height(16.dp))
 
@@ -315,9 +357,26 @@ private fun QuickExchangeCard(
         )
         Spacer(Modifier.height(16.dp))
 
+        // design fee row: "Fee (0.01%)  $0.10 USD"
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Fee (0.01%)",
+                style = MaterialTheme.typography.labelMedium,
+                color = LedgerColors.TextMuted,
+            )
+            Text(
+                text = "\$0.10 USD",
+                style = MaterialTheme.typography.labelMedium,
+                color = LedgerColors.TextSecondary,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+
         LedgerButton(
-            text = "Convert",
-            onClick = onConvert,
+            text = "Execute Exchange",
+            onClick = onExecute,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
         )
@@ -353,7 +412,7 @@ private fun CurrencyRow(
             color = LedgerColors.TextMuted,
         )
         Spacer(Modifier.width(16.dp))
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = currency?.name ?: "Select…",
                 style = MaterialTheme.typography.titleMedium,
@@ -371,10 +430,30 @@ private fun CurrencyRow(
             text = "Change",
             style = MaterialTheme.typography.labelSmall,
             color = LedgerColors.BlueSoft,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 4.dp),
+        )
+    }
+}
+
+// ----------------------------------------------------- 3. recent activity
+
+@Composable
+private fun RecentActivitySection() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SectionHeader(
+            title = "Recent Activity",
+            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+        )
+    }
+    Spacer(Modifier.height(16.dp))
+
+    BentoCard(fill = LedgerColors.Card) {
+        EmptyState(
+            title = "No activity yet",
+            message = "Your exchanges will appear here once recorded (Phase 4).",
+            icon = Icons.Outlined.History,
         )
     }
 }
@@ -383,14 +462,10 @@ private fun CurrencyRow(
 
 /**
  * Ledger-style number formatting (KMP-safe, locale-stable):
- * fixed precision by magnitude — >=100: 2dp · >=1: 4dp · <1: 6dp.
+ * 3 fraction digits everywhere (design decision).
  */
 internal fun formatLedgerNumber(value: Double): String {
-    val precision = when {
-        value >= 100.0 -> 2
-        value >= 1.0 -> 4
-        else -> 6
-    }
+    val precision = 3
     val factor = pow10(precision)
     val rounded = kotlin.math.round(value * factor) / factor
     var text = rounded.toString()
@@ -399,7 +474,7 @@ internal fun formatLedgerNumber(value: Double): String {
     return text
 }
 
-/** KMP-safe 10^n for small integer exponents (no kotlin.math.pow on all targets). */
+/** KMP-safe 10^n for small integer exponents. */
 private fun pow10(exponent: Int): Double {
     var result = 1.0
     repeat(exponent) { result *= 10.0 }

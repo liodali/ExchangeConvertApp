@@ -3,7 +3,6 @@ package dali.hamza.shared.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -61,9 +60,10 @@ fun ExchangeCurrencyApp(
         val currentRoute = backStackEntry?.destination?.route
 
         Scaffold(
+            // full-bleed canvas — hosts opt into system-bar insets where the
+            // design needs them (Android runs immersive fullscreen)
             modifier = modifier
-                .fillMaxSize()
-                .safeDrawingPadding(),
+                .fillMaxSize(),
             bottomBar = {
                 if (currentRoute in Routes.topLevel) {
                     LedgerBottomNav(

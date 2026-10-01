@@ -106,6 +106,9 @@ class CurrencyRepositoryImpl(
     override suspend fun getCurrentCurrency(): String =
         withContext(Dispatchers.Default) { sessionStorage.getCurrency() }
 
+    override suspend fun getUsername(): String =
+        withContext(Dispatchers.Default) { sessionStorage.getUsername() }
+
     override suspend fun setCurrentCurrency(value: String) = withContext(Dispatchers.Default) {
         if (sessionStorage.getCurrency() != value) {
             sessionStorage.setCurrency(value)

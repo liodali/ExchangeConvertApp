@@ -22,6 +22,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        // Flutter-style edge-to-edge: system bars stay visible and transparent,
+        // content draws behind them; M3 Scaffold insets position the content
         enableEdgeToEdge()
         setContent {
             val viewModel = remember { GlobalContext.get().get<SharedViewModel>() }

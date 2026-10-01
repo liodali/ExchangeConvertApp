@@ -19,12 +19,20 @@ class IosSessionStorage : ISessionStorage {
     override fun getLastUpdate(): Long =
         defaults.doubleForKey(KEY_LAST_UPDATE).toLong()
 
+    override fun getUsername(): String =
+        defaults.stringForKey(KEY_USERNAME) ?: DEFAULT_USERNAME
+
+    override fun setUsername(value: String) {
+        defaults.setObject(value, forKey = KEY_USERNAME)
+    }
+
     override fun setLastUpdate(timestamp: Long) {
         defaults.setObject(timestamp.toDouble(), forKey = KEY_LAST_UPDATE)
     }
 
     private companion object {
         const val KEY_CURRENCY = "currency"
+        const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"
     }
 }

@@ -13,7 +13,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-private const val DEFAULT_HOST = "api.exchangerate.host"
+private const val DEFAULT_HOST = "api.exchange.dev.adetify.com"   // our exchange-api backend
 
 /**
  * Shared Koin module (KMP). Wired by [initSharedKoin] from the platform host

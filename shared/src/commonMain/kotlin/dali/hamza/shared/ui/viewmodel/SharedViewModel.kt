@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
  * UI state shared by the Converter and Rates screens.
  */
 data class SharedUiState(
+    val username: String = "SOVEREIGN",
     val currencies: List<Currency> = emptyList(),
     val rates: List<ExchangeRate> = emptyList(),
     val amount: String = "",
@@ -47,6 +48,7 @@ class SharedViewModel(
 
     fun load() {
         viewModelScope.launch {
+            _state.update { it.copy(username = repository.getUsername()) }
             loadCurrencies()
             loadRates()
         }

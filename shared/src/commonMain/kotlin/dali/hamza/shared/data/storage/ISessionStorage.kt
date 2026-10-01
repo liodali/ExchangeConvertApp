@@ -18,6 +18,15 @@ interface ISessionStorage {
     fun getLastUpdate(): Long
 
     fun setLastUpdate(timestamp: Long)
+
+    /**
+     * Profile display name shown in the top bar (design: the username,
+     * e.g. "SOVEREIGN"). Defaults to [DEFAULT_USERNAME] until accounts exist.
+     */
+    fun getUsername(): String = DEFAULT_USERNAME
+
+    fun setUsername(value: String)
 }
 
 const val DEFAULT_CURRENCY = "USD"
+const val DEFAULT_USERNAME = "SOVEREIGN"
