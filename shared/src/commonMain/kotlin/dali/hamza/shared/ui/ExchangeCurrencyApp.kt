@@ -75,14 +75,7 @@ fun ExchangeCurrencyApp(
             // on another input re-focus it and the keyboard stays.
             contentWindowInsets = WindowInsets(0.dp),
             modifier = modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    awaitEachGesture {
-                        awaitFirstDown(requireUnconsumed = false)
-                        keyboardController?.hide()
-                        focusManager.clearFocus()
-                    }
-                },
+                .fillMaxSize(),
             bottomBar = {
                 if (currentRoute in Routes.topLevel) {
                     LedgerBottomNav(
@@ -101,7 +94,19 @@ fun ExchangeCurrencyApp(
             NavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
-                modifier = Modifier.padding(innerPadding),
+                // ANY touch inside screen content clears Compose focus + hides
+                // the IME (observing, non-consuming; interactive elements still
+                // receive their taps, inputs re-focus and keep the keyboard)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            awaitFirstDown(requireUnconsumed = false)
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                        }
+                    },
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
