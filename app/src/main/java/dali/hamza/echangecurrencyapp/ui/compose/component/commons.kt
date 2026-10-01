@@ -36,6 +36,7 @@ import dali.hamza.echangecurrencyapp.models.NoDataUIState
 import dali.hamza.echangecurrencyapp.models.UIState
 
 
+@Composable
 inline fun <T> UIState.StateBuilder(
     noinline loadingUI: (@Composable () -> Unit)?,
     noinline emptyUI: (@Composable () -> Unit)?,

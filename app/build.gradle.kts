@@ -181,6 +181,7 @@ dependencies {
 
 
     implementation(project(":database"))
+    implementation(project(":shared"))
     implementation(project(":core"))
     implementation(project(":domain"))
 

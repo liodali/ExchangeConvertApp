@@ -138,17 +138,19 @@ fun RatesPageCompose(
                     }
                 }
             }
-            ratesState.StateBuilder<List<ExchangeRate>>(
-                loadingUI = {
-                    Box {
-                        // TODO: Add loading indicator
+            item {
+                ratesState.StateBuilder<List<ExchangeRate>>(
+                    loadingUI = {
+                        Box {
+                            // TODO: Add loading indicator
+                        }
+                    },
+                    emptyUI = {
+
                     }
-                },
-                emptyUI = {
+                ) { data ->
 
                 }
-            ) { data ->
-
             }
 
 

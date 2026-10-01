@@ -30,7 +30,10 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
     }
 }
 
-actual fun createSessionStorage(): ISessionStorage =
-    throw IllegalStateException("Use createSessionStorage(context) for Android")
+actual fun createSessionStorage(): ISessionStorage {
+    val context = dali.hamza.shared.AndroidAppContext.appContext
+        ?: throw IllegalStateException("Set AndroidAppContext.appContext from Application.onCreate() first")
+    return createSessionStorage(context)
+}
 
 fun createSessionStorage(context: Context): ISessionStorage = AndroidSessionStorage(context)
