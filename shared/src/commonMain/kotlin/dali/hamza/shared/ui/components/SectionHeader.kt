@@ -30,6 +30,7 @@ fun SectionHeader(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     iconTint: Color = LedgerColors.Blue,
+    titleColor: Color = Color.Unspecified,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
@@ -56,7 +57,11 @@ fun SectionHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = if (titleColor == Color.Unspecified) {
+                MaterialTheme.colorScheme.onBackground
+            } else {
+                titleColor
+            },
             modifier = Modifier.weight(1f),
         )
         if (trailing != null) {

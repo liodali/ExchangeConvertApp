@@ -21,13 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dali.hamza.shared.ui.theme.LedgerColors
 
 /**
- * Accordion row — the design's FAQ item: a rounded-16 canvas-dark card with the
- * question and a rotating chevron; expanding reveals the answer copy.
+ * Accordion row — the design's FAQ item: rounded-16 card (expanded items sit
+ * on `#201F1F`, collapsed on `#131313`) with the question and a rotating
+ * chevron; expanding reveals the answer copy.
  */
 @Composable
 fun AccordionRow(
@@ -36,12 +38,13 @@ fun AccordionRow(
     expanded: Boolean,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
+    fill: Color = LedgerColors.Canvas,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(LedgerColors.Canvas)
+            .background(fill)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

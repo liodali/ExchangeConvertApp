@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dali.hamza.shared.ui.theme.LedgerColors
 
@@ -90,5 +92,46 @@ fun LedgerInput(
                 trailing()
             }
         }
+    }
+}
+
+/**
+ * Ledger textarea — the design's multiline form fields ("Detailed
+ * Description", "Detailed Suggestions"): card fill `#2A2A2A`, rounded-8,
+ * content-driven height with a design-matching minimum.
+ */
+@Composable
+fun LedgerTextArea(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String? = null,
+    minHeight: Dp = 160.dp,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = minHeight)
+            .clip(RoundedCornerShape(8.dp))
+            .background(LedgerColors.Card)
+            .padding(16.dp),
+    ) {
+        if (value.isEmpty() && placeholder != null) {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyLarge,
+                color = LedgerColors.TextTertiary.copy(alpha = 0.60f),
+                modifier = Modifier.align(Alignment.TopStart),
+            )
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onBackground,
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        )
     }
 }

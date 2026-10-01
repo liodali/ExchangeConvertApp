@@ -27,16 +27,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dali.hamza.shared.ui.components.LedgerBottomNav
 import dali.hamza.shared.ui.components.LedgerDestination
-import dali.hamza.shared.screens.AccountPlaceholder
-import dali.hamza.shared.screens.ContactPlaceholder
-import dali.hamza.shared.screens.FaqPlaceholder
-import dali.hamza.shared.screens.FeedbackPlaceholder
-import dali.hamza.shared.screens.SupportPlaceholder
+import dali.hamza.shared.ui.screens.AccountScreen
+import dali.hamza.shared.ui.screens.ContactSupportScreen
+import dali.hamza.shared.ui.screens.FaqScreen
+import dali.hamza.shared.ui.screens.FeedbackScreen
+import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
 import dali.hamza.shared.ui.screens.RatesScreen
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
+import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import org.koin.mp.KoinPlatform
 
 /**
  * Route names of the Sovereign Ledger app (Navigation-Compose MP).
@@ -83,6 +85,12 @@ fun ExchangeCurrencyApp(
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
+        // Hosts always start Koin before composing — resolve the account VM
+        // from the shared container (same instance both platforms use).
+        val accountViewModel = remember {
+            KoinPlatform.getKoin()?.get<AccountViewModel>()
+                ?: AccountViewModel(dali.hamza.shared.data.storage.createSessionStorage())
+        }
 
         Scaffold(
             // full-bleed canvas — hosts opt into system-bar insets where the
@@ -141,17 +149,33 @@ fun ExchangeCurrencyApp(
                     // current rates list so the tab stays useful.
                     RatesScreen(viewModel)
                 }
-                composable(Routes.ACCOUNT) { AccountPlaceholder() }
-                composable(Routes.CONVERTER) { ConverterCurrencyScreen(viewModel) }
-                composable(Routes.FAQ) { FaqPlaceholder() }
-                composable(Routes.SUPPORT) {
-                    SupportPlaceholder(
-                        onOpenContact = { navController.navigate(Routes.CONTACT) },
-                        onOpenFeedback = { navController.navigate(Routes.FEEDBACK) }
+                composable(Routes.ACCOUNT) {
+                    AccountScreen(
+                        viewModel = accountViewModel,
+                        onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                     )
                 }
-                composable(Routes.CONTACT) { ContactPlaceholder() }
-                composable(Routes.FEEDBACK) { FeedbackPlaceholder() }
+                composable(Routes.CONVERTER) { ConverterCurrencyScreen(viewModel) }
+                composable(Routes.FAQ) {
+                    FaqScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenContact = { navController.navigate(Routes.CONTACT) },
+                    )
+                }
+                composable(Routes.SUPPORT) {
+                    SupportScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenFaq = { navController.navigate(Routes.FAQ) },
+                        onOpenContact = { navController.navigate(Routes.CONTACT) },
+                        onOpenFeedback = { navController.navigate(Routes.FEEDBACK) },
+                    )
+                }
+                composable(Routes.CONTACT) {
+                    ContactSupportScreen(onBack = { navController.popBackStack() })
+                }
+                composable(Routes.FEEDBACK) {
+                    FeedbackScreen(onBack = { navController.popBackStack() })
+                }
             }
         }
     }
