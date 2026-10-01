@@ -1,6 +1,9 @@
 package dali.hamza.echangecurrencyapp.ui
 
+import android.graphics.Rect
 import android.os.Bundle
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +21,26 @@ import org.koin.core.context.GlobalContext
  * verifies full feature parity (plans/redesign-migration-strategy.md).
  */
 class MainActivity : ComponentActivity() {
+
+    /**
+     * Tap-outside dismisses the keyboard (platform-level, 100% reliable):
+     * any touch that starts outside the focused editor clears focus and
+     * hides the IME. Compose's own focus system follows.
+     */
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            currentFocus?.let { focused ->
+                val rect = Rect()
+                focused.getGlobalVisibleRect(rect)
+                if (!rect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                    focused.clearFocus()
+                    (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                        .hideSoftInputFromWindow(focused.windowToken, 0)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

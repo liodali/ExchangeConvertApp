@@ -93,6 +93,8 @@ fun HomeScreen(
     ) {
         LedgerTopAppBar(
             title = state.username,
+            leadingIcon = Icons.Outlined.CurrencyExchange,
+            avatarInitials = state.username,
             trailing = {
                 IconButton(onClick = viewModel::refresh) {
                     Icon(

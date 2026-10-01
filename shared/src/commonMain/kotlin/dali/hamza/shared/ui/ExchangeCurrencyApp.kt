@@ -3,13 +3,16 @@ package dali.hamza.shared.ui
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,6 +63,7 @@ fun ExchangeCurrencyApp(
 ) {
     ExchangeCurrencyAppTheme {
         val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
@@ -69,11 +73,13 @@ fun ExchangeCurrencyApp(
             // design needs them. ANY touch clears focus first (observing,
             // non-consuming): taps on empty space dismiss the keyboard; taps
             // on another input re-focus it and the keyboard stays.
+            contentWindowInsets = WindowInsets(0.dp),
             modifier = modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         awaitFirstDown(requireUnconsumed = false)
+                        keyboardController?.hide()
                         focusManager.clearFocus()
                     }
                 },

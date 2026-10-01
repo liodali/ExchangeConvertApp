@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -60,14 +61,13 @@ fun LedgerBottomNav(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(101.dp)
-            .background(LedgerColors.SurfaceBlur),
+            .background(LedgerColors.SurfaceBlur)
+            .navigationBarsPadding(),
     ) {
-        // 16dp breathing room + 24dp gesture-safe bottom inset baked into the 101dp bar
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 22.dp),
+                .fillMaxWidth()
+                .height(101.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
