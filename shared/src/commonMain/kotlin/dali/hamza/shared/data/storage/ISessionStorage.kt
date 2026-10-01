@@ -26,7 +26,24 @@ interface ISessionStorage {
     fun getUsername(): String = DEFAULT_USERNAME
 
     fun setUsername(value: String)
+
+    /**
+     * Push notifications preference (Account → Preferences).
+     * Defaults to `true`; implementations should persist it.
+     */
+    fun getNotificationsEnabled(): Boolean = true
+
+    fun setNotificationsEnabled(enabled: Boolean) {}
+
+    /**
+     * Preferred pair preset "QUOTE/BASE" (e.g. "USD/EUR") for the dashboard
+     * market overview. Defaults to [DEFAULT_PAIR].
+     */
+    fun getDefaultPair(): String = DEFAULT_PAIR
+
+    fun setDefaultPair(pair: String) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"
 const val DEFAULT_USERNAME = "SOVEREIGN"
+const val DEFAULT_PAIR = "EUR/USD"

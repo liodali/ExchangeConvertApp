@@ -30,10 +30,32 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(timestamp.toDouble(), forKey = KEY_LAST_UPDATE)
     }
 
+    override fun getNotificationsEnabled(): Boolean =
+        // boolForKey returns NO for absent keys — check presence so the
+        // default stays `true` until the user opts out.
+        if (defaults.objectForKey(KEY_NOTIFICATIONS) == null) {
+            true
+        } else {
+            defaults.boolForKey(KEY_NOTIFICATIONS)
+        }
+
+    override fun setNotificationsEnabled(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = KEY_NOTIFICATIONS)
+    }
+
+    override fun getDefaultPair(): String =
+        defaults.stringForKey(KEY_DEFAULT_PAIR) ?: DEFAULT_PAIR
+
+    override fun setDefaultPair(pair: String) {
+        defaults.setObject(pair, forKey = KEY_DEFAULT_PAIR)
+    }
+
     private companion object {
         const val KEY_CURRENCY = "currency"
         const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"
+        const val KEY_NOTIFICATIONS = "notifications_enabled"
+        const val KEY_DEFAULT_PAIR = "default_pair"
     }
 }
 
