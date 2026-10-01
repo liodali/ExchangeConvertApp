@@ -1,6 +1,6 @@
 package dali.hamza.shared.data.network
 
-import dali.hamza.shared.data.network.models.ConvertDataAPI
+import dali.hamza.shared.data.network.models.LatestRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricRatesDataAPI
 import dali.hamza.shared.data.network.models.LiveRatesDataAPI
 import io.ktor.client.HttpClient
@@ -9,15 +9,16 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
 /**
- * Ktor client for [exchangerate.host](https://api.exchangerate.host).
+ * Ktor client for our exchange-api backend
+ * (https://github.com/liodali/OpenExchangeRate — api.exchange.dev.adetify.com).
  *
- * The host now requires an access key on every request (currencylayer-compatible API).
- * Working endpoints with the current plan:
- * - `live?source=BASE`        → current rates of BASE against every other currency
- * - `convert?from=&to=&amount=` → single conversion
- * - `historical?date=&source=`  → rates of a specific date
+ * Endpoints used:
+ * - `latest?base=BASE[&symbol=SYM][&amount=N]` → rates of BASE against
+ *   every supported currency (or the requested symbol); with `amount` the
+ *   returned rate already includes it
+ * - `historical?…` → Phase 4 (History cluster) — not migrated yet
  *
- * Currency names come from [dali.hamza.shared.data.CurrenciesCatalog] (static, local).
+ * The backend needs no access key; the parameter is kept for compatibility.
  */
 class CurrencyApi(
     private val httpClient: HttpClient,
@@ -26,36 +27,37 @@ class CurrencyApi(
 
     /**
      * Current rates of [source] against all other currencies.
-     * Quote keys are concatenated, e.g. `source=USD` produces `USDAED` → rate.
+     * Response: `{base, time, rates: {"EUR": 0.88, ...}}`
      */
-    suspend fun getLiveRates(source: String): Result<LiveRatesDataAPI> {
+    suspend fun getLiveRates(source: String): Result<LatestRatesDataAPI> {
         return try {
-            val response = httpClient.get("live") {
+            val response = httpClient.get("latest") {
                 parameter("access_key", accessKey)
-                parameter("source", source)
+                parameter("base", source)
             }
-            Result.success(response.body<LiveRatesDataAPI>())
+            Result.success(response.body<LatestRatesDataAPI>())
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Convert [amount] from [from] to [to] using the API's own quote.
+     * Convert [amount] from [from] to [to]: the backend returns the pair's
+     * rate with the amount already applied.
      */
     suspend fun convert(
         from: String,
         to: String,
         amount: Double,
-    ): Result<ConvertDataAPI> {
+    ): Result<Double?> {
         return try {
-            val response = httpClient.get("convert") {
+            val response = httpClient.get("latest") {
                 parameter("access_key", accessKey)
-                parameter("from", from)
-                parameter("to", to)
+                parameter("base", from)
+                parameter("symbol", to)
                 parameter("amount", amount)
             }
-            Result.success(response.body<ConvertDataAPI>())
+            Result.success(response.body<LatestRatesDataAPI>().rates?.get(to))
         } catch (e: Exception) {
             Result.failure(e)
         }

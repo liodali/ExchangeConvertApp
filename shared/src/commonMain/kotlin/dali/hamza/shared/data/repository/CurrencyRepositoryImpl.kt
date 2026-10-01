@@ -58,17 +58,17 @@ class CurrencyRepositoryImpl(
         currencyApi.getLiveRates(currentCurrency)
             .fold(
                 onSuccess = { data ->
-                    val quotes = data.quotes
-                    if (data.success == true && quotes != null) {
-                        val time = (data.timestamp ?: (now / 1000)) * 1000
+                    // exchange-api shape: rates keyed by quote code {"EUR": 0.88}
+                    val rates = data.rates
+                    if (rates != null) {
+                        // server "time" is a display string — store fetch time
                         database.currenciesQueries.deleteAllRates()
-                        quotes.forEach { (key, rate) ->
-                            val target = key.removePrefix(currentCurrency)
-                            if (target.isNotEmpty() && target != currentCurrency) {
+                        rates.forEach { (target, rate) ->
+                            if (target != currentCurrency) {
                                 database.currenciesQueries.insertRate(
                                     name = target,
                                     rate = rate,
-                                    time = time,
+                                    time = now,
                                     baseCurrency = currentCurrency
                                 )
                             }

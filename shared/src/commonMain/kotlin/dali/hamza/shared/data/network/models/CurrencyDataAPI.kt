@@ -9,6 +9,23 @@ import kotlinx.serialization.Serializable
  * All requests require an `access_key` query parameter.
  */
 @Serializable
+data class LatestRatesDataAPI(
+    /** base currency ISO code, e.g. "USD" */
+    @SerialName("base") val base: String? = null,
+    /** server timestamp (free-form string; display only) */
+    @SerialName("time") val time: String? = null,
+    /** rates keyed by quote ISO code: {"EUR": 0.88, ...} — for convert()
+     *  requests with amount, the value already includes the amount */
+    @SerialName("rates") val rates: Map<String, Double>? = null,
+)
+
+// ---------------------------------------------------------------------------
+// Legacy exchangerate.host DTOs (currencylayer-compatible). The /live and
+// /convert flows now use LatestRatesDataAPI against our own exchange-api
+// backend; the historical DTO stays until Phase 4 migrates /historic.
+// ---------------------------------------------------------------------------
+
+@Serializable
 data class ApiError(
     @SerialName("code") val code: Int? = null,
     @SerialName("type") val type: String? = null,
