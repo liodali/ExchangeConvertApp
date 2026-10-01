@@ -1,0 +1,11 @@
+# Sovereign Ledger release signing — copy to script/key.properties and adjust.
+# script/keystore.sh also bootstraps it with random passwords on first run.
+# LOCAL ONLY — key.properties is gitignored.
+#
+# Back this file AND the keystore up somewhere safe: losing them means the
+# app can never be updated on Google Play.
+
+KEYSTORE_PATH=/absolute/path/to/sovereign-ledger-release.jks
+KEYSTORE_PASSWORD=
+KEY_ALIAS=sovereign-ledger
+KEY_PASSWORD=

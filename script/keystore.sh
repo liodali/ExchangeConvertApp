@@ -6,12 +6,12 @@
 #   script/keystore.sh verify     show the keystore certificate
 #   script/keystore.sh secrets    print the GitHub Actions secret values to paste
 #
-# Configuration lives in .env at the repo root (see .env.example).
+# Configuration lives in key.properties at the repo root (see key.properties.example).
 # The keystore itself is NEVER committed (.gitignore blocks .env and keystores/).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_FILE="$ROOT/script/key.properties"
+ENV_FILE="$ROOT/key.properties"
 LOCAL_PROPERTIES="$ROOT/local.properties"
 
 # ---- defaults -------------------------------------------------------------
