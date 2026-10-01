@@ -6,7 +6,7 @@
 #   script/keystore.sh verify     show the keystore certificate
 #   script/keystore.sh secrets    print the GitHub Actions secret values to paste
 #
-# Configuration lives in key.properties at the repo root (see key.properties.example).
+# Configuration lives in key.properties at the repo root (see script/key.properties.example).
 # The keystore itself is NEVER committed (.gitignore blocks .env and keystores/).
 set -euo pipefail
 
