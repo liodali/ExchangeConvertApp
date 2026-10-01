@@ -65,8 +65,9 @@ Console when ready.
 
 ## Listing assets (ready in `qa/store/`)
 
-- Feature graphic `feature-graphic-1024x500.png` ✅ (logo mark + wordmark)
-- App icon: the adaptive icon ships with the app (dark tile, gold rate-line)
+- Store icon `app-icon-512.png` ✅ (512×512 full-bleed, Play masks corners)
+- Feature graphic `feature-graphic-1024x500.png` ✅ (bars mark + wordmark)
+- App icon: the adaptive + Material You monochrome icon ships with the app
 - Phone screenshots: capture from the device during the QA pass (min 2, 16:9/9:16)
 
 ## Notes
