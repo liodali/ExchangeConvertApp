@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.shared.data.CurrenciesCatalog
+import dali.hamza.shared.platform.currentHourOfDay
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.ui.components.BentoCard
@@ -100,6 +101,7 @@ fun HomeScreen(
         LedgerTopAppBar(
             title = state.username,
             leadingIcon = Icons.Outlined.CurrencyExchange,
+            greeting = remember { greetingForHour(currentHourOfDay()) },
             avatarInitials = state.username,
             trailing = {
                 IconButton(onClick = viewModel::refresh) {
@@ -467,6 +469,17 @@ private fun RecentActivitySection() {
 }
 
 // ------------------------------------------------------------------ helpers
+
+/**
+ * Time-based greeting shown above the username — used until a login /
+ * guest profile exists (Account phase).
+ */
+internal fun greetingForHour(hour: Int): String = when (hour) {
+    in 5..11 -> "Good Morning"
+    in 12..16 -> "Good Afternoon"
+    in 17..21 -> "Good Evening"
+    else -> "Good Night"
+}
 
 /**
  * Ledger-style number formatting (KMP-safe, locale-stable):

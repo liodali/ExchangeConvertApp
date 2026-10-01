@@ -54,6 +54,8 @@ fun LedgerTopAppBar(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     leadingIcon: ImageVector? = null,
+    /** Optional greeting line above the title (dashboard: "Good Afternoon"). */
+    greeting: String? = null,
     avatarInitials: String? = null,
     onAvatarClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
@@ -100,19 +102,32 @@ fun LedgerTopAppBar(
                 }
             }
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    letterSpacing = 0.5.sp,
-                ),
-                color = LedgerColors.Blue,
-                textAlign = if (onBack != null) TextAlign.Center else TextAlign.Start,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                if (greeting != null && onBack == null) {
+                    Text(
+                        text = greeting,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.sp,
+                        ),
+                        color = LedgerColors.TextTertiary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        letterSpacing = 0.5.sp,
+                    ),
+                    color = LedgerColors.Blue,
+                    textAlign = if (onBack != null) TextAlign.Center else TextAlign.Start,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
 
             if (trailing != null) {
                 trailing()
