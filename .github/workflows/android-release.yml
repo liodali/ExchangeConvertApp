@@ -110,6 +110,9 @@ jobs:
             app/build/outputs/mapping/release/mapping.txt
 
       - name: Upload to Play internal testing
+        # Non-fatal until the Play Console app entry exists — "Package not
+        # found" here means: create the app in Console, then re-run the job.
+        continue-on-error: true
         if: steps.secrets.outputs.play == 'true' && steps.secrets.outputs.keystore == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
