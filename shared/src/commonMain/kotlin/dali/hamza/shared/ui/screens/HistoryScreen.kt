@@ -208,6 +208,7 @@ fun HistoryScreen(
                 Spacer(Modifier.height(16.dp))
                 LedgerLineChart(
                     points = state.series.map { it.rate },
+                    labels = state.series.map { it.date },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp),

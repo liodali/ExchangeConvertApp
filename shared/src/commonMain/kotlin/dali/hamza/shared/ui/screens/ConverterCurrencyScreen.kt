@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -238,6 +239,7 @@ fun ConverterCurrencyScreen(
                 if (historyState.series.size >= 2) {
                     LedgerLineChart(
                         points = historyState.series.map { it.rate },
+                        labels = historyState.series.map { it.date },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(192.dp),
@@ -259,8 +261,24 @@ fun ConverterCurrencyScreen(
                     }
                 }
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = historyState.series.firstOrNull()?.date ?: "",
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                    color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
+                )
+                Text(
+                    text = historyState.series.lastOrNull()?.date ?: "",
+                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                    color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
+                )
+            }
+        }
 
-            Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
             // ============ Available rates ================================
             Text(
