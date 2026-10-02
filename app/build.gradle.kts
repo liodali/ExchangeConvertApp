@@ -15,6 +15,10 @@ val properties = Properties().apply {
         load(rootProject.file("local.properties").inputStream())
     }
 }
+// Gradle property (-P / gradle.properties) → local.properties → default.
+// CI passes -PversionCode/-PversionName from the release tag.
+fun prop(name: String, fallback: String): String =
+    (project.properties[name] as? String) ?: properties.getProperty(name) ?: fallback
 val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
@@ -25,8 +29,8 @@ android {
         applicationId = "com.sovereignledger.app"
         minSdk = 26
         // injectable from CI (-PversionCode=… / -PversionName=…)
-        versionCode = (properties.getOrDefault("versionCode", "1") as String).toInt()
-        versionName = (properties.getOrDefault("versionName", "1.0.0") as String)
+        versionCode = prop("versionCode", "1").toInt()
+        versionName = prop("versionName", "1.0.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -60,7 +64,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
