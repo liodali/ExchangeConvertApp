@@ -38,17 +38,22 @@ android {
         }
     }
 
-    // Release signing: keystore NEVER committed — credentials come from
-    // local.properties (local) or environment variables (CI). See
-    // docs/play-release.md.
+    // Release signing — priority: CI env vars → root key.properties (ours,
+    // Studio never touches it) — see script/keystore.sh. Never committed.
+    val keyProperties = Properties().apply {
+        val keyFile = rootProject.file("key.properties")
+        if (keyFile.exists()) {
+            keyFile.inputStream().use { load(it) }
+        }
+    }
     val releaseKeystorePath = providers.environmentVariable("SIGNING_KEYSTORE_PATH").orNull
-        ?: properties.getOrDefault("signing.keystore.path", "").toString()
+        ?: keyProperties.getProperty("KEYSTORE_PATH").orEmpty()
     val releaseStorePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull
-        ?: properties.getOrDefault("signing.store.password", "").toString()
+        ?: keyProperties.getProperty("KEYSTORE_PASSWORD").orEmpty()
     val releaseKeyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").orNull
-        ?: properties.getOrDefault("signing.key.alias", "").toString()
+        ?: keyProperties.getProperty("KEY_ALIAS").orEmpty()
     val releaseKeyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull
-        ?: properties.getOrDefault("signing.key.password", "").toString()
+        ?: keyProperties.getProperty("KEY_PASSWORD").orEmpty()
 
     signingConfigs {
         if (releaseKeystorePath.isNotBlank()) {
