@@ -276,9 +276,8 @@ fun ConverterCurrencyScreen(
                     color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
                 )
             }
-        }
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
             // ============ Available rates ================================
             Text(
