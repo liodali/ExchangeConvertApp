@@ -9,6 +9,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.blur
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -39,6 +41,8 @@ import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.BiometricAuthenticator
 import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.ui.components.LedgerBottomNav
+import dali.hamza.shared.ui.components.LedgerButton
+import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
 import dali.hamza.shared.ui.screens.ContactSupportScreen
@@ -51,6 +55,7 @@ import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
+import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
@@ -115,6 +120,15 @@ fun ExchangeCurrencyApp(
             )
         }
 
+        // ---- biometric app lock (guest & sovereign; off by default) --------
+        val appLock = remember { runCatching { dali.hamza.shared.data.storage.createSessionStorage() }.getOrNull() }
+        val authenticator = remember { dali.hamza.shared.platform.createBiometricAuthenticator() }
+        var lockEnabled by remember { mutableStateOf(appLock?.getBiometricUnlock() == true) }
+        var unlocked by remember { mutableStateOf(false) }
+        var authCancelled by remember { mutableStateOf(false) }
+        val locked = lockEnabled && !unlocked
+
+        Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             // full-bleed canvas — hosts opt into system-bar insets where the
             // design needs them. ANY touch clears focus first (observing,
@@ -123,7 +137,8 @@ fun ExchangeCurrencyApp(
             contentWindowInsets = WindowInsets(0.dp),
             modifier = modifier
                 .fillMaxSize()
-                .then(sinkModifier),
+                .then(sinkModifier)
+                .blur(if (locked) 20.dp else 0.dp),
             bottomBar = {
                 if (currentRoute in Routes.topLevel) {
                     LedgerBottomNav(
@@ -232,6 +247,24 @@ fun ExchangeCurrencyApp(
                 }
             }
         }
+
+            if (locked) {
+                LockScreen(
+                    canPrompt = authenticator.isAvailable(),
+                    cancelled = authCancelled,
+                    onPrompt = {
+                        authenticator.authenticate { ok ->
+                            if (ok) {
+                                unlocked = true
+                                authCancelled = false
+                            } else {
+                                authCancelled = true
+                            }
+                        }
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -250,15 +283,14 @@ private fun destinationForRoute(route: String?): LedgerDestination = when (route
 
 
 /**
- * Biometric gate — shown instead of the app until the user authenticates.
- * Presents the system prompt automatically when biometrics are enrolled;
- * the button re-triggers it (or falls back to entry if none are enrolled
- * and the lock was enabled on another configuration).
+ * Biometric gate — the app renders behind (Home/splash) but is blurred
+ * and scrimmed until the user authenticates. Cancelling the system prompt
+ * shows a must-authenticate message; only a successful check unlocks.
  */
 @Composable
 private fun LockScreen(
     canPrompt: Boolean,
-    onUnlock: () -> Unit,
+    cancelled: Boolean,
     onPrompt: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
@@ -267,27 +299,36 @@ private fun LockScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(dali.hamza.shared.ui.theme.LedgerColors.Canvas),
+            .background(LedgerColors.Scrim.copy(alpha = 0.94f)),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            dali.hamza.shared.ui.components.LedgerLogoMark(size = 72.dp)
+            LedgerLogoMark(size = 72.dp)
             Spacer(Modifier.height(24.dp))
             Text(
                 text = "Sovereign Ledger",
                 style = MaterialTheme.typography.headlineMedium,
-                color = dali.hamza.shared.ui.theme.LedgerColors.TextPrimary,
+                color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Your ledger is locked",
+                text = if (cancelled) {
+                    "You need to verify your biometrics to continue"
+                } else {
+                    "Your ledger is locked"
+                },
                 style = MaterialTheme.typography.bodyMedium,
-                color = dali.hamza.shared.ui.theme.LedgerColors.TextTertiary,
+                color = if (cancelled) LedgerColors.Gold else LedgerColors.TextTertiary,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
             Spacer(Modifier.height(32.dp))
-            dali.hamza.shared.ui.components.LedgerButton(
-                text = if (canPrompt) "Unlock" else "Biometric not set up — continue",
-                onClick = { if (canPrompt) onPrompt() else onUnlock() },
+            LedgerButton(
+                text = when {
+                    cancelled -> "Try again"
+                    canPrompt -> "Unlock"
+                    else -> "Biometric not set up — tap to retry"
+                },
+                onClick = onPrompt,
             )
         }
     }

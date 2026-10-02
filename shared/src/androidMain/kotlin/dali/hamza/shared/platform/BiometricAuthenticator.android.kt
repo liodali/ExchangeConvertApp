@@ -14,8 +14,10 @@ actual class BiometricAuthenticator {
     actual fun isAvailable(): Boolean {
         val activity = AndroidAppContext.currentActivity ?: return false
         val manager = BiometricManager.from(activity)
-        return manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
-            BiometricManager.BIOMETRIC_SUCCESS
+        return manager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        ) != BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE
     }
 
     actual fun authenticate(onResult: (Boolean) -> Unit) {
@@ -40,8 +42,11 @@ actual class BiometricAuthenticator {
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Sovereign Ledger")
             .setDescription("Unlock your ledger")
-            .setNegativeButtonText("Cancel")
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            // biometrics OR device PIN/pattern — nobody gets locked out
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            )
             .build()
         prompt.authenticate(info)
     }
