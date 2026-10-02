@@ -86,8 +86,22 @@ do_run() {
   local s; s="$(require_device)"
   do_install
   adb -s "$s" shell am force-stop "$APP_ID" >/dev/null 2>&1 || true
-  adb -s "$s" shell am start -n "$APP_ID/$ACTIVITY" >/dev/null
-  say "launched $APP_ID"
+  adb -s "$s" shell am start -W -n "$APP_ID/$ACTIVITY" >/dev/null
+  say "launched $APP_ID — streaming logs (Ctrl-C to detach; app keeps running)"
+  stream_logs "$s"
+}
+
+# pid + logcat attach (waits briefly for the process to come up)
+stream_logs() {
+  local s="$1" pid=""
+  local i
+  for i in 1 2 3 4 5; do
+    pid="$(adb -s "$s" shell pidof "$APP_ID" | tr -d '')"
+    if [ -n "$pid" ]; then break; fi
+    sleep 1
+  done
+  if [ -z "$pid" ]; then fail "app process not found"; fi
+  adb -s "$s" logcat --pid="$pid"
 }
 
 do_release() {
@@ -106,11 +120,8 @@ do_release() {
 
 do_logs() {
   local s; s="$(require_device)"
-  local pid
-  pid="$(adb -s "$s" shell pidof "$APP_ID" | tr -d '\r')"
-  if [ -z "$pid" ]; then fail "app not running — start it with: script/dev.sh run"; fi
-  say "streaming logcat for $APP_ID (pid $pid) — Ctrl-C to stop"
-  adb -s "$s" logcat --pid="$pid"
+  say "streaming logcat for $APP_ID — Ctrl-C to stop"
+  stream_logs "$s"
 }
 
 case "${1:-}" in
