@@ -53,6 +53,7 @@ import dali.hamza.shared.ui.screens.HistoryScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
+import dali.hamza.shared.ui.screens.OnboardingScreen
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -128,7 +129,29 @@ fun ExchangeCurrencyApp(
         var authCancelled by remember { mutableStateOf(false) }
         val locked = lockEnabled && !unlocked
 
+        // ---- market-overview onboarding (first launch) ---------------------
+        // empty preferences = the user never completed the market selection
+        var marketPreferences by remember {
+            mutableStateOf(appLock?.getMarketPreferences().orEmpty())
+        }
+        var onboarded by remember { mutableStateOf(marketPreferences.isNotEmpty()) }
+        val sharedState by viewModel.state.collectAsState()
+
         Box(modifier = Modifier.fillMaxSize()) {
+        if (!onboarded) {
+            OnboardingScreen(
+                currencies = sharedState.currencies,
+                base = sharedState.fromCurrency?.name,
+                onDone = { codes ->
+                    appLock?.setMarketPreferences(codes)
+                    marketPreferences = codes
+                    onboarded = true
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(if (locked) 20.dp else 0.dp),
+            )
+        } else {
         Scaffold(
             // full-bleed canvas — hosts opt into system-bar insets where the
             // design needs them. ANY touch clears focus first (observing,
@@ -179,6 +202,7 @@ fun ExchangeCurrencyApp(
                 composable(Routes.HOME) {
                     HomeScreen(
                         viewModel = viewModel,
+                        marketPreferences = marketPreferences,
                         homeViewModel = remember {
                             KoinPlatform.getKoin()?.get<HomeViewModel>()
                                 ?: HomeViewModel(
@@ -205,6 +229,9 @@ fun ExchangeCurrencyApp(
                 composable(Routes.ACCOUNT) {
                     AccountScreen(
                         viewModel = accountViewModel,
+                        currencies = sharedState.currencies,
+                        baseCurrency = sharedState.fromCurrency?.name,
+                        onMarketPreferencesChanged = { marketPreferences = it },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                     )
                 }
@@ -246,6 +273,7 @@ fun ExchangeCurrencyApp(
                     FeedbackScreen(onBack = { navController.popBackStack() })
                 }
             }
+        }
         }
 
             if (locked) {

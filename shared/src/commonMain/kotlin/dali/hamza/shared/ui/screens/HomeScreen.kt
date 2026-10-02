@@ -93,6 +93,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel,
     onOpenConverter: () -> Unit,
     onOpenHistory: () -> Unit,
+    marketPreferences: List<String> = emptyList(),
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
@@ -100,9 +101,19 @@ fun HomeScreen(
 
     val topRates = state.rates.topPairs()
 
-    // pair cards: reload when the base or top rates change
-    LaunchedEffect(state.fromCurrency?.name, topRates) {
-        homeViewModel.load(state.fromCurrency?.name, topRates)
+    // market-overview cards: the user's onboarding selections (Account can
+    // change them); falls back to the design majors while nothing is chosen
+    val cardsRates = remember(state.rates, marketPreferences, state.fromCurrency?.name) {
+        val base = state.fromCurrency?.name
+        marketPreferences
+            .filter { it != base }
+            .mapNotNull { code -> state.rates.firstOrNull { it.name == code } }
+            .ifEmpty { topRates.take(3) }
+    }
+
+    // pair cards: reload when the base or selected rates change
+    LaunchedEffect(state.fromCurrency?.name, cardsRates) {
+        homeViewModel.load(state.fromCurrency?.name, cardsRates)
     }
     // recent activity: keep fresh while Home is visible
     LaunchedEffect(Unit) {
@@ -142,7 +153,7 @@ fun HomeScreen(
             // ============ 1. Market Overview ================================
             MarketOverviewSection(
                 pairCards = homeState.pairCards.ifEmpty {
-                    topRates.take(3).map { PairCardData(quote = it.name, rate = it.rate) }
+                    cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
                 },
             )
 

@@ -50,6 +50,11 @@ object LedgerStrings {
         const val LANGUAGE = "Language"
         const val LANGUAGE_VALUE = "English (US)"
 
+        /** Market-overview preference section (dashboard pair cards). */
+        const val MARKET_SECTION = "MARKET PREFERENCES"
+        const val MARKET_PICK_TITLE = "Choose currency"
+        const val MARKET_SLOT_PREFIX = "Market"
+
         const val VAULT_SECTION = "VAULT MANAGEMENT"
         const val LOG_OUT = "Log out from Ledger"
         const val DELETE_ACCOUNT = "Permanently Delete Account"

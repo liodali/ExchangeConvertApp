@@ -62,6 +62,19 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putBoolean(KEY_BIOMETRIC_UNLOCK, enabled).apply()
     }
 
+    override fun getMarketPreferences(): List<String> =
+        preferences.getString(KEY_MARKET_PREFERENCES, null)
+            ?.split(',')
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+
+    override fun setMarketPreferences(codes: List<String>) {
+        preferences.edit()
+            .putString(KEY_MARKET_PREFERENCES, codes.joinToString(","))
+            .apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -71,6 +84,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_DEFAULT_PAIR = "default_pair"
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
+        const val KEY_MARKET_PREFERENCES = "market_preferences"
     }
 }
 

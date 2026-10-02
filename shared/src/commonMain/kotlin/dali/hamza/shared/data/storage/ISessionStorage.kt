@@ -61,6 +61,16 @@ interface ISessionStorage {
     fun getBiometricUnlock(): Boolean = false
 
     fun setBiometricUnlock(enabled: Boolean) {}
+
+    /**
+     * Market-overview preferences: up to 3 ISO codes quoted against the
+     * base currency on the dashboard. An empty list means onboarding has
+     * not been completed yet (the market-selection flow runs at first
+     * launch; values are editable in Account → Market Preferences).
+     */
+    fun getMarketPreferences(): List<String> = emptyList()
+
+    fun setMarketPreferences(codes: List<String>) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

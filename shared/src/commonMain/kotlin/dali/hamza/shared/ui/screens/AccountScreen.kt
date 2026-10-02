@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.window.Dialog
 import dali.hamza.shared.ui.components.BentoCard
+import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
 import dali.hamza.shared.ui.components.LedgerChip
@@ -66,6 +67,7 @@ import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
+import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 
@@ -81,9 +83,13 @@ import dali.hamza.shared.ui.viewmodel.AccountViewModel
 fun AccountScreen(
     viewModel: AccountViewModel,
     onOpenSupport: () -> Unit,
+    currencies: List<Currency> = emptyList(),
+    baseCurrency: String? = null,
+    onMarketPreferencesChanged: (List<String>) -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
+    var marketSlot by remember { mutableStateOf<Int?>(null) }
     val isSovereign = viewModel.dataTier == DataTier.SOVEREIGN
     val biometricAuthenticator = remember {
         org.koin.mp.KoinPlatform.getKoin()?.get<dali.hamza.shared.platform.BiometricAuthenticator>()
@@ -246,6 +252,28 @@ fun AccountScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            // ============ Market preferences (dashboard cards) ============
+            BentoCard {
+                SectionLabel(LedgerStrings.Account.MARKET_SECTION)
+                Spacer(Modifier.height(16.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // always three slots, even if storage was hand-edited short
+                    for (index in 0 until 3) {
+                        val code = viewModel.marketPreferences.getOrNull(index)
+                        val name = currencies
+                            .firstOrNull { it.name == code }?.fullCountryName
+                        LedgerListRow(
+                            label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1}" +
+                                (name?.let { " · $it" } ?: ""),
+                            value = code ?: "—",
+                            onClick = { marketSlot = index },
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
             // ============ Preferences =====================================
             BentoCard {
                 SectionLabel(LedgerStrings.Account.PREFERENCES)
@@ -375,6 +403,22 @@ fun AccountScreen(
             onSave = { name ->
                 viewModel.rename(name)
                 showEditDialog = false
+            },
+        )
+    }
+
+    marketSlot?.let { slot ->
+        val others = viewModel.marketPreferences.filterIndexed { index, _ -> index != slot }
+        CurrencyPickerSheet(
+            visible = true,
+            currencies = currencies.filter {
+                it.name != baseCurrency && it.name !in others
+            },
+            title = LedgerStrings.Account.MARKET_PICK_TITLE,
+            onDismiss = { marketSlot = null },
+            onCurrencySelected = { currency ->
+                viewModel.updateMarketPreference(slot, currency.name)
+                onMarketPreferencesChanged(viewModel.marketPreferences)
             },
         )
     }

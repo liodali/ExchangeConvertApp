@@ -72,6 +72,17 @@ class IosSessionStorage : ISessionStorage {
         defaults.setBool(enabled, forKey = KEY_BIOMETRIC_UNLOCK)
     }
 
+    override fun getMarketPreferences(): List<String> =
+        defaults.stringForKey(KEY_MARKET_PREFERENCES)
+            ?.split(',')
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            .orEmpty()
+
+    override fun setMarketPreferences(codes: List<String>) {
+        defaults.setObject(codes.joinToString(","), forKey = KEY_MARKET_PREFERENCES)
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
@@ -80,6 +91,7 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_LAST_UPDATE = "last_time_update_rates"
         const val KEY_NOTIFICATIONS = "notifications_enabled"
         const val KEY_DEFAULT_PAIR = "default_pair"
+        const val KEY_MARKET_PREFERENCES = "market_preferences"
     }
 }
 

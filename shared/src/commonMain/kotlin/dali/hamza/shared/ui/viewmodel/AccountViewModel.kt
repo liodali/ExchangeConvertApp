@@ -39,9 +39,24 @@ class AccountViewModel(
     var biometricUnlock by mutableStateOf(storage.getBiometricUnlock())
         private set
 
+    /** Dashboard market-overview codes (persisted; editable in Account). */
+    var marketPreferences by mutableStateOf(storage.getMarketPreferences())
+        private set
+
     fun updateBiometricUnlock(enabled: Boolean) {
         biometricUnlock = enabled
         storage.setBiometricUnlock(enabled)
+    }
+
+    /** Replace slot [slot] (0–2) of the market preferences with [code]. */
+    fun updateMarketPreference(slot: Int, code: String) {
+        val next = marketPreferences.toMutableList()
+        // dedupe: a code picked for one slot leaves any other slot it was in
+        next.removeAll { it == code }
+        while (next.size <= slot) next.add(code)
+        next[slot] = code
+        marketPreferences = next.take(3)
+        storage.setMarketPreferences(marketPreferences)
     }
 
     /** Design persona email, derived from the username. */
