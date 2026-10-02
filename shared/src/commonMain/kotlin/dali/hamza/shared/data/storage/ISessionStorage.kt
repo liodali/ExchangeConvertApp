@@ -53,6 +53,14 @@ interface ISessionStorage {
     fun getDataTier(): DataTier = DataTier.GUEST
 
     fun setDataTier(tier: DataTier) {}
+
+    /**
+     * Biometric app lock — disabled by default; when enabled the app asks
+     * for device biometrics at launch.
+     */
+    fun getBiometricUnlock(): Boolean = false
+
+    fun setBiometricUnlock(enabled: Boolean) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

@@ -84,8 +84,11 @@ fun AccountScreen(
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
-    var biometricUnlock by remember { mutableStateOf(true) }
     val isSovereign = viewModel.dataTier == DataTier.SOVEREIGN
+    val biometricAuthenticator = remember {
+        org.koin.mp.KoinPlatform.getKoin()?.get<dali.hamza.shared.platform.BiometricAuthenticator>()
+            ?: dali.hamza.shared.platform.createBiometricAuthenticator()
+    }
 
     Column(
         modifier = Modifier
@@ -157,8 +160,10 @@ fun AccountScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ============ Personal information =============================
-            BentoCard {
+            // ============ Personal information (Sovereign only) ============
+            // guest mode has no profile backend — persona fields wait for login
+            if (isSovereign) {
+                BentoCard {
                 SectionHeader(
                     title = LedgerStrings.Account.PERSONAL_INFO,
                     icon = Icons.Outlined.PersonOutline,
@@ -173,6 +178,7 @@ fun AccountScreen(
                         label = LedgerStrings.Account.RESIDENCE_LABEL,
                         value = LedgerStrings.Account.RESIDENCE_VALUE,
                     )
+                }
                 }
             }
 
@@ -215,8 +221,18 @@ fun AccountScreen(
                         icon = Icons.Outlined.Fingerprint,
                         trailing = {
                             Switch(
-                                checked = biometricUnlock,
-                                onCheckedChange = { biometricUnlock = it },
+                                checked = viewModel.biometricUnlock,
+                                onCheckedChange = { enable ->
+                                    if (enable) {
+                                        // confirm with the system prompt before arming
+                                        biometricAuthenticator.authenticate { ok ->
+                                            if (ok) viewModel.updateBiometricUnlock(true)
+                                        }
+                                    } else {
+                                        viewModel.updateBiometricUnlock(false)
+                                    }
+                                },
+                                enabled = !viewModel.biometricUnlock || biometricAuthenticator.isAvailable(),
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = LedgerColors.Green,
                                     checkedTrackColor = LedgerColors.Green.copy(alpha = 0.25f),

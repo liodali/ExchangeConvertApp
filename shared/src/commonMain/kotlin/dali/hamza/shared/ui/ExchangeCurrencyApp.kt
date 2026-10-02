@@ -7,17 +7,25 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,7 +34,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.domain.repository.IRepository
+import dali.hamza.shared.platform.BiometricAuthenticator
+import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.ui.components.LedgerBottomNav
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
@@ -234,4 +245,50 @@ private fun destinationForRoute(route: String?): LedgerDestination = when (route
     Routes.HISTORY -> LedgerDestination.HISTORY
     Routes.ACCOUNT -> LedgerDestination.ACCOUNT
     else -> LedgerDestination.HOME
+}
+
+
+
+/**
+ * Biometric gate — shown instead of the app until the user authenticates.
+ * Presents the system prompt automatically when biometrics are enrolled;
+ * the button re-triggers it (or falls back to entry if none are enrolled
+ * and the lock was enabled on another configuration).
+ */
+@Composable
+private fun LockScreen(
+    canPrompt: Boolean,
+    onUnlock: () -> Unit,
+    onPrompt: () -> Unit,
+) {
+    LaunchedEffect(Unit) {
+        if (canPrompt) onPrompt()
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(dali.hamza.shared.ui.theme.LedgerColors.Canvas),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            dali.hamza.shared.ui.components.LedgerLogoMark(size = 72.dp)
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = "Sovereign Ledger",
+                style = MaterialTheme.typography.headlineMedium,
+                color = dali.hamza.shared.ui.theme.LedgerColors.TextPrimary,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Your ledger is locked",
+                style = MaterialTheme.typography.bodyMedium,
+                color = dali.hamza.shared.ui.theme.LedgerColors.TextTertiary,
+            )
+            Spacer(Modifier.height(32.dp))
+            dali.hamza.shared.ui.components.LedgerButton(
+                text = if (canPrompt) "Unlock" else "Biometric not set up — continue",
+                onClick = { if (canPrompt) onPrompt() else onUnlock() },
+            )
+        }
+    }
 }

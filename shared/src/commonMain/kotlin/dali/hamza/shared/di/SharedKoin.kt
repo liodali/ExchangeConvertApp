@@ -4,6 +4,7 @@ import dali.hamza.shared.data.network.CurrencyApi
 import dali.hamza.shared.data.network.createHttpClient
 import dali.hamza.shared.data.repository.CurrencyRepositoryImpl
 import dali.hamza.shared.data.storage.createSessionStorage
+import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.database.AppDatabase
 import dali.hamza.shared.database.createDatabaseDriver
 import dali.hamza.shared.domain.repository.IRepository
@@ -33,6 +34,7 @@ fun sharedModule(
     single { createDatabaseDriver() }
     single { AppDatabase(get()) }
     single { createSessionStorage() }
+    single { createBiometricAuthenticator() }
     single<IRepository> {
         CurrencyRepositoryImpl(
             currencyApi = get(),

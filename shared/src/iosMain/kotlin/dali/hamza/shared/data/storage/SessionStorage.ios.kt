@@ -61,8 +61,20 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(tier.name, forKey = KEY_DATA_TIER)
     }
 
+    override fun getBiometricUnlock(): Boolean =
+        if (defaults.objectForKey(KEY_BIOMETRIC_UNLOCK) == null) {
+            false
+        } else {
+            defaults.boolForKey(KEY_BIOMETRIC_UNLOCK)
+        }
+
+    override fun setBiometricUnlock(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = KEY_BIOMETRIC_UNLOCK)
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
+        const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
         const val KEY_CURRENCY = "currency"
         const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"

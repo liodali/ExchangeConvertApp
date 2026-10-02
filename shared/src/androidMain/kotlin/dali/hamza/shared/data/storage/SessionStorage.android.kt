@@ -55,6 +55,13 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_DATA_TIER, tier.name).apply()
     }
 
+    override fun getBiometricUnlock(): Boolean =
+        preferences.getBoolean(KEY_BIOMETRIC_UNLOCK, false)
+
+    override fun setBiometricUnlock(enabled: Boolean) {
+        preferences.edit().putBoolean(KEY_BIOMETRIC_UNLOCK, enabled).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -63,6 +70,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_NOTIFICATIONS = "notifications_enabled"
         const val KEY_DEFAULT_PAIR = "default_pair"
         const val KEY_DATA_TIER = "data_tier"
+        const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
     }
 }
 

@@ -12,4 +12,8 @@ import android.content.Context
 object AndroidAppContext {
     @Volatile
     var appContext: Context? = null
+
+    /** Current foreground activity — the biometric prompt needs one. */
+    @Volatile
+    var currentActivity: androidx.fragment.app.FragmentActivity? = null
 }

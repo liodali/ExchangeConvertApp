@@ -35,6 +35,15 @@ class AccountViewModel(
     /** Account data tier — guests get hourly rates, Sovereign realtime. */
     val dataTier: DataTier get() = storage.getDataTier()
 
+    /** Biometric app lock (persisted, disabled by default). */
+    var biometricUnlock by mutableStateOf(storage.getBiometricUnlock())
+        private set
+
+    fun updateBiometricUnlock(enabled: Boolean) {
+        biometricUnlock = enabled
+        storage.setBiometricUnlock(enabled)
+    }
+
     /** Design persona email, derived from the username. */
     val email: String
         get() = "${username.lowercase().filter { it.isLetterOrDigit() }}@sovereign.vault"

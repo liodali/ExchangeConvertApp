@@ -3,7 +3,7 @@ package dali.hamza.echangecurrencyapp.ui
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
@@ -25,7 +25,7 @@ import org.koin.core.context.GlobalContext
  *   (No bounds check on purpose: in Compose, `currentFocus` is the whole
  *   Compose surface, so a bounds test can never detect "outside".)
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        dali.hamza.shared.AndroidAppContext.currentActivity = this
         installSplashScreen()
         // Flutter-style edge-to-edge: system bars stay visible and transparent,
         // content draws behind them; M3 Scaffold insets position the content
