@@ -3,6 +3,8 @@
 # Sovereign Ledger — release keystore (JKS) manager
 #
 #   script/keystore.sh            generate the keystore if missing + sync local.properties
+#   script/keystore.sh sync       only re-write the signing.* entries into local.properties
+#                                 (Android Studio wipes them on Gradle sync — re-run after)
 #   script/keystore.sh verify     show the keystore certificate
 #   script/keystore.sh secrets    print the GitHub Actions secret values to paste
 #
@@ -128,7 +130,8 @@ secrets() {
 
 case "${1:-generate}" in
   generate) generate ;;
+  sync)     ensure_env; sync_local_properties ;;
   verify)   verify ;;
   secrets)  secrets ;;
-  *) echo "usage: script/keystore.sh [generate|verify|secrets]"; exit 1 ;;
+  *) echo "usage: script/keystore.sh [generate|sync|verify|secrets]"; exit 1 ;;
 esac
