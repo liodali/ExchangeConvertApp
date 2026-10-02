@@ -69,6 +69,8 @@ kotlin {
         }
 
         androidMain.dependencies {
+            // Biometric app-lock (BiometricPrompt in the platform actual)
+            implementation(libs.androidx.biometric)
             // Ktor Android Engine
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)

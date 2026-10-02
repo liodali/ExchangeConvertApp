@@ -14,6 +14,7 @@ object LedgerStrings {
 
     object Account {
         const val BADGE_PRIVATE = "PRIVATE CLIENT"
+        const val GUEST_CLIENT = "GUEST CLIENT"
         const val BADGE_VERIFIED = "VERIFIED LEDGER"
         const val EDIT_PROFILE = "Edit Profile"
         const val EDIT_PROFILE_TITLE = "Edit Profile"

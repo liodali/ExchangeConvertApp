@@ -116,6 +116,7 @@ fun AccountScreen(
             ProfileHero(
                 username = viewModel.username,
                 email = viewModel.email,
+                isSovereign = isSovereign,
                 onEdit = { showEditDialog = true },
             )
 
@@ -451,9 +452,12 @@ private fun IconTile(
 private fun ProfileHero(
     username: String,
     email: String,
+    isSovereign: Boolean,
     onEdit: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        // guests have no profile photo — the avatar waits for login
+        if (isSovereign) {
         Box(modifier = Modifier.size(128.dp)) {
             Box(
                 modifier = Modifier
@@ -487,6 +491,7 @@ private fun ProfileHero(
                 )
             }
         }
+        }
 
         Column {
             Text(
@@ -494,16 +499,22 @@ private fun ProfileHero(
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = email,
-                style = MaterialTheme.typography.bodyLarge,
-                color = LedgerColors.TextSecondary,
-            )
+            if (isSovereign) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = LedgerColors.TextSecondary,
+                )
+            }
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 LedgerChip(
-                    text = LedgerStrings.Account.BADGE_PRIVATE,
+                    text = if (isSovereign) {
+                        LedgerStrings.Account.BADGE_PRIVATE
+                    } else {
+                        LedgerStrings.Account.GUEST_CLIENT
+                    },
                     tint = LedgerColors.Gold,
                 )
                 LedgerChip(
