@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "mohamedali.hamza.database"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

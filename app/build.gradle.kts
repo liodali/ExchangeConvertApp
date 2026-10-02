@@ -23,7 +23,7 @@ val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
         applicationId = "com.sovereignledger.app"
