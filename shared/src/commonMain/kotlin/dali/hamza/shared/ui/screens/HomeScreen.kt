@@ -155,6 +155,7 @@ fun HomeScreen(
                 pairCards = homeState.pairCards.ifEmpty {
                     cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
                 },
+                base = state.fromCurrency?.name,
             )
 
             Spacer(Modifier.height(32.dp))
@@ -211,7 +212,7 @@ private fun List<ExchangeRate>.topPairs(): List<ExchangeRate> =
     TOP_PAIRS.mapNotNull { symbol -> firstOrNull { it.name == symbol } }
 
 @Composable
-private fun MarketOverviewSection(pairCards: List<PairCardData>) {
+private fun MarketOverviewSection(pairCards: List<PairCardData>, base: String?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),
@@ -238,7 +239,7 @@ private fun MarketOverviewSection(pairCards: List<PairCardData>) {
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         pairCards.forEach { card ->
-            PairCard(card = card)
+            PairCard(card = card, base = base)
         }
     }
 }
@@ -249,7 +250,7 @@ private fun MarketOverviewSection(pairCards: List<PairCardData>) {
  * (Manrope 700/30) and the 64dp warm-white sparkline.
  */
 @Composable
-private fun PairCard(card: PairCardData) {
+private fun PairCard(card: PairCardData, base: String?) {
     BentoCard(
         fill = LedgerColors.Card,
         padding = PaddingValues(20.dp),
@@ -257,7 +258,9 @@ private fun PairCard(card: PairCardData) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = card.quote,
+                    // full pair title (design "EUR/USD Card"): quote against
+                    // the session base, so the card answers "compared to what?"
+                    text = base?.let { "${card.quote}/$it" } ?: card.quote,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
