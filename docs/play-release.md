@@ -22,10 +22,10 @@ KEYSTORE_PATH=/Users/dalihamza/Desktop/FlutterApps/androidKeys/exchangerate-app/
 ./script/keystore.sh secrets    # print the GitHub secret values to paste
 ```
 
-The script writes the `signing.*` entries into `local.properties` —
-`app/build.gradle.kts` picks them up (env vars take precedence, which is what
-CI uses). **Back up the keystore + key.properties somewhere safe** (lose them →
-the app can never be updated on Play).
+`app/build.gradle.kts` reads signing straight from `key.properties`
+(CI env vars take precedence) — Android Studio can wipe `local.properties` all
+it wants, signing is unaffected. **Back up the keystore + key.properties
+somewhere safe** (lose them → the app can never be updated on Play).
 
 ## 2. GitHub secrets (repo → Settings → Secrets → Actions)
 

@@ -2,11 +2,12 @@
 #
 # Sovereign Ledger — release keystore (JKS) manager
 #
-#   script/keystore.sh            generate the keystore if missing + sync local.properties
-#   script/keystore.sh sync       only re-write the signing.* entries into local.properties
-#                                 (Android Studio wipes them on Gradle sync — re-run after)
+#   script/keystore.sh            generate the keystore if missing
 #   script/keystore.sh verify     show the keystore certificate
 #   script/keystore.sh secrets    print the GitHub Actions secret values to paste
+#
+# app/build.gradle.kts reads signing straight from key.properties (env
+# vars override on CI) — no local.properties sync needed.
 #
 # Configuration lives in key.properties at the repo root (see script/key.properties.example).
 # The keystore itself is NEVER committed (.gitignore blocks .env and keystores/).
@@ -85,28 +86,6 @@ generate() {
     chmod 600 "$KEYSTORE_PATH"
     echo "generated $KEYSTORE_PATH (alias: $KEY_ALIAS)"
   fi
-  sync_local_properties
-}
-
-# write signing.* entries into local.properties (app/build.gradle.kts reads them)
-sync_local_properties() {
-  [[ -f "$LOCAL_PROPERTIES" ]] || touch "$LOCAL_PROPERTIES"
-  local abs_path="$KEYSTORE_PATH"
-  if [[ "$abs_path" != /* ]]; then abs_path="$ROOT/$abs_path"; fi
-  local props=("signing.keystore.path=$abs_path"
-               "signing.store.password=$KEYSTORE_PASSWORD"
-               "signing.key.alias=$KEY_ALIAS"
-               "signing.key.password=$KEY_PASSWORD")
-  local tmp; tmp="$(mktemp)"
-  cp "$LOCAL_PROPERTIES" "$tmp"
-  for prop in "${props[@]}"; do
-    local key="${prop%%=*}"
-    grep -v "^${key}=" "$tmp" > "$tmp.new" || true
-    mv "$tmp.new" "$tmp"
-  done
-  printf '%s\n' "${props[@]}" >> "$tmp"
-  mv "$tmp" "$LOCAL_PROPERTIES"
-  echo "local.properties updated with signing.* entries"
 }
 
 verify() {
@@ -130,8 +109,7 @@ secrets() {
 
 case "${1:-generate}" in
   generate) generate ;;
-  sync)     ensure_env; sync_local_properties ;;
   verify)   verify ;;
   secrets)  secrets ;;
-  *) echo "usage: script/keystore.sh [generate|sync|verify|secrets]"; exit 1 ;;
+  *) echo "usage: script/keystore.sh [generate|verify|secrets]"; exit 1 ;;
 esac
