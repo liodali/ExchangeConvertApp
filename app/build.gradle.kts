@@ -28,6 +28,8 @@ android {
     defaultConfig {
         applicationId = "com.sovereignledger.app"
         minSdk = 26
+        // explicit: target doesn't silently move with future compileSdk bumps
+        targetSdk = 37
         // injectable from CI (-PversionCode=… / -PversionName=…)
         versionCode = prop("versionCode", "1").toInt()
         versionName = prop("versionName", "1.0.0")
