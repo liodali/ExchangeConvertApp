@@ -7,5 +7,5 @@
 
 KEYSTORE_PATH=/absolute/path/to/sovereign-ledger-release.jks
 KEYSTORE_PASSWORD=
-KEY_ALIAS=sovereign-ledger
+KEY_ALIAS=alias
 KEY_PASSWORD=

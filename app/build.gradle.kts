@@ -49,7 +49,8 @@ android {
     signingConfigs {
         if (releaseKeystorePath.isNotBlank()) {
             create("release") {
-                storeFile = file(releaseKeystorePath)
+                // relative paths in .env/local.properties resolve from the repo root
+                storeFile = rootProject.file(releaseKeystorePath)
                 storePassword = releaseStorePassword
                 keyAlias = releaseKeyAlias
                 keyPassword = releaseKeyPassword
