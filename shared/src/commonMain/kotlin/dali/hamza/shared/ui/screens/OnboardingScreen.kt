@@ -33,9 +33,11 @@ import dali.hamza.shared.ui.theme.LedgerStrings
 
 /**
  * First-launch market selection (market-overview onboarding): the user
- * picks the three currencies the dashboard quotes against the base.
+ * picks their base currency (everything is quoted against it — defaults
+ * to USD until changed) and the three market currencies the dashboard
+ * follows. The base never appears among the selectable markets.
  *
- * Runs once — [onDone] persists the codes and never shows this screen
+ * Runs once — [onDone] persists base + codes and never shows this screen
  * again. Everything chosen here is editable later in
  * Account → Market Preferences.
  */
@@ -43,12 +45,14 @@ import dali.hamza.shared.ui.theme.LedgerStrings
 fun OnboardingScreen(
     currencies: List<Currency>,
     base: String?,
-    onDone: (List<String>) -> Unit,
+    onDone: (base: String, markets: List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var baseCode by remember { mutableStateOf(base ?: "USD") }
     // preselected majors (design TOP_PAIRS); the user can swap each slot
     val selections = remember { mutableStateListOf("EUR", "GBP", "MAD") }
-    var slot by remember { mutableStateOf<Int?>(null) }
+    var pickingBase by remember { mutableStateOf(false) }
+    var marketSlot by remember { mutableStateOf<Int?>(null) }
 
     val nameFor: (String) -> String = { code ->
         currencies.firstOrNull { it.name == code }?.fullCountryName ?: "Currency"
@@ -85,7 +89,8 @@ fun OnboardingScreen(
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Pick the three currencies your dashboard follows. " +
+            text = "Set the currency everything is quoted against, then pick " +
+                "the three markets your dashboard follows. " +
                 "You can change them anytime in Account.",
             style = MaterialTheme.typography.bodyMedium,
             color = LedgerColors.TextSecondary,
@@ -93,8 +98,31 @@ fun OnboardingScreen(
 
         Spacer(Modifier.height(32.dp))
 
+        // ---- base currency -----------------------------------------------
         BentoCard {
-            // caps section label — Inter 600/12 secondary (design Heading 3)
+            Text(
+                text = LedgerStrings.Account.BASE_CURRENCY,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = LedgerColors.TextSecondary,
+            )
+            Spacer(Modifier.height(16.dp))
+            LedgerListRow(
+                label = nameFor(baseCode),
+                value = baseCode,
+                onClick = { pickingBase = true },
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = "All rates on your dashboard are compared to this currency.",
+                style = MaterialTheme.typography.bodySmall,
+                color = LedgerColors.TextTertiary,
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        // ---- market slots --------------------------------------------------
+        BentoCard {
             Text(
                 text = LedgerStrings.Account.MARKET_SECTION,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -106,7 +134,7 @@ fun OnboardingScreen(
                     LedgerListRow(
                         label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1} · ${nameFor(code)}",
                         value = code,
-                        onClick = { slot = index },
+                        onClick = { marketSlot = index },
                     )
                 }
             }
@@ -116,7 +144,7 @@ fun OnboardingScreen(
 
         LedgerButton(
             text = if (currencies.isEmpty()) "Loading markets…" else "Continue",
-            onClick = { onDone(selections.toList()) },
+            onClick = { onDone(baseCode, selections.toList()) },
             enabled = currencies.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -133,16 +161,40 @@ fun OnboardingScreen(
         Spacer(Modifier.height(48.dp))
     }
 
-    slot?.let { index ->
+    if (pickingBase) {
+        CurrencyPickerSheet(
+            visible = true,
+            currencies = currencies,
+            title = LedgerStrings.Account.BASE_PICK_TITLE,
+            onDismiss = { pickingBase = false },
+            onCurrencySelected = { currency ->
+                baseCode = currency.name
+                // the base can never be one of the markets — swap it out
+                val fallback = fallbackMajor(exclude = selections + currency.name)
+                selections.indices.forEach { index ->
+                    if (selections[index] == currency.name) {
+                        selections[index] = fallback
+                    }
+                }
+            },
+        )
+    }
+
+    marketSlot?.let { index ->
         val others = selections.filterIndexed { i, _ -> i != index }
         CurrencyPickerSheet(
             visible = true,
-            currencies = currencies.filter { it.name != base && it.name !in others },
+            currencies = currencies.filter { it.name != baseCode && it.name !in others },
             title = LedgerStrings.Account.MARKET_PICK_TITLE,
-            onDismiss = { slot = null },
+            onDismiss = { marketSlot = null },
             onCurrencySelected = { currency ->
                 selections[index] = currency.name
             },
         )
     }
 }
+
+/** First design major that isn't excluded (base-chasing backfill). */
+private fun fallbackMajor(exclude: List<String>): String =
+    listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
+        ?: "EUR"

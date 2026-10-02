@@ -59,6 +59,12 @@ class AccountViewModel(
         storage.setMarketPreferences(marketPreferences)
     }
 
+    /** Replace the whole market selection (used when the base changes). */
+    fun replaceMarketPreferences(codes: List<String>) {
+        marketPreferences = codes.take(3)
+        storage.setMarketPreferences(marketPreferences)
+    }
+
     /** Design persona email, derived from the username. */
     val email: String
         get() = "${username.lowercase().filter { it.isLetterOrDigit() }}@sovereign.vault"

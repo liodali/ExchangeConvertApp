@@ -86,10 +86,12 @@ fun AccountScreen(
     currencies: List<Currency> = emptyList(),
     baseCurrency: String? = null,
     onMarketPreferencesChanged: (List<String>) -> Unit = {},
+    onBaseCurrencyChanged: (String) -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
     var marketSlot by remember { mutableStateOf<Int?>(null) }
+    var pickingBase by remember { mutableStateOf(false) }
     val isSovereign = viewModel.dataTier == DataTier.SOVEREIGN
     val biometricAuthenticator = remember {
         org.koin.mp.KoinPlatform.getKoin()?.get<dali.hamza.shared.platform.BiometricAuthenticator>()
@@ -257,6 +259,14 @@ fun AccountScreen(
                 SectionLabel(LedgerStrings.Account.MARKET_SECTION)
                 Spacer(Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    LedgerListRow(
+                        label = "${LedgerStrings.Account.BASE_LABEL} · ${
+                            currencies.firstOrNull { it.name == baseCurrency }?.fullCountryName
+                                ?: "Currency"
+                        }",
+                        value = baseCurrency ?: "—",
+                        onClick = { pickingBase = true },
+                    )
                     // always three slots, even if storage was hand-edited short
                     for (index in 0 until 3) {
                         val code = viewModel.marketPreferences.getOrNull(index)
@@ -403,6 +413,36 @@ fun AccountScreen(
             onSave = { name ->
                 viewModel.rename(name)
                 showEditDialog = false
+            },
+        )
+    }
+
+    if (pickingBase) {
+        CurrencyPickerSheet(
+            visible = true,
+            currencies = currencies,
+            title = LedgerStrings.Account.BASE_PICK_TITLE,
+            onDismiss = { pickingBase = false },
+            onCurrencySelected = { currency ->
+                pickingBase = false
+                // the base can never be one of the markets: displace any
+                // market equal to the new base with a fallback major
+                val current = viewModel.marketPreferences
+                val next = current.map { code ->
+                    if (code == currency.name) {
+                        fallbackMarketMajor(exclude = current + currency.name)
+                    } else {
+                        code
+                    }
+                }.toMutableList()
+                while (next.size < 3) {
+                    next.add(fallbackMarketMajor(exclude = next + currency.name))
+                }
+                if (next != current) {
+                    viewModel.replaceMarketPreferences(next)
+                    onMarketPreferencesChanged(viewModel.marketPreferences)
+                }
+                onBaseCurrencyChanged(currency.name)
             },
         )
     }
@@ -665,3 +705,8 @@ private fun EditNameDialog(
         }
     }
 }
+
+/** First design major that isn't excluded (base-chasing backfill). */
+private fun fallbackMarketMajor(exclude: List<String>): String =
+    listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
+        ?: "EUR"

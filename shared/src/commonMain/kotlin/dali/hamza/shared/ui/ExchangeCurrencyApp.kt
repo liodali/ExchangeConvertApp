@@ -142,9 +142,16 @@ fun ExchangeCurrencyApp(
             OnboardingScreen(
                 currencies = sharedState.currencies,
                 base = sharedState.fromCurrency?.name,
-                onDone = { codes ->
+                onDone = { baseCode, codes ->
                     appLock?.setMarketPreferences(codes)
                     marketPreferences = codes
+                    // apply the chosen base: persists it and refetches all
+                    // rates quoted against the new base
+                    if (baseCode != sharedState.fromCurrency?.name) {
+                        sharedState.currencies
+                            .firstOrNull { it.name == baseCode }
+                            ?.let(viewModel::selectFromCurrency)
+                    }
                     onboarded = true
                 },
                 modifier = Modifier
@@ -232,6 +239,11 @@ fun ExchangeCurrencyApp(
                         currencies = sharedState.currencies,
                         baseCurrency = sharedState.fromCurrency?.name,
                         onMarketPreferencesChanged = { marketPreferences = it },
+                        onBaseCurrencyChanged = { code ->
+                            sharedState.currencies
+                                .firstOrNull { it.name == code }
+                                ?.let(viewModel::selectFromCurrency)
+                        },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                     )
                 }

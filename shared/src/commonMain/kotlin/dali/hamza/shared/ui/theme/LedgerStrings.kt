@@ -54,6 +54,9 @@ object LedgerStrings {
         const val MARKET_SECTION = "MARKET PREFERENCES"
         const val MARKET_PICK_TITLE = "Choose currency"
         const val MARKET_SLOT_PREFIX = "Market"
+        const val BASE_CURRENCY = "BASE CURRENCY"
+        const val BASE_PICK_TITLE = "Choose base currency"
+        const val BASE_LABEL = "Base"
 
         const val VAULT_SECTION = "VAULT MANAGEMENT"
         const val LOG_OUT = "Log out from Ledger"
