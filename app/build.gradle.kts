@@ -22,6 +22,18 @@ fun prop(name: String, fallback: String): String =
 val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
+// Local default: derive from the latest app-v* tag so debug builds wear
+// the real version (CI still overrides via -PversionCode/-PversionName
+// from the release tag it builds).
+fun latestAppTag(): Pair<String, String>? = runCatching {
+    val tag = providers.exec {
+        commandLine("git", "describe", "--abbrev=0", "--match", "app-v*")
+    }.standardOutput.asText.get().trim()
+    val m = Regex("""app-v(\d+\.\d+\.\d+)[^+]*\+(\d+)""").find(tag) ?: return null
+    m.groupValues[1] to m.groupValues[2]
+}.getOrNull()
+val tagVersion = latestAppTag()
+
 android {
     compileSdk = 37
     namespace = "dali.hamza.echangecurrencyapp"
@@ -31,8 +43,8 @@ android {
         // explicit: target doesn't silently move with future compileSdk bumps
         targetSdk = 37
         // injectable from CI (-PversionCode=… / -PversionName=…)
-        versionCode = prop("versionCode", "1").toInt()
-        versionName = prop("versionName", "1.0.0")
+        versionCode = prop("versionCode", tagVersion?.second ?: "1").toInt()
+        versionName = prop("versionName", tagVersion?.first ?: "1.0.0")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
