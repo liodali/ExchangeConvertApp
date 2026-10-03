@@ -840,7 +840,8 @@ private fun fallbackMarketMajor(exclude: List<String>): String =
     listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
         ?: "EUR"
 
-/** Palette preview swatches (design `qDCZE` Color Palette Choices). */
+/** Palette preview swatches (design `qDCZE` Color Palette Choices; forest
+ *  triad from the `theme-forest-*` variables). */
 private val paletteSwatches: List<Pair<LedgerColorPalette, List<Color>>> = listOf(
     LedgerColorPalette.SOVEREIGN to listOf(
         Color(0xFF4EDEA3), Color(0xFFB9C7E4), Color(0xFFE5E2E1),
@@ -850,5 +851,8 @@ private val paletteSwatches: List<Pair<LedgerColorPalette, List<Color>>> = listO
     ),
     LedgerColorPalette.BLOOM to listOf(
         Color(0xFFF2A9D0), Color(0xFFB9A6E6), Color(0xFFA8DCC8),
+    ),
+    LedgerColorPalette.FOREST to listOf(
+        Color(0xFFA7D77E), Color(0xFFB5C7B9), Color(0xFF365143),
     ),
 )

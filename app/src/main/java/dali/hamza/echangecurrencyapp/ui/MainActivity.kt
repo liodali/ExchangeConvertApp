@@ -69,6 +69,26 @@ class MainActivity : FragmentActivity() {
         // Flutter-style edge-to-edge: system bars stay visible and transparent,
         // content draws behind them; M3 Scaffold insets position the content
         enableEdgeToEdge()
+        // Cold-start background follows the persisted appearance so Light
+        // mode doesn't flash dark before Compose draws (shared_session is
+        // written by the shared AndroidSessionStorage).
+        runCatching {
+            val prefs = getSharedPreferences("shared_session", MODE_PRIVATE)
+            val systemDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            val dark = when (prefs.getString("theme_mode", "dark")) {
+                "light" -> false
+                "dark" -> true
+                else -> systemDark
+            }
+            window.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(
+                    if (dark) android.graphics.Color.parseColor("#0E0E0E")
+                    else android.graphics.Color.parseColor("#F5F7F2")
+                )
+            )
+        }
         setContent {
             val viewModel = remember { GlobalContext.get().get<SharedViewModel>() }
             ExchangeCurrencyApp(viewModel = viewModel)

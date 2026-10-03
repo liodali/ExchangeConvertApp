@@ -36,7 +36,8 @@ enum class LedgerThemeMode(val stored: String) {
 enum class LedgerColorPalette(val stored: String, val label: String) {
     SOVEREIGN("sovereign", "Sovereign"),
     SUMMER("summer", "Summer"),
-    BLOOM("bloom", "Bloom");
+    BLOOM("bloom", "Bloom"),
+    FOREST("forest", "Forest");
 
     companion object {
         fun fromStored(value: String?): LedgerColorPalette =
@@ -194,6 +195,25 @@ val BloomDarkPalette = darkPalette(
     negative = Color(0xFFFF9D98),
 )
 
+/** Forest — mossy dark (design `theme-forest-*` variables). */
+val ForestDarkPalette = darkPalette(
+    background = 0xFF111A16,
+    surfaceDeep = 0xFF15201A,
+    elevated = 0xFF19241E,
+    raised = 0xFF1E2B24,
+    card = 0xFF22312A,
+    cardAlt = 0xFF2A3B32,
+    cardHigh = 0xFF2F4238,
+    text = Color(0xFFE3EFE7),
+    secondary = Color(0xFFB5C7B9),
+    muted = Color(0xFF8AA092),
+    border = 0xFF365143,
+    accent = Color(0xFFA7D77E),
+    accentSoft = Color(0x33A7D77E),
+    info = Color(0xFF8BD3C7),
+    negative = Color(0xFFF0A59A),
+)
+
 /** Light · Sovereign (design `theme-light-*` variables, frame tW9BY). */
 val SovereignLightPalette = LedgerPalette(
     canvas = Color(0xFFF5F7F2),
@@ -241,6 +261,7 @@ fun resolvePalette(mode: LedgerThemeMode, palette: LedgerColorPalette, systemDar
             LedgerColorPalette.SOVEREIGN -> SovereignDarkPalette
             LedgerColorPalette.SUMMER -> SummerDarkPalette
             LedgerColorPalette.BLOOM -> BloomDarkPalette
+            LedgerColorPalette.FOREST -> ForestDarkPalette
         }
     } else {
         SovereignLightPalette
