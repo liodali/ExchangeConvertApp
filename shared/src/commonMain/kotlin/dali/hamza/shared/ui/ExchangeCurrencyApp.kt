@@ -45,6 +45,7 @@ import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
+import dali.hamza.shared.ui.screens.ChatwootScreen
 import dali.hamza.shared.ui.screens.ContactSupportScreen
 import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
@@ -82,6 +83,7 @@ object Routes {
     const val SUPPORT = "support"
     const val CONTACT = "contact"
     const val FEEDBACK = "feedback"
+    const val CHAT = "chat"
 
     val topLevel = setOf(HOME, HISTORY, ACCOUNT)
 }
@@ -294,8 +296,13 @@ fun ExchangeCurrencyApp(
                         onBack = { navController.popBackStack() },
                         onOpenFaq = { navController.navigate(Routes.FAQ) },
                         onOpenContact = { navController.navigate(Routes.CONTACT) },
-                        onOpenFeedback = { navController.navigate(Routes.FEEDBACK) },
+                        // feedback lives in the Chatwoot inbox — the form
+                        // screen stays reachable via CONTACT's flow if needed
+                        onOpenFeedback = { navController.navigate(Routes.CHAT) },
                     )
+                }
+                composable(Routes.CHAT) {
+                    ChatwootScreen(onBack = { navController.popBackStack() })
                 }
                 composable(Routes.CONTACT) {
                     ContactSupportScreen(onBack = { navController.popBackStack() })

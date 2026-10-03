@@ -176,7 +176,13 @@ object LedgerStrings {
         const val CONTACT_TITLE = "Contact Us"
         const val CONTACT_DESC = "Chat with our premium support team."
         const val FEEDBACK_TITLE = "Feedback"
-        const val FEEDBACK_DESC = "Help us refine your ledger experience."
+        const val FEEDBACK_DESC = "Send feedback — chat with us in real time."
+
+        /** Chatwoot live chat (self-hosted inbox). */
+        const val CHAT_TITLE = "Live Chat"
+        const val CHAT_UNAVAILABLE = "Live chat coming soon"
+        const val CHAT_UNAVAILABLE_DESC =
+            "Chat support is being connected. Reach us through Contact or Feedback meanwhile."
 
         const val LEGAL_TITLE = "Resources & Legal"
         val legal = listOf(
