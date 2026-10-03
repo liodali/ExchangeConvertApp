@@ -85,7 +85,7 @@ fun OnboardingScreen(
         Text(
             text = "Choose your markets",
             style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-            color = LedgerColors.TextOnColor,
+            color = LedgerColors.TextPrimary,
         )
         Spacer(Modifier.height(12.dp))
         Text(

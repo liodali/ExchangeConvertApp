@@ -79,7 +79,7 @@ fun LedgerLineChart(
     val bubbleRateStyle = MaterialTheme.typography.labelMedium.copy(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
-        color = LedgerColors.TextOnColor,
+        color = LedgerColors.TextPrimary,
     )
 
     fun indexForX(x: Float, plotWidth: Float): Int {

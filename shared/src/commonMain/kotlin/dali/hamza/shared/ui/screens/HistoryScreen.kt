@@ -158,7 +158,7 @@ fun HistoryScreen(
                     Text(
                         text = state.currentRate?.let { formatRate(it) } ?: "—",
                         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = LedgerColors.TextOnColor,
+                        color = LedgerColors.TextPrimary,
                     )
                     state.delta?.let { delta ->
                         Text(
@@ -260,7 +260,7 @@ fun HistoryScreen(
                     Text(
                         text = state.bestRate?.let { formatRate(it) } ?: "—",
                         style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = LedgerColors.TextOnColor,
+                        color = LedgerColors.TextPrimary,
                     )
                     Text(
                         text = "${state.base ?: ""}/${state.quote ?: ""}",
@@ -307,7 +307,7 @@ fun HistoryScreen(
                         Text(
                             text = state.currentRate?.let { formatRate(it) } ?: "—",
                             style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                            color = LedgerColors.TextOnColor,
+                            color = LedgerColors.TextPrimary,
                         )
                     }
                     val current = state.currentRate
@@ -394,7 +394,7 @@ fun HistoryScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                     ),
-                    color = LedgerColors.TextOnColor,
+                    color = LedgerColors.TextPrimary,
                     modifier = Modifier.weight(1f),
                 )
                 Text(
@@ -459,7 +459,7 @@ private fun TransactionRow(tx: Transaction) {
             Text(
                 text = "Exchanged ${tx.base} to ${tx.quote}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = LedgerColors.TextOnColor,
+                color = LedgerColors.TextPrimary,
             )
             Text(
                 text = DateUtils.formatDateTime(tx.timestamp),
@@ -471,7 +471,7 @@ private fun TransactionRow(tx: Transaction) {
             Text(
                 text = "-${formatAmount(tx.amountBase)} ${tx.base}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = LedgerColors.TextOnColor,
+                color = LedgerColors.TextPrimary,
             )
             Text(
                 text = "+${formatAmount(tx.amountQuote)} ${tx.quote}",
