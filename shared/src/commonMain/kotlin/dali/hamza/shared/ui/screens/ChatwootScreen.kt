@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -49,7 +51,11 @@ fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
                 baseUrl = ChatwootConfig.BASE_URL,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    // keep Chatwoot's message input above the system
+                    // gesture bar, and resize with the keyboard
+                    .navigationBarsPadding()
+                    .imePadding(),
             )
         } else {
             Box(

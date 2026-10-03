@@ -108,14 +108,9 @@ fun SupportScreen(
                     onClick = onOpenFaq,
                 )
                 Spacer(Modifier.height(16.dp))
-                HelpCategoryCard(
-                    title = Support.CONTACT_TITLE,
-                    description = Support.CONTACT_DESC,
-                    icon = Icons.Outlined.MailOutline,
-                    tint = LedgerColors.Green,
-                    onClick = onOpenContact,
-                )
-                Spacer(Modifier.height(16.dp))
+                // "Contact Us" entry removed — Feedback (Chatwoot live chat)
+                // is the support channel; the contact page + route remain
+                // reachable for deep links.
                 HelpCategoryCard(
                     title = Support.FEEDBACK_TITLE,
                     description = Support.FEEDBACK_DESC,

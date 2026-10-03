@@ -186,38 +186,6 @@ fun FaqScreen(
                 }
 
                 Spacer(Modifier.height(24.dp))
-
-                // ============ Concierge CTA ================================
-                BentoCard(
-                    fill = LedgerColors.CardAlt,
-                    padding = PaddingValues(24.dp),
-                ) {
-                    Text(
-                        text = Faq.CTA_TITLE,
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LedgerColors.TextPrimary,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = Faq.CTA_DESC,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = LedgerColors.TextSecondary,
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    LedgerButton(
-                        text = Faq.CTA_PRIMARY,
-                        onClick = onOpenContact,
-                        leadingIcon = Icons.Outlined.MailOutline,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    LedgerButton(
-                        text = Faq.CTA_SECONDARY,
-                        onClick = onOpenContact,
-                        variant = LedgerButtonVariant.GHOST,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
             } else {
                 // ============ Search results =================================
                 val results = (Faq.security + Faq.account).filter {
