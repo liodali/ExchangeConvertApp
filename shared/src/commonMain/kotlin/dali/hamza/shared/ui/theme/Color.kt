@@ -7,11 +7,11 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * Sovereign Ledger appearance system — extracted from `ui-design.pen`
- * (Account → Appearance, see the "Rates — Light/Summer/Bloom" frames).
+ * (Account → Appearance, see the "Rates — Light/Summer/Orchid" frames).
  *
  * Two independent axes:
  * - **Mode**: System / Light / Dark
- * - **Palette**: Sovereign / Summer / Bloom (dark palettes; Light mode
+ * - **Palette**: Sovereign / Summer / Orchid (dark palettes; Light mode
  *   uses the Sovereign light tokens — design frame "Rates — Light Mode ·
  *   Sovereign").
  *
@@ -36,12 +36,15 @@ enum class LedgerThemeMode(val stored: String) {
 enum class LedgerColorPalette(val stored: String, val label: String) {
     SOVEREIGN("sovereign", "Sovereign"),
     SUMMER("summer", "Summer"),
-    BLOOM("bloom", "Bloom"),
+    ORCHID("orchid", "Orchid"),
     FOREST("forest", "Forest");
 
     companion object {
-        fun fromStored(value: String?): LedgerColorPalette =
-            entries.firstOrNull { it.stored == value } ?: SOVEREIGN
+        fun fromStored(value: String?): LedgerColorPalette = when (value) {
+            // pre-rename storage written by build 9
+            "bloom" -> ORCHID
+            else -> entries.firstOrNull { it.stored == value } ?: SOVEREIGN
+        }
     }
 }
 
@@ -176,8 +179,8 @@ val SummerDarkPalette = darkPalette(
     negative = Color(0xFFFF8C78),
 )
 
-/** Bloom — violet dark (design `theme-bloom-*` variables). */
-val BloomDarkPalette = darkPalette(
+/** Orchid — violet dark (design `theme-bloom-*` variables). */
+val OrchidDarkPalette = darkPalette(
     background = 0xFF1A1420,
     surfaceDeep = 0xFF1F1826,
     elevated = 0xFF251B2B,
@@ -260,7 +263,7 @@ fun resolvePalette(mode: LedgerThemeMode, palette: LedgerColorPalette, systemDar
         when (palette) {
             LedgerColorPalette.SOVEREIGN -> SovereignDarkPalette
             LedgerColorPalette.SUMMER -> SummerDarkPalette
-            LedgerColorPalette.BLOOM -> BloomDarkPalette
+            LedgerColorPalette.ORCHID -> OrchidDarkPalette
             LedgerColorPalette.FOREST -> ForestDarkPalette
         }
     } else {

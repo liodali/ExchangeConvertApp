@@ -80,7 +80,7 @@ interface ISessionStorage {
 
     fun setThemeMode(mode: String) {}
 
-    /** Dark-mode color palette: sovereign / summer / bloom. */
+    /** Dark-mode color palette: sovereign / summer / orchid / forest. */
     fun getColorPalette(): String = "sovereign"
 
     fun setColorPalette(palette: String) {}

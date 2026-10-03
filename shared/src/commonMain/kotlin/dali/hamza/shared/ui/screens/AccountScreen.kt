@@ -849,7 +849,7 @@ private val paletteSwatches: List<Pair<LedgerColorPalette, List<Color>>> = listO
     LedgerColorPalette.SUMMER to listOf(
         Color(0xFFF5BA59), Color(0xFFFB7185), Color(0xFF8BD3C7),
     ),
-    LedgerColorPalette.BLOOM to listOf(
+    LedgerColorPalette.ORCHID to listOf(
         Color(0xFFF2A9D0), Color(0xFFB9A6E6), Color(0xFFA8DCC8),
     ),
     LedgerColorPalette.FOREST to listOf(

@@ -61,9 +61,11 @@ fun LedgerLineChart(
     // read CompositionLocals, so capture the resolved colors up front
     val gridColor = LedgerColors.GridLine
     val canvasColor = LedgerColors.Canvas
-    val hairlineColor = LedgerColors.TextTertiary.copy(alpha = 0.40f)
+    // scrub marker: the palette's tertiary (gold) — reads on dark AND light
+    val scrubColor = LedgerColors.Gold
+    val hairlineColor = LedgerColors.Gold.copy(alpha = 0.55f)
     val bubbleBg = LedgerColors.SurfaceElevated.copy(alpha = 0.98f)
-    val bubbleBorder = LedgerColors.BorderSoft
+    val bubbleBorder = LedgerColors.Gold.copy(alpha = 0.40f)
 
     val axisStyle = TextStyle(
         fontFamily = FontFamily.Monospace,
@@ -224,7 +226,7 @@ fun LedgerLineChart(
             center = Offset(scrubX, scrubY),
         )
         drawCircle(
-            color = lineColor,
+            color = scrubColor,
             radius = 4.dp.toPx(),
             center = Offset(scrubX, scrubY),
         )

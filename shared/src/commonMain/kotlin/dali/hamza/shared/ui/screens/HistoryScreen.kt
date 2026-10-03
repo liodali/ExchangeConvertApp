@@ -194,11 +194,13 @@ fun HistoryScreen(
                         Text(
                             text = range.label,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = if (selected) LedgerColors.TextOnColor else LedgerColors.TextSecondary,
+                            // accent pairing on both modes (white text was
+                            // unreadable on the light chip)
+                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (selected) LedgerColors.CardHigh else Color.Transparent)
+                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
                                 .clickable { historyViewModel.selectRange(range) }
                                 .padding(vertical = 8.dp),
                             textAlign = TextAlign.Center,
