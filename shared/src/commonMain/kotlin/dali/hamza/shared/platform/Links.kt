@@ -2,8 +2,8 @@ package dali.hamza.shared.platform
 
 /** Canonical external links (backend legal pages + store listing). */
 object AppLinks {
-    const val TERMS_URL = "https://api.exchange.dev.adetify.com/terms"
-    const val PRIVACY_URL = "https://api.exchange.dev.adetify.com/privacy"
+    const val TERMS_URL = "https://exchange.dev.adetify.com/terms"
+    const val PRIVACY_URL = "https://exchange.dev.adetify.com/privacy"
     const val PLAY_URL = "https://play.google.com/store/apps/details?id=com.sovereignledger.app"
 }
 
