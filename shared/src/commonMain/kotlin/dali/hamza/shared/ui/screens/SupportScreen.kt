@@ -197,7 +197,7 @@ fun SupportScreen(
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
                     Text(
-                        text = Support.VERSION,
+                        text = "V${dali.hamza.shared.platform.appVersionName()}",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontFamily = FontFamily.Monospace,
                         ),

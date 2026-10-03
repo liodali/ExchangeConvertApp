@@ -86,8 +86,10 @@ object LedgerStrings {
         fun dataPlanGuest() = "Hourly rates · Guest"
         fun dataPlanSovereign() = "Realtime · Sovereign"
 
-        const val VERSION = "V1.0.0"
-        fun footer(lastSync: String) = "SOVEREIGN LEDGER NODE $VERSION • LAST SYNC: $lastSync"
+        /** Live version of the installed build (from the package, not a
+         *  design string) + last-sync label — Account screen footer. */
+        fun footer(lastSync: String) =
+            "SOVEREIGN LEDGER NODE V${dali.hamza.shared.platform.appVersionName()} • LAST SYNC: $lastSync"
 
         const val DIALOG_CANCEL = "Cancel"
         const val DIALOG_SAVE = "Save"
