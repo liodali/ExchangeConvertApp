@@ -5,10 +5,16 @@ import androidx.compose.ui.Modifier
 
 /**
  * Minimal full-bleed HTML surface (platform WebView), used by the
- * Chatwoot live-chat screen. [html] is loaded as a data page.
+ * Chatwoot live-chat screen. [html] is loaded as a data page with
+ * [baseUrl] as its origin — the widget SDK needs storage/session
+ * access, which a null origin blocks.
  */
 @Composable
-expect fun PlatformWebView(html: String, modifier: Modifier = Modifier)
+expect fun PlatformWebView(
+    html: String,
+    baseUrl: String? = null,
+    modifier: Modifier = Modifier,
+)
 
 /**
  * Chatwoot client configuration — the self-hosted inbox that manages
@@ -22,16 +28,17 @@ expect fun PlatformWebView(html: String, modifier: Modifier = Modifier)
  * An empty token disables the chat screen (coming-soon state).
  */
 object ChatwootConfig {
-    const val BASE_URL = ""
-    const val WEBSITE_TOKEN = ""
+    const val BASE_URL = "https://chatwoot.dev.adetify.com"
+    const val WEBSITE_TOKEN = "ZrfM1iLhTVABeE5zHX7Q75rn"
 }
 
 /**
  * Standalone page hosting the Chatwoot website SDK: the chat opens
  * expanded (no floating bubble) and the page paints the app's theme
  * background so the transition into the web surface is seamless.
+ * [userName] tags the conversation with the guest's display name.
  */
-fun chatwootHtml(backgroundHex: String): String = """
+fun chatwootHtml(backgroundHex: String, userName: String? = null): String = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,6 +50,7 @@ html,body{margin:0;padding:0;height:100%;background:${backgroundHex};overflow:hi
 </head>
 <body>
 <script>
+var userName = ${userName?.let { "'$it'" } ?: "null"};
 window.chatwootSettings = {
   hideMessageBubble: true,
   type: 'expanded',
@@ -62,6 +70,15 @@ window.chatwootSettings = {
     });
   };
 })(document, 'script');
+window.addEventListener('chatwoot:ready', function(){
+  if (!userName || !window.chatwootSDK) return;
+  try {
+    window.${'$'}chatwoot.setUser('${'$'}chatwoot_user_'.concat(userName.toLowerCase()), {
+      name: userName,
+      identifier: 'guest'
+    });
+  } catch (e) { /* identity stays anonymous if setUser is unavailable */ }
+});
 </script>
 </body>
 </html>

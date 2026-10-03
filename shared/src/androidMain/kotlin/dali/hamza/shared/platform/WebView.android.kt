@@ -11,7 +11,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-actual fun PlatformWebView(html: String, modifier: Modifier) {
+actual fun PlatformWebView(html: String, baseUrl: String?, modifier: Modifier) {
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { context ->
@@ -25,7 +25,7 @@ actual fun PlatformWebView(html: String, modifier: Modifier) {
             }
         },
         update = { web ->
-            web.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+            web.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null)
         },
     )
 }

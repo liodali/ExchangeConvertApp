@@ -31,11 +31,11 @@ import dali.hamza.shared.ui.theme.LedgerStrings
  * coming-soon state instead of a broken page.
  */
 @Composable
-fun ChatwootScreen(onBack: () -> Unit) {
+fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
     val configured = ChatwootConfig.WEBSITE_TOKEN.isNotBlank()
     // theme-matched page background so the web surface blends in
     val bg = LedgerColors.Canvas
-    val html = remember(bg) { chatwootHtml(backgroundHex = bg.toPaddedHex()) }
+    val html = remember(bg, userName) { chatwootHtml(backgroundHex = bg.toPaddedHex(), userName = userName) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LedgerTopAppBar(
@@ -45,6 +45,8 @@ fun ChatwootScreen(onBack: () -> Unit) {
         if (configured) {
             PlatformWebView(
                 html = html,
+                // the widget SDK needs a real origin for storage/sessions
+                baseUrl = ChatwootConfig.BASE_URL,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),

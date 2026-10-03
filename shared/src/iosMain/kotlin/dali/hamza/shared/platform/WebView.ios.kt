@@ -9,14 +9,15 @@ import platform.WebKit.WKWebView
 import platform.WebKit.javaScriptEnabled
 
 @Composable
-actual fun PlatformWebView(html: String, modifier: Modifier) {
+actual fun PlatformWebView(html: String, baseUrl: String?, modifier: Modifier) {
     UIKitView(
         modifier = modifier.fillMaxSize(),
         factory = {
             WKWebView(frame = CGRectZero.readValue()).apply {
                 configuration.defaultWebpagePreferences.javaScriptEnabled = true
                 allowsBackForwardNavigationGestures = false
-                loadHTMLString(html, null)
+                val nsBase = baseUrl?.let { platform.Foundation.NSURL.URLWithString(it) }
+                loadHTMLString(html, nsBase)
             }
         },
         update = { /* static page — no updates needed */ },

@@ -302,7 +302,10 @@ fun ExchangeCurrencyApp(
                     )
                 }
                 composable(Routes.CHAT) {
-                    ChatwootScreen(onBack = { navController.popBackStack() })
+                    ChatwootScreen(
+                        onBack = { navController.popBackStack() },
+                        userName = sharedState.username,
+                    )
                 }
                 composable(Routes.CONTACT) {
                     ContactSupportScreen(onBack = { navController.popBackStack() })
