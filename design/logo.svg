@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <!-- Sovereign Ledger — chart mark v2: ascending rate bars on a baseline.
+       Unambiguous "market chart" reading at every size (replaces the
+       rate-line mark, which read as a reclining figure). -->
+  <rect width="108" height="108" rx="24" fill="#131313"/>
+  <line x1="24" y1="86" x2="92" y2="86" stroke="#44474D" stroke-width="3" stroke-linecap="round"/>
+  <rect x="28" y="58" width="14" height="28" rx="5" fill="#E9C349"/>
+  <rect x="50" y="42" width="14" height="44" rx="5" fill="#E9C349"/>
+  <rect x="72" y="26" width="14" height="60" rx="5" fill="#E9C349"/>
+</svg>

@@ -3,7 +3,4 @@
     >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <application
-        android:testOnly="true"
-        android:usesCleartextTraffic="true" />
 </manifest>
