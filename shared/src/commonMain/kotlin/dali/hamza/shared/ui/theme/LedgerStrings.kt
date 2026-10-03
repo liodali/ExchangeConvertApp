@@ -205,7 +205,7 @@ object LedgerStrings {
             "Live exchange rates and a private conversion ledger — no account, no tracking."
         const val TERMS = "Terms & Conditions"
         const val PRIVACY = "Privacy Policy"
-        const val RATE = "Rate Sovereign Ledger on Google Play"
+        const val RATE = "Rate on Google Play"
         const val VERSION_NOTE =
             "Version names follow the release tags; internal builds show the newest tag."
         const val POWERED_BY =

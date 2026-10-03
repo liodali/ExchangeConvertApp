@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dali.hamza.shared.ui.theme.LedgerColors
 
@@ -120,6 +121,9 @@ private fun LedgerButtonContent(
             text = text,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
+            // the button has a fixed 56dp height — wrap would clip
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
         if (trailingIcon != null) {
             Gap(8.dp)
