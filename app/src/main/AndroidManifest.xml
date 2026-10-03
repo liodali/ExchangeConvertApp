@@ -22,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- crash reporting: ExchangeApplication initialises the Sentry SDK
+             programmatically (DSN from BuildConfig, empty = disabled) —
+             the SDK's auto-init provider must stay off or it crashes at
+             startup demanding a manifest DSN -->
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
     </application>
 
 </manifest>

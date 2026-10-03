@@ -36,6 +36,9 @@ somewhere safe** (lose them → the app can never be updated on Play).
 | `ANDROID_KEY_ALIAS` | `sovereign-ledger` |
 | `ANDROID_KEY_PASSWORD` | key password |
 | `PLAY_SERVICE_ACCOUNT_JSON` | service-account JSON (step 3) |
+| `GLITCHTIP_DSN` | GlitchTip client DSN (`https://…@glitchtip.dev.adetify.com/N`) — crash reporting; releases without it simply ship without telemetry |
+
+Local builds read the same DSN from `local.properties` (`glitchtip.dsn=`); empty = disabled.
 
 ## 3. Play Console one-time setup (~15 min, needs your Google account)
 

@@ -28,6 +28,7 @@ class ExchangeApplication : Application() {
                 options.release = "sovereign-ledger@${BuildConfig.VERSION_NAME}"
                 options.isSendDefaultPii = false
                 options.tracesSampleRate = 0.0 // crashes/ANRs only
+                options.isDebug = BuildConfig.DEBUG // SDK transport logs in dev builds
             }
         }
 
