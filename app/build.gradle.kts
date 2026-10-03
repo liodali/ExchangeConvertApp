@@ -46,6 +46,11 @@ android {
         versionCode = prop("versionCode", tagVersion?.second ?: "1").toInt()
         versionName = prop("versionName", tagVersion?.first ?: "1.0.0")
 
+        // GlitchTip (Sentry-compatible OSS) DSN — gradle prop →
+        // local.properties → empty (crash reporting disabled).
+        // CI injects it from the GLITCHTIP_DSN secret.
+        buildConfigField("String", "GLITCHTIP_DSN", "\"${prop("glitchtip.dsn", "")}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -111,6 +116,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeVersion
@@ -126,6 +132,8 @@ dependencies {
 
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
+    // crash reporting → self-hosted GlitchTip (Sentry protocol)
+    implementation(libs.sentry.android)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.material)

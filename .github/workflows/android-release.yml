@@ -105,7 +105,8 @@ jobs:
         run: |
           ./gradlew :app:bundleRelease \
             -PversionCode="$VERSION_CODE" \
-            -PversionName="$VERSION_NAME"
+            -PversionName="$VERSION_NAME" \
+            -Pglitchtip.dsn="${{ secrets.GLITCHTIP_DSN }}"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4

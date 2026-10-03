@@ -5,6 +5,7 @@ androidxDatastorePreferences = "1.1.1"
 appcompat = "1.7.1"
 coilCompose = "2.7.0"
 coilComposeCore = "3.4.0"
+sentryAndroid = "8.16.0"
 converterMoshi = "3.0.0"
 coreKtx = "1.18.0"
 coreKtxVersion = "1.7.0"
@@ -75,6 +76,7 @@ android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = 
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationCompose" }
