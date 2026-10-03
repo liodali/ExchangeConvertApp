@@ -194,7 +194,20 @@ object LedgerStrings {
         )
 
         const val VERSION = "SOVEREIGN LEDGER V2.4.0-STABLE"
-        const val COPYRIGHT = "© 2024 Sovereign Wealth Systems AG."
+        const val COPYRIGHT = "© 2026 Adetify."
+    }
+
+    /** About page (Resources & Legal → About Sovereign Ledger). */
+    object About {
+        const val TAGLINE =
+            "Live exchange rates and a private conversion ledger — no account, no tracking."
+        const val TERMS = "Terms & Conditions"
+        const val PRIVACY = "Privacy Policy"
+        const val RATE = "Rate Sovereign Ledger on Google Play"
+        const val VERSION_NOTE =
+            "Version names follow the release tags; internal builds show the newest tag."
+        const val POWERED_BY =
+            "Rates by api.exchange.dev.adetify.com · self-hosted, no trackers"
     }
 
     object Contact {

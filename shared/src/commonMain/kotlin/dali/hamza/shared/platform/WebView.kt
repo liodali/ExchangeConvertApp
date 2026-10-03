@@ -5,15 +5,17 @@ import androidx.compose.ui.Modifier
 
 /**
  * Minimal full-bleed HTML surface (platform WebView), used by the
- * Chatwoot live-chat screen. [html] is loaded as a data page with
- * [baseUrl] as its origin — the widget SDK needs storage/session
- * access, which a null origin blocks.
+ * Chatwoot live-chat screen and the in-app legal pages. Loads [html]
+ * as a data page with [baseUrl] as its origin — the widget SDK needs
+ * storage/session access, which a null origin blocks. When [url] is
+ * set, the URL is loaded directly instead (legal pages on the backend).
  */
 @Composable
 expect fun PlatformWebView(
     html: String,
     baseUrl: String? = null,
     modifier: Modifier = Modifier,
+    url: String? = null,
 )
 
 /**

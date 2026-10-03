@@ -45,7 +45,9 @@ import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
+import dali.hamza.shared.ui.screens.AboutScreen
 import dali.hamza.shared.ui.screens.ChatwootScreen
+import dali.hamza.shared.ui.screens.LegalScreen
 import dali.hamza.shared.ui.screens.ContactSupportScreen
 import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
@@ -84,6 +86,9 @@ object Routes {
     const val CONTACT = "contact"
     const val FEEDBACK = "feedback"
     const val CHAT = "chat"
+    const val TERMS = "terms"
+    const val PRIVACY = "privacy"
+    const val ABOUT = "about"
 
     val topLevel = setOf(HOME, HISTORY, ACCOUNT)
 }
@@ -299,6 +304,30 @@ fun ExchangeCurrencyApp(
                         // feedback lives in the Chatwoot inbox — the form
                         // screen stays reachable via CONTACT's flow if needed
                         onOpenFeedback = { navController.navigate(Routes.CHAT) },
+                        onOpenTerms = { navController.navigate(Routes.TERMS) },
+                        onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
+                        onOpenAbout = { navController.navigate(Routes.ABOUT) },
+                    )
+                }
+                composable(Routes.TERMS) {
+                    LegalScreen(
+                        title = "Terms & Conditions",
+                        url = dali.hamza.shared.platform.AppLinks.TERMS_URL,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Routes.PRIVACY) {
+                    LegalScreen(
+                        title = "Privacy Policy",
+                        url = dali.hamza.shared.platform.AppLinks.PRIVACY_URL,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Routes.ABOUT) {
+                    AboutScreen(
+                        onOpenTerms = { navController.navigate(Routes.TERMS) },
+                        onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
+                        onBack = { navController.popBackStack() },
                     )
                 }
                 composable(Routes.CHAT) {

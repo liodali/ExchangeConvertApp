@@ -63,6 +63,9 @@ fun SupportScreen(
     onOpenFaq: () -> Unit,
     onOpenContact: () -> Unit,
     onOpenFeedback: () -> Unit,
+    onOpenTerms: () -> Unit = {},
+    onOpenPrivacy: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -141,10 +144,12 @@ fun SupportScreen(
                 }
                 Spacer(Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LegalRow(Support.legal[0], Icons.Outlined.Gavel, LedgerColors.TextTertiary)
-                    LegalRow(Support.legal[1], Icons.Outlined.Description, LedgerColors.TextTertiary)
-                    LegalRow(Support.legal[2], Icons.Outlined.HelpOutline, LedgerColors.TextTertiary)
-                    LegalRow(Support.legal[3], Icons.Outlined.StarOutline, LedgerColors.Gold)
+                    LegalRow(Support.legal[0], Icons.Outlined.Gavel, LedgerColors.TextTertiary, onOpenTerms)
+                    LegalRow(Support.legal[1], Icons.Outlined.Description, LedgerColors.TextTertiary, onOpenPrivacy)
+                    LegalRow(Support.legal[2], Icons.Outlined.HelpOutline, LedgerColors.TextTertiary, onOpenAbout)
+                    LegalRow(Support.legal[3], Icons.Outlined.StarOutline, LedgerColors.Gold) {
+                        dali.hamza.shared.platform.openUri(dali.hamza.shared.platform.AppLinks.PLAY_URL)
+                    }
                     LegalRow(Support.legal[4], Icons.Outlined.Share, LedgerColors.Blue)
                 }
             } else {
@@ -266,13 +271,14 @@ private fun LegalRow(
     label: String,
     icon: ImageVector,
     iconTint: Color,
+    onClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(LedgerColors.SurfaceElevated)
-            .clickable(onClick = {})
+            .clickable(onClick = onClick ?: {})
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
