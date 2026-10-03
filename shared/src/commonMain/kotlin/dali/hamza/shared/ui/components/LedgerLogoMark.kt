@@ -22,8 +22,12 @@ import dali.hamza.shared.ui.theme.LedgerColors
 fun LedgerLogoMark(
     modifier: Modifier = Modifier,
     size: Dp = 20.dp,
-    tint: Color = LedgerColors.Gold,
+    tint: Color = Color.Unspecified,
 ) {
+    // theme tokens are read in composable scope — the draw lambda can't
+    // read CompositionLocals
+    val goldTint = if (tint == Color.Unspecified) LedgerColors.Gold else tint
+    val steelColor = LedgerColors.Steel
     Canvas(modifier = modifier.size(size)) {
         val w = this.size.width
         val h = this.size.height
@@ -34,7 +38,7 @@ fun LedgerLogoMark(
 
         // baseline (steel)
         drawLine(
-            color = LedgerColors.Steel,
+            color = steelColor,
             start = Offset(w * 0.22f, baselineY),
             end = Offset(w * 0.85f, baselineY),
             strokeWidth = w * 0.028f,
@@ -46,7 +50,7 @@ fun LedgerLogoMark(
             val barHeight = h * fraction
             val left = w * 0.26f + index * (barWidth + gap)
             drawRoundRect(
-                color = tint,
+                color = goldTint,
                 topLeft = Offset(left, baselineY - barHeight),
                 size = Size(barWidth, barHeight),
                 cornerRadius = radius,

@@ -57,6 +57,14 @@ fun LedgerLineChart(
     var scrubIndex by remember { mutableStateOf<Int?>(null) }
     val textMeasurer = rememberTextMeasurer()
 
+    // theme tokens are read in composable scope — DrawScope lambdas can't
+    // read CompositionLocals, so capture the resolved colors up front
+    val gridColor = LedgerColors.GridLine
+    val canvasColor = LedgerColors.Canvas
+    val hairlineColor = LedgerColors.TextTertiary.copy(alpha = 0.40f)
+    val bubbleBg = LedgerColors.SurfaceElevated.copy(alpha = 0.98f)
+    val bubbleBorder = LedgerColors.BorderSoft
+
     val axisStyle = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontSize = 9.sp,
@@ -123,8 +131,7 @@ fun LedgerLineChart(
 
         fun rateAtY(y: Float): Double = yMin + (1f - y / size.height) * ySpan
 
-        // grid lines (design: hairline white, evenly spread) + y value labels
-        val gridColor = Color.White.copy(alpha = 0.07f)
+        // grid lines (design: hairline, evenly spread) + y value labels
         repeat(gridCount) { index ->
             val y = size.height * (index + 1) / (gridCount + 1)
             drawLine(
@@ -204,7 +211,7 @@ fun LedgerLineChart(
 
         // vertical hairline through the selected day
         drawLine(
-            color = Color.White.copy(alpha = 0.25f),
+            color = hairlineColor,
             start = Offset(scrubX, 0f),
             end = Offset(scrubX, size.height),
             strokeWidth = 1.dp.toPx(),
@@ -212,7 +219,7 @@ fun LedgerLineChart(
         )
         // enlarged dot with ring
         drawCircle(
-            color = LedgerColors.Canvas,
+            color = canvasColor,
             radius = 5.dp.toPx(),
             center = Offset(scrubX, scrubY),
         )
@@ -242,13 +249,13 @@ fun LedgerLineChart(
         val bubbleY = if (bubbleTop >= 0f) bubbleTop else (scrubY + 10.dp.toPx()).coerceAtMost(size.height - bubbleH)
 
         drawRoundRect(
-            color = LedgerColors.SurfaceRaised.copy(alpha = 0.98f),
+            color = bubbleBg,
             topLeft = Offset(bubbleX, bubbleY),
             size = Size(bubbleW, bubbleH),
             cornerRadius = CornerRadius(8.dp.toPx()),
         )
         drawRoundRect(
-            color = Color.White.copy(alpha = 0.12f),
+            color = bubbleBorder,
             topLeft = Offset(bubbleX, bubbleY),
             size = Size(bubbleW, bubbleH),
             cornerRadius = CornerRadius(8.dp.toPx()),

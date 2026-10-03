@@ -56,7 +56,11 @@ import dali.hamza.shared.ui.screens.HomeScreen
 import dali.hamza.shared.ui.screens.OnboardingScreen
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
+import dali.hamza.shared.ui.theme.LedgerAppearance
+import dali.hamza.shared.ui.theme.LedgerColorPalette
+import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.ui.theme.LocalLedgerAppearance
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
@@ -93,8 +97,22 @@ fun ExchangeCurrencyApp(
     viewModel: SharedViewModel,
     modifier: Modifier = Modifier,
 ) {
-    ExchangeCurrencyAppTheme {
+    // appearance (Account → Appearance): storage-backed so the choice
+    // survives restarts; SYSTEM follows the platform setting
+    val sessionStore = remember { runCatching { createSessionStorage() }.getOrNull() }
+    var themeMode by remember {
+        mutableStateOf(LedgerThemeMode.fromStored(sessionStore?.getThemeMode()))
+    }
+    var colorPalette by remember {
+        mutableStateOf(LedgerColorPalette.fromStored(sessionStore?.getColorPalette()))
+    }
+    ExchangeCurrencyAppTheme(themeMode = themeMode, colorPalette = colorPalette) {
         val keyboardController = LocalSoftwareKeyboardController.current
+        // system-bar contrast follows the resolved theme (light mode → dark icons)
+        val appearance = LocalLedgerAppearance.current
+        LaunchedEffect(appearance.dark) {
+            dali.hamza.shared.platform.applySystemBarIcons(appearance.dark)
+        }
         // Focus sink: an invisible, non-input focus target. Tapping anywhere
         // moves focus HERE instead of "clearing" it — Compose's root focus
         // restoration would otherwise re-focus the amount field and reopen
@@ -122,9 +140,8 @@ fun ExchangeCurrencyApp(
         }
 
         // ---- biometric app lock (guest & sovereign; off by default) --------
-        val appLock = remember { runCatching { dali.hamza.shared.data.storage.createSessionStorage() }.getOrNull() }
         val authenticator = remember { dali.hamza.shared.platform.createBiometricAuthenticator() }
-        var lockEnabled by remember { mutableStateOf(appLock?.getBiometricUnlock() == true) }
+        var lockEnabled by remember { mutableStateOf(sessionStore?.getBiometricUnlock() == true) }
         var unlocked by remember { mutableStateOf(false) }
         var authCancelled by remember { mutableStateOf(false) }
         val locked = lockEnabled && !unlocked
@@ -132,7 +149,7 @@ fun ExchangeCurrencyApp(
         // ---- market-overview onboarding (first launch) ---------------------
         // empty preferences = the user never completed the market selection
         var marketPreferences by remember {
-            mutableStateOf(appLock?.getMarketPreferences().orEmpty())
+            mutableStateOf(sessionStore?.getMarketPreferences().orEmpty())
         }
         var onboarded by remember { mutableStateOf(marketPreferences.isNotEmpty()) }
         val sharedState by viewModel.state.collectAsState()
@@ -143,7 +160,7 @@ fun ExchangeCurrencyApp(
                 currencies = sharedState.currencies,
                 base = sharedState.fromCurrency?.name,
                 onDone = { baseCode, codes ->
-                    appLock?.setMarketPreferences(codes)
+                    sessionStore?.setMarketPreferences(codes)
                     marketPreferences = codes
                     // apply the chosen base: persists it and refetches all
                     // rates quoted against the new base
@@ -244,6 +261,8 @@ fun ExchangeCurrencyApp(
                                 .firstOrNull { it.name == code }
                                 ?.let(viewModel::selectFromCurrency)
                         },
+                        onThemeModeChanged = { themeMode = it },
+                        onColorPaletteChanged = { colorPalette = it },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                     )
                 }

@@ -75,6 +75,20 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
             .apply()
     }
 
+    override fun getThemeMode(): String =
+        preferences.getString(KEY_THEME_MODE, "dark") ?: "dark"
+
+    override fun setThemeMode(mode: String) {
+        preferences.edit().putString(KEY_THEME_MODE, mode).apply()
+    }
+
+    override fun getColorPalette(): String =
+        preferences.getString(KEY_COLOR_PALETTE, "sovereign") ?: "sovereign"
+
+    override fun setColorPalette(palette: String) {
+        preferences.edit().putString(KEY_COLOR_PALETTE, palette).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -85,6 +99,8 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
         const val KEY_MARKET_PREFERENCES = "market_preferences"
+        const val KEY_THEME_MODE = "theme_mode"
+        const val KEY_COLOR_PALETTE = "color_palette"
     }
 }
 

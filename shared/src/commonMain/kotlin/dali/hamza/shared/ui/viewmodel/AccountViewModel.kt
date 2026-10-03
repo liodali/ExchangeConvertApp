@@ -7,6 +7,8 @@ import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.currentEpochMillis
+import dali.hamza.shared.ui.theme.LedgerColorPalette
+import dali.hamza.shared.ui.theme.LedgerThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,6 +45,14 @@ class AccountViewModel(
     var marketPreferences by mutableStateOf(storage.getMarketPreferences())
         private set
 
+    /** Appearance mode (persisted; Account → Appearance). */
+    var themeMode by mutableStateOf(LedgerThemeMode.fromStored(storage.getThemeMode()))
+        private set
+
+    /** Dark color palette (persisted; Account → Appearance). */
+    var colorPalette by mutableStateOf(LedgerColorPalette.fromStored(storage.getColorPalette()))
+        private set
+
     fun updateBiometricUnlock(enabled: Boolean) {
         biometricUnlock = enabled
         storage.setBiometricUnlock(enabled)
@@ -63,6 +73,16 @@ class AccountViewModel(
     fun replaceMarketPreferences(codes: List<String>) {
         marketPreferences = codes.take(3)
         storage.setMarketPreferences(marketPreferences)
+    }
+
+    fun updateThemeMode(mode: LedgerThemeMode) {
+        themeMode = mode
+        storage.setThemeMode(mode.stored)
+    }
+
+    fun updateColorPalette(palette: LedgerColorPalette) {
+        colorPalette = palette
+        storage.setColorPalette(palette.stored)
     }
 
     /** Design persona email, derived from the username. */

@@ -71,6 +71,19 @@ interface ISessionStorage {
     fun getMarketPreferences(): List<String> = emptyList()
 
     fun setMarketPreferences(codes: List<String>) {}
+
+    /**
+     * Appearance mode (Account → Appearance): system / light / dark.
+     * Defaults to dark — the original design palette.
+     */
+    fun getThemeMode(): String = "dark"
+
+    fun setThemeMode(mode: String) {}
+
+    /** Dark-mode color palette: sovereign / summer / bloom. */
+    fun getColorPalette(): String = "sovereign"
+
+    fun setColorPalette(palette: String) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

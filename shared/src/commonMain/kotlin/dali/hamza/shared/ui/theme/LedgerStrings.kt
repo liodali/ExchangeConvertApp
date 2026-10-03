@@ -58,6 +58,15 @@ object LedgerStrings {
         const val BASE_PICK_TITLE = "Choose base currency"
         const val BASE_LABEL = "Base"
 
+        /** Appearance section (mode + color palette, design `qDCZE`). */
+        const val APPEARANCE_SECTION = "APPEARANCE"
+        const val APPEARANCE_TITLE = "Appearance"
+        const val APPEARANCE_DESC = "Mode and color palette"
+        const val MODE_SYSTEM = "System"
+        const val MODE_LIGHT = "Light"
+        const val MODE_DARK = "Dark"
+        const val PALETTE_SECTION = "Color palette"
+
         const val VAULT_SECTION = "VAULT MANAGEMENT"
         const val LOG_OUT = "Log out from Ledger"
         const val DELETE_ACCOUNT = "Permanently Delete Account"

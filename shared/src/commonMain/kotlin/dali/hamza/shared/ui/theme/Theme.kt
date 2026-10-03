@@ -1,67 +1,140 @@
 package dali.hamza.shared.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 
 /**
- * Sovereign Ledger dark color scheme — the design (`ui-design.pen`) is dark-only (v1),
- * so [ExchangeCurrencyAppTheme] always applies this scheme regardless of the system
- * setting (the `darkTheme` parameter is kept for API stability).
- *
- * Primary = light blue `#B9C7E4` on navy — the design's CTA/active-accent pairing.
- * Secondary = green `#4EDEA3` (positive/live), tertiary = gold `#E9C349` (premium).
+ * Material color scheme derived from a [LedgerPalette] (single source for
+ * both appearance modes). Primary = the palette's info blue pairing;
+ * secondary = the accent (positive/live); tertiary = gold (premium).
  */
-val LedgerDarkColors = darkColorScheme(
-    primary = LedgerColors.Blue,
-    onPrimary = LedgerColors.NavyPanel,
-    primaryContainer = LedgerColors.NavyPanel,
-    onPrimaryContainer = LedgerColors.BlueSoft,
-    secondary = LedgerColors.Green,
-    onSecondary = LedgerColors.Canvas,
-    secondaryContainer = LedgerColors.GreenGlow,
-    onSecondaryContainer = LedgerColors.Green,
-    tertiary = LedgerColors.Gold,
-    onTertiary = LedgerColors.Canvas,
-    tertiaryContainer = LedgerColors.GoldGlow,
-    onTertiaryContainer = LedgerColors.Gold,
-    background = LedgerColors.Canvas,
-    onBackground = LedgerColors.TextPrimary,
-    surface = LedgerColors.Surface,
-    onSurface = LedgerColors.TextPrimary,
-    onSurfaceVariant = LedgerColors.TextSecondary,
-    surfaceVariant = LedgerColors.SurfaceElevated,
-    surfaceContainerLowest = LedgerColors.Canvas,
-    surfaceContainerLow = LedgerColors.SurfaceElevated,
-    surfaceContainer = LedgerColors.SurfaceRaised,
-    surfaceContainerHigh = LedgerColors.Card,
-    surfaceContainerHighest = LedgerColors.CardAlt,
-    error = LedgerColors.Error,
-    onError = LedgerColors.Canvas,
-    errorContainer = LedgerColors.Error.copy(alpha = 0.12f),
-    onErrorContainer = LedgerColors.Error,
-    outline = LedgerColors.Steel,
-    outlineVariant = LedgerColors.Card,
-    inverseSurface = LedgerColors.TextPrimary,
-    inverseOnSurface = LedgerColors.Canvas,
-    inversePrimary = LedgerColors.Green,
-    scrim = LedgerColors.Scrim,
-    surfaceTint = LedgerColors.Card,
+fun ledgerColorScheme(p: LedgerPalette, dark: Boolean): ColorScheme {
+    val onAccent = if (dark) p.canvas else Color.White
+    return if (dark) {
+        darkColorScheme(
+            primary = p.blue,
+            onPrimary = p.navyPanel,
+            primaryContainer = p.navyPanel,
+            onPrimaryContainer = p.blueSoft,
+            secondary = p.green,
+            onSecondary = p.canvas,
+            secondaryContainer = p.greenGlow,
+            onSecondaryContainer = p.green,
+            tertiary = p.gold,
+            onTertiary = p.canvas,
+            tertiaryContainer = p.goldGlow,
+            onTertiaryContainer = p.gold,
+            background = p.canvas,
+            onBackground = p.textPrimary,
+            surface = p.surface,
+            onSurface = p.textPrimary,
+            onSurfaceVariant = p.textSecondary,
+            surfaceVariant = p.surfaceElevated,
+            surfaceContainerLowest = p.canvas,
+            surfaceContainerLow = p.surfaceElevated,
+            surfaceContainer = p.surfaceRaised,
+            surfaceContainerHigh = p.card,
+            surfaceContainerHighest = p.cardAlt,
+            error = p.error,
+            onError = p.canvas,
+            errorContainer = p.error.copy(alpha = 0.12f),
+            onErrorContainer = p.error,
+            outline = p.steel,
+            outlineVariant = p.card,
+            inverseSurface = p.textPrimary,
+            inverseOnSurface = p.canvas,
+            inversePrimary = p.green,
+            scrim = p.scrim,
+            surfaceTint = p.card,
+        )
+    } else {
+        lightColorScheme(
+            primary = p.blue,
+            onPrimary = Color.White,
+            primaryContainer = p.navyPanel,
+            onPrimaryContainer = p.navyDeep,
+            secondary = p.green,
+            onSecondary = Color.White,
+            secondaryContainer = p.greenGlow,
+            onSecondaryContainer = p.green,
+            tertiary = p.gold,
+            onTertiary = Color.White,
+            tertiaryContainer = p.goldGlow,
+            onTertiaryContainer = p.gold,
+            background = p.canvas,
+            onBackground = p.textPrimary,
+            surface = p.surface,
+            onSurface = p.textPrimary,
+            onSurfaceVariant = p.textSecondary,
+            surfaceVariant = p.cardAlt,
+            surfaceContainerLowest = p.canvas,
+            surfaceContainerLow = p.surface,
+            surfaceContainer = p.surfaceRaised,
+            surfaceContainerHigh = p.card,
+            surfaceContainerHighest = p.cardAlt,
+            error = p.error,
+            onError = Color.White,
+            errorContainer = p.error.copy(alpha = 0.12f),
+            onErrorContainer = p.error,
+            outline = p.steel,
+            outlineVariant = p.cardAlt,
+            inverseSurface = p.textPrimary,
+            inverseOnSurface = p.canvas,
+            inversePrimary = p.green,
+            scrim = p.scrim,
+            surfaceTint = p.card,
+        )
+    }
+}
+
+/** Resolved appearance for the current composition (mode + palette). */
+data class LedgerAppearance(
+    val mode: LedgerThemeMode,
+    val palette: LedgerColorPalette,
+    val dark: Boolean,
 )
 
+val LocalLedgerAppearance = staticCompositionLocalOf {
+    LedgerAppearance(LedgerThemeMode.DARK, LedgerColorPalette.SOVEREIGN, dark = true)
+}
+
 /**
- * Root theme of the shared Compose Multiplatform app (single design source for
- * Android + iOS). Signature unchanged from the pre-redesign version.
+ * Root theme of the shared Compose Multiplatform app (single design source
+ * for Android + iOS). Applies the palette selected in Account → Appearance;
+ * SYSTEM follows the platform setting.
  */
 @Composable
 fun ExchangeCurrencyAppTheme(
-    darkTheme: Boolean = true,
+    themeMode: LedgerThemeMode = LedgerThemeMode.DARK,
+    colorPalette: LedgerColorPalette = LedgerColorPalette.SOVEREIGN,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = LedgerDarkColors,
-        typography = ledgerTypography(),
-        shapes = shapes,
-        content = content,
-    )
+    val systemDark = isSystemInDarkTheme()
+    val dark = when (themeMode) {
+        LedgerThemeMode.DARK -> true
+        LedgerThemeMode.LIGHT -> false
+        LedgerThemeMode.SYSTEM -> systemDark
+    }
+    val resolved = remember(dark, colorPalette) { resolvePalette(themeMode, colorPalette, systemDark) }
+    val scheme = remember(resolved, dark) { ledgerColorScheme(resolved, dark) }
+
+    CompositionLocalProvider(
+        LocalLedgerPalette provides resolved,
+        LocalLedgerAppearance provides LedgerAppearance(themeMode, colorPalette, dark),
+    ) {
+        MaterialTheme(
+            colorScheme = scheme,
+            typography = ledgerTypography(),
+            shapes = shapes,
+            content = content,
+        )
+    }
 }

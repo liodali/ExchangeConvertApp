@@ -83,6 +83,20 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(codes.joinToString(","), forKey = KEY_MARKET_PREFERENCES)
     }
 
+    override fun getThemeMode(): String =
+        defaults.stringForKey(KEY_THEME_MODE) ?: "dark"
+
+    override fun setThemeMode(mode: String) {
+        defaults.setObject(mode, forKey = KEY_THEME_MODE)
+    }
+
+    override fun getColorPalette(): String =
+        defaults.stringForKey(KEY_COLOR_PALETTE) ?: "sovereign"
+
+    override fun setColorPalette(palette: String) {
+        defaults.setObject(palette, forKey = KEY_COLOR_PALETTE)
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
@@ -92,6 +106,8 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_NOTIFICATIONS = "notifications_enabled"
         const val KEY_DEFAULT_PAIR = "default_pair"
         const val KEY_MARKET_PREFERENCES = "market_preferences"
+        const val KEY_THEME_MODE = "theme_mode"
+        const val KEY_COLOR_PALETTE = "color_palette"
     }
 }
 

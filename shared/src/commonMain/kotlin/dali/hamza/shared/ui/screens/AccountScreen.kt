@@ -2,6 +2,7 @@ package dali.hamza.shared.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -65,7 +67,9 @@ import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
+import dali.hamza.shared.ui.theme.LedgerColorPalette
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
@@ -87,6 +91,8 @@ fun AccountScreen(
     baseCurrency: String? = null,
     onMarketPreferencesChanged: (List<String>) -> Unit = {},
     onBaseCurrencyChanged: (String) -> Unit = {},
+    onThemeModeChanged: (LedgerThemeMode) -> Unit = {},
+    onColorPaletteChanged: (LedgerColorPalette) -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
@@ -278,6 +284,127 @@ fun AccountScreen(
                             value = code ?: "—",
                             onClick = { marketSlot = index },
                         )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // ============ Appearance (mode + palette, design qDCZE) =======
+            BentoCard {
+                SectionLabel(LedgerStrings.Account.APPEARANCE_SECTION)
+                Spacer(Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = LedgerStrings.Account.APPEARANCE_TITLE,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = LedgerColors.TextPrimary,
+                        )
+                        Text(
+                            text = LedgerStrings.Account.APPEARANCE_DESC,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = LedgerColors.TextTertiary,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                // segmented mode control (design: System / Light / Dark)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(LedgerColors.SurfaceElevated)
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    listOf(
+                        LedgerStrings.Account.MODE_SYSTEM to LedgerThemeMode.SYSTEM,
+                        LedgerStrings.Account.MODE_LIGHT to LedgerThemeMode.LIGHT,
+                        LedgerStrings.Account.MODE_DARK to LedgerThemeMode.DARK,
+                    ).forEach { (label, mode) ->
+                        val selected = viewModel.themeMode == mode
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                .clickable {
+                                    viewModel.updateThemeMode(mode)
+                                    onThemeModeChanged(mode)
+                                }
+                                .padding(vertical = 8.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(20.dp))
+                // palette choices (design swatches)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = LedgerStrings.Account.PALETTE_SECTION,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = LedgerColors.TextPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = viewModel.colorPalette.label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = LedgerColors.Green,
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    paletteSwatches.forEach { (palette, swatches) ->
+                        val selected = viewModel.colorPalette == palette
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                .border(
+                                    1.dp,
+                                    if (selected) LedgerColors.Green.copy(alpha = 0.45f) else LedgerColors.BorderSoft,
+                                    RoundedCornerShape(12.dp),
+                                )
+                                .clickable {
+                                    viewModel.updateColorPalette(palette)
+                                    onColorPaletteChanged(palette)
+                                }
+                                .padding(vertical = 12.dp),
+                        ) {
+                            Row {
+                                swatches.forEachIndexed { index, swatch ->
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (-6 * index).dp)
+                                            .size(18.dp)
+                                            .clip(CircleShape)
+                                            .background(swatch)
+                                            .border(1.5.dp, LedgerColors.SurfaceElevated, CircleShape),
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = palette.label,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                            )
+                        }
                     }
                 }
             }
@@ -629,12 +756,14 @@ private fun ClearanceRow() {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
+            val ringTrack = LedgerColors.Steel
+            val ringProgress = LedgerColors.Green
             Canvas(modifier = Modifier.size(48.dp)) {
                 val stroke = 4.dp.toPx()
                 val inset = stroke / 2f
                 val arcSize = Size(size.width - stroke, size.height - stroke)
                 drawArc(
-                    color = LedgerColors.Steel,
+                    color = ringTrack,
                     startAngle = 0f,
                     sweepAngle = 360f,
                     useCenter = false,
@@ -643,7 +772,7 @@ private fun ClearanceRow() {
                     style = Stroke(width = stroke),
                 )
                 drawArc(
-                    color = LedgerColors.Green,
+                    color = ringProgress,
                     startAngle = -90f,
                     sweepAngle = 360f * 0.75f,
                     useCenter = false,
@@ -710,3 +839,16 @@ private fun EditNameDialog(
 private fun fallbackMarketMajor(exclude: List<String>): String =
     listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
         ?: "EUR"
+
+/** Palette preview swatches (design `qDCZE` Color Palette Choices). */
+private val paletteSwatches: List<Pair<LedgerColorPalette, List<Color>>> = listOf(
+    LedgerColorPalette.SOVEREIGN to listOf(
+        Color(0xFF4EDEA3), Color(0xFFB9C7E4), Color(0xFFE5E2E1),
+    ),
+    LedgerColorPalette.SUMMER to listOf(
+        Color(0xFFF5BA59), Color(0xFFFB7185), Color(0xFF8BD3C7),
+    ),
+    LedgerColorPalette.BLOOM to listOf(
+        Color(0xFFF2A9D0), Color(0xFFB9A6E6), Color(0xFFA8DCC8),
+    ),
+)

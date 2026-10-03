@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import dali.hamza.shared.ui.theme.LedgerColors
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -59,8 +60,8 @@ fun GlassCard(
     val shape = RoundedCornerShape(cornerRadius)
     val glassBrush = Brush.verticalGradient(
         listOf(
-            Color.White.copy(alpha = 0.06f),
-            Color.White.copy(alpha = 0.02f),
+            LedgerColors.GlossTop,
+            LedgerColors.GlossBottom,
         )
     )
     Column(
@@ -68,7 +69,7 @@ fun GlassCard(
             .clip(shape)
             .background(glassBrush)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .border(1.dp, Color.White.copy(alpha = 0.08f), shape)
+            .border(1.dp, LedgerColors.BorderSoft, shape)
             .padding(padding),
         content = content,
     )
