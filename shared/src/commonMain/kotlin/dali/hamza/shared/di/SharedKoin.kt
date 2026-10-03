@@ -17,7 +17,12 @@ import org.koin.core.context.startKoin
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-private const val DEFAULT_HOST = "api.exchange.dev.adetify.com"   // our exchange-api backend
+/**
+ * Default backend host (our exchange-api deployment). Platform hosts may
+ * override it at build time (Android: `SERVER_HOST` BuildConfig field fed
+ * by the `server.host` gradle prop; iOS: `ExchangeSecrets.apiHost`).
+ */
+const val DEFAULT_HOST = "api.exchange.dev.adetify.com"
 
 /**
  * Shared Koin module (KMP). Wired by [initSharedKoin] from the platform host

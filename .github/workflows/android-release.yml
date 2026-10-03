@@ -10,6 +10,12 @@ name: Android Release
 #   ANDROID_KEY_PASSWORD
 #   PLAY_SERVICE_ACCOUNT_JSON — Play Console service account JSON
 #
+# Optional repository VARIABLES (Settings → Secrets and variables → Actions
+# → Variables):
+#   EXCHANGE_SERVER_HOST — backend host baked into the app (defaults to the
+#     shared module's DEFAULT_HOST, currently the dev deployment; set this
+#     when the production backend gets its own domain).
+#
 # Signing: the runner materializes key.properties from the keystore
 # secrets (same file format local builds use) — app/build.gradle.kts
 # loads it at configuration time. Missing secrets → unsigned AAB
@@ -106,7 +112,8 @@ jobs:
           ./gradlew :app:bundleRelease \
             -PversionCode="$VERSION_CODE" \
             -PversionName="$VERSION_NAME" \
-            -Pglitchtip.dsn="${{ secrets.GLITCHTIP_DSN }}"
+            -Pglitchtip.dsn="${{ secrets.GLITCHTIP_DSN }}" \
+            -Pserver.host="${{ vars.EXCHANGE_SERVER_HOST }}"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4

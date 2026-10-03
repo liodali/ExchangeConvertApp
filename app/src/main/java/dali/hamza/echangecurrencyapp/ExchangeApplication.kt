@@ -3,6 +3,7 @@ package dali.hamza.echangecurrencyapp
 import android.app.Application
 import dali.hamza.echangecurrencyapp.di.appModule
 import dali.hamza.shared.AndroidAppContext
+import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
 import io.sentry.android.core.SentryAndroid
 import org.koin.android.ext.koin.androidContext
@@ -38,8 +39,11 @@ class ExchangeApplication : Application() {
             // Load modules
             modules(appModule)
         }
-        // shared module rides on the same Koin instance (backend host
-        // defaults to api.exchange.dev.adetify.com inside sharedModule)
-        loadKoinModules(sharedModule())
+        // shared module rides on the same Koin instance. Backend host:
+        // BuildConfig.SERVER_HOST (gradle prop / CI variable) or the
+        // shared module's DEFAULT_HOST when unset.
+        loadKoinModules(
+            sharedModule(serverURL = BuildConfig.SERVER_HOST.ifBlank { DEFAULT_HOST })
+        )
     }
 }

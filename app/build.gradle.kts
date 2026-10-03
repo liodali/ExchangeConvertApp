@@ -51,6 +51,13 @@ android {
         // CI injects it from the GLITCHTIP_DSN secret.
         buildConfigField("String", "GLITCHTIP_DSN", "\"${prop("glitchtip.dsn", "")}\"")
 
+        // Backend host override — gradle prop → local.properties → empty
+        // (the shared module's DEFAULT_HOST wins at runtime). CI passes
+        // -Pserver.host from the EXCHANGE_SERVER_HOST repo variable; when
+        // the production backend gets its own domain, set that variable —
+        // no code change needed.
+        buildConfigField("String", "SERVER_HOST", "\"${prop("server.host", "")}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true

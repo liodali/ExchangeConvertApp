@@ -40,6 +40,19 @@ somewhere safe** (lose them → the app can never be updated on Play).
 
 Local builds read the same DSN from `local.properties` (`glitchtip.dsn=`); empty = disabled.
 
+### Backend host (optional repo variable)
+
+The app talks to our exchange-api backend. The host defaults to the shared
+module's `DEFAULT_HOST` (`api.exchange.dev.adetify.com` — currently the only
+deployment). To point a release at a different host without a code change:
+
+- **CI**: repo variable `EXCHANGE_SERVER_HOST` (Settings → Secrets and
+  variables → Actions → **Variables**, not Secrets) — unset = default host.
+- **Local builds**: `local.properties` → `server.host=…` (or `-Pserver.host=…`).
+
+When the production backend gets its own domain, set the variable and tag —
+that's the whole cutover.
+
 ## 3. Play Console one-time setup (~15 min, needs your Google account)
 
 1. [play.google.com/console](https://play.google.com/console) → pay the one-time $25 fee.
