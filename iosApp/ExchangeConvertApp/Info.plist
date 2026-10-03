@@ -8,5 +8,9 @@
 	<true/>
 	<key>CFBundleDisplayName</key>
 	<string>Sovereign Ledger</string>
+	<!-- Required for the biometric app-lock (Account → App Lock). Without
+	     this iOS terminates the app the first time Face ID is invoked. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock your ledger with Face ID.</string>
 </dict>
 </plist>

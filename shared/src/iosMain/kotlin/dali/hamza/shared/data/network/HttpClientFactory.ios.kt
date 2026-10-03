@@ -28,7 +28,7 @@ actual fun createHttpClient(serverURL: String): HttpClient {
                     Napier.v("HTTP Client", null, message)
                 }
             }
-            level = LogLevel.HEADERS
+            level = LogLevel.INFO
         }
         defaultRequest {
             url {

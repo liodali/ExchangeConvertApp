@@ -7,7 +7,7 @@ import platform.UIKit.UIDevice
 
 actual fun openUri(url: String) {
     val nsUrl = NSURL.URLWithString(url) ?: return
-    UIApplication.sharedApplication.openURL(nsUrl, options = emptyMap<Any?, Any?>()) { _, _ -> }
+    UIApplication.sharedApplication.openURL(nsUrl, options = emptyMap<Any?, Any?>()) { _ -> }
 }
 
 actual fun appVersionName(): String {
