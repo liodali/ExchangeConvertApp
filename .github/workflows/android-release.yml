@@ -28,6 +28,10 @@ on:
 
 jobs:
   release:
+    # Canonical repo only — forks don't carry the signing/Play secrets,
+    # so a fork run could only produce an unsigned artifact. Skip forks
+    # entirely (also saves the fork owner's Actions minutes).
+    if: github.repository == 'liodali/ExchangeConvertApp'
     name: Build & upload AAB
     runs-on: ubuntu-latest
     steps:
