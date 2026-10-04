@@ -25,10 +25,11 @@ import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
+import dali.hamza.shared.ui.theme.LocalLedgerAppearance
 
 /**
- * Live chat / feedback — the Chatwoot website widget in a WebView
- * (self-hosted inbox; conversations are managed there). Gated on
+ * Live chat / feedback — the Chatwoot inbox's full-page chat in a
+ * WebView (self-hosted inbox; conversations are managed there). Gated on
  * [ChatwootConfig]: without a website token the screen shows a
  * coming-soon state instead of a broken page.
  */
@@ -37,7 +38,10 @@ fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
     val configured = ChatwootConfig.WEBSITE_TOKEN.isNotBlank()
     // theme-matched page background so the web surface blends in
     val bg = LedgerColors.Canvas
-    val html = remember(bg, userName) { chatwootHtml(backgroundHex = bg.toPaddedHex(), userName = userName) }
+    val dark = LocalLedgerAppearance.current.dark
+    val html = remember(bg, userName, dark) {
+        chatwootHtml(backgroundHex = bg.toPaddedHex(), userName = userName, dark = dark)
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LedgerTopAppBar(

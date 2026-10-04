@@ -6,12 +6,19 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 actual fun PlatformWebView(html: String, baseUrl: String?, modifier: Modifier, url: String?) {
+    // AndroidView's update block runs on every recomposition — reloading
+    // unconditionally would restart the page (a live chat would lose its
+    // session mid-conversation), so only load when the payload changed.
+    val loadedKey: MutableState<String?> = remember { mutableStateOf(null) }
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { context ->
@@ -25,10 +32,14 @@ actual fun PlatformWebView(html: String, baseUrl: String?, modifier: Modifier, u
             }
         },
         update = { web ->
-            if (url != null) {
-                web.loadUrl(url)
-            } else {
-                web.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null)
+            val key = url ?: (baseUrl.orEmpty() + "\n\n" + html)
+            if (loadedKey.value != key) {
+                loadedKey.value = key
+                if (url != null) {
+                    web.loadUrl(url)
+                } else {
+                    web.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null)
+                }
             }
         },
     )
