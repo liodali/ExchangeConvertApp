@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.theme.LedgerColors
 
 /**
@@ -44,13 +45,15 @@ enum class LedgerDestination(val label: String, val icon: ImageVector) {
 }
 
 /**
- * Ledger bottom navigation — 101dp translucent bar over blurred content
+ * Ledger bottom navigation — translucent bar over blurred content
  * (design: `#131313B2` fill), 3 items; the selected item gets the design's
  * raised pill (`#201F1F`, radius 16) with the light-blue active accent
  * `#B9C7E4`; inactive items use the muted blue-gray `#64748B`.
  *
- * Component-level only for Phase 1 — [dali.hamza.shared.ui.ExchangeCurrencyApp]
- * still uses [SharedBottomNavigation] until the Phase 2 navigation migration.
+ * Bar content height: 101dp on Android (design). iOS uses 80dp — the home
+ * indicator inset (34pt) is larger than Android's gesture inset (~16dp),
+ * so with 101dp the total footprint (~135dp) towered over native tab bars
+ * (~83pt). 80 + 34 ≈ 114dp total, matching the Android footprint (~117dp).
  */
 @Composable
 fun LedgerBottomNav(
@@ -58,6 +61,7 @@ fun LedgerBottomNav(
     onSelectDestination: (LedgerDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val barHeight = if (isIos()) 80.dp else 101.dp
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -68,7 +72,7 @@ fun LedgerBottomNav(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(101.dp),
+                .height(barHeight),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
