@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = "dali.hamza.exchangecurrencyapp.core"
     defaultConfig {
         minSdk = 26

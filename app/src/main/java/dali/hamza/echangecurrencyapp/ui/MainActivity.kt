@@ -1,101 +1,97 @@
 package dali.hamza.echangecurrencyapp.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import dali.hamza.core.common.ISessionManager
-import dali.hamza.echangecurrencyapp.ui.compose.page.Home
-import dali.hamza.echangecurrencyapp.ui.compose.page.SelectCurrencyPage
-import dali.hamza.echangecurrencyapp.ui.compose.theme.ExchangeCurrencyAppTheme
-import dali.hamza.echangecurrencyapp.viewmodel.State
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.koin.compose.KoinContext
+import dali.hamza.shared.ui.ExchangeCurrencyApp
+import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import org.koin.core.context.GlobalContext
 
+/**
+ * Hosts the shared Compose Multiplatform UI (Sovereign Ledger).
+ *
+ * Keyboard UX (both platform-level — the Compose focus observer in the
+ * shared root covers iOS):
+ * - `stateHidden` (manifest): the IME is NEVER restored open on launch —
+ *   no autofocus when the app opens.
+ * - `dispatchTouchEvent`: every touch first clears focus and hides the
+ *   IME. Tapping a text field re-requests focus during the same gesture,
+ *   so inputs keep working; tapping anywhere else dismisses the keyboard.
+ *   (No bounds check on purpose: in Compose, `currentFocus` is the whole
+ *   Compose surface, so a bounds test can never detect "outside".)
+ */
+class MainActivity : FragmentActivity() {
 
-class MainActivity : ComponentActivity() {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+        }
+        return super.dispatchTouchEvent(event)
+    }
 
+    /**
+     * Covers warm resume (reopen from recents): any focus and IME left over
+     * from the previous session are cleared. onResume never fires during
+     * keyboard interaction, so it cannot fight the user typing.
+     */
+    override fun onResume() {
+        super.onResume()
+        currentFocus?.clearFocus()
+        (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+    }
 
-    private var isLoadingCurrentCurrency: State by mutableStateOf(State.NOT_LOADING)
-    private var firstDestination: String by mutableStateOf("home")
-    private val sessionManager: ISessionManager by inject()
-
+    /**
+     * Compose RESTORES the saved focus of the amount field during the first
+     * composition — AFTER onResume — and the restored editor re-opens the
+     * IME even with stateHidden. This hook fires last, when the window
+     * actually gains focus, and clears it. It never fires while the user is
+     * typing (opening the soft IME does not change activity window focus).
+     */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen().setKeepOnScreenCondition {
-            isLoadingCurrentCurrency != State.FINISH
-        }
-        lifecycleScope.launch {
-            repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-                isLoadingCurrentCurrency = State.LOADING
-                sessionManager.getCurrencyFromDataStore.collectLatest { currency ->
-                    if (currency.isEmpty()) {
-                        firstDestination = "selectCurrency"
-                        delay(200)
-                    }
-                    isLoadingCurrentCurrency = State.FINISH
-
-                }
+        dali.hamza.shared.AndroidAppContext.currentActivity = this
+        installSplashScreen()
+        // Flutter-style edge-to-edge: system bars stay visible and transparent,
+        // content draws behind them; M3 Scaffold insets position the content
+        enableEdgeToEdge()
+        // Cold-start background follows the persisted appearance so Light
+        // mode doesn't flash dark before Compose draws (shared_session is
+        // written by the shared AndroidSessionStorage).
+        runCatching {
+            val prefs = getSharedPreferences("shared_session", MODE_PRIVATE)
+            val systemDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            val dark = when (prefs.getString("theme_mode", "dark")) {
+                "light" -> false
+                "dark" -> true
+                else -> systemDark
             }
+            window.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(
+                    if (dark) android.graphics.Color.parseColor("#0E0E0E")
+                    else android.graphics.Color.parseColor("#F5F7F2")
+                )
+            )
         }
         setContent {
-            val navController = rememberNavController()
-            KoinContext {
-                App(
-                    //mainViewModel = mainViewModel,
-                    navController = navController,
-                    firstPage = firstDestination
-                )
-            }
-        }
-
-    }
-
-    @OptIn(ExperimentalComposeUiApi::class)
-    @Composable
-    fun App(
-        navController: NavHostController,
-        firstPage: String = "home"
-    ) {
-
-        ExchangeCurrencyAppTheme {
-            NavHost(navController = navController, startDestination = firstPage) {
-                composable("home") {
-                    KoinContext {
-                        Home()
-                    }
-                }
-                composable("selectCurrency") {
-                    KoinContext {
-                        SelectCurrencyPage(
-                            modifier = Modifier,
-                            onSelect = { _ ->
-                                navController.popBackStack()
-                                navController.navigate("home")
-                            }
-                        )
-                    }
-                }
-            }
+            val viewModel = remember { GlobalContext.get().get<SharedViewModel>() }
+            ExchangeCurrencyApp(viewModel = viewModel)
         }
     }
-
 }
-

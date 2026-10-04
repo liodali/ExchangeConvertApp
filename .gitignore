@@ -14,6 +14,23 @@
 .cxx
 local.properties
 /build/
-/gradle/
 /.idea/
 /.idea/*
+shared/build/**
+.kotlin
+xcuserdata
+# iOS secrets (token) — committed template: Secrets.swift.example
+iosApp/ExchangeConvertApp/Secrets.swift
+
+# Local agent tooling
+.kilo/
+.kilocode/
+
+# Design assets
+design/*
+!design/logo.svg
+qa/
+.env
+key.properties
+keystores/
+ui-design.pen

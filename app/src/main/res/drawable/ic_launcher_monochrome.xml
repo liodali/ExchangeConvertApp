@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon (Material You) layer: bars only, no baseline — the
+     launcher tints it with the dynamic palette, so a single simplified
+     shape reads best at themed sizes. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FFFFFF" android:pathData="M33,58 h4 a5,5 0 0 1 5,5 v18 a5,5 0 0 1 -5,5 h-4 a5,5 0 0 1 -5,-5 v-18 a5,5 0 0 1 5,-5 z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M55,42 h4 a5,5 0 0 1 5,5 v34 a5,5 0 0 1 -5,5 h-4 a5,5 0 0 1 -5,-5 v-34 a5,5 0 0 1 5,-5 z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M77,26 h4 a5,5 0 0 1 5,5 v50 a5,5 0 0 1 -5,5 h-4 a5,5 0 0 1 -5,-5 v-50 a5,5 0 0 1 5,-5 z" />
+</vector>

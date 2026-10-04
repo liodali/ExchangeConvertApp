@@ -1,0 +1,11 @@
+-- v1 → v2: add the ConversionTransaction table (Phase 4 — History cluster).
+CREATE TABLE IF NOT EXISTS ConversionTransaction (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    base TEXT NOT NULL,
+    quote TEXT NOT NULL,
+    amountBase REAL NOT NULL,
+    amountQuote REAL NOT NULL,
+    rate REAL NOT NULL,
+    timestamp INTEGER NOT NULL,
+    direction TEXT NOT NULL
+);

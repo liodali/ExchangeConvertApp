@@ -15,17 +15,48 @@ val properties = Properties().apply {
         load(rootProject.file("local.properties").inputStream())
     }
 }
+// Gradle property (-P / gradle.properties) → local.properties → default.
+// CI passes -PversionCode/-PversionName from the release tag.
+fun prop(name: String, fallback: String): String =
+    (project.properties[name] as? String) ?: properties.getProperty(name) ?: fallback
 val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
+// Local default: derive from the latest app-v* tag so debug builds wear
+// the real version (CI still overrides via -PversionCode/-PversionName
+// from the release tag it builds).
+fun latestAppTag(): Pair<String, String>? = runCatching {
+    val tag = providers.exec {
+        commandLine("git", "describe", "--abbrev=0", "--match", "app-v*")
+    }.standardOutput.asText.get().trim()
+    val m = Regex("""app-v(\d+\.\d+\.\d+)[^+]*\+(\d+)""").find(tag) ?: return null
+    m.groupValues[1] to m.groupValues[2]
+}.getOrNull()
+val tagVersion = latestAppTag()
+
 android {
-    compileSdk = 36
+    compileSdk = 37
     namespace = "dali.hamza.echangecurrencyapp"
     defaultConfig {
-        applicationId = "dali.hamza.exchangecurrencyapp"
+        applicationId = "com.sovereignledger.app"
         minSdk = 26
-        versionCode = 1
-        versionName = "1.0"
+        // explicit: target doesn't silently move with future compileSdk bumps
+        targetSdk = 37
+        // injectable from CI (-PversionCode=… / -PversionName=…)
+        versionCode = prop("versionCode", tagVersion?.second ?: "1").toInt()
+        versionName = prop("versionName", tagVersion?.first ?: "1.0.0")
+
+        // GlitchTip (Sentry-compatible OSS) DSN — gradle prop →
+        // local.properties → empty (crash reporting disabled).
+        // CI injects it from the GLITCHTIP_DSN secret.
+        buildConfigField("String", "GLITCHTIP_DSN", "\"${prop("glitchtip.dsn", "")}\"")
+
+        // Backend host override — gradle prop → local.properties → empty
+        // (the shared module's DEFAULT_HOST wins at runtime). CI passes
+        // -Pserver.host from the EXCHANGE_SERVER_HOST repo variable; when
+        // the production backend gets its own domain, set that variable —
+        // no code change needed.
+        buildConfigField("String", "SERVER_HOST", "\"${prop("server.host", "")}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,15 +64,44 @@ android {
         }
     }
 
+    // Release signing — priority: CI env vars → root key.properties (ours,
+    // Studio never touches it) — see script/keystore.sh. Never committed.
+    val keyProperties = Properties().apply {
+        val keyFile = rootProject.file("key.properties")
+        if (keyFile.exists()) {
+            keyFile.inputStream().use { load(it) }
+        }
+    }
+    val releaseKeystorePath = providers.environmentVariable("SIGNING_KEYSTORE_PATH").orNull
+        ?: keyProperties.getProperty("KEYSTORE_PATH").orEmpty()
+    val releaseStorePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull
+        ?: keyProperties.getProperty("KEYSTORE_PASSWORD").orEmpty()
+    val releaseKeyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").orNull
+        ?: keyProperties.getProperty("KEY_ALIAS").orEmpty()
+    val releaseKeyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull
+        ?: keyProperties.getProperty("KEY_PASSWORD").orEmpty()
+
+    signingConfigs {
+        if (releaseKeystorePath.isNotBlank()) {
+            create("release") {
+                // relative paths in .env/local.properties resolve from the repo root
+                storeFile = rootProject.file(releaseKeystorePath)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            applicationIdSuffix = ".Build${Calendar.getInstance().time.time}"
             resValue("string", "token", properties.getOrDefault("token", "").toString())
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
         debug {
             resValue("string", "token", properties.getOrDefault("token", "").toString())
@@ -63,6 +123,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = composeVersion
@@ -78,6 +139,8 @@ dependencies {
 
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
+    // crash reporting → self-hosted GlitchTip (Sentry protocol)
+    implementation(libs.sentry.android)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.material)
@@ -181,6 +244,7 @@ dependencies {
 
 
     implementation(project(":database"))
+    implementation(project(":shared"))
     implementation(project(":core"))
     implementation(project(":domain"))
 
