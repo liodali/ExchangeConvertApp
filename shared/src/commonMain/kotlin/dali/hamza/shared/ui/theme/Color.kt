@@ -258,7 +258,38 @@ val SovereignLightPalette = LedgerPalette(
     glassEdge = Color(0xFF18231D).copy(alpha = 0.14f),
 )
 
-/** Palette for the current [mode] — Light always resolves to Sovereign light. */
+/** Darken a dark-palette accent for use as text/icon color on light
+ *  surfaces (keeps the hue, adds contrast). */
+private fun darkenForLight(c: Color): Color =
+    Color(c.red * 0.70f, c.green * 0.70f, c.blue * 0.70f, c.alpha)
+
+/**
+ * Light variant of a dark palette: Sovereign-light neutrals (backgrounds,
+ * text — tuned for legibility) carrying the palette's accent identity.
+ */
+private fun lightVariant(base: LedgerPalette): LedgerPalette =
+    SovereignLightPalette.copy(
+        green = darkenForLight(base.green),
+        gold = darkenForLight(base.gold),
+        blue = darkenForLight(base.blue),
+        blueSoft = base.blueSoft,
+        greenGlow = base.greenGlow,
+        greenSoft = base.greenSoft,
+        goldGlow = base.goldGlow,
+        blueGlow = base.blueGlow,
+    )
+
+/** Light · Summer (Sovereign-light neutrals + Summer accents). */
+val SummerLightPalette = lightVariant(SummerDarkPalette)
+
+/** Light · Orchid (Sovereign-light neutrals + Orchid accents). */
+val OrchidLightPalette = lightVariant(OrchidDarkPalette)
+
+/** Light · Forest (Sovereign-light neutrals + Forest accents). */
+val ForestLightPalette = lightVariant(ForestDarkPalette)
+
+/** Palette for the current [mode]. Light keeps Sovereign-light neutrals
+ *  (legibility) but takes each palette's accents, darkened for contrast. */
 fun resolvePalette(mode: LedgerThemeMode, palette: LedgerColorPalette, systemDark: Boolean): LedgerPalette {
     val dark = when (mode) {
         LedgerThemeMode.DARK -> true
@@ -273,7 +304,12 @@ fun resolvePalette(mode: LedgerThemeMode, palette: LedgerColorPalette, systemDar
             LedgerColorPalette.FOREST -> ForestDarkPalette
         }
     } else {
-        SovereignLightPalette
+        when (palette) {
+            LedgerColorPalette.SOVEREIGN -> SovereignLightPalette
+            LedgerColorPalette.SUMMER -> SummerLightPalette
+            LedgerColorPalette.ORCHID -> OrchidLightPalette
+            LedgerColorPalette.FOREST -> ForestLightPalette
+        }
     }
 }
 

@@ -40,6 +40,7 @@ import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.BiometricAuthenticator
 import dali.hamza.shared.platform.createBiometricAuthenticator
+import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.components.LedgerBottomNav
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerLogoMark
@@ -183,42 +184,25 @@ fun ExchangeCurrencyApp(
                     .blur(if (locked) 20.dp else 0.dp),
             )
         } else {
-        // Liquid-glass nav: the bar floats OVER the content. A Scaffold
-        // bottomBar slot would clip scrollables at the bar's top edge —
-        // nothing would slide beneath the translucent material. Top-level
-        // hosts append ledgerNavClearance() so their last item scrolls
-        // clear of the glass; sub-routes have no bar and were already
-        // full-bleed (contentWindowInsets was 0).
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                // the Scaffold this replaced painted its containerColor as
-                // the app background — reproduce it with the design Canvas
-                // token or Light mode shows the dark window behind.
-                .background(LedgerColors.Canvas)
-                .then(sinkModifier)
-                .blur(if (locked) 20.dp else 0.dp),
-        ) {
+        // Platform split: iOS hosts the floating liquid-glass capsule over
+        // full-bleed content (screens add ledgerNavClearance()). Android
+        // keeps the classic Scaffold bottomBar slot — content stops at the
+        // bar's top edge, exactly as before the glass redesign.
+        val keyboardSink = Modifier.pointerInput(Unit) {
+            awaitEachGesture {
+                awaitFirstDown(requireUnconsumed = false)
+                runCatching { focusSink.requestFocus() }
+                waitForUpOrCancellation()
+                if (sinkHasFocus) {
+                    keyboardController?.hide()
+                }
+            }
+        }
+        val appNavHost: @Composable (Modifier) -> Unit = { navModifier ->
             NavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
-                // Keyboard UX: on touch-DOWN focus moves to the invisible
-                // sink (never clearFocus — Compose's focus restoration would
-                // re-focus the amount field). After the gesture ENDS, the IME
-                // is hidden as the final word — but only if no input re-took
-                // the focus (tapping the field itself keeps the keyboard).
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false)
-                            runCatching { focusSink.requestFocus() }
-                            waitForUpOrCancellation()
-                            if (sinkHasFocus) {
-                                keyboardController?.hide()
-                            }
-                        }
-                    },
+                modifier = navModifier,
             ) {
                 composable(Routes.HOME) {
                     HomeScreen(
@@ -333,19 +317,65 @@ fun ExchangeCurrencyApp(
                     FeedbackScreen(onBack = { navController.popBackStack() })
                 }
             }
+        }
 
-            // floating liquid-glass nav — on top of the scrolling content
-            if (currentRoute in Routes.topLevel) {
-                LedgerBottomNav(
-                    currentDestination = destinationForRoute(currentRoute),
-                    onSelectDestination = { destination ->
-                        navController.navigate(routeFor(destination)) {
-                            popUpTo(Routes.HOME) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    modifier = Modifier.align(Alignment.BottomCenter),
+        if (isIos()) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    // Canvas = the app background (what the removed
+                    // Scaffold's containerColor used to paint)
+                    .background(LedgerColors.Canvas)
+                    .then(sinkModifier)
+                    .blur(if (locked) 20.dp else 0.dp),
+            ) {
+                appNavHost(Modifier.fillMaxSize().then(keyboardSink))
+
+                // floating liquid-glass nav — on top of the scrolling content
+                if (currentRoute in Routes.topLevel) {
+                    LedgerBottomNav(
+                        currentDestination = destinationForRoute(currentRoute),
+                        onSelectDestination = { destination ->
+                            navController.navigate(routeFor(destination)) {
+                                popUpTo(Routes.HOME) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                }
+            }
+        } else {
+            Scaffold(
+                // full-bleed canvas — hosts opt into system-bar insets where
+                // the design needs them (original Android behaviour).
+                contentWindowInsets = WindowInsets(0.dp),
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(LedgerColors.Canvas)
+                    .then(sinkModifier)
+                    .blur(if (locked) 20.dp else 0.dp),
+                bottomBar = {
+                    if (currentRoute in Routes.topLevel) {
+                        LedgerBottomNav(
+                            currentDestination = destinationForRoute(currentRoute),
+                            onSelectDestination = { destination ->
+                                navController.navigate(routeFor(destination)) {
+                                    popUpTo(Routes.HOME) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+                }
+            ) { innerPadding ->
+                appNavHost(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .then(keyboardSink)
                 )
             }
         }
