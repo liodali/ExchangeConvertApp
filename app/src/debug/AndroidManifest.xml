@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Same adaptive icon, bug-badged foreground — see
+         res/mipmap-anydpi-v26/ic_launcher_debug.xml. -->
+    <application
+        android:icon="@mipmap/ic_launcher_debug"
+        tools:replace="android:icon"/>
+</manifest>

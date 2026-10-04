@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug launcher foreground = the real icon + a bug badge tucked into
+     the top-right of the adaptive-icon safe zone. Debug-only; release
+     keeps the clean icon. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_foreground"/>
+    <item
+        android:drawable="@drawable/ic_debug_bug"
+        android:width="28dp"
+        android:height="28dp"
+        android:gravity="top|end"
+        android:top="16dp"
+        android:right="16dp"/>
+</layer-list>
