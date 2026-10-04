@@ -392,9 +392,7 @@ cd exchange-api
 docker compose -f docker-compose.local.yml up   # full local stack (+ observability)
 ```
 
-Endpoints: `/currencies`, `/latest?base=&amount=&symbol=`, `/historic?base=&symbol=&from=&to=`,
-`/currency/{png,svg}` (flags), `/health`, `/metrics`. Provider rotation (Beacon, currency-api,
-exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching.
+Endpoints: `/currencies` (optional `?type=fiat|metal|crypto|all`), `/latest` (base/symbol accept metals XAU/XAG, mixed with fiat), `/historic`, `/currency/{png,svg}` (flags), `/health`, `/metrics`. Provider rotation (Beacon, currency-api, exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching. Gold/silver quotes come from the keyless exchange-rates.org precious-metals pages (`getLatestMetal`), stored metal-as-base in the same `currencyrates` cache; `/latest?base=USD&symbol=XAU` derives the inverse on the fly. Future asset-class plans (crypto, stocks) live in [`exchange-api/.plan/`](exchange-api/.plan).
 
 > The submodule holds its own git history. Local fixes there (Kotlin 2.3.21 bump, tolerant
 > `key.properties`, Gradle 9.4.1 wrapper, `rateRepository` visibility) are **uncommitted** in the
