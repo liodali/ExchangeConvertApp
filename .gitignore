@@ -34,3 +34,4 @@ qa/
 key.properties
 keystores/
 ui-design.pen
+__pycache__

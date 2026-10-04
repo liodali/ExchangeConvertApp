@@ -101,5 +101,21 @@ promote internal → closed → production from the Console when ready.
 
 - Debug builds install as `com.sovereignledger.app.debug` (separate from release).
 - The AAB artifact is attached to every workflow run even without Play secrets.
+- When the Play upload runs, an upload or rollout failure fails the workflow
+  and prevents publication of the GitHub release. The AAB remains available
+  as a workflow artifact for inspection.
+- Before building for a Play upload, the workflow reads all Play tracks and
+  requires the new version code to exceed the highest current code by 1–3.
+  Equal, lower, and larger jumps fail, as do authentication/API errors.
+  With no existing releases, only codes 1–3 are accepted. Artifact-only runs
+  without signing or Play credentials skip this check.
+  Limitation: the check reads *active* releases only — codes consumed by
+  since-deleted releases are invisible to it, so a green check does not
+  guarantee Play will accept the rollout; the upload step is the backstop.
 - Version scheme: `app-vX.Y.Z+BUILD[-dev]` — both versionName and versionCode
   are defined by the tag; the workflow derives and validates them.
+- Manual runs (`workflow_dispatch`): the "Run workflow" form takes a required
+  `version_code` (same 1–3-above-Play rule applies) and an optional `track`
+  (default `internal`; any closed-testing track must already exist in Play
+  Console — the check fails with the list of available tracks otherwise).
+  Manual builds are versioned `dev.<versionCode>`.
