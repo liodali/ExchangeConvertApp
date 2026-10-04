@@ -49,6 +49,7 @@ import dali.hamza.shared.ui.components.LedgerChip
 import dali.hamza.shared.ui.components.LedgerLineChart
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
+import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.AssetBalance
 import dali.hamza.shared.ui.viewmodel.HistoryRange
@@ -424,6 +425,7 @@ fun HistoryScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(ledgerNavClearance()))    // liquid-glass nav clearance
         }
     }
 }

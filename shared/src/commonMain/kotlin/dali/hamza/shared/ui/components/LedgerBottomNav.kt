@@ -3,15 +3,17 @@ package dali.hamza.shared.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,10 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.theme.LedgerColors
 
 /**
@@ -44,16 +47,35 @@ enum class LedgerDestination(val label: String, val icon: ImageVector) {
     ACCOUNT("Account", Icons.Outlined.Person),
 }
 
+/** Capsule content height — sized to what an icon+label tab actually needs. */
+private val CapsuleHeight = 60.dp
+
+/** Gap between the capsule and the system gesture inset (it floats). */
+private val FloatGap = 10.dp
+
 /**
- * Ledger bottom navigation — translucent bar over blurred content
- * (design: `#131313B2` fill), 3 items; the selected item gets the design's
- * raised pill (`#201F1F`, radius 16) with the light-blue active accent
- * `#B9C7E4`; inactive items use the muted blue-gray `#64748B`.
+ * Total vertical clearance top-level hosts reserve so their last item
+ * scrolls clear of the floating capsule: capsule + gap + breathing room
+ * on top of the system-bar inset.
+ */
+@Composable
+fun ledgerNavClearance(): Dp =
+    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+        CapsuleHeight + FloatGap + 24.dp
+
+/**
+ * Ledger bottom navigation — floating "liquid glass" capsule (Tier-1
+ * emulation, iOS 26 flavoured):
  *
- * Bar content height: 101dp on Android (design). iOS uses 80dp — the home
- * indicator inset (34pt) is larger than Android's gesture inset (~16dp),
- * so with 101dp the total footprint (~135dp) towered over native tab bars
- * (~83pt). 80 + 34 ≈ 114dp total, matching the Android footprint (~117dp).
+ * - wraps its content — three tabs — instead of spanning the screen;
+ *   floats 10dp above the home indicator / gesture bar
+ * - glass material: translucent gradient fill, gloss wash and a specular
+ *   hairline all around the capsule ([LedgerColors.GlassEdge])
+ * - the selected tab sits in its own glass lens (bright gradient +
+ *   hairline border) over a faint accent tint, Apple's selected-tab look
+ *
+ * Content scrolls beneath it — the app root overlays the bar instead of
+ * using a Scaffold bottomBar slot.
  */
 @Composable
 fun LedgerBottomNav(
@@ -61,37 +83,32 @@ fun LedgerBottomNav(
     onSelectDestination: (LedgerDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val barHeight = if (isIos()) 80.dp else 101.dp
-    Column(
+    val capsule = RoundedCornerShape(percent = 50)
+    Row(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .navigationBarsPadding()
+            .padding(bottom = FloatGap)
+            .height(CapsuleHeight)
+            .clip(capsule)
+            // the system-configured "liquid amount": the palette's
+            // SurfaceBlur token (alpha tuned per theme in Color.kt)
             .background(LedgerColors.SurfaceBlur)
-            .navigationBarsPadding(),
+            // gloss wash on top of the fill (palette gloss tokens)
+            .background(
+                Brush.verticalGradient(listOf(LedgerColors.GlossTop, LedgerColors.GlossBottom))
+            )
+            // edge hairline — specular white in dark, dark hairline in light
+            .border(1.dp, LedgerColors.GlassEdge, capsule)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(barHeight),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .height(63.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                LedgerDestination.entries.forEach { destination ->
-                    LedgerNavItem(
-                        destination = destination,
-                        selected = currentDestination == destination,
-                        onClick = { onSelectDestination(destination) },
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                }
-            }
+        LedgerDestination.entries.forEach { destination ->
+            LedgerNavItem(
+                destination = destination,
+                selected = currentDestination == destination,
+                onClick = { onSelectDestination(destination) },
+            )
         }
     }
 }
@@ -100,32 +117,50 @@ fun LedgerBottomNav(
 private fun LedgerNavItem(
     destination: LedgerDestination,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
     selected: Boolean,
 ) {
+    val pill = RoundedCornerShape(percent = 50)
     val contentColor by animateColorAsState(
         targetValue = if (selected) LedgerColors.Blue else LedgerColors.TextMuted,
         animationSpec = tween(200),
         label = "navColor",
     )
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) LedgerColors.SurfaceRaised else Color.Transparent)
+        modifier = Modifier
+            .clip(pill)
+            .then(
+                if (selected) {
+                    // glass lens: faint accent tint under a bright gradient
+                    // cap, edged with the specular hairline
+                    Modifier
+                        .background(LedgerColors.Blue.copy(alpha = 0.10f))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.22f),
+                                    Color.White.copy(alpha = 0.07f),
+                                )
+                            )
+                        )
+                        .border(1.dp, LedgerColors.GlassEdge, pill)
+                } else {
+                    Modifier
+                }
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
             )
-            .padding(horizontal = 24.dp, vertical = 8.dp),
+            .padding(horizontal = 18.dp, vertical = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Icon(
             imageVector = destination.icon,
             contentDescription = destination.label,
             tint = contentColor,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(22.dp),
         )
         Text(
             text = destination.label,

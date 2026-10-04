@@ -88,6 +88,8 @@ data class LedgerPalette(
     val borderSoft: Color,
     val glossTop: Color,
     val glossBottom: Color,
+    // liquid-glass chrome: specular edge highlight of the bottom nav
+    val glassEdge: Color,
 )
 
 private fun darkPalette(
@@ -139,6 +141,7 @@ private fun darkPalette(
     borderSoft = Color.White.copy(alpha = 0.08f),
     glossTop = Color.White.copy(alpha = 0.06f),
     glossBottom = Color.White.copy(alpha = 0.02f),
+    glassEdge = Color.White.copy(alpha = 0.25f),
 )
 
 /** Sovereign dark — the original design palette (v1 token set). */
@@ -250,6 +253,9 @@ val SovereignLightPalette = LedgerPalette(
     borderSoft = Color(0xFF18231D).copy(alpha = 0.10f),
     glossTop = Color(0xFF18231D).copy(alpha = 0.04f),
     glossBottom = Color(0xFF18231D).copy(alpha = 0.015f),
+    // light chrome: a white specular line would vanish on light glass —
+    // use the dark hairline family (borderSoft) so the capsule reads
+    glassEdge = Color(0xFF18231D).copy(alpha = 0.14f),
 )
 
 /** Palette for the current [mode] — Light always resolves to Sovereign light. */
@@ -362,4 +368,6 @@ object LedgerColors {
         @Composable @ReadOnlyComposable get() = LocalLedgerPalette.current.glossTop
     val GlossBottom: Color
         @Composable @ReadOnlyComposable get() = LocalLedgerPalette.current.glossBottom
+    val GlassEdge: Color
+        @Composable @ReadOnlyComposable get() = LocalLedgerPalette.current.glassEdge
 }

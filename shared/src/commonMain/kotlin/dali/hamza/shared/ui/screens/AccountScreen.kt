@@ -68,6 +68,7 @@ import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.theme.LedgerColorPalette
+import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.ui.theme.LedgerStrings
@@ -530,6 +531,7 @@ fun AccountScreen(
             )
 
             Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(ledgerNavClearance()))    // liquid-glass nav clearance
         }
     }
 

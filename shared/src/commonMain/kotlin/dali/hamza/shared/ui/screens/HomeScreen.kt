@@ -69,6 +69,7 @@ import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
+import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.viewmodel.PairCardData
@@ -596,6 +597,7 @@ private fun RecentActivitySection(
                 }
             }
         }
+    Spacer(Modifier.height(ledgerNavClearance()))    // liquid-glass nav clearance
     }
 }
 

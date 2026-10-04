@@ -183,31 +183,22 @@ fun ExchangeCurrencyApp(
                     .blur(if (locked) 20.dp else 0.dp),
             )
         } else {
-        Scaffold(
-            // full-bleed canvas — hosts opt into system-bar insets where the
-            // design needs them. ANY touch clears focus first (observing,
-            // non-consuming): taps on empty space dismiss the keyboard; taps
-            // on another input re-focus it and the keyboard stays.
-            contentWindowInsets = WindowInsets(0.dp),
+        // Liquid-glass nav: the bar floats OVER the content. A Scaffold
+        // bottomBar slot would clip scrollables at the bar's top edge —
+        // nothing would slide beneath the translucent material. Top-level
+        // hosts append ledgerNavClearance() so their last item scrolls
+        // clear of the glass; sub-routes have no bar and were already
+        // full-bleed (contentWindowInsets was 0).
+        Box(
             modifier = modifier
                 .fillMaxSize()
+                // the Scaffold this replaced painted its containerColor as
+                // the app background — reproduce it with the design Canvas
+                // token or Light mode shows the dark window behind.
+                .background(LedgerColors.Canvas)
                 .then(sinkModifier)
                 .blur(if (locked) 20.dp else 0.dp),
-            bottomBar = {
-                if (currentRoute in Routes.topLevel) {
-                    LedgerBottomNav(
-                        currentDestination = destinationForRoute(currentRoute),
-                        onSelectDestination = { destination ->
-                            navController.navigate(routeFor(destination)) {
-                                popUpTo(Routes.HOME) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    )
-                }
-            }
-        ) { innerPadding ->
+        ) {
             NavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
@@ -218,7 +209,6 @@ fun ExchangeCurrencyApp(
                 // the focus (tapping the field itself keeps the keyboard).
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
                     .pointerInput(Unit) {
                         awaitEachGesture {
                             awaitFirstDown(requireUnconsumed = false)
@@ -342,6 +332,21 @@ fun ExchangeCurrencyApp(
                 composable(Routes.FEEDBACK) {
                     FeedbackScreen(onBack = { navController.popBackStack() })
                 }
+            }
+
+            // floating liquid-glass nav — on top of the scrolling content
+            if (currentRoute in Routes.topLevel) {
+                LedgerBottomNav(
+                    currentDestination = destinationForRoute(currentRoute),
+                    onSelectDestination = { destination ->
+                        navController.navigate(routeFor(destination)) {
+                            popUpTo(Routes.HOME) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
             }
         }
         }
