@@ -142,21 +142,24 @@ jobs:
           cat whatsnew/en-US
 
       - name: Upload to Play internal testing
-        # Non-fatal until the Play Console app entry exists — "Package not
-        # found" here means: create the app in Console, then re-run the job.
-        continue-on-error: true
+        # Play failures fail the run (red). This was continue-on-error only
+        # while the Console app entry didn't exist yet; masking failures
+        # hid a rejected rollout (versionCode 14 < active 46) as "success".
         if: steps.secrets.outputs.play == 'true' && steps.secrets.outputs.keystore == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.sovereignledger.app
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: internal
+          tracks: internal
           status: completed
           whatsNewDirectory: whatsnew
 
       - name: Publish GitHub release (tag message + AAB)
-        if: startsWith(github.ref, 'refs/tags/')
+        # success() is explicit: with a custom `if` GitHub would otherwise
+        # run this even after the Play upload failed — a red run must not
+        # publish a release that never reached Play.
+        if: startsWith(github.ref, 'refs/tags/') && success()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
