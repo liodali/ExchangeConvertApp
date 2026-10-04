@@ -141,6 +141,10 @@ dependencies {
     implementation(libs.appcompat)
     // crash reporting → self-hosted GlitchTip (Sentry protocol)
     implementation(libs.sentry.android)
+    // Play In-App Updates — flexible/immediate update prompts for users
+    // without Play auto-update
+    implementation(libs.androidx.app.update)
+    implementation(libs.androidx.app.update.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.material)

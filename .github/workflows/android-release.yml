@@ -35,6 +35,11 @@ on:
         required: false
         default: internal
         type: string
+      in_app_update_priority:
+        description: "In-app update priority 0–5 — 4 or higher makes the app force a full-screen update"
+        required: false
+        default: "0"
+        type: string
 
 jobs:
   release:
@@ -92,6 +97,11 @@ jobs:
           # a number (run numbers can never satisfy the Play check).
           TAG="${GITHUB_REF_NAME#app-v}"
           PLAY_TRACK="${{ inputs.track || 'internal' }}"
+          PLAY_PRIORITY="${{ inputs.in_app_update_priority || '0' }}"
+          if ! [[ "$PLAY_PRIORITY" =~ ^[0-5]$ ]]; then
+            echo "::error::in_app_update_priority must be 0–5 (got '$PLAY_PRIORITY')"
+            exit 1
+          fi
           if [ "$TAG" = "$GITHUB_REF_NAME" ]; then
             # workflow_dispatch / non-tag
             VERSION_CODE="${{ inputs.version_code }}"
@@ -127,7 +137,8 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
           echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
           echo "PLAY_TRACK=$PLAY_TRACK" >> "$GITHUB_ENV"
-          echo "release: versionName=$VERSION_NAME versionCode=$VERSION_CODE track=$PLAY_TRACK"
+          echo "PLAY_UPDATE_PRIORITY=$PLAY_PRIORITY" >> "$GITHUB_ENV"
+          echo "release: versionName=$VERSION_NAME versionCode=$VERSION_CODE track=$PLAY_TRACK priority=$PLAY_PRIORITY"
 
       - name: Check version code against Google Play
         if: steps.secrets.outputs.play == 'true' && steps.secrets.outputs.keystore == 'true'
@@ -182,6 +193,7 @@ jobs:
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           tracks: ${{ env.PLAY_TRACK }}
           status: completed
+          inAppUpdatePriority: ${{ env.PLAY_UPDATE_PRIORITY }}
           whatsNewDirectory: whatsnew
 
       - name: Publish GitHub release (tag message + AAB)

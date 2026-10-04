@@ -3,6 +3,7 @@ activityCompose = "1.10.1"
 activityKtx = "1.13.0"
 androidxDatastorePreferences = "1.1.1"
 appcompat = "1.7.1"
+appUpdate = "2.1.0"
 coilCompose = "2.7.0"
 coilComposeCore = "3.4.0"
 sentryAndroid = "8.16.0"
@@ -73,6 +74,9 @@ androidx-core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtxV
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastorePreferences" }
 androidx-driver = { module = "app.cash.sqldelight:androidx-driver", version.ref = "sqlDelightVersion" }
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelightVersion" }
+# Play In-App Updates — prompt users who disabled Play auto-update
+androidx-app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
+androidx-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }

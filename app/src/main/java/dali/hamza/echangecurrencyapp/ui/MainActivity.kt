@@ -27,6 +27,12 @@ import org.koin.core.context.GlobalContext
  */
 class MainActivity : FragmentActivity() {
 
+    private lateinit var updateChecker: AppUpdateChecker
+
+    /** Persisted appearance, resolved in onCreate before Compose draws —
+     *  used for the window background and the update dialogs. */
+    private var darkTheme = true
+
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
@@ -45,6 +51,9 @@ class MainActivity : FragmentActivity() {
         currentFocus?.clearFocus()
         (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
             .hideSoftInputFromWindow(window.decorView.windowToken, 0)
+        // re-check Play for updates (also re-nudges a finished download
+        // after warm resume)
+        if (::updateChecker.isInitialized) updateChecker.refresh()
     }
 
     /**
@@ -66,6 +75,8 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         dali.hamza.shared.AndroidAppContext.currentActivity = this
         installSplashScreen()
+        // In-app update prompts (Play In-App Updates) — see AppUpdateChecker
+        updateChecker = AppUpdateChecker(this)
         // Flutter-style edge-to-edge: system bars stay visible and transparent,
         // content draws behind them; M3 Scaffold insets position the content
         enableEdgeToEdge()
@@ -82,6 +93,7 @@ class MainActivity : FragmentActivity() {
                 "dark" -> true
                 else -> systemDark
             }
+            darkTheme = dark
             window.setBackgroundDrawable(
                 android.graphics.drawable.ColorDrawable(
                     if (dark) android.graphics.Color.parseColor("#0E0E0E")
@@ -92,6 +104,18 @@ class MainActivity : FragmentActivity() {
         setContent {
             val viewModel = remember { GlobalContext.get().get<SharedViewModel>() }
             ExchangeCurrencyApp(viewModel = viewModel)
+            UpdateDialogs(
+                state = updateChecker.uiState,
+                dark = darkTheme,
+                onUpdate = updateChecker::startFlexibleUpdate,
+                onDecline = updateChecker::decline,
+                onRestart = updateChecker::completeUpdate,
+            )
         }
+    }
+
+    override fun onDestroy() {
+        updateChecker.destroy()
+        super.onDestroy()
     }
 }
