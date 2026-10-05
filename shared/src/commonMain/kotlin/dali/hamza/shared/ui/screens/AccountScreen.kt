@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,9 +33,11 @@ import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -57,7 +60,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
-import androidx.compose.ui.window.Dialog
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
@@ -602,38 +604,13 @@ fun AccountScreen(
     }
 
     if (showClearDialog) {
-        Dialog(onDismissRequest = { showClearDialog = false }) {
-            BentoCard(fill = LedgerColors.SurfaceElevated) {
-                Text(
-                    text = LedgerStrings.Account.CLEAR_LEDGER_TITLE,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = LedgerColors.TextPrimary,
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = LedgerStrings.Account.CLEAR_LEDGER_MESSAGE,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LedgerColors.TextSecondary,
-                )
-                Spacer(Modifier.height(24.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LedgerButton(
-                        text = LedgerStrings.Account.DIALOG_CANCEL,
-                        onClick = { showClearDialog = false },
-                        variant = LedgerButtonVariant.TONAL,
-                        modifier = Modifier.weight(1f),
-                    )
-                    LedgerButton(
-                        text = LedgerStrings.Account.CONFIRM_CLEAR,
-                        onClick = {
-                            showClearDialog = false
-                            viewModel.clearLedger()
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        }
+        ClearLedgerConfirmSheet(
+            onDismiss = { showClearDialog = false },
+            onConfirm = {
+                showClearDialog = false
+                viewModel.clearLedger()
+            },
+        )
     }
 }
 
@@ -806,7 +783,55 @@ private fun ClearanceRow() {
     }
 }
 
+/**
+ * "Clear local ledger?" confirm — bottom sheet (CMP Dialog mislays its
+ * content on iOS; the sheet is the app's cross-platform modal).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ClearLedgerConfirmSheet(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .navigationBarsPadding(),
+        ) {
+            Text(
+                text = LedgerStrings.Account.CLEAR_LEDGER_TITLE,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = LedgerStrings.Account.CLEAR_LEDGER_MESSAGE,
+                style = MaterialTheme.typography.bodyMedium,
+                color = LedgerColors.TextSecondary,
+            )
+            Spacer(Modifier.height(24.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LedgerButton(
+                    text = LedgerStrings.Account.DIALOG_CANCEL,
+                    onClick = onDismiss,
+                    variant = LedgerButtonVariant.TONAL,
+                    modifier = Modifier.weight(1f),
+                )
+                LedgerButton(
+                    text = LedgerStrings.Account.CONFIRM_CLEAR,
+                    onClick = onConfirm,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
 /** Edit Profile — renames the Sovereign account (persisted in session). */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditNameDialog(
     initial: String,
@@ -814,8 +839,13 @@ private fun EditNameDialog(
     onSave: (String) -> Unit,
 ) {
     var name by remember { mutableStateOf(initial) }
-    Dialog(onDismissRequest = onDismiss) {
-        BentoCard(fill = LedgerColors.SurfaceElevated) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .navigationBarsPadding(),
+        ) {
             Text(
                 text = LedgerStrings.Account.EDIT_PROFILE_TITLE,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -842,6 +872,7 @@ private fun EditNameDialog(
                     enabled = name.isNotBlank(),
                 )
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
