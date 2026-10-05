@@ -71,6 +71,8 @@ kotlin {
         androidMain.dependencies {
             // Biometric app-lock (BiometricPrompt in the platform actual)
             implementation(libs.androidx.biometric)
+            // Local rate-alert background job (WorkManager worker actual)
+            implementation(libs.androidx.work.runtime.ktx)
             // Ktor Android Engine
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)
