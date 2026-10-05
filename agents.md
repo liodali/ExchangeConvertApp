@@ -165,6 +165,13 @@ iosApp → SharedKMP (local SwiftPM package) → shared (Kotlin/Native framework
 | [`shared/.../data/storage/ISessionStorage.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/data/storage/ISessionStorage.kt) | Session storage interface (currency + last update) |
 | [`shared/.../database/DatabaseDriverFactory.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/database/DatabaseDriverFactory.kt) | `expect` for SQLDelight driver factory |
 | [`shared/.../di/SharedKoin.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/di/SharedKoin.kt) | Shared Koin module + `initSharedKoin(serverURL, accessKey)` |
+| [`shared/.../domain/models/RateAlert.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/domain/models/RateAlert.kt) | Local rate-alert model + mode (1h/2h periodic, ±% threshold) + free-tier cap (guest = 2) |
+| [`shared/.../data/alerts/RateAlertsEngine.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/data/alerts/RateAlertsEngine.kt) | The alert "job": fetch rates, compare vs previous stored rate, post local notifications |
+| [`shared/.../platform/Notifications.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/platform/Notifications.kt) | `expect` local notifier (permission + posting) — see android/ios actuals |
+| [`shared/.../platform/RateAlertScheduler.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/platform/RateAlertScheduler.kt) | `expect` background-job alignment (Android WorkManager / iOS Swift host) |
+| [`shared/.../ui/screens/RateAlertsScreen.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/screens/RateAlertsScreen.kt) | Rate Alerts management screen (add/toggle/delete, cap UI) |
+| [`shared/.../ui/components/AddRateAlertDialog.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/components/AddRateAlertDialog.kt) | Shared add-alert dialog (Rate Alerts screen + Home market-card bell) |
+| [`shared/.../ui/viewmodel/RateAlertsViewModel.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/viewmodel/RateAlertsViewModel.kt) | Rate Alerts screen state |
 | [`shared/.../ui/viewmodel/SharedViewModel.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/viewmodel/SharedViewModel.kt) | Shared ViewModel (`StateFlow<SharedUiState>`, no platform base class) |
 | [`shared/.../ui/ExchangeCurrencyApp.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/ExchangeCurrencyApp.kt) | Shared app root (Scaffold + bottom navigation) |
 | [`shared/.../ui/theme/`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/theme/) | Shared Material3 theme (single design source) |
@@ -172,11 +179,14 @@ iosApp → SharedKMP (local SwiftPM package) → shared (Kotlin/Native framework
 | [`shared/.../ui/screens/RatesScreen.kt`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/screens/RatesScreen.kt) | Shared rates screen |
 | [`shared/.../ui/components/`](shared/src/commonMain/kotlin/dali/hamza/shared/ui/components/) | Shared components (bottom nav, currency picker sheet) |
 | [`shared/.../database/currencies.sq`](shared/src/commonMain/sqldelight/dali/hamza/shared/database/currencies.sq) | SQLDelight schema |
+| [`shared/.../database/rateAlerts.sq`](shared/src/commonMain/sqldelight/dali/hamza/shared/database/rateAlerts.sq) | SQLDelight `RateAlert` table + queries (migration `2.sqm`, schema v3) |
 | [`shared/.../MainViewController.kt`](shared/src/iosMain/kotlin/dali/hamza/shared/MainViewController.kt) | iOS entry: `MainViewController()` → `ComposeUIViewController` |
 | [`shared/.../data/network/HttpClientFactory.android.kt`](shared/src/androidMain/kotlin/dali/hamza/shared/data/network/HttpClientFactory.android.kt) | Android `actual` — OkHttp engine |
 | [`shared/.../data/network/HttpClientFactory.ios.kt`](shared/src/iosMain/kotlin/dali/hamza/shared/data/network/HttpClientFactory.ios.kt) | iOS `actual` — Darwin engine |
 | [`shared/.../database/DatabaseDriverFactory.android.kt`](shared/src/androidMain/kotlin/dali/hamza/shared/database/DatabaseDriverFactory.android.kt) | Android `actual` — AndroidSqliteDriver |
 | [`shared/.../database/DatabaseDriverFactory.ios.kt`](shared/src/iosMain/kotlin/dali/hamza/shared/database/DatabaseDriverFactory.ios.kt) | iOS `actual` — NativeSqliteDriver |
+| [`shared/.../platform/Notifications.ios.kt`](shared/src/iosMain/kotlin/dali/hamza/shared/platform/Notifications.ios.kt) | iOS `actual` notifier — UNUserNotificationCenter (props via KVC) |
+| [`shared/.../platform/RateAlertsBridge.kt`](shared/src/iosMain/kotlin/dali/hamza/shared/platform/RateAlertsBridge.kt) | Swift entry points: `runRateAlertsCheckNow`, `hasRateAlerts` |
 
 ### 4.5 iOS App Key Files
 
@@ -188,6 +198,7 @@ iosApp → SharedKMP (local SwiftPM package) → shared (Kotlin/Native framework
 | [`iosApp/ExchangeConvertApp/Secrets.swift.example`](iosApp/ExchangeConvertApp/Secrets.swift.example) | Committed template; copy to `Secrets.swift` (git-ignored) and add the exchangerate.host access key |
 | [`iosApp/SharedKMP/Package.swift`](iosApp/SharedKMP/Package.swift) | Local Swift package exposing the Kotlin `shared` framework to the app |
 | [`iosApp/SharedKMP/Sources/SharedKMP/SharedKMP.swift`](iosApp/SharedKMP/Sources/SharedKMP/SharedKMP.swift) | Re-exports `shared` (`@_exported import shared`) so app code imports `SharedKMP` |
+| [`iosApp/ExchangeConvertApp/RateAlertsBackground.swift`](iosApp/ExchangeConvertApp/RateAlertsBackground.swift) | BGAppRefreshTask registration/scheduling for rate alerts + `AppDelegate` (Koin warm start) |
 
 > **iOS integration (SwiftPM local package):** `iosApp` no longer uses CocoaPods.
 > The Kotlin framework is produced by the `:shared:embedAndSignAppleFrameworkForXcode`
@@ -420,6 +431,7 @@ Endpoints: `/currencies` (optional `?type=fiat|metal|crypto|all`), `/latest` (ba
 | File | What it tests |
 |---|---|
 | [`MainViewModelUnitTest.kt`](app/src/androidTest/java/dali/hamza/echangecurrencyapp/MainViewModelUnitTest.kt) | MainViewModel with mocked dependencies |
+| [`RateAlertsEngineTest.kt`](shared/src/commonTest/kotlin/dali/hamza/shared/data/alerts/RateAlertsEngineTest.kt) | Rate-alert engine: baseline seeding, threshold fire + rebase, periodic interval, gates |
 | [`UIComposeInstrumentedTest.kt`](app/src/androidTest/java/dali/hamza/echangecurrencyapp/UIComposeInstrumentedTest.kt) | Compose UI tests |
 | [`CurrencyRepoTesting.kt`](core/src/androidTest/java/dali/hamza/core/CurrencyRepoTesting.kt) | CurrencyRepository integration tests |
 | [`SessionManagerTest.kt`](core/src/androidTest/java/dali/hamza/core/SessionManagerTest.kt) | DataStore session tests |
@@ -542,6 +554,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 - The KMP migration is incomplete — `domain`, `core`, and `database` modules still referenced but targeted for deprecation
 - Android app is NOT yet wired to the shared UI — `MainActivity` still uses the app-local Compose UI and the legacy Retrofit repository; the legacy `strings.xml` server (`api.openexchangerate.com`) is a dead host
 - Android `actual`s of the shared storage/driver need a `Context` (`createSessionStorage(context)`, `createDatabaseDriver(context)`) until the shared module is initialized from `ExchangeApplication`
+- Rate alerts (local notifications) shipped Oct 2026: free tier capped at 2 alerts, WorkManager job on Android / BGAppRefresh + foreground checks on iOS — see [`plans/rate-alerts.md`](plans/rate-alerts.md) for the design and KMP gotchas
 - Shared UI icons are now real Material icons (`compose.materialIconsExtended`, added in Phase 1 of the redesign); the Ledger component library + bundled Manrope/Inter fonts live in `shared/ui/components/` + `shared/ui/theme/`
 
 ---
