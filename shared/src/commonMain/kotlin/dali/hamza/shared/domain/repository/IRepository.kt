@@ -4,6 +4,7 @@ import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.HistoricalRate
 import dali.hamza.shared.domain.models.MyResponse
+import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.Transaction
 import kotlinx.coroutines.flow.Flow
 
@@ -88,4 +89,31 @@ interface IRepository {
      * Remove all recorded transactions (guest-mode "Clear Local Ledger").
      */
     suspend fun clearTransactions()
+
+    /**
+     * All configured rate alerts (local notifications), newest first.
+     */
+    suspend fun getRateAlerts(): List<RateAlert>
+
+    /**
+     * Enabled rate alerts only — the alert engine's working set.
+     */
+    suspend fun getEnabledRateAlerts(): List<RateAlert>
+
+    /**
+     * Create a rate alert. Fails when the free-tier cap
+     * ([RateAlert.maxAlertsForTier]) is reached or the pair is already
+     * tracked.
+     */
+    suspend fun addRateAlert(alert: RateAlert): Result<RateAlert>
+
+    suspend fun removeRateAlert(id: Long)
+
+    suspend fun setRateAlertEnabled(id: Long, enabled: Boolean)
+
+    /**
+     * Persist the engine's evaluation state (observed rate + throttle
+     * timestamp) for one alert.
+     */
+    suspend fun updateRateAlertState(id: Long, lastRate: Double?, lastNotifiedAt: Long)
 }

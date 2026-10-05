@@ -1,0 +1,43 @@
+-- Rate alerts table (local notifications — free tier capped in the repository).
+CREATE TABLE IF NOT EXISTS RateAlert (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    base TEXT NOT NULL,
+    quote TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    intervalMinutes INTEGER NOT NULL,
+    thresholdPercent REAL NOT NULL,
+    enabled INTEGER NOT NULL,
+    lastRate REAL,
+    lastNotifiedAt INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+selectAlerts:
+SELECT * FROM RateAlert
+ORDER BY createdAt DESC;
+
+selectEnabledAlerts:
+SELECT * FROM RateAlert
+WHERE enabled = 1
+ORDER BY createdAt DESC;
+
+insertAlert:
+INSERT INTO RateAlert(base, quote, mode, intervalMinutes, thresholdPercent, enabled, lastRate, lastNotifiedAt, createdAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateAlertState:
+UPDATE RateAlert
+SET lastRate = ?, lastNotifiedAt = ?
+WHERE id = ?;
+
+updateAlertEnabled:
+UPDATE RateAlert
+SET enabled = ?
+WHERE id = ?;
+
+deleteAlert:
+DELETE FROM RateAlert
+WHERE id = ?;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

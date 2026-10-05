@@ -10,8 +10,11 @@ import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.HistoricalRate
 import dali.hamza.shared.domain.models.MyResponse
+import dali.hamza.shared.domain.models.RateAlert
+import dali.hamza.shared.domain.models.RateAlertMode
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
+import dali.hamza.shared.platform.currentEpochMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -223,6 +226,82 @@ class CurrencyRepositoryImpl(
     override suspend fun clearTransactions(): Unit = withContext(Dispatchers.Default) {
         database.transactionsQueries.deleteAllTransactions()
     }
+
+    // ---- rate alerts (local notifications) -----------------------------
+
+    override suspend fun getRateAlerts(): List<RateAlert> =
+        withContext(Dispatchers.Default) {
+            database.rateAlertsQueries.selectAlerts().executeAsList().map(::toRateAlert)
+        }
+
+    override suspend fun getEnabledRateAlerts(): List<RateAlert> =
+        withContext(Dispatchers.Default) {
+            database.rateAlertsQueries.selectEnabledAlerts().executeAsList().map(::toRateAlert)
+        }
+
+    override suspend fun addRateAlert(alert: RateAlert): Result<RateAlert> =
+        withContext(Dispatchers.Default) {
+            val existing = database.rateAlertsQueries.selectAlerts().executeAsList()
+            if (existing.any { it.base == alert.base && it.quote == alert.quote }) {
+                return@withContext Result.failure(IllegalStateException(RateAlert.DUPLICATE_MESSAGE))
+            }
+            val maxAlerts = RateAlert.maxAlertsForTier(sessionStorage.getDataTier())
+            if (existing.size >= maxAlerts) {
+                return@withContext Result.failure(IllegalStateException(RateAlert.LIMIT_MESSAGE))
+            }
+            val now = currentEpochMillis()
+            database.rateAlertsQueries.insertAlert(
+                base = alert.base,
+                quote = alert.quote,
+                mode = alert.mode.name,
+                intervalMinutes = alert.intervalMinutes,
+                thresholdPercent = alert.thresholdPercent,
+                enabled = 1L,
+                lastRate = null,
+                // seeded with the creation time so a periodic alert waits a
+                // full interval before its first notification
+                lastNotifiedAt = now,
+                createdAt = now,
+            )
+            val id = database.rateAlertsQueries.lastInsertRowId().executeAsOne()
+            Result.success(
+                alert.copy(id = id, enabled = true, lastNotifiedAt = now, createdAt = now)
+            )
+        }
+
+    override suspend fun removeRateAlert(id: Long): Unit = withContext(Dispatchers.Default) {
+        database.rateAlertsQueries.deleteAlert(id)
+    }
+
+    override suspend fun setRateAlertEnabled(id: Long, enabled: Boolean): Unit =
+        withContext(Dispatchers.Default) {
+            // boolean stored as 0/1 INTEGER (sqlite-3.25 dialect)
+            database.rateAlertsQueries.updateAlertEnabled(if (enabled) 1L else 0L, id)
+        }
+
+    override suspend fun updateRateAlertState(
+        id: Long,
+        lastRate: Double?,
+        lastNotifiedAt: Long,
+    ): Unit = withContext(Dispatchers.Default) {
+        database.rateAlertsQueries.updateAlertState(lastRate, lastNotifiedAt, id)
+    }
+
+    private fun toRateAlert(
+        row: dali.hamza.shared.database.RateAlert,
+    ): RateAlert = RateAlert(
+        id = row.id,
+        base = row.base,
+        quote = row.quote,
+        mode = runCatching { RateAlertMode.valueOf(row.mode) }
+            .getOrDefault(RateAlertMode.PERIODIC),
+        intervalMinutes = row.intervalMinutes,
+        thresholdPercent = row.thresholdPercent,
+        enabled = row.enabled != 0L,
+        lastRate = row.lastRate,
+        lastNotifiedAt = row.lastNotifiedAt,
+        createdAt = row.createdAt,
+    )
 
     companion object {
         /**

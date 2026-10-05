@@ -1,0 +1,13 @@
+-- v2 → v3: add the RateAlert table (local rate notifications).
+CREATE TABLE IF NOT EXISTS RateAlert (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    base TEXT NOT NULL,
+    quote TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    intervalMinutes INTEGER NOT NULL,
+    thresholdPercent REAL NOT NULL,
+    enabled INTEGER NOT NULL,
+    lastRate REAL,
+    lastNotifiedAt INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL
+);

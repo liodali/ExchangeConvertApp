@@ -4,6 +4,7 @@ import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.HistoricalRate
 import dali.hamza.shared.domain.models.MyResponse
+import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +82,47 @@ private class FakeRepository : IRepository {
 
     override suspend fun clearTransactions() {
         recorded.clear()
+    }
+
+    // ---- rate alerts (local notifications) -----------------------------
+
+    val rateAlerts = mutableListOf<RateAlert>()
+    private var nextAlertId = 1L
+
+    override suspend fun getRateAlerts(): List<RateAlert> = rateAlerts.toList()
+
+    override suspend fun getEnabledRateAlerts(): List<RateAlert> =
+        rateAlerts.filter { it.enabled }
+
+    override suspend fun addRateAlert(alert: RateAlert): Result<RateAlert> {
+        if (rateAlerts.any { it.base == alert.base && it.quote == alert.quote }) {
+            return Result.failure(IllegalStateException(RateAlert.DUPLICATE_MESSAGE))
+        }
+        if (rateAlerts.size >= RateAlert.maxAlertsForTier(dali.hamza.shared.domain.models.DataTier.GUEST)) {
+            return Result.failure(IllegalStateException(RateAlert.LIMIT_MESSAGE))
+        }
+        val stored = alert.copy(id = nextAlertId++)
+        rateAlerts += stored
+        return Result.success(stored)
+    }
+
+    override suspend fun removeRateAlert(id: Long) {
+        rateAlerts.removeAll { it.id == id }
+    }
+
+    override suspend fun setRateAlertEnabled(id: Long, enabled: Boolean) {
+        val index = rateAlerts.indexOfFirst { it.id == id }
+        if (index >= 0) rateAlerts[index] = rateAlerts[index].copy(enabled = enabled)
+    }
+
+    override suspend fun updateRateAlertState(id: Long, lastRate: Double?, lastNotifiedAt: Long) {
+        val index = rateAlerts.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            rateAlerts[index] = rateAlerts[index].copy(
+                lastRate = lastRate,
+                lastNotifiedAt = lastNotifiedAt,
+            )
+        }
     }
 }
 
