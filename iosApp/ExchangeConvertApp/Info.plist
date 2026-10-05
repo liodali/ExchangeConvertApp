@@ -12,5 +12,11 @@
 	     this iOS terminates the app the first time Face ID is invoked. -->
 	<key>NSFaceIDUsageDescription</key>
 	<string>Unlock your ledger with Face ID.</string>
+	<!-- Rate alerts (local notifications): the background refresh task
+	     fetching fresh rates and posting local notifications. -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>dali.hamza.shared.ratealerts</string>
+	</array>
 </dict>
 </plist>
