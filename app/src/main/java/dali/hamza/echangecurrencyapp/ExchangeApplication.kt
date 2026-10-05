@@ -5,8 +5,15 @@ import dali.hamza.echangecurrencyapp.di.appModule
 import dali.hamza.shared.AndroidAppContext
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
+import dali.hamza.shared.domain.repository.IRepository
+import dali.hamza.shared.platform.RateAlertScheduler
 import io.sentry.android.core.SentryAndroid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.loadKoinModules
 
@@ -45,5 +52,15 @@ class ExchangeApplication : Application() {
         loadKoinModules(
             sharedModule(serverURL = BuildConfig.SERVER_HOST.ifBlank { DEFAULT_HOST })
         )
+
+        // Rate alerts: align the WorkManager job with the stored alert
+        // state (an immediate check runs when any alert is enabled).
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            runCatching {
+                val koin = GlobalContext.get()
+                val hasActiveAlerts = koin.get<IRepository>().getEnabledRateAlerts().isNotEmpty()
+                koin.get<RateAlertScheduler>().update(hasActiveAlerts)
+            }
+        }
     }
 }

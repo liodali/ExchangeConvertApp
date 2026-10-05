@@ -54,6 +54,22 @@ class MainActivity : FragmentActivity() {
         // re-check Play for updates (also re-nudges a finished download
         // after warm resume)
         if (::updateChecker.isInitialized) updateChecker.refresh()
+        // rate alerts: one throttled engine pass on foreground
+        dali.hamza.shared.platform.RateAlertsAndroid.checkOnForeground()
+    }
+
+    /**
+     * Forwards the Android 13+ notification permission result (requested
+     * from the shared Rate Alerts UI) back into the shared module.
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        dali.hamza.shared.platform.NotificationPermissionBridge
+            .handleResult(requestCode, grantResults)
     }
 
     /**
