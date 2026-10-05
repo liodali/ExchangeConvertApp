@@ -95,6 +95,54 @@ object LedgerStrings {
         const val DIALOG_SAVE = "Save"
     }
 
+    object RateAlerts {
+        const val TITLE = "Rate Alerts"
+        const val HEADER_NOTE =
+            "Local notifications, checked in the background — on a schedule or when a pair moves."
+        const val EMPTY_TITLE = "No alerts yet"
+        const val EMPTY_MESSAGE =
+            "Track a pair and get notified every hour, every 2 hours, or when it moves."
+        const val NEW_ALERT = "New Alert"
+        const val ADD = "Add alert"
+        const val CANCEL = "Cancel"
+        const val BASE_LABEL = "From"
+        const val QUOTE_LABEL = "To"
+        const val PICK_BASE_TITLE = "Choose base currency"
+        const val PICK_QUOTE_TITLE = "Choose quote currency"
+        const val MODE_SECTION = "Notify me"
+        const val MODE_HOURLY = "Hourly"
+        const val MODE_TWO_HOURS = "2 Hours"
+        const val MODE_ON_MOVE = "On move"
+        const val THRESHOLD_LABEL = "Move ≥ %"
+        const val THRESHOLD_HINT = "0.5"
+
+        fun usage(used: Int, max: Int) = "$used of $max alerts used"
+        const val FREE_PLAN_NOTE =
+            "Free plan tracks up to 2 pairs. Sovereign login will unlock more."
+
+        fun pairTitle(base: String, quote: String) = "$base → $quote"
+        fun modeLabel(intervalMinutes: Long) = "Every ${intervalMinutes / 60}h"
+        fun thresholdLabel(percent: Double) =
+            "±${dali.hamza.shared.data.alerts.formatPercent(percent)}%"
+        fun lastRateLabel(rate: Double) =
+            "Last rate ${dali.hamza.shared.data.alerts.formatRate(rate)}"
+
+        const val PERMISSION_BANNER =
+            "Notifications are off for this app — enable them to receive rate alerts."
+        const val PERMISSION_ACTION = "Enable"
+
+        const val AWAITING_CHECK = "Awaiting first background check"
+        fun notifiedAt(timestamp: Long) =
+            "Last notification ${dali.hamza.shared.common.DateUtils.formatDateTime(timestamp)}"
+
+        /** Shown inside the add dialog when the free-tier cap is reached. */
+        const val AT_CAP_NOTE = "Alert limit reached — remove one to add another."
+
+        /** Bell action on the Home market cards (content descriptions). */
+        fun addAlertFor(pair: String) = "Add rate alert for $pair"
+        fun alertActiveFor(pair: String) = "Rate alert active for $pair"
+    }
+
     /** One FAQ entry (question + answer). */
     data class FaqEntry(val question: String, val answer: String)
 

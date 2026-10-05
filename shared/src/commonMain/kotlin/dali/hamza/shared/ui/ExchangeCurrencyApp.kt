@@ -54,11 +54,13 @@ import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
 import dali.hamza.shared.ui.screens.FullConverterScreen
 import dali.hamza.shared.ui.screens.HistoryScreen
+import dali.hamza.shared.ui.screens.RateAlertsScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
 import dali.hamza.shared.ui.screens.OnboardingScreen
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
+import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.theme.ExchangeCurrencyAppTheme
 import dali.hamza.shared.ui.theme.LedgerAppearance
 import dali.hamza.shared.ui.theme.LedgerColorPalette
@@ -82,6 +84,7 @@ object Routes {
     const val ACCOUNT = "account"
     const val CONVERTER = "converter"
     const val FULL_CONVERTER = "full-converter"
+    const val RATE_ALERTS = "rate-alerts"
     const val FAQ = "faq"
     const val SUPPORT = "support"
     const val CONTACT = "contact"
@@ -223,6 +226,7 @@ fun ExchangeCurrencyApp(
                                 restoreState = true
                             }
                         },
+                        onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
                     )
                 }
                 composable(Routes.HISTORY) {
@@ -245,6 +249,7 @@ fun ExchangeCurrencyApp(
                         onThemeModeChanged = { themeMode = it },
                         onColorPaletteChanged = { colorPalette = it },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
+                        onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
                     )
                 }
                 composable(Routes.CONVERTER) {
@@ -261,6 +266,17 @@ fun ExchangeCurrencyApp(
                 composable(Routes.FULL_CONVERTER) {
                     FullConverterScreen(
                         viewModel = viewModel,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Routes.RATE_ALERTS) {
+                    RateAlertsScreen(
+                        viewModel = remember {
+                            KoinPlatform.getKoin()?.get<RateAlertsViewModel>()
+                                ?: error("initSharedKoin() must run before ExchangeCurrencyApp()")
+                        },
+                        currencies = sharedState.currencies,
+                        defaultBase = sharedState.fromCurrency?.name,
                         onBack = { navController.popBackStack() },
                     )
                 }

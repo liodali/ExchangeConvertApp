@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PhotoCamera
@@ -94,6 +95,7 @@ fun AccountScreen(
     onBaseCurrencyChanged: (String) -> Unit = {},
     onThemeModeChanged: (LedgerThemeMode) -> Unit = {},
     onColorPaletteChanged: (LedgerColorPalette) -> Unit = {},
+    onOpenRateAlerts: () -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
@@ -114,10 +116,12 @@ fun AccountScreen(
             title = "Sovereign Ledger",
             avatarInitials = viewModel.username,
             trailing = {
-                IconButton(onClick = onOpenSupport) {
+                // bell opens the local rate alerts (the support hub keeps
+                // its own card + CTA at the bottom of this screen)
+                IconButton(onClick = onOpenRateAlerts) {
                     Icon(
                         imageVector = Icons.Outlined.Notifications,
-                        contentDescription = null,
+                        contentDescription = LedgerStrings.RateAlerts.TITLE,
                         tint = LedgerColors.TextMuted,
                     )
                 }
@@ -436,6 +440,11 @@ fun AccountScreen(
                                 cornerRadius = 4.dp,
                             )
                         },
+                    )
+                    LedgerListRow(
+                        label = LedgerStrings.RateAlerts.TITLE,
+                        icon = Icons.Outlined.NotificationsActive,
+                        onClick = onOpenRateAlerts,
                     )
                     LedgerListRow(
                         label = LedgerStrings.Account.LANGUAGE,

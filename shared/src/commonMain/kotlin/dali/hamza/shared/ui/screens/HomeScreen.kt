@@ -30,6 +30,8 @@ import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.ArrowDropUp
 import androidx.compose.material.icons.outlined.CurrencyExchange
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.Icon
@@ -59,6 +61,7 @@ import dali.hamza.shared.common.DateUtils
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.Transaction
+import dali.hamza.shared.ui.components.AddRateAlertDialog
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.EmptyState
@@ -71,9 +74,12 @@ import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.viewmodel.PairCardData
+import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import org.koin.mp.KoinPlatform
 
 /**
  * Sovereign Market Dashboard (design frame `RbQhR`) — Home tab.
@@ -95,10 +101,19 @@ fun HomeScreen(
     onOpenConverter: () -> Unit,
     onOpenHistory: () -> Unit,
     marketPreferences: List<String> = emptyList(),
+    onOpenRateAlerts: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
     var pickerFor by remember { mutableStateOf<Boolean?>(null) } // true=from, false=to, null=hidden
+
+    // rate alerts: bell on the market cards — a tracked market becomes a
+    // local alert in one tap (add dialog pre-filled with the pair)
+    val rateAlertsViewModel = remember {
+        KoinPlatform.getKoin()?.get<RateAlertsViewModel>()
+            ?: error("initSharedKoin() must run before HomeScreen()")
+    }
+    var alertQuote by remember { mutableStateOf<String?>(null) }
 
     val topRates = state.rates.topPairs()
 
@@ -157,6 +172,9 @@ fun HomeScreen(
                     cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
                 },
                 base = state.fromCurrency?.name,
+                alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
+                onAddAlert = { alertQuote = it },
+                onOpenRateAlerts = onOpenRateAlerts,
             )
 
             Spacer(Modifier.height(32.dp))
@@ -202,6 +220,27 @@ fun HomeScreen(
             },
         )
     }
+
+    // market-card bell → add an alert for that pair
+    alertQuote?.let { quote ->
+        AddRateAlertDialog(
+            currencies = state.currencies,
+            initialBase = state.fromCurrency?.name,
+            initialQuote = quote,
+            atCap = rateAlertsViewModel.alerts.size >= rateAlertsViewModel.maxAlerts,
+            onDismiss = { alertQuote = null },
+            onConfirm = { base, quoteCurrency, mode, intervalMinutes, thresholdPercent ->
+                alertQuote = null
+                rateAlertsViewModel.addAlert(
+                    base,
+                    quoteCurrency,
+                    mode,
+                    intervalMinutes,
+                    thresholdPercent,
+                )
+            },
+        )
+    }
 }
 
 // ------------------------------------------------------ 1. market overview
@@ -213,7 +252,13 @@ private fun List<ExchangeRate>.topPairs(): List<ExchangeRate> =
     TOP_PAIRS.mapNotNull { symbol -> firstOrNull { it.name == symbol } }
 
 @Composable
-private fun MarketOverviewSection(pairCards: List<PairCardData>, base: String?) {
+private fun MarketOverviewSection(
+    pairCards: List<PairCardData>,
+    base: String?,
+    alertedQuotes: Set<String>,
+    onAddAlert: (String) -> Unit,
+    onOpenRateAlerts: () -> Unit,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),
@@ -240,7 +285,16 @@ private fun MarketOverviewSection(pairCards: List<PairCardData>, base: String?) 
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         pairCards.forEach { card ->
-            PairCard(card = card, base = base)
+            val hasAlert = card.quote in alertedQuotes
+            PairCard(
+                card = card,
+                base = base,
+                hasAlert = hasAlert,
+                onAlert = {
+                    // tracked market → manage it; untracked → offer to add
+                    if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
+                },
+            )
         }
     }
 }
@@ -248,10 +302,17 @@ private fun MarketOverviewSection(pairCards: List<PairCardData>, base: String?) 
 /**
  * Design "EUR/USD Card" (updated pen): full-width #2A2A2A card —
  * one-line pair title + full name, 7-day delta chip, 4-decimal rate
- * (Manrope 700/30) and the 64dp warm-white sparkline.
+ * (Manrope 700/30) and the 64dp warm-white sparkline. The trailing bell
+ * adds (or manages) the local rate alert for the pair.
  */
 @Composable
-private fun PairCard(card: PairCardData, base: String?) {
+private fun PairCard(
+    card: PairCardData,
+    base: String?,
+    hasAlert: Boolean,
+    onAlert: () -> Unit,
+) {
+    val pairTitle = base?.let { "${card.quote}/$it" } ?: card.quote
     BentoCard(
         fill = LedgerColors.Card,
         padding = PaddingValues(20.dp),
@@ -261,7 +322,7 @@ private fun PairCard(card: PairCardData, base: String?) {
                 Text(
                     // full pair title (design "EUR/USD Card"): quote against
                     // the session base, so the card answers "compared to what?"
-                    text = base?.let { "${card.quote}/$it" } ?: card.quote,
+                    text = pairTitle,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -277,6 +338,8 @@ private fun PairCard(card: PairCardData, base: String?) {
             card.deltaPercent?.let { delta ->
                 DeltaChip(percent = delta)
             }
+            Spacer(Modifier.width(12.dp))
+            AlertBell(pair = pairTitle, hasAlert = hasAlert, onAlert = onAlert)
         }
         Spacer(Modifier.height(16.dp))
         Text(
@@ -297,6 +360,43 @@ private fun PairCard(card: PairCardData, base: String?) {
                     .height(64.dp),
             )
         }
+    }
+}
+
+/**
+ * Market-card bell — muted/outline when the pair has no alert (tap: add),
+ * gold/active when one exists (tap: manage alerts).
+ */
+@Composable
+private fun AlertBell(
+    pair: String,
+    hasAlert: Boolean,
+    onAlert: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (hasAlert) LedgerColors.Gold.copy(alpha = 0.12f) else LedgerColors.NavyDeep
+            )
+            .clickable(onClick = onAlert),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = if (hasAlert) {
+                Icons.Outlined.NotificationsActive
+            } else {
+                Icons.Outlined.NotificationsNone
+            },
+            contentDescription = if (hasAlert) {
+                LedgerStrings.RateAlerts.alertActiveFor(pair)
+            } else {
+                LedgerStrings.RateAlerts.addAlertFor(pair)
+            },
+            tint = if (hasAlert) LedgerColors.Gold else LedgerColors.TextTertiary,
+            modifier = Modifier.size(18.dp),
+        )
     }
 }
 
