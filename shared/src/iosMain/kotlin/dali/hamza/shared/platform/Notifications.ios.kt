@@ -30,8 +30,11 @@ internal class LocalNotifierIos : LocalNotifier {
     }
 
     override fun areNotificationsEnabled(): Boolean {
+        // Until the async OS query lands, assume allowed: a wrong "off"
+        // banner is worse than a redundant check (posting without
+        // permission is a silent no-op, and the add flow still prompts).
         if (!statusKnown) refreshState()
-        return authorized
+        return !statusKnown || authorized
     }
 
     override fun requestPermission(onResult: (Boolean) -> Unit) {
