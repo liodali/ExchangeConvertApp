@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
@@ -54,6 +55,10 @@ enum class LedgerDestination(val label: String, val icon: ImageVector) {
 
 /** Capsule content height — sized to what an icon+label tab actually needs. */
 private val CapsuleHeight = 60.dp
+private val CapsuleRadius = CapsuleHeight / 2
+private val CapsuleInset = 5.dp
+private val IndicatorHeight = CapsuleHeight - CapsuleInset * 2
+private val IndicatorRadius = CapsuleRadius - CapsuleInset
 
 /** Gap between the capsule and the system gesture inset (it floats). */
 private val FloatGap = 10.dp
@@ -77,8 +82,8 @@ fun ledgerNavClearance(): Dp =
  *
  * - **iOS**: floating "liquid glass" capsule (Tier-1 emulation, iOS 26
  *   flavoured) — wraps its three tabs, floats 10dp above the home
- *   indicator; palette SurfaceBlur fill (the system-configured
- *   translucency), gloss wash, hairline edge; the selected tab sits in
+ *   indicator; opaque surface backing, gloss wash, hairline edge;
+ *   the selected tab sits in
  *   its own glass lens over a faint accent tint. Lives in an overlay Box
  *   in the app root so content slides beneath it.
  * - **Android**: the original design, unchanged — full-width 101dp bar,
@@ -93,23 +98,26 @@ fun LedgerBottomNav(
     modifier: Modifier = Modifier,
 ) {
     if (isIos()) {
-        val capsule = RoundedCornerShape(percent = 50)
+        val capsule = RoundedCornerShape(CapsuleRadius)
         Row(
             modifier = modifier
                 .navigationBarsPadding()
+                .padding(horizontal = 24.dp)
                 .padding(bottom = FloatGap)
+                .widthIn(max = 360.dp)
                 .height(CapsuleHeight)
                 .clip(capsule)
-                // the system-configured "liquid amount": the palette's
-                // SurfaceBlur token (alpha tuned per theme in Color.kt)
-                .background(LedgerColors.SurfaceBlur)
+                // Compose's translucent fill does not blur the scene behind
+                // it. Back the glass finish with a solid surface so scrolling
+                // amounts cannot show through the icons and labels.
+                .background(LedgerColors.SurfaceBlur.copy(alpha = 1f))
                 // gloss wash on top of the fill (palette gloss tokens)
                 .background(
                     Brush.verticalGradient(listOf(LedgerColors.GlossTop, LedgerColors.GlossBottom))
                 )
                 // edge hairline — specular white in dark, dark hairline in light
                 .border(1.dp, LedgerColors.GlassEdge, capsule)
-                .padding(horizontal = 10.dp),
+                .padding(CapsuleInset),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp),
         ) {
@@ -118,6 +126,7 @@ fun LedgerBottomNav(
                     destination = destination,
                     selected = currentDestination == destination,
                     onClick = { onSelectDestination(destination) },
+                    modifier = Modifier.height(IndicatorHeight),
                     glass = true,
                 )
             }
@@ -129,7 +138,7 @@ fun LedgerBottomNav(
                 // fill recipe: mostly the background surface, a neutral
                 // elevation step (Steel) for separation, and a whisper of
                 // the primary — visible without reading as "green"
-                .background(LedgerColors.SurfaceBlur)
+                .background(LedgerColors.SurfaceBlur.copy(alpha = 1f))
                 .background(LedgerColors.Steel.copy(alpha = 0.08f))
                 .background(LedgerColors.Green.copy(alpha = 0.03f))
                 .navigationBarsPadding(),
@@ -176,7 +185,9 @@ private fun LedgerNavItem(
     glass: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val pill = RoundedCornerShape(16.dp)
+    // Concentric curves: the indicator radius is the capsule radius minus
+    // its inset, and its height is fixed rather than derived from the label.
+    val pill = if (glass) RoundedCornerShape(IndicatorRadius) else RoundedCornerShape(16.dp)
     val contentColor by animateColorAsState(
         targetValue = if (selected) LedgerColors.Blue else LedgerColors.TextMuted,
         animationSpec = tween(200),
@@ -200,7 +211,7 @@ private fun LedgerNavItem(
                                     )
                                 )
                             )
-                            .border(1.dp, LedgerColors.GlassEdge, RoundedCornerShape(percent = 50))
+                            .border(1.dp, LedgerColors.GlassEdge, pill)
                     } else {
                         // classic raised pill (design `#201F1F`, radius 16)
                         Modifier.background(LedgerColors.SurfaceRaised)
@@ -219,7 +230,7 @@ private fun LedgerNavItem(
                 vertical = if (glass) 7.dp else 8.dp,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
     ) {
         Icon(
             imageVector = destination.icon,
