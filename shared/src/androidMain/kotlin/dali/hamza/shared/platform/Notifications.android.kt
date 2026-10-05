@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.FragmentActivity
 import dali.hamza.shared.AndroidAppContext
+import dali.hamza.shared.R
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -62,8 +63,9 @@ internal class LocalNotifierAndroid : LocalNotifier {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
-        val icon = context.applicationInfo.icon.takeIf { it != 0 }
-            ?: android.R.drawable.ic_dialog_info
+        // monochrome glyph — status-bar icons render alpha only, so the
+        // adaptive launcher icon would collapse into a white blob
+        val icon = R.drawable.ic_stat_rate_alert
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(icon)
