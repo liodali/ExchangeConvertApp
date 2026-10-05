@@ -8,9 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.RateAlertMode
@@ -39,13 +43,20 @@ private enum class AlertPreset(val label: String) {
 }
 
 /**
- * "New Rate Alert" dialog — shared by the Rate Alerts screen and the Home
+ * "New Rate Alert" form — shared by the Rate Alerts screen and the Home
  * market-overview cards (bell action on a tracked market).
+ *
+ * Hosted in a [ModalBottomSheet] (not a [androidx.compose.ui.window.Dialog]):
+ * the sheet is the app's established cross-platform modal — Compose
+ * Multiplatform's Dialog mislays its content on iOS (full-height window,
+ * scattered layout), while sheets render correctly on both platforms
+ * (see CurrencyPickerSheet).
  *
  * The pair is pre-filled from [initialBase]/[initialQuote] but stays
  * editable through the currency pickers; [atCap] disables creation when
  * the free-tier alert limit is reached.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRateAlertDialog(
     currencies: List<Currency>,
@@ -78,8 +89,14 @@ fun AddRateAlertDialog(
     val valid = !atCap && base != quote &&
         (preset != AlertPreset.ON_MOVE || (threshold != null && threshold > 0.0 && threshold <= 50.0))
 
-    Dialog(onDismissRequest = onDismiss) {
-        BentoCard(fill = LedgerColors.SurfaceElevated, modifier = modifier) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .navigationBarsPadding(),
+        ) {
             Text(
                 text = LedgerStrings.RateAlerts.NEW_ALERT,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -175,6 +192,7 @@ fun AddRateAlertDialog(
                     modifier = Modifier.weight(1f),
                 )
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 
