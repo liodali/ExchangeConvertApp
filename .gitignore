@@ -35,3 +35,4 @@ key.properties
 keystores/
 ui-design.pen
 __pycache__
+iosApp/build
