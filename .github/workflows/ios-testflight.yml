@@ -97,6 +97,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/asc" "$ARTIFACTS"
           KEY="$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
           printf '%s' "$ASC_PRIVATE_KEY_B64" | base64 -d > "$KEY"
+          chmod 600 "$KEY" # asc rejects .p8 files with loose permissions
           asc auth login --bypass-keychain --name ci \
             --key-id "$ASC_KEY_ID" \
             --issuer-id "$ASC_ISSUER_ID" \
