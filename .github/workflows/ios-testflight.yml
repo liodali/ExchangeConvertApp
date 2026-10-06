@@ -104,15 +104,18 @@ jobs:
           asc auth status --validate
 
       - name: Inject Secrets.swift (runtime API key)
-        if: ${{ secrets.IOS_SECRETS_SWIFT_B64 != '' }}
         env:
           IOS_SECRETS_SWIFT_B64: ${{ secrets.IOS_SECRETS_SWIFT_B64 }}
         run: |
+          # secrets context is not resolvable in step `if:` — gate here
+          if [ -z "$IOS_SECRETS_SWIFT_B64" ]; then
+            echo "IOS_SECRETS_SWIFT_B64 not set — the Xcode 'Prepare Secrets'"
+            echo "phase will copy the template; the build still succeeds."
+            exit 0
+          fi
           printf '%s' "$IOS_SECRETS_SWIFT_B64" | base64 -d \
             > iosApp/ExchangeConvertApp/Secrets.swift
           echo "Injected Secrets.swift from secret"
-        # When the secret is absent, the Xcode "Prepare Secrets" phase copies
-        # Secrets.swift.example automatically — the build still succeeds.
 
       - name: Resolve app id, version, and next build number
         id: ids
