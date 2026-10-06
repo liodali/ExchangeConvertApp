@@ -80,18 +80,15 @@ jobs:
           key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: konan-${{ runner.os }}-
 
-      # The compiled shared framework — Kotlin/Native tasks are not covered
-      # by Gradle's build cache, so without this every run recompiles the
-      # whole module (~15 min). Exact-key hits make the Gradle pre-action
-      # fully UP-TO-DATE; restore-keys give incremental compilation when
-      # sources change. Runner paths are stable, so incremental state is safe.
-      - name: Cache shared framework build
+      # Prebuilt shared framework (~90 MB, vs 2.5 GB for the whole build
+      # dir). Exact-key hits let the scheme pre-action skip Gradle entirely;
+      # deliberately NO restore-keys — a stale framework must never be used.
+      - name: Cache shared framework artifact
+        id: fwcache
         uses: actions/cache@v4
         with:
-          path: shared/build
-          key: kn-framework-${{ runner.os }}-${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
-          restore-keys: |
-            kn-framework-${{ runner.os }}-
+          path: shared/build/xcode-frameworks
+          key: fw-${{ runner.os }}-${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
 
       - name: Install asc CLI
         run: |
@@ -173,6 +170,9 @@ jobs:
         env:
           VERSION: ${{ steps.ids.outputs.version }}
           BUILD_NUMBER: ${{ steps.ids.outputs.build_number }}
+          # 'true' only on an exact framework-cache hit — the scheme
+          # pre-action then restores the framework and skips Gradle
+          ASC_FW_CACHE_HIT: ${{ steps.fwcache.outputs.cache-hit }}
         run: |
           KEY="$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
           asc xcode archive \
