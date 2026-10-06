@@ -53,6 +53,8 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
       TESTFLIGHT_GROUP: ${{ secrets.TESTFLIGHT_GROUP }}
+      # Team id for manual-signing export — not a secret (ships in every IPA).
+      TEAM_ID: JL33N2APJT
 
     steps:
       - name: Checkout
@@ -166,7 +168,47 @@ jobs:
           echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved: app=$APP_ID version=$VERSION build=$BUILD_NUMBER"
 
-      - name: Archive (Release · generic/iOS · automatic signing)
+      # -allowProvisioningUpdates requires an Apple ID account session on
+      # this Xcode ("No Accounts") — API keys alone don't cut it for profile
+      # creation. Provision explicitly instead: fetch (or create) the
+      # distribution cert + App Store profile, install the identity into a
+      # dedicated keychain and the profile where xcodebuild finds it.
+      - name: Provision signing (cert + profile)
+        run: |
+          set -euo pipefail
+          mkdir -p .asc/signing .asc/secrets .asc/keychains
+          umask 077
+          openssl rand -hex 16 > .asc/secrets/p12-password
+          openssl rand -hex 16 > .asc/secrets/keychain-password
+
+          asc signing fetch \
+            --bundle-id "$BUNDLE_ID" \
+            --profile-type IOS_APP_STORE \
+            --output .asc/signing \
+            --create-missing --create-missing-certificate \
+            --identity-password-file .asc/secrets/p12-password \
+            --force
+
+          P12=$(ls .asc/signing/*.p12 | head -n 1)
+          asc signing keychain install \
+            --identity "$P12" \
+            --identity-password-file .asc/secrets/p12-password \
+            --keychain .asc/keychains/ci.keychain-db \
+            --keychain-password-file .asc/secrets/keychain-password \
+            --add-to-search-list --confirm
+
+          PROFILE=$(ls .asc/signing/*.mobileprovision | head -n 1)
+          asc profiles local install --path "$PROFILE" --force
+
+          # UUID + Name feed the manual-signing build settings
+          security cms -D -i "$PROFILE" > /tmp/profile.plist
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /tmp/profile.plist)
+          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /tmp/profile.plist)
+          echo "PROFILE_UUID=$UUID"  >> "$GITHUB_ENV"
+          echo "PROFILE_NAME=$NAME"  >> "$GITHUB_ENV"
+          echo "identity: $(ls .asc/signing/*.p12), profile: $NAME ($UUID)"
+
+      - name: Archive (Release · generic/iOS · manual signing)
         env:
           VERSION: ${{ steps.ids.outputs.version }}
           BUILD_NUMBER: ${{ steps.ids.outputs.build_number }}
@@ -184,26 +226,23 @@ jobs:
             --output json \
             --xcodebuild-flag=-destination \
             --xcodebuild-flag=generic/platform=iOS \
-            --xcodebuild-flag=-allowProvisioningUpdates \
-            --xcodebuild-flag=-authenticationKeyPath="$KEY" \
-            --xcodebuild-flag=-authenticationKeyID="$ASC_KEY_ID" \
-            --xcodebuild-flag=-authenticationKeyIssuerID="$ASC_ISSUER_ID" \
+            --xcodebuild-flag=CODE_SIGN_STYLE=Manual \
+            --xcodebuild-flag=PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            --xcodebuild-flag=PROVISIONING_PROFILE="$PROFILE_UUID" \
+            --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
             --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
 
       - name: Export IPA (app-store-connect)
         run: |
-          KEY="$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
           asc xcode export \
             --archive-path "$ARTIFACTS/ExchangeConvertApp.xcarchive" \
             --ipa-path "$ARTIFACTS/ExchangeConvertApp.ipa" \
             --method app-store-connect \
+            --signing-style manual \
+            --team-id "$TEAM_ID" \
             --overwrite --timeout 15m \
-            --output json \
-            --xcodebuild-flag=-allowProvisioningUpdates \
-            --xcodebuild-flag=-authenticationKeyPath="$KEY" \
-            --xcodebuild-flag=-authenticationKeyID="$ASC_KEY_ID" \
-            --xcodebuild-flag=-authenticationKeyIssuerID="$ASC_ISSUER_ID"
+            --output json
 
       - name: Upload to App Store Connect / TestFlight
         if: ${{ inputs.skip_upload != true }}
