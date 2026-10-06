@@ -64,6 +64,7 @@ import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
+import dali.hamza.shared.ui.components.ReorderableColumn
 import dali.hamza.shared.ui.components.LedgerChip
 import dali.hamza.shared.ui.components.LedgerInfoField
 import dali.hamza.shared.ui.components.LedgerInput
@@ -280,16 +281,25 @@ fun AccountScreen(
                         value = baseCurrency ?: "—",
                         onClick = { pickingBase = true },
                     )
-                    // always three slots, even if storage was hand-edited short
-                    for (index in 0 until 3) {
-                        val code = viewModel.marketPreferences.getOrNull(index)
+                    // market slots — long-press drag to reorder (persisted;
+                    // mirrors the Home dashboard card drag)
+                    ReorderableColumn(
+                        items = viewModel.marketPreferences,
+                        key = { it },
+                        onMove = { from, to ->
+                            viewModel.moveMarketPreference(from, to)
+                            onMarketPreferencesChanged(viewModel.marketPreferences)
+                        },
+                        spacing = 16.dp,
+                    ) { code, _ ->
+                        val slot = viewModel.marketPreferences.indexOf(code)
                         val name = currencies
                             .firstOrNull { it.name == code }?.fullCountryName
                         LedgerListRow(
-                            label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1}" +
+                            label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
                                 (name?.let { " · $it" } ?: ""),
-                            value = code ?: "—",
-                            onClick = { marketSlot = index },
+                            value = code,
+                            onClick = { marketSlot = slot },
                         )
                     }
                 }

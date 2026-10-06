@@ -75,6 +75,14 @@ class AccountViewModel(
         storage.setMarketPreferences(marketPreferences)
     }
 
+    /** Reorder the market preferences (long-press drag in Account/onboarding). */
+    fun moveMarketPreference(from: Int, to: Int) {
+        if (from == to || from !in marketPreferences.indices || to !in marketPreferences.indices) return
+        val next = marketPreferences.toMutableList().apply { add(to, removeAt(from)) }
+        marketPreferences = next
+        storage.setMarketPreferences(marketPreferences)
+    }
+
     fun updateThemeMode(mode: LedgerThemeMode) {
         themeMode = mode
         storage.setThemeMode(mode.stored)

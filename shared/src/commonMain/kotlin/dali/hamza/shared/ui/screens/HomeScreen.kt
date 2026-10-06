@@ -283,6 +283,8 @@ private fun MarketOverviewSection(
         return
     }
 
+    // long-press drag reordering lives in Onboarding + Account → Market
+    // Preferences (same persisted order); Home cards just render it
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         pairCards.forEach { card ->
             val hasAlert = card.quote in alertedQuotes

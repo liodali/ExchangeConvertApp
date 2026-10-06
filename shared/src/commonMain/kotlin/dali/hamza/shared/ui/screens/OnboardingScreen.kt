@@ -1,5 +1,6 @@
 package dali.hamza.shared.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,7 @@ import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerLogoMark
+import dali.hamza.shared.ui.components.ReorderableColumn
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
 
@@ -61,6 +63,7 @@ fun OnboardingScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(LedgerColors.Canvas)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
     ) {
@@ -129,14 +132,23 @@ fun OnboardingScreen(
                 color = LedgerColors.TextSecondary,
             )
             Spacer(Modifier.height(16.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                selections.forEachIndexed { index, code ->
-                    LedgerListRow(
-                        label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1} · ${nameFor(code)}",
-                        value = code,
-                        onClick = { marketSlot = index },
-                    )
-                }
+            // long-press drag to reorder the slots — the "Market 01/02/03"
+            // labels renumber live, and the order carries into the
+            // dashboard and Account after Continue
+            ReorderableColumn(
+                items = selections,
+                key = { it },
+                onMove = { from, to ->
+                    selections.add(to, selections.removeAt(from))
+                },
+                spacing = 16.dp,
+            ) { code, _ ->
+                val index = selections.indexOf(code)
+                LedgerListRow(
+                    label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1} · ${nameFor(code)}",
+                    value = code,
+                    onClick = { marketSlot = index },
+                )
             }
         }
 
