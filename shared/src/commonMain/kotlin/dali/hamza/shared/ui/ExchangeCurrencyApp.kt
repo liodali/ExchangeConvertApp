@@ -165,13 +165,21 @@ fun ExchangeCurrencyApp(
         var onboarded by remember { mutableStateOf(marketPreferences.isNotEmpty()) }
         val sharedState by viewModel.state.collectAsState()
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        // Canvas for BOTH branches: the onboarding branch has no app
+        // container (Scaffold/Box below), so without this the raw light
+        // window background bleeds through behind onboarding.
+        Box(modifier = Modifier.fillMaxSize().background(LedgerColors.Canvas)) {
         if (!onboarded) {
             OnboardingScreen(
                 currencies = sharedState.currencies,
                 base = sharedState.fromCurrency?.name,
                 onDone = { baseCode, codes ->
-                    sessionStore?.setMarketPreferences(codes)
+                    // Persist AND refresh the AccountViewModel snapshot: it is
+                    // created at first composition — before onboarding runs —
+                    // so its cached marketPreferences would otherwise stay
+                    // empty, and Account would show (and rebuild from) the
+                    // stale list instead of this selection.
+                    accountViewModel.replaceMarketPreferences(codes)
                     marketPreferences = codes
                     // apply the chosen base: persists it and refetches all
                     // rates quoted against the new base
@@ -184,6 +192,10 @@ fun ExchangeCurrencyApp(
                 },
                 modifier = Modifier
                     .fillMaxSize()
+                    // the theme canvas is painted by the app container, which
+                    // is NOT composed while onboarding shows — without this
+                    // the raw (light) window background bleeds through
+                    .background(LedgerColors.Canvas)
                     .blur(if (locked) 20.dp else 0.dp),
             )
         } else {
