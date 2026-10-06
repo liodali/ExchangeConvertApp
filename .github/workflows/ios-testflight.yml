@@ -171,45 +171,59 @@ jobs:
           echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved: app=$APP_ID version=$VERSION build=$BUILD_NUMBER"
 
+      # Distribution identity persists across runs — fetch creates a cert
+      # only once; the private key must survive or every run mints a new
+      # cert and Apple allows only two.
+      - name: Cache distribution identity
+        uses: actions/cache@v4
+        with:
+          path: .asc/signing
+          key: dist-identity-v1
+
       # -allowProvisioningUpdates requires an Apple ID account session on
-      # this Xcode ("No Accounts") — API keys alone don't cut it for profile
-      # creation. Provision explicitly instead: fetch (or create) the
-      # distribution cert + App Store profile, install the identity into a
-      # dedicated keychain and the profile where xcodebuild finds it.
+      # this Xcode ("No Accounts") — API keys alone don't cut it. Provision
+      # explicitly: fetch (or create) cert + profile, import the identity
+      # into a dedicated keychain, stage the profile for xcodebuild.
       - name: Provision signing (cert + profile)
         run: |
           set -euo pipefail
-          mkdir -p .asc/signing .asc/secrets .asc/keychains
-          umask 077
-          openssl rand -hex 16 > .asc/secrets/p12-password
-          openssl rand -hex 16 > .asc/secrets/keychain-password
-
+          mkdir -p .asc/signing
           asc signing fetch \
             --bundle-id "$BUNDLE_ID" \
             --profile-type IOS_APP_STORE \
             --output .asc/signing \
             --create-missing --create-missing-certificate \
-            --identity-password-file .asc/secrets/p12-password \
             --force
-
-          P12=$(ls .asc/signing/*.p12 | head -n 1)
-          asc signing keychain install \
-            --identity "$P12" \
-            --identity-password-file .asc/secrets/p12-password \
-            --keychain .asc/keychains/ci.keychain-db \
-            --keychain-password-file .asc/secrets/keychain-password \
-            --add-to-search-list --confirm
-
+          CER=$(ls .asc/signing/*.cer | head -n 1)
+          KEY=.asc/signing/distribution.key
           PROFILE=$(ls .asc/signing/*.mobileprovision | head -n 1)
-          asc profiles local install --path "$PROFILE" --force
 
-          # UUID + Name feed the manual-signing build settings
+          # Rebuild the p12 with the SYSTEM LibreSSL: asc's p12 (and any
+          # OpenSSL 3.x one) uses AES-256/SHA-256 PKCS12 that macOS
+          # `security import` rejects with -25264. LibreSSL emits the
+          # legacy encoding Apple's importer accepts.
+          P12_PASS=$(/usr/bin/openssl rand -hex 16)
+          KC_PASS=$(/usr/bin/openssl rand -hex 16)
+          KC="$RUNNER_TEMP/ci.keychain-db"
+          /usr/bin/openssl pkcs12 -export \
+            -in "$CER" -inkey "$KEY" \
+            -out "$RUNNER_TEMP/ci.p12" -passout "pass:$P12_PASS" \
+            -name "CI Apple Distribution"
+          security create-keychain -p "$KC_PASS" "$KC"
+          security unlock-keychain -p "$KC_PASS" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr '\n' ' ')
+          security import "$RUNNER_TEMP/ci.p12" -P "$P12_PASS" -k "$KC" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PASS" "$KC" >/dev/null 2>&1
+          rm -f "$RUNNER_TEMP/ci.p12"
+
+          asc profiles local install --path "$PROFILE" --force
           security cms -D -i "$PROFILE" > /tmp/profile.plist
           UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /tmp/profile.plist)
           NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /tmp/profile.plist)
-          echo "PROFILE_UUID=$UUID"  >> "$GITHUB_ENV"
-          echo "PROFILE_NAME=$NAME"  >> "$GITHUB_ENV"
-          echo "identity: $(ls .asc/signing/*.p12), profile: $NAME ($UUID)"
+          echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
+          echo "PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
+          security find-identity -p codesigning "$KC"
 
       - name: Archive (Release · generic/iOS · manual signing)
         env:
