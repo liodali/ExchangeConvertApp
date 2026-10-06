@@ -162,7 +162,7 @@ jobs:
           # --- next build number for this version -------------------------
           BUILD_NUMBER=$(asc builds next-build-number \
             --app "$APP_ID" --version "$VERSION" --platform IOS \
-            --initial-build-number 1 --output json \
+            --initial-build-number 50 --output json \
             | python3 -c 'import json,sys; print(json.load(sys.stdin)["nextBuildNumber"])')
           [ -n "$BUILD_NUMBER" ] || { echo "::error::Could not resolve the next build number"; exit 1; }
 
@@ -195,6 +195,18 @@ jobs:
           printf '%s' "$(/usr/bin/openssl rand -hex 16)" > "$P12_PW_FILE"
           chmod 600 "$P12_PW_FILE"
           fetch_signing() {
+            # Keep only the irreplaceable private key; wipe the regenerable
+            # outputs. Profile filenames are date-based, so same-day retries
+            # (including the recovery refetch below) collide otherwise.
+            mkdir -p .asc/signing
+            if [ -f .asc/signing/distribution.key ]; then
+              cp .asc/signing/distribution.key "$RUNNER_TEMP/distribution.key.preserved"
+            fi
+            rm -rf .asc/signing
+            mkdir -p .asc/signing
+            if [ -f "$RUNNER_TEMP/distribution.key.preserved" ]; then
+              cp "$RUNNER_TEMP/distribution.key.preserved" .asc/signing/distribution.key
+            fi
             asc signing fetch \
               --bundle-id "$BUNDLE_ID" \
               --profile-type IOS_APP_STORE \
@@ -203,20 +215,6 @@ jobs:
               --identity-password-file "$P12_PW_FILE" \
               --force
           }
-
-          # The identity cache restores yesterday's files; the profile name
-          # is date-based, so a same-day rerun collides ("file already
-          # exists" — --force does not cover it). Keep the irreplaceable
-          # private key, wipe the regenerable rest.
-          mkdir -p .asc/signing
-          if [ -f .asc/signing/distribution.key ]; then
-            cp .asc/signing/distribution.key "$RUNNER_TEMP/distribution.key.preserved"
-          fi
-          rm -rf .asc/signing
-          mkdir -p .asc/signing
-          if [ -f "$RUNNER_TEMP/distribution.key.preserved" ]; then
-            cp "$RUNNER_TEMP/distribution.key.preserved" .asc/signing/distribution.key
-          fi
 
           # Sweep this bundle's App Store profiles first: every failed run
           # left a date-named profile behind, and --create-missing refuses
