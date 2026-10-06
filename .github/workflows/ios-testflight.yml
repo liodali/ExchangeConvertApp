@@ -94,12 +94,15 @@ jobs:
 
       - name: Install asc CLI
         run: |
-          if ! brew install asc; then
-            echo "::warning::brew install failed — falling back to the install script"
-            curl -fsSL https://asccli.sh/install | bash
-            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-            export PATH="$HOME/.local/bin:$PATH"
+          # install script first: serves the latest release. Homebrew lags
+          # behind and older formula versions miss newer flags (e.g.
+          # signing fetch --create-missing-certificate).
+          if ! curl -fsSL https://asccli.sh/install | bash; then
+            echo "::warning::install script failed — falling back to brew"
+            HOMEBREW_NO_AUTO_UPDATE=1 brew install asc
           fi
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
           asc version
 
       - name: App Store Connect auth (API key, headless)
