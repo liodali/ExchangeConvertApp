@@ -178,7 +178,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .asc/signing
-          key: dist-identity-v1
+          key: dist-identity-v2
 
       # -allowProvisioningUpdates requires an Apple ID account session on
       # this Xcode ("No Accounts") — API keys alone don't cut it. Provision
@@ -194,13 +194,42 @@ jobs:
           P12_PW_FILE="$RUNNER_TEMP/asc-p12-password"
           printf '%s' "$(/usr/bin/openssl rand -hex 16)" > "$P12_PW_FILE"
           chmod 600 "$P12_PW_FILE"
-          asc signing fetch \
-            --bundle-id "$BUNDLE_ID" \
-            --profile-type IOS_APP_STORE \
-            --output .asc/signing \
-            --create-missing --create-missing-certificate \
-            --identity-password-file "$P12_PW_FILE" \
-            --force
+          fetch_signing() {
+            asc signing fetch \
+              --bundle-id "$BUNDLE_ID" \
+              --profile-type IOS_APP_STORE \
+              --output .asc/signing \
+              --create-missing --create-missing-certificate \
+              --identity-password-file "$P12_PW_FILE" \
+              --force
+          }
+          fetch_signing
+
+          # Self-heal: an earlier ephemeral runner may have created the
+          # distribution cert while its private key was lost. If the key is
+          # unusable and exactly ONE distribution cert exists, it is our
+          # orphan — revoke and mint a fresh key+cert pair (cached after).
+          KEY=.asc/signing/distribution.key
+          if ! /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1; then
+            echo "::warning::no usable distribution key — recovering"
+            CERT_IDS=$(asc certificates list --output json | python3 -c '
+              import json, sys
+              d = json.load(sys.stdin)
+              ids = [c["id"] for c in d.get("data") or []
+                     if "DISTRIBUTION" in (c.get("attributes") or {}).get("certificateType", "")]
+              print(" ".join(ids))')
+            set -- $CERT_IDS
+            if [ "$#" -eq 1 ]; then
+              echo "revoking orphaned distribution certificate $1 and recreating"
+              asc certificates revoke --id "$1" --confirm
+              fetch_signing
+            else
+              echo "::error::$# distribution certificates exist but no usable private key — revoke the unused one at https://developer.apple.com/account/resources/certificates/list"
+              exit 1
+            fi
+          fi
+          /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1 \
+            || { echo "::error::distribution key still unusable after recovery"; exit 1; }
           CER=$(ls .asc/signing/*.cer | head -n 1)
           KEY=.asc/signing/distribution.key
           PROFILE=$(ls .asc/signing/*.mobileprovision | head -n 1)
