@@ -203,6 +203,20 @@ jobs:
               --identity-password-file "$P12_PW_FILE" \
               --force
           }
+
+          # The identity cache restores yesterday's files; the profile name
+          # is date-based, so a same-day rerun collides ("file already
+          # exists" — --force does not cover it). Keep the irreplaceable
+          # private key, wipe the regenerable rest.
+          mkdir -p .asc/signing
+          if [ -f .asc/signing/distribution.key ]; then
+            cp .asc/signing/distribution.key "$RUNNER_TEMP/distribution.key.preserved"
+          fi
+          rm -rf .asc/signing
+          mkdir -p .asc/signing
+          if [ -f "$RUNNER_TEMP/distribution.key.preserved" ]; then
+            cp "$RUNNER_TEMP/distribution.key.preserved" .asc/signing/distribution.key
+          fi
           fetch_signing
 
           # Self-heal: an earlier ephemeral runner may have created the
