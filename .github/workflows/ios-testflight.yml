@@ -53,6 +53,8 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
       TESTFLIGHT_GROUP: ${{ secrets.TESTFLIGHT_GROUP }}
+      # Not a secret — the team id ships inside every signed IPA anyway.
+      TEAM_ID: JL33N2APJT
 
     steps:
       - name: Checkout
@@ -176,7 +178,8 @@ jobs:
             --xcodebuild-flag=-authenticationKeyID="$ASC_KEY_ID" \
             --xcodebuild-flag=-authenticationKeyIssuerID="$ASC_ISSUER_ID" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
-            --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+            --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            --xcodebuild-flag=DEVELOPMENT_TEAM="$TEAM_ID"
 
       - name: Export IPA (app-store-connect)
         run: |
