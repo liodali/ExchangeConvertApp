@@ -188,11 +188,18 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .asc/signing
+          # fetch always encrypts its .p12 output and requires a password
+          # file for it (we rebuild our own p12 below, but the flag is
+          # still mandatory). Newline-free + 0600 to satisfy its checks.
+          P12_PW_FILE="$RUNNER_TEMP/asc-p12-password"
+          printf '%s' "$(/usr/bin/openssl rand -hex 16)" > "$P12_PW_FILE"
+          chmod 600 "$P12_PW_FILE"
           asc signing fetch \
             --bundle-id "$BUNDLE_ID" \
             --profile-type IOS_APP_STORE \
             --output .asc/signing \
             --create-missing --create-missing-certificate \
+            --identity-password-file "$P12_PW_FILE" \
             --force
           CER=$(ls .asc/signing/*.cer | head -n 1)
           KEY=.asc/signing/distribution.key
