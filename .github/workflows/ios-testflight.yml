@@ -217,6 +217,25 @@ jobs:
           if [ -f "$RUNNER_TEMP/distribution.key.preserved" ]; then
             cp "$RUNNER_TEMP/distribution.key.preserved" .asc/signing/distribution.key
           fi
+
+          # Sweep this bundle's App Store profiles first: every failed run
+          # left a date-named profile behind, and --create-missing refuses
+          # to pick among duplicates. Profiles are regenerable — churn is fine.
+          CLEAN_IDS=$(asc profiles list --profile-type IOS_APP_STORE --paginate \
+            --include bundleId --output json 2>/dev/null | python3 -c '
+              import json, sys
+              d = json.load(sys.stdin)
+              bundle_map = {b["id"]: (b.get("attributes") or {}).get("identifier")
+                            for b in d.get("included") or []}
+              ids = [p["id"] for p in d.get("data") or []
+                     if bundle_map.get(((p.get("relationships") or {})
+                           .get("bundleId") or {}).get("data", {}).get("id")) == sys.argv[1]]
+              print(" ".join(ids))' "$BUNDLE_ID" || true)
+          for pid in $CLEAN_IDS; do
+            echo "deleting stale App Store profile $pid"
+            asc profiles delete --id "$pid" --confirm || true
+          done
+
           fetch_signing
 
           # Self-heal: an earlier ephemeral runner may have created the
