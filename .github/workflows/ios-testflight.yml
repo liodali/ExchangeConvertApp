@@ -114,6 +114,11 @@ jobs:
             asc version
             exit 0
           fi
+          # Self-hosted: reuse the machine's asc instead of reinstalling.
+          if command -v asc >/dev/null 2>&1; then
+            asc version
+            exit 0
+          fi
           # install script first: serves the latest release. Homebrew lags
           # behind and older formula versions miss newer flags (e.g.
           # signing fetch --create-missing-certificate).
@@ -134,7 +139,10 @@ jobs:
           KEY="$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8"
           printf '%s' "$ASC_PRIVATE_KEY_B64" | base64 -d > "$KEY"
           chmod 600 "$KEY" # asc rejects .p8 files with loose permissions
-          asc auth login --bypass-keychain --name ci \
+          # --local keeps credentials in the job workspace (.asc/config.json)
+          # instead of the user's global ~/.asc — the runner must not touch
+          # the host account's asc profiles.
+          asc auth login --bypass-keychain --local --name ci \
             --key-id "$ASC_KEY_ID" \
             --issuer-id "$ASC_ISSUER_ID" \
             --private-key "$KEY"
@@ -318,6 +326,7 @@ jobs:
             --scheme "$SCHEME" \
             --configuration "$CONFIGURATION" \
             --archive-path "$ARTIFACTS/ExchangeConvertApp.xcarchive" \
+            --derived-data-path "$RUNNER_TEMP/xcode-dd" \
             --overwrite \
             --output json \
             --xcodebuild-flag=-destination \

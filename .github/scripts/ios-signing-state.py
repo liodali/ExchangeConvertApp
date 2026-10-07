@@ -43,20 +43,22 @@ def install_profiles(root, profile):
     if not uuid or any(c not in '0123456789abcdefABCDEF-' for c in uuid):
         raise ValueError('Invalid provisioning profile UUID')
     home = Path.home()
-    destinations = [
-        home / 'Library/MobileDevice/Provisioning Profiles' / f'{uuid}.mobileprovision',
-        home / 'Library/Developer/Xcode/UserData/Provisioning Profiles' / f'{uuid}.mobileprovision',
-    ]
-    manifest = root / 'installed-profiles.json'
+    # ONLY the legacy directory: xcodebuild scans it, but the Xcode GUI
+    # ignores it (16+ reads UserData instead) — the runner stays invisible
+    # to the developer's own Xcode.
+    destination = home / 'Library/MobileDevice/Provisioning Profiles' / f'{uuid}.mobileprovision'
+    destination.parent.mkdir(parents=True, exist_ok=True)
     installed = []
-    for destination in destinations:
-        destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        # Same UUID = same profile; never overwrite, never fail.
+        print(f'::warning::Profile {uuid} already installed — leaving it untouched')
+    else:
         # Exclusive creation leaves any existing local profile untouched.
         with destination.open('xb') as target:
             installed.append({'path': str(destination), 'sha256': hashlib.sha256(content).hexdigest()})
-            manifest.write_text(json.dumps(installed))
             target.write(content)
-    print(f'Installed CI profile {uuid} in both Xcode profile directories')
+    (root / 'installed-profiles.json').write_text(json.dumps(installed))
+    print(f'Installed CI profile {uuid} in the legacy profiles directory')
 
 
 def cleanup(root):

@@ -25,7 +25,7 @@ class SigningStateTests(unittest.TestCase):
         (self.root/'profile.plist').write_bytes(plistlib.dumps(self.metadata))
         self.profile = self.root/'AppStore.mobileprovision'
         self.profile.write_bytes(b'CI profile content')
-        self.dirs = [self.home/'Library/MobileDevice/Provisioning Profiles', self.home/'Library/Developer/Xcode/UserData/Provisioning Profiles']
+        self.dirs = [self.home/'Library/MobileDevice/Provisioning Profiles']
 
     def test_only_ci_profiles_removed(self):
         for folder in self.dirs:
@@ -39,12 +39,13 @@ class SigningStateTests(unittest.TestCase):
         signing.cleanup(self.root)  # idempotent
 
     def test_existing_uuid_never_overwritten_or_deleted_on_partial_failure(self):
-        folder = self.dirs[1]; folder.mkdir(parents=True)
+        folder = self.dirs[0]; folder.mkdir(parents=True)
         existing = folder/f'{self.uuid}.mobileprovision'; existing.write_bytes(b'existing')
-        with self.assertRaises(FileExistsError): signing.install_profiles(self.root, self.profile)
+        # A pre-existing profile with the same UUID is the same profile:
+        # keep it untouched and carry on instead of failing the build.
+        signing.install_profiles(self.root, self.profile)
         signing.cleanup(self.root)
         self.assertEqual(existing.read_bytes(), b'existing')
-        self.assertFalse((self.dirs[0]/f'{self.uuid}.mobileprovision').exists())
 
     def test_modified_profile_is_preserved(self):
         signing.install_profiles(self.root, self.profile)
