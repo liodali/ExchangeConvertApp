@@ -125,15 +125,20 @@ jobs:
         env:
           IOS_SECRETS_SWIFT_B64: ${{ secrets.IOS_SECRETS_SWIFT_B64 }}
         run: |
-          # secrets context is not resolvable in step `if:` — gate here
-          if [ -z "$IOS_SECRETS_SWIFT_B64" ]; then
-            echo "IOS_SECRETS_SWIFT_B64 not set — the Xcode 'Prepare Secrets'"
-            echo "phase will copy the template; the build still succeeds."
-            exit 0
+          # Secrets.swift is a declared compile source but is NOT declared
+          # as an output of the "Prepare Secrets" phase — the build graph
+          # therefore requires it to exist BEFORE xcodebuild starts (it
+          # exists locally from earlier Xcode builds; on a fresh runner it
+          # must be created here).
+          if [ -n "$IOS_SECRETS_SWIFT_B64" ]; then
+            printf '%s' "$IOS_SECRETS_SWIFT_B64" | base64 -d \
+              > iosApp/ExchangeConvertApp/Secrets.swift
+            echo "Injected Secrets.swift from secret"
+          else
+            cp iosApp/ExchangeConvertApp/Secrets.swift.example \
+               iosApp/ExchangeConvertApp/Secrets.swift
+            echo "Copied Secrets.swift template (no secret set)"
           fi
-          printf '%s' "$IOS_SECRETS_SWIFT_B64" | base64 -d \
-            > iosApp/ExchangeConvertApp/Secrets.swift
-          echo "Injected Secrets.swift from secret"
 
       - name: Resolve app id, version, and next build number
         id: ids
