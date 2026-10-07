@@ -47,7 +47,9 @@ env:
 jobs:
   build-and-upload:
     name: Archive, export, upload
-    runs-on: macos-15
+    # macos-26 ships Xcode 26 (iOS 26 SDK) — Apple rejects uploads built
+    # with anything older (error 90725).
+    runs-on: macos-26
     timeout-minutes: 90
 
     env:
