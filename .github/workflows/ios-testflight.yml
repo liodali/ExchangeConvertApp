@@ -157,10 +157,22 @@ jobs:
           fi
           [ -n "$APP_ID" ] || { echo "::error::No App Store Connect app for $BUNDLE_ID — run ios_cicd/add-app.sh first, or set the ASC_APP_ID secret"; exit 1; }
 
-          # --- marketing version (input > tag > project) ------------------
-          VERSION="${{ inputs.version }}"
-          if [ -z "$VERSION" ] && [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
-            VERSION="${GITHUB_REF_NAME#ios-v}"
+          # --- version + build: ios-vX.Y.Z+BUILD tag > inputs > project ----
+          # Mirrors the Android app-v* scheme: same versionName/versionCode
+          # on both stores for one release. -dev tags strip the marker
+          # (CFBundleShortVersionString must stay numeric).
+          TAG="${GITHUB_REF_NAME#ios-v}"
+          VERSION=""
+          BUILD_NUMBER=""
+          if [[ "$TAG" != "$GITHUB_REF_NAME" && "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-dev)?\+[0-9]+$ ]]; then
+            VERSION="${TAG%+*}"
+            VERSION="${VERSION%-dev}"
+            BUILD_NUMBER="${TAG#*+}"
+          fi
+
+          # marketing version fallbacks: dispatch input > project
+          if [ -z "$VERSION" ]; then
+            VERSION="${{ inputs.version }}"
           fi
           if [ -z "$VERSION" ]; then
             VERSION=$(grep -m1 'MARKETING_VERSION' "$PROJECT/project.pbxproj" \
@@ -168,11 +180,13 @@ jobs:
           fi
           [ -n "$VERSION" ] || { echo "::error::Could not determine the version"; exit 1; }
 
-          # --- next build number for this version -------------------------
-          BUILD_NUMBER=$(asc builds next-build-number \
-            --app "$APP_ID" --version "$VERSION" --platform IOS \
-            --initial-build-number 50 --output json \
-            | python3 -c 'import json,sys; print(json.load(sys.stdin)["nextBuildNumber"])')
+          # build number: tag > next free ASC number
+          if [ -z "$BUILD_NUMBER" ]; then
+            BUILD_NUMBER=$(asc builds next-build-number \
+              --app "$APP_ID" --version "$VERSION" --platform IOS \
+              --initial-build-number 50 --output json \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin)["nextBuildNumber"])')
+          fi
           [ -n "$BUILD_NUMBER" ] || { echo "::error::Could not resolve the next build number"; exit 1; }
 
           echo "app_id=$APP_ID"        >> "$GITHUB_OUTPUT"
