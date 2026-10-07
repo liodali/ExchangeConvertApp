@@ -2,7 +2,7 @@ name: iOS → TestFlight (asc)
 
 # Builds the iOS app on a macOS runner with the asc CLI:
 #   Gradle (shared KMP framework, via the scheme pre-action)
-#   → xcodebuild archive (Release, automatic signing via ASC API key)
+#   → xcodebuild archive (Release, manual signing with a CI identity)
 #   → export IPA (app-store-connect)
 #   → upload to App Store Connect / TestFlight
 #
@@ -64,6 +64,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare isolated signing directory
+        run: |
+          set -euo pipefail
+          umask 077
+          SIGNING_DIR=$(mktemp -d "$RUNNER_TEMP/exchangeconvert-signing-XXXXXX")
+          echo "CI_SIGNING_DIR=$SIGNING_DIR" >> "$GITHUB_ENV"
+          echo "ASC_CONFIG_PATH=$SIGNING_DIR/asc-config.json" >> "$GITHUB_ENV"
+
       - name: Show toolchain
         run: |
           xcodebuild -version
@@ -86,15 +94,19 @@ jobs:
           key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: konan-${{ runner.os }}-
 
-      # Prebuilt shared framework (~90 MB, vs 2.5 GB for the whole build
-      # dir). Exact-key hits let the scheme pre-action skip Gradle entirely;
-      # deliberately NO restore-keys — a stale framework must never be used.
+      # Prebuilt shared framework + Compose resources (~91 MB, vs 2.5 GB for
+      # the whole build dir). Exact-key hits let the scheme pre-action skip
+      # Gradle entirely; deliberately NO restore-keys — a stale framework
+      # must never be used. v2: added the compose resource tree the fast
+      # path was missing (fonts — crashes at launch without them).
       - name: Cache shared framework artifact
         id: fwcache
         uses: actions/cache@v4
         with:
-          path: shared/build/xcode-frameworks
-          key: fw-${{ runner.os }}-${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: |
+            shared/build/xcode-frameworks
+            shared/build/generated/compose/resourceGenerator
+          key: fw2-${{ runner.os }}-${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
 
       - name: Install asc CLI
         run: |
@@ -113,8 +125,9 @@ jobs:
         env:
           ASC_PRIVATE_KEY_B64: ${{ secrets.ASC_PRIVATE_KEY_B64 }}
         run: |
-          mkdir -p "$RUNNER_TEMP/asc" "$ARTIFACTS"
-          KEY="$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
+          umask 077
+          mkdir -p "$CI_SIGNING_DIR/asc" "$ARTIFACTS"
+          KEY="$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8"
           printf '%s' "$ASC_PRIVATE_KEY_B64" | base64 -d > "$KEY"
           chmod 600 "$KEY" # asc rejects .p8 files with loose permissions
           asc auth login --bypass-keychain --name ci \
@@ -204,17 +217,16 @@ jobs:
           umask 077
           [ -n "$IOS_DISTRIBUTION_KEY_B64" ] && [ -n "$IOS_DISTRIBUTION_CERT_ID" ] \
             || { echo "::error::Set IOS_DISTRIBUTION_KEY_B64 and IOS_DISTRIBUTION_CERT_ID repository secrets"; exit 1; }
-          mkdir -p .asc/signing
-          KEY=.asc/signing/distribution.key
-          CER=.asc/signing/distribution.cer
+          KEY="$CI_SIGNING_DIR/distribution.key"
+          CER="$CI_SIGNING_DIR/distribution.cer"
           CERT_ID="$IOS_DISTRIBUTION_CERT_ID"
           printf '%s' "$IOS_DISTRIBUTION_KEY_B64" | base64 -d > "$KEY"
           /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1 \
             || { echo "::error::IOS_DISTRIBUTION_KEY_B64 must contain a base64-encoded, unencrypted PEM private key"; exit 1; }
-          printf '%s' "$CERT_ID" > .asc/signing/certificate-id
+          printf '%s' "$CERT_ID" > "$CI_SIGNING_DIR/certificate-id"
           echo "Using distribution certificate $CERT_ID"
-          asc certificates view --id "$CERT_ID" --output json > "$RUNNER_TEMP/certificate.json"
-          python3 - "$RUNNER_TEMP/certificate.json" "$CER" <<'PYTHON'
+          asc certificates view --id "$CERT_ID" --output json > "$CI_SIGNING_DIR/certificate.json"
+          python3 - "$CI_SIGNING_DIR/certificate.json" "$CER" <<'PYTHON'
           import base64, datetime, json, pathlib, sys
           attrs = json.load(open(sys.argv[1]))["data"]["attributes"]
           if attrs.get("certificateType") not in ("DISTRIBUTION", "IOS_DISTRIBUTION"):
@@ -224,8 +236,8 @@ jobs:
               raise SystemExit("Distribution certificate has expired; replace the signing secrets")
           pathlib.Path(sys.argv[2]).write_bytes(base64.b64decode(attrs["certificateContent"], validate=True))
           PYTHON
-          /usr/bin/openssl x509 -inform DER -in "$CER" -out "$RUNNER_TEMP/cert.pem"
-          CER="$RUNNER_TEMP/cert.pem"
+          /usr/bin/openssl x509 -inform DER -in "$CER" -out "$CI_SIGNING_DIR/cert.pem"
+          CER="$CI_SIGNING_DIR/cert.pem"
           CERT_PUBLIC_KEY=$(/usr/bin/openssl x509 -in "$CER" -pubkey -noout)
           KEY_PUBLIC_KEY=$(/usr/bin/openssl pkey -in "$KEY" -pubout)
           [ "$CERT_PUBLIC_KEY" = "$KEY_PUBLIC_KEY" ] \
@@ -234,32 +246,21 @@ jobs:
       - name: Create provisioning profile and install signing identity
         run: |
           set -euo pipefail
-          KEY=.asc/signing/distribution.key
-          CER="$RUNNER_TEMP/cert.pem"
-          CERT_ID=$(cat .asc/signing/certificate-id)
-          PROFILE=.asc/signing/AppStore.mobileprovision
+          KEY="$CI_SIGNING_DIR/distribution.key"
+          CER="$CI_SIGNING_DIR/cert.pem"
+          CERT_ID=$(cat "$CI_SIGNING_DIR/certificate-id")
+          PROFILE="$CI_SIGNING_DIR/AppStore.mobileprovision"
 
           BUNDLE_RESOURCE_ID=$(asc bundle-ids list --identifier "$BUNDLE_ID" --paginate --output json \
             | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert len(d)==1, "Expected one bundle ID"; print(d[0]["id"])')
 
-          # Remove this bundle's old App Store profiles before creating one
-          # tied to the exact certificate whose private key we hold.
-          CLEAN_IDS=$(asc profiles list --profile-type IOS_APP_STORE --paginate \
-            --include bundleId --output json | python3 -c '
-              import json, sys
-              d = json.load(sys.stdin)
-              ids = [p["id"] for p in d.get("data") or []
-                     if ((p.get("relationships") or {}).get("bundleId") or {}).get("data", {}).get("id") == sys.argv[1]]
-              print(" ".join(ids))' "$BUNDLE_RESOURCE_ID")
-          for pid in $CLEAN_IDS; do
-            echo "deleting stale App Store profile $pid"
-            asc profiles delete --id "$pid" --confirm
-          done
+          # Create a profile owned by this run. Never delete other profiles
+          # for the bundle, including profiles used by local Xcode builds.
           asc profiles create --name "ExchangeConvertApp-CI-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --profile-type IOS_APP_STORE --bundle "$BUNDLE_RESOURCE_ID" \
-            --certificate "$CERT_ID" --output json > "$RUNNER_TEMP/created-profile.json"
+            --certificate "$CERT_ID" --output json > "$CI_SIGNING_DIR/created-profile.json"
           PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
-            "$RUNNER_TEMP/created-profile.json")
+            "$CI_SIGNING_DIR/created-profile.json")
           rm -f "$PROFILE"
           asc profiles download --id "$PROFILE_ID" --output "$PROFILE"
 
@@ -269,28 +270,23 @@ jobs:
           # legacy encoding Apple's importer accepts.
           P12_PASS=$(/usr/bin/openssl rand -hex 16)
           KC_PASS=$(/usr/bin/openssl rand -hex 16)
-          KC="$RUNNER_TEMP/ci.keychain-db"
+          KC="$CI_SIGNING_DIR/ci.keychain-db"
           /usr/bin/openssl pkcs12 -export \
             -in "$CER" -inkey "$KEY" \
-            -out "$RUNNER_TEMP/ci.p12" -passout "pass:$P12_PASS" \
+            -out "$CI_SIGNING_DIR/ci.p12" -passout "pass:$P12_PASS" \
             -name "CI Apple Distribution"
           security create-keychain -p "$KC_PASS" "$KC"
           security unlock-keychain -p "$KC_PASS" "$KC"
           security set-keychain-settings -lut 21600 "$KC"
-          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr '\n' ' ')
-          security import "$RUNNER_TEMP/ci.p12" -P "$P12_PASS" -k "$KC" -T /usr/bin/codesign
+          python3 .github/scripts/ios-signing-state.py keychain-add
+          security import "$CI_SIGNING_DIR/ci.p12" -P "$P12_PASS" -k "$KC" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PASS" "$KC" >/dev/null 2>&1
-          rm -f "$RUNNER_TEMP/ci.p12"
+          rm -f "$CI_SIGNING_DIR/ci.p12"
 
-          asc profiles local install --path "$PROFILE" --force
-          # asc picks the Xcode-16 GUI location; headless xcodebuild scans
-          # the legacy directory — install to both so the build always
-          # finds it.
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
-          security cms -D -i "$PROFILE" > /tmp/profile.plist
-          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /tmp/profile.plist)
-          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /tmp/profile.plist)
+          security cms -D -i "$PROFILE" > "$CI_SIGNING_DIR/profile.plist"
+          python3 .github/scripts/ios-signing-state.py profiles-install "$PROFILE"
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$CI_SIGNING_DIR/profile.plist")
+          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$CI_SIGNING_DIR/profile.plist")
           echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
           security find-identity -p codesigning "$KC"
@@ -304,7 +300,7 @@ jobs:
           # pre-action then restores the framework and skips Gradle
           ASC_FW_CACHE_HIT: ${{ steps.fwcache.outputs.cache-hit }}
         run: |
-          KEY="$RUNNER_TEMP/asc/AuthKey_${ASC_KEY_ID}.p8"
+          KEY="$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8"
           asc xcode archive \
             --project "$PROJECT" \
             --scheme "$SCHEME" \
@@ -319,6 +315,23 @@ jobs:
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
             --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+
+      # The cache fast path restores the framework but NOT the Compose
+      # resources (the Gradle embed task normally copies them into the .app).
+      # Without them the theme's fonts throw MissingResourceException at
+      # launch. Stage them into the archived app; export re-signs after.
+      - name: Stage Compose resources into archive
+        run: |
+          APP_IN_ARCHIVE="$ARTIFACTS/ExchangeConvertApp.xcarchive/Products/Applications/ExchangeConvertApp.app"
+          if [ -d "$APP_IN_ARCHIVE/compose-resources" ]; then
+            echo "compose-resources already present (full Gradle build)"
+            exit 0
+          fi
+          RES=$(ls -d shared/build/generated/compose/resourceGenerator/assembledResources/iosArm64*/composeResources 2>/dev/null | head -n 1)
+          [ -n "$RES" ] || { echo "::error::compose resources missing — the app would crash at launch without fonts"; exit 1; }
+          mkdir -p "$APP_IN_ARCHIVE/compose-resources"
+          cp -R "$RES" "$APP_IN_ARCHIVE/compose-resources/"
+          echo "staged $(basename "$(dirname "$RES")") compose resources into the archive app"
 
       - name: Export IPA (app-store-connect)
         run: |
@@ -358,6 +371,26 @@ jobs:
             .asc/artifacts/ExchangeConvertApp.ipa
             .asc/artifacts/ExchangeConvertApp.xcarchive/dSYMs
           if-no-files-found: error
+
+      - name: Clean up CI signing resources
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -n "${CI_SIGNING_DIR:-}" ] && [ -d "$CI_SIGNING_DIR" ] || exit 0
+          # Delete only the remote profile whose creation receipt this run owns.
+          if [ -s "$CI_SIGNING_DIR/created-profile.json" ]; then
+            if PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
+              "$CI_SIGNING_DIR/created-profile.json"); then
+              asc profiles delete --id "$PROFILE_ID" --confirm \
+                || echo "::warning::Could not delete CI profile $PROFILE_ID; local cleanup will continue"
+            else
+              echo "::warning::Invalid CI profile receipt; local cleanup will continue"
+            fi
+          fi
+          rm -f "$CI_SIGNING_DIR/distribution.key" "$CI_SIGNING_DIR/ci.p12" \
+            "$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8" "$CI_SIGNING_DIR/asc-config.json"
+          python3 .github/scripts/ios-signing-state.py cleanup
+          rm -rf "$CI_SIGNING_DIR"
 
       - name: Summary
         if: always()
