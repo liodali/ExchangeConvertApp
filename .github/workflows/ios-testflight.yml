@@ -265,6 +265,13 @@ jobs:
           KEY=.asc/signing/distribution.key
           PROFILE=$(ls .asc/signing/*.mobileprovision | head -n 1)
 
+          # ASC serves DER certificates; the PKCS12 export below expects
+          # PEM ("unable to load certificates"). Normalize when needed.
+          if ! /usr/bin/openssl x509 -in "$CER" -noout >/dev/null 2>&1; then
+            /usr/bin/openssl x509 -inform DER -in "$CER" -out "$RUNNER_TEMP/cert.pem"
+            CER="$RUNNER_TEMP/cert.pem"
+          fi
+
           # Rebuild the p12 with the SYSTEM LibreSSL: asc's p12 (and any
           # OpenSSL 3.x one) uses AES-256/SHA-256 PKCS12 that macOS
           # `security import` rejects with -25264. LibreSSL emits the
