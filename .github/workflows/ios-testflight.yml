@@ -10,6 +10,8 @@ name: iOS → TestFlight (asc)
 #   ASC_KEY_ID           App Store Connect API key id (e.g. PGFU8P8424)
 #   ASC_ISSUER_ID        Issuer id (e.g. 5616a31a-2b14-4332-be86-eedd145346f8)
 #   ASC_PRIVATE_KEY_B64  base64 of the AuthKey_<KEY_ID>.p8 file
+#   IOS_DISTRIBUTION_KEY_B64  base64 of the distribution private key (PEM)
+#   IOS_DISTRIBUTION_CERT_ID  ASC certificate id created from that key’s CSR
 # Optional:
 #   ASC_APP_ID           App id (auto-resolved from the bundle id when empty)
 #   TESTFLIGHT_GROUP     Beta group name — set to also distribute to testers
@@ -32,7 +34,7 @@ on:
     tags: ["ios-v*"]
 
 concurrency:
-  group: ios-testflight-${{ github.ref }}
+  group: ios-testflight-signing
   cancel-in-progress: false
 
 env:
@@ -171,106 +173,74 @@ jobs:
           echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
           echo "Resolved: app=$APP_ID version=$VERSION build=$BUILD_NUMBER"
 
-      # Distribution identity persists across runs — fetch creates a cert
-      # only once; the private key must survive or every run mints a new
-      # cert and Apple allows only two.
-      - name: Cache distribution identity
-        uses: actions/cache@v4
-        with:
-          path: .asc/signing
-          key: dist-identity-v2
-
-      # -allowProvisioningUpdates requires an Apple ID account session on
-      # this Xcode ("No Accounts") — API keys alone don't cut it. Provision
-      # explicitly: fetch (or create) cert + profile, import the identity
-      # into a dedicated keychain, stage the profile for xcodebuild.
-      - name: Provision signing (cert + profile)
+      # Load the stable identity from secrets; asc manages its profile.
+      - name: Load distribution certificate and private key
+        env:
+          IOS_DISTRIBUTION_KEY_B64: ${{ secrets.IOS_DISTRIBUTION_KEY_B64 }}
+          IOS_DISTRIBUTION_CERT_ID: ${{ secrets.IOS_DISTRIBUTION_CERT_ID }}
         run: |
           set -euo pipefail
+          umask 077
+          [ -n "$IOS_DISTRIBUTION_KEY_B64" ] && [ -n "$IOS_DISTRIBUTION_CERT_ID" ] \
+            || { echo "::error::Set IOS_DISTRIBUTION_KEY_B64 and IOS_DISTRIBUTION_CERT_ID repository secrets"; exit 1; }
           mkdir -p .asc/signing
-          # fetch always encrypts its .p12 output and requires a password
-          # file for it (we rebuild our own p12 below, but the flag is
-          # still mandatory). Newline-free + 0600 to satisfy its checks.
-          P12_PW_FILE="$RUNNER_TEMP/asc-p12-password"
-          printf '%s' "$(/usr/bin/openssl rand -hex 16)" > "$P12_PW_FILE"
-          chmod 600 "$P12_PW_FILE"
-          fetch_signing() {
-            # Keep only the irreplaceable private key; wipe the regenerable
-            # outputs. Profile filenames are date-based, so same-day retries
-            # (including the recovery refetch below) collide otherwise.
-            mkdir -p .asc/signing
-            if [ -f .asc/signing/distribution.key ]; then
-              cp .asc/signing/distribution.key "$RUNNER_TEMP/distribution.key.preserved"
-            fi
-            rm -rf .asc/signing
-            mkdir -p .asc/signing
-            if [ -f "$RUNNER_TEMP/distribution.key.preserved" ]; then
-              cp "$RUNNER_TEMP/distribution.key.preserved" .asc/signing/distribution.key
-            fi
-            asc signing fetch \
-              --bundle-id "$BUNDLE_ID" \
-              --profile-type IOS_APP_STORE \
-              --output .asc/signing \
-              --create-missing --create-missing-certificate \
-              --identity-password-file "$P12_PW_FILE" \
-              --force
-          }
+          KEY=.asc/signing/distribution.key
+          CER=.asc/signing/distribution.cer
+          CERT_ID="$IOS_DISTRIBUTION_CERT_ID"
+          printf '%s' "$IOS_DISTRIBUTION_KEY_B64" | base64 -d > "$KEY"
+          /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1 \
+            || { echo "::error::IOS_DISTRIBUTION_KEY_B64 must contain a base64-encoded, unencrypted PEM private key"; exit 1; }
+          printf '%s' "$CERT_ID" > .asc/signing/certificate-id
+          echo "Using distribution certificate $CERT_ID"
+          asc certificates view --id "$CERT_ID" --output json > "$RUNNER_TEMP/certificate.json"
+          python3 - "$RUNNER_TEMP/certificate.json" "$CER" <<'PYTHON'
+          import base64, datetime, json, pathlib, sys
+          attrs = json.load(open(sys.argv[1]))["data"]["attributes"]
+          if attrs.get("certificateType") not in ("DISTRIBUTION", "IOS_DISTRIBUTION"):
+              raise SystemExit("Expected an Apple/iOS distribution certificate")
+          expiry = attrs.get("expirationDate")
+          if not expiry or datetime.datetime.fromisoformat(expiry.replace("Z", "+00:00")) <= datetime.datetime.now(datetime.timezone.utc):
+              raise SystemExit("Distribution certificate has expired; replace the signing secrets")
+          pathlib.Path(sys.argv[2]).write_bytes(base64.b64decode(attrs["certificateContent"], validate=True))
+          PYTHON
+          /usr/bin/openssl x509 -inform DER -in "$CER" -out "$RUNNER_TEMP/cert.pem"
+          CER="$RUNNER_TEMP/cert.pem"
+          CERT_PUBLIC_KEY=$(/usr/bin/openssl x509 -in "$CER" -pubkey -noout)
+          KEY_PUBLIC_KEY=$(/usr/bin/openssl pkey -in "$KEY" -pubout)
+          [ "$CERT_PUBLIC_KEY" = "$KEY_PUBLIC_KEY" ] \
+            || { echo "::error::Distribution certificate does not match the cached private key"; exit 1; }
 
-          # Sweep this bundle's App Store profiles first: every failed run
-          # left a date-named profile behind, and --create-missing refuses
-          # to pick among duplicates. Profiles are regenerable — churn is fine.
+      - name: Create provisioning profile and install signing identity
+        run: |
+          set -euo pipefail
+          KEY=.asc/signing/distribution.key
+          CER="$RUNNER_TEMP/cert.pem"
+          CERT_ID=$(cat .asc/signing/certificate-id)
+          PROFILE=.asc/signing/AppStore.mobileprovision
+
+          BUNDLE_RESOURCE_ID=$(asc bundle-ids list --identifier "$BUNDLE_ID" --paginate --output json \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert len(d)==1, "Expected one bundle ID"; print(d[0]["id"])')
+
+          # Remove this bundle's old App Store profiles before creating one
+          # tied to the exact certificate whose private key we hold.
           CLEAN_IDS=$(asc profiles list --profile-type IOS_APP_STORE --paginate \
-            --include bundleId --output json 2>/dev/null | python3 -c '
+            --include bundleId --output json | python3 -c '
               import json, sys
               d = json.load(sys.stdin)
-              bundle_map = {b["id"]: (b.get("attributes") or {}).get("identifier")
-                            for b in d.get("included") or []}
               ids = [p["id"] for p in d.get("data") or []
-                     if bundle_map.get(((p.get("relationships") or {})
-                           .get("bundleId") or {}).get("data", {}).get("id")) == sys.argv[1]]
-              print(" ".join(ids))' "$BUNDLE_ID" || true)
+                     if ((p.get("relationships") or {}).get("bundleId") or {}).get("data", {}).get("id") == sys.argv[1]]
+              print(" ".join(ids))' "$BUNDLE_RESOURCE_ID")
           for pid in $CLEAN_IDS; do
             echo "deleting stale App Store profile $pid"
-            asc profiles delete --id "$pid" --confirm || true
+            asc profiles delete --id "$pid" --confirm
           done
-
-          fetch_signing
-
-          # Self-heal: an earlier ephemeral runner may have created the
-          # distribution cert while its private key was lost. If the key is
-          # unusable and exactly ONE distribution cert exists, it is our
-          # orphan — revoke and mint a fresh key+cert pair (cached after).
-          KEY=.asc/signing/distribution.key
-          if ! /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1; then
-            echo "::warning::no usable distribution key — recovering"
-            CERT_IDS=$(asc certificates list --output json | python3 -c '
-              import json, sys
-              d = json.load(sys.stdin)
-              ids = [c["id"] for c in d.get("data") or []
-                     if "DISTRIBUTION" in (c.get("attributes") or {}).get("certificateType", "")]
-              print(" ".join(ids))')
-            set -- $CERT_IDS
-            if [ "$#" -eq 1 ]; then
-              echo "revoking orphaned distribution certificate $1 and recreating"
-              asc certificates revoke --id "$1" --confirm
-              fetch_signing
-            else
-              echo "::error::$# distribution certificates exist but no usable private key — revoke the unused one at https://developer.apple.com/account/resources/certificates/list"
-              exit 1
-            fi
-          fi
-          /usr/bin/openssl pkey -in "$KEY" -noout >/dev/null 2>&1 \
-            || { echo "::error::distribution key still unusable after recovery"; exit 1; }
-          CER=$(ls .asc/signing/*.cer | head -n 1)
-          KEY=.asc/signing/distribution.key
-          PROFILE=$(ls .asc/signing/*.mobileprovision | head -n 1)
-
-          # ASC serves DER certificates; the PKCS12 export below expects
-          # PEM ("unable to load certificates"). Normalize when needed.
-          if ! /usr/bin/openssl x509 -in "$CER" -noout >/dev/null 2>&1; then
-            /usr/bin/openssl x509 -inform DER -in "$CER" -out "$RUNNER_TEMP/cert.pem"
-            CER="$RUNNER_TEMP/cert.pem"
-          fi
+          asc profiles create --name "ExchangeConvertApp-CI-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --profile-type IOS_APP_STORE --bundle "$BUNDLE_RESOURCE_ID" \
+            --certificate "$CERT_ID" --output json > "$RUNNER_TEMP/created-profile.json"
+          PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
+            "$RUNNER_TEMP/created-profile.json")
+          rm -f "$PROFILE"
+          asc profiles download --id "$PROFILE_ID" --output "$PROFILE"
 
           # Rebuild the p12 with the SYSTEM LibreSSL: asc's p12 (and any
           # OpenSSL 3.x one) uses AES-256/SHA-256 PKCS12 that macOS
@@ -298,6 +268,7 @@ jobs:
           echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
           security find-identity -p codesigning "$KC"
+          rm -f "$KEY"
 
       - name: Archive (Release · generic/iOS · manual signing)
         env:
