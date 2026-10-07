@@ -344,11 +344,12 @@ jobs:
             --scheme "$SCHEME" \
             --configuration "$CONFIGURATION" \
             --archive-path "$ARTIFACTS/ExchangeConvertApp.xcarchive" \
-            --derived-data-path "$RUNNER_TEMP/xcode-dd" \
             --overwrite \
             --output json \
             --xcodebuild-flag=-destination \
             --xcodebuild-flag=generic/platform=iOS \
+            --xcodebuild-flag=-derivedDataPath \
+            --xcodebuild-flag="$RUNNER_TEMP/xcode-dd" \
             --xcodebuild-flag=CODE_SIGN_STYLE=Manual \
             --xcodebuild-flag=PROVISIONING_PROFILE="$PROFILE_UUID" \
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
