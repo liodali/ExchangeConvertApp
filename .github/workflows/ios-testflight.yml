@@ -139,10 +139,11 @@ jobs:
           KEY="$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8"
           printf '%s' "$ASC_PRIVATE_KEY_B64" | base64 -d > "$KEY"
           chmod 600 "$KEY" # asc rejects .p8 files with loose permissions
-          # --local keeps credentials in the job workspace (.asc/config.json)
-          # instead of the user's global ~/.asc — the runner must not touch
-          # the host account's asc profiles.
-          asc auth login --bypass-keychain --local --name ci \
+          # NOTE: asc's --local writes an empty ./.asc that then SHADOWS the
+          # global config for every later asc call in this workspace — do not
+          # use it. Wipe any stale one instead, then register globally.
+          rm -rf .asc
+          asc auth login --bypass-keychain --name ci \
             --key-id "$ASC_KEY_ID" \
             --issuer-id "$ASC_ISSUER_ID" \
             --private-key "$KEY"
@@ -289,7 +290,10 @@ jobs:
             -name "CI Apple Distribution"
           security create-keychain -p "$KC_PASS" "$KC"
           security unlock-keychain -p "$KC_PASS" "$KC"
-          security set-keychain-settings -lut 21600 "$KC"
+          # -t only: no lock-on-sleep — the machine may doze during the long
+          # Gradle phase and a locked keychain kills codesign with
+          # errSecInternalComponent.
+          security set-keychain-settings -t 21600 "$KC"
           python3 .github/scripts/ios-signing-state.py keychain-add
           # Apple's WWDR intermediates: preinstalled on GitHub's runner
           # images, ABSENT on self-hosted Macs — without them the chain
@@ -300,7 +304,13 @@ jobs:
           security import "$CI_SIGNING_DIR/wwdr-g3.cer" -k "$KC"
           security import "$CI_SIGNING_DIR/wwdr-g4.cer" -k "$KC"
           security import "$CI_SIGNING_DIR/ci.p12" -P "$P12_PASS" -k "$KC" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PASS" "$KC" >/dev/null 2>&1
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PASS" "$KC"
+          # expose keychain + password to the archive step for its pre-flight
+          # unlock (session state cannot be trusted across a 13-min Gradle
+          # build; the runner is a single-user machine so this stays local)
+          echo "CI_KEYCHAIN=$KC"               >> "$GITHUB_ENV"
+          printf 'CI_KEYCHAIN_PASS=%s\n' "$KC_PASS" >> "$GITHUB_ENV"
+          security find-identity -p codesigning "$KC"
           rm -f "$CI_SIGNING_DIR/ci.p12"
 
           security cms -D -i "$PROFILE" > "$CI_SIGNING_DIR/profile.plist"
@@ -320,6 +330,14 @@ jobs:
           # pre-action then restores the framework and skips Gradle
           ASC_FW_CACHE_HIT: ${{ steps.fwcache.outputs.cache-hit }}
         run: |
+          # Pre-flight: the signing keychain may have re-locked (session
+          # state is not trustworthy across the Gradle phase) — unlock and
+          # ASSERT the identity before spending 15 minutes building.
+          if [ -n "${CI_KEYCHAIN:-}" ]; then
+            security unlock-keychain -p "$CI_KEYCHAIN_PASS" "$CI_KEYCHAIN"
+            security find-identity -p codesigning "$CI_KEYCHAIN" | grep -q "Apple Distribution" \
+              || { echo "::error::distribution identity missing from the CI keychain"; exit 1; }
+          fi
           KEY="$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8"
           asc xcode archive \
             --project "$PROJECT" \
