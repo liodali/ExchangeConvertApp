@@ -1,5 +1,6 @@
 import SwiftUI
 import BackgroundTasks
+import Sentry
 import SharedKMP
 
 /// Local rate-alert plumbing (shared `RateAlertsEngine`):
@@ -60,6 +61,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // Crash reporting → self-hosted GlitchTip (Sentry protocol), same
+        // server as the Android build. Captures native AND Kotlin crashes
+        // (kfun symbols survive). Empty DSN (CI template) = disabled.
+        if !ExchangeSecrets.glitchTipDSN.isEmpty {
+            SentrySDK.start { options in
+                options.dsn = ExchangeSecrets.glitchTipDSN
+            }
+        }
         // Kotlin exports init*-named functions with a "do" prefix to ObjC
         SharedKoinKt.doInitSharedKoin(
             serverURL: ExchangeSecrets.apiHost,

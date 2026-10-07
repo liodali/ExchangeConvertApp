@@ -10,6 +10,7 @@
 		A1000001 /* ExchangeConvertAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001 /* ExchangeConvertAppApp.swift */; };
 		A1000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000002 /* ContentView.swift */; };
 		A1000010 /* SharedKMP in Frameworks */ = {isa = PBXBuildFile; productRef = A0000002 /* SharedKMP */; };
+		A1000011 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = A0000012 /* Sentry */; };
 		A1000011 /* ComposeViewControllerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000010 /* ComposeViewControllerProvider.swift */; };
 		A1000012 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* Secrets.swift */; };
 		A1000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000013 /* Assets.xcassets */; };
@@ -33,6 +34,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000010 /* SharedKMP in Frameworks */,
+				A1000011 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +98,7 @@
 			name = ExchangeConvertApp;
 			packageProductDependencies = (
 				A0000002 /* SharedKMP */,
+				A0000012 /* Sentry */,
 			);
 			productName = ExchangeConvertApp;
 			productReference = A2000005 /* ExchangeConvertApp.app */;
@@ -127,6 +130,7 @@
 			mainGroup = A5000001;
 			packageReferences = (
 				A0000001 /* XCLocalSwiftPackageReference "SharedKMP" */,
+				A0000011 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = A5000003 /* Products */;
 			projectDirPath = "";
@@ -410,10 +414,25 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		A0000011 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.58.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		A0000002 /* SharedKMP */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SharedKMP;
+		};
+		A0000012 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Sentry;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
