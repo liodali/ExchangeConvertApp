@@ -262,6 +262,11 @@ jobs:
           rm -f "$RUNNER_TEMP/ci.p12"
 
           asc profiles local install --path "$PROFILE" --force
+          # asc picks the Xcode-16 GUI location; headless xcodebuild scans
+          # the legacy directory — install to both so the build always
+          # finds it.
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE" "$HOME/Library/MobileDevice/Provisioning Profiles/"
           security cms -D -i "$PROFILE" > /tmp/profile.plist
           UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' /tmp/profile.plist)
           NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' /tmp/profile.plist)
@@ -289,7 +294,6 @@ jobs:
             --xcodebuild-flag=-destination \
             --xcodebuild-flag=generic/platform=iOS \
             --xcodebuild-flag=CODE_SIGN_STYLE=Manual \
-            --xcodebuild-flag=PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             --xcodebuild-flag=PROVISIONING_PROFILE="$PROFILE_UUID" \
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
