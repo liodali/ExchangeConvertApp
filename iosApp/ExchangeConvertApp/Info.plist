@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Only exempt encryption is used (HTTPS through Apple's networking stack). -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<!-- Required by Compose Multiplatform (high refresh rate support).
 	     Merged into the generated Info.plist (GENERATE_INFOPLIST_FILE = YES). -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
