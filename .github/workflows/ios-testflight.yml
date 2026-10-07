@@ -47,9 +47,8 @@ env:
 jobs:
   build-and-upload:
     name: Archive, export, upload
-    # macos-26 ships Xcode 26 (iOS 26 SDK) — Apple rejects uploads built
-    # with anything older (error 90725).
-    runs-on: macos-26
+    # Dedicated Apple Silicon Mac with Xcode 26+ and the CI signing cleanup below.
+    runs-on: [self-hosted, macOS, ARM64, exchange-mac]
     timeout-minutes: 90
 
     env:
@@ -110,6 +109,11 @@ jobs:
 
       - name: Install asc CLI
         run: |
+          # Reuse the installed CLI on the persistent runner.
+          if command -v asc >/dev/null 2>&1; then
+            asc version
+            exit 0
+          fi
           # install script first: serves the latest release. Homebrew lags
           # behind and older formula versions miss newer flags (e.g.
           # signing fetch --create-missing-certificate).
