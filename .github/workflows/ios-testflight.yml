@@ -294,7 +294,7 @@ jobs:
             --scheme "$SCHEME" \
             --configuration "$CONFIGURATION" \
             --archive-path "$ARTIFACTS/ExchangeConvertApp.xcarchive" \
-            --clean --overwrite \
+            --overwrite \
             --output json \
             --xcodebuild-flag=-destination \
             --xcodebuild-flag=generic/platform=iOS \
