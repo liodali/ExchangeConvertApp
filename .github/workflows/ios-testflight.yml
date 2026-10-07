@@ -283,8 +283,16 @@ jobs:
           security unlock-keychain -p "$KC_PASS" "$KC"
           security set-keychain-settings -lut 21600 "$KC"
           python3 .github/scripts/ios-signing-state.py keychain-add
+          # Apple's WWDR intermediates: preinstalled on GitHub's runner
+          # images, ABSENT on self-hosted Macs — without them the chain
+          # cannot build, find-identity sees nothing, and codesign dies
+          # with errSecInternalComponent. Import into the CI keychain.
+          curl -sfL -o "$CI_SIGNING_DIR/wwdr-g3.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+          curl -sfL -o "$CI_SIGNING_DIR/wwdr-g4.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer
+          security import "$CI_SIGNING_DIR/wwdr-g3.cer" -k "$KC"
+          security import "$CI_SIGNING_DIR/wwdr-g4.cer" -k "$KC"
           security import "$CI_SIGNING_DIR/ci.p12" -P "$P12_PASS" -k "$KC" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PASS" "$KC" >/dev/null 2>&1
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PASS" "$KC" >/dev/null 2>&1
           rm -f "$CI_SIGNING_DIR/ci.p12"
 
           security cms -D -i "$PROFILE" > "$CI_SIGNING_DIR/profile.plist"
