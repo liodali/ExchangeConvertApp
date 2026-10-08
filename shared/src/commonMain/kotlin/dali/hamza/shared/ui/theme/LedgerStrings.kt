@@ -67,6 +67,12 @@ object LedgerStrings {
         const val MODE_DARK = "Dark"
         const val PALETTE_SECTION = "Color palette"
 
+        /** Chart style control (line vs bar historical graph, design `ATVsN`). */
+        const val CHART_STYLE_TITLE = "Chart style"
+        const val CHART_STYLE_DESC = "History graphs render as a line or bars"
+        const val CHART_STYLE_LINE = "Line"
+        const val CHART_STYLE_BAR = "Bar"
+
         const val VAULT_SECTION = "VAULT MANAGEMENT"
         const val LOG_OUT = "Log out from Ledger"
         const val DELETE_ACCOUNT = "Permanently Delete Account"

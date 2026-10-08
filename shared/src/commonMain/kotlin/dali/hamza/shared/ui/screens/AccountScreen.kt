@@ -65,6 +65,7 @@ import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
 import dali.hamza.shared.ui.components.ReorderableColumn
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerChip
 import dali.hamza.shared.ui.components.LedgerInfoField
 import dali.hamza.shared.ui.components.LedgerInput
@@ -98,6 +99,7 @@ fun AccountScreen(
     onBaseCurrencyChanged: (String) -> Unit = {},
     onThemeModeChanged: (LedgerThemeMode) -> Unit = {},
     onColorPaletteChanged: (LedgerColorPalette) -> Unit = {},
+    onChartStyleChanged: (LedgerChartStyle) -> Unit = {},
     onOpenRateAlerts: () -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
@@ -422,6 +424,49 @@ fun AccountScreen(
                                 color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
                             )
                         }
+                    }
+                }
+                Spacer(Modifier.height(20.dp))
+                // chart style: line vs bar historical graph (design `ATVsN`)
+                Text(
+                    text = LedgerStrings.Account.CHART_STYLE_TITLE,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = LedgerColors.TextPrimary,
+                )
+                Text(
+                    text = LedgerStrings.Account.CHART_STYLE_DESC,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LedgerColors.TextTertiary,
+                )
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(LedgerColors.SurfaceElevated)
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    listOf(
+                        LedgerStrings.Account.CHART_STYLE_LINE to LedgerChartStyle.LINE,
+                        LedgerStrings.Account.CHART_STYLE_BAR to LedgerChartStyle.BAR,
+                    ).forEach { (label, style) ->
+                        val selected = viewModel.chartStyle == style
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                .clickable {
+                                    viewModel.updateChartStyle(style)
+                                    onChartStyleChanged(style)
+                                }
+                                .padding(vertical = 8.dp),
+                        )
                     }
                 }
             }
