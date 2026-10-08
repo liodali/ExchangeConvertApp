@@ -45,8 +45,9 @@ import androidx.compose.ui.unit.sp
 import dali.hamza.shared.common.DateUtils
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.ui.components.BentoCard
+import dali.hamza.shared.ui.components.LedgerChart
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerChip
-import dali.hamza.shared.ui.components.LedgerLineChart
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.ledgerNavClearance
@@ -71,6 +72,7 @@ import dali.hamza.shared.ui.viewmodel.SharedViewModel
 fun HistoryScreen(
     sharedViewModel: SharedViewModel,
     historyViewModel: HistoryViewModel,
+    chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     val state by historyViewModel.state.collectAsState()
     val sharedState by sharedViewModel.state.collectAsState()
@@ -209,9 +211,10 @@ fun HistoryScreen(
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                LedgerLineChart(
+                LedgerChart(
                     points = state.series.map { it.rate },
                     labels = state.series.map { it.date },
+                    style = chartStyle,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp),

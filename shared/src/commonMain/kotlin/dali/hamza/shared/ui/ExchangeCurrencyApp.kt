@@ -43,6 +43,7 @@ import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.components.LedgerBottomNav
 import dali.hamza.shared.ui.components.LedgerButton
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerDestination
 import dali.hamza.shared.ui.screens.AccountScreen
@@ -116,6 +117,10 @@ fun ExchangeCurrencyApp(
     }
     var colorPalette by remember {
         mutableStateOf(LedgerColorPalette.fromStored(sessionStore?.getColorPalette()))
+    }
+    // chart rendering style (Account → Appearance): which graphs draw with
+    var chartStyle by remember {
+        mutableStateOf(LedgerChartStyle.fromStored(sessionStore?.getChartStyle()))
     }
     ExchangeCurrencyAppTheme(themeMode = themeMode, colorPalette = colorPalette) {
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -223,6 +228,7 @@ fun ExchangeCurrencyApp(
                     HomeScreen(
                         viewModel = viewModel,
                         marketPreferences = marketPreferences,
+                        chartStyle = chartStyle,
                         homeViewModel = remember {
                             KoinPlatform.getKoin()?.get<HomeViewModel>()
                                 ?: HomeViewModel(
@@ -245,6 +251,7 @@ fun ExchangeCurrencyApp(
                     HistoryScreen(
                         sharedViewModel = viewModel,
                         historyViewModel = historyViewModel,
+                        chartStyle = chartStyle,
                     )
                 }
                 composable(Routes.ACCOUNT) {
@@ -260,6 +267,7 @@ fun ExchangeCurrencyApp(
                         },
                         onThemeModeChanged = { themeMode = it },
                         onColorPaletteChanged = { colorPalette = it },
+                        onChartStyleChanged = { chartStyle = it },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
                     )
@@ -271,6 +279,7 @@ fun ExchangeCurrencyApp(
                         historyViewModel = remember {
                             KoinPlatform.getKoin()?.get<HistoryViewModel>() ?: historyViewModel
                         },
+                        chartStyle = chartStyle,
                         onBack = { navController.popBackStack() },
                         onOpenFullConverter = { navController.navigate(Routes.FULL_CONVERTER) },
                     )

@@ -44,7 +44,8 @@ import androidx.compose.ui.unit.sp
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
-import dali.hamza.shared.ui.components.LedgerLineChart
+import dali.hamza.shared.ui.components.LedgerChart
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -67,6 +68,7 @@ fun ConverterCurrencyScreen(
     historyViewModel: HistoryViewModel,
     onBack: () -> Unit,
     onOpenFullConverter: () -> Unit = {},
+    chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     val state by viewModel.state.collectAsState()
     val historyState by historyViewModel.state.collectAsState()
@@ -237,9 +239,10 @@ fun ConverterCurrencyScreen(
             Spacer(Modifier.height(16.dp))
             BentoCard(fill = LedgerColors.SurfaceElevated, cornerRadius = 16.dp) {
                 if (historyState.series.size >= 2) {
-                    LedgerLineChart(
+                    LedgerChart(
                         points = historyState.series.map { it.rate },
                         labels = historyState.series.map { it.date },
+                        style = chartStyle,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(192.dp),
