@@ -78,6 +78,13 @@ fun ComponentGallery(modifier: Modifier = Modifier) {
                             .height(64.dp)
                             .padding(top = 12.dp),
                     )
+                    Sparkline(
+                        values = listOf(1.081, 1.0823, 1.0805, 1.0831, 1.0842, 1.0829, 1.0842),
+                        style = LedgerChartStyle.BAR,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp),
+                    )
                 }
             }
 
@@ -92,6 +99,29 @@ fun ComponentGallery(modifier: Modifier = Modifier) {
                         text = "$42,850.00",
                         style = MaterialTheme.typography.displayMedium,
                         color = LedgerColors.Blue,
+                    )
+                }
+            }
+
+            GallerySection("Charts (line / bar)") {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    LedgerLineChart(
+                        points = listOf(
+                            1.0792, 1.0804, 1.0789, 1.0813, 1.0826, 1.0818,
+                            1.0831, 1.0824, 1.0838, 1.0842,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
+                    )
+                    LedgerBarChart(
+                        points = listOf(
+                            1.0792, 1.0804, 1.0789, 1.0813, 1.0826, 1.0818,
+                            1.0831, 1.0824, 1.0838, 1.0842,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp),
                     )
                 }
             }
