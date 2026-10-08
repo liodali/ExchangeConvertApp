@@ -3,7 +3,9 @@ package dali.hamza.shared.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -15,7 +17,9 @@ import dali.hamza.shared.ui.theme.LedgerColors
 
 /**
  * Sparkline — the design's mini rate charts (dashboard "Top Pairs" cards):
- * a smoothed line with an optional vertical gradient fill underneath.
+ * a smoothed line with an optional vertical gradient fill underneath, or
+ * (bar style, matching [LedgerBarChart]) bottom-aligned rounded bars with
+ * the newest values in the full color and older ones muted.
  *
  * Values are normalized to the available space; fewer than 2 points draw nothing.
  */
@@ -26,6 +30,7 @@ fun Sparkline(
     color: androidx.compose.ui.graphics.Color = LedgerColors.Green,
     fillUnder: Boolean = true,
     strokeWidth: androidx.compose.ui.unit.Dp = 2.dp,
+    style: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     Canvas(modifier = modifier) {
         if (values.size < 2) return@Canvas
@@ -35,6 +40,26 @@ fun Sparkline(
         val paddingY = size.height * 0.08f
         val usableHeight = size.height - paddingY * 2
         val stepX = size.width / (values.size - 1)
+
+        if (style == LedgerChartStyle.BAR) {
+            // same ramp as the big chart: newest 3 bars full, older muted
+            val slot = size.width / values.size
+            val barWidth = minOf(8.dp.toPx(), slot * 0.55f)
+            val cornerRadius = CornerRadius(minOf(1.5.dp.toPx(), barWidth / 2f))
+            val minBarHeight = 2.dp.toPx()
+            val accentFrom = values.size - 3.coerceIn(0, values.size)
+            values.forEachIndexed { index, value ->
+                val y = paddingY + (usableHeight * (1.0 - (value - minValue) / range)).toFloat()
+                val height = (size.height - y).coerceAtLeast(minBarHeight)
+                drawRoundRect(
+                    color = if (index >= accentFrom) color else color.copy(alpha = 0.45f),
+                    topLeft = Offset(slot * (index + 0.5f) - barWidth / 2f, size.height - height),
+                    size = Size(barWidth, height),
+                    cornerRadius = cornerRadius,
+                )
+            }
+            return@Canvas
+        }
 
         val points = values.mapIndexed { index, value ->
             val x = stepX * index

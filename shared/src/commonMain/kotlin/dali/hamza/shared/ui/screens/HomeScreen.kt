@@ -67,6 +67,7 @@ import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
@@ -102,6 +103,7 @@ fun HomeScreen(
     onOpenHistory: () -> Unit,
     marketPreferences: List<String> = emptyList(),
     onOpenRateAlerts: () -> Unit = {},
+    chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
@@ -175,6 +177,7 @@ fun HomeScreen(
                 alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
                 onAddAlert = { alertQuote = it },
                 onOpenRateAlerts = onOpenRateAlerts,
+                chartStyle = chartStyle,
             )
 
             Spacer(Modifier.height(32.dp))
@@ -258,6 +261,7 @@ private fun MarketOverviewSection(
     alertedQuotes: Set<String>,
     onAddAlert: (String) -> Unit,
     onOpenRateAlerts: () -> Unit,
+    chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -296,6 +300,7 @@ private fun MarketOverviewSection(
                     // tracked market → manage it; untracked → offer to add
                     if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
                 },
+                chartStyle = chartStyle,
             )
         }
     }
@@ -313,6 +318,7 @@ private fun PairCard(
     base: String?,
     hasAlert: Boolean,
     onAlert: () -> Unit,
+    chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
 ) {
     val pairTitle = base?.let { "${card.quote}/$it" } ?: card.quote
     BentoCard(
@@ -357,6 +363,7 @@ private fun PairCard(
             Sparkline(
                 values = card.spark,
                 color = LedgerColors.TextPrimary,
+                style = chartStyle,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
