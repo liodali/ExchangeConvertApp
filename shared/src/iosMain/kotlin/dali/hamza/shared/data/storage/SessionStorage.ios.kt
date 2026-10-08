@@ -97,6 +97,13 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(palette, forKey = KEY_COLOR_PALETTE)
     }
 
+    override fun getChartStyle(): String =
+        defaults.stringForKey(KEY_CHART_STYLE) ?: "line"
+
+    override fun setChartStyle(style: String) {
+        defaults.setObject(style, forKey = KEY_CHART_STYLE)
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
@@ -108,6 +115,7 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_MARKET_PREFERENCES = "market_preferences"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
+        const val KEY_CHART_STYLE = "chart_style"
     }
 }
 

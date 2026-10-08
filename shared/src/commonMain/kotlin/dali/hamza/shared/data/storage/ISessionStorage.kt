@@ -84,6 +84,14 @@ interface ISessionStorage {
     fun getColorPalette(): String = "sovereign"
 
     fun setColorPalette(palette: String) {}
+
+    /**
+     * Historical-chart rendering style (Account → Appearance): line / bar.
+     * Defaults to line — the original design graph.
+     */
+    fun getChartStyle(): String = "line"
+
+    fun setChartStyle(style: String) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

@@ -7,6 +7,7 @@ import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.currentEpochMillis
+import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.theme.LedgerColorPalette
 import dali.hamza.shared.ui.theme.LedgerThemeMode
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +54,10 @@ class AccountViewModel(
     var colorPalette by mutableStateOf(LedgerColorPalette.fromStored(storage.getColorPalette()))
         private set
 
+    /** Historical-chart rendering style (persisted; Account → Appearance). */
+    var chartStyle by mutableStateOf(LedgerChartStyle.fromStored(storage.getChartStyle()))
+        private set
+
     fun updateBiometricUnlock(enabled: Boolean) {
         biometricUnlock = enabled
         storage.setBiometricUnlock(enabled)
@@ -91,6 +96,11 @@ class AccountViewModel(
     fun updateColorPalette(palette: LedgerColorPalette) {
         colorPalette = palette
         storage.setColorPalette(palette.stored)
+    }
+
+    fun updateChartStyle(style: LedgerChartStyle) {
+        chartStyle = style
+        storage.setChartStyle(style.stored)
     }
 
     /** Design persona email, derived from the username. */

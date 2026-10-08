@@ -89,6 +89,13 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_COLOR_PALETTE, palette).apply()
     }
 
+    override fun getChartStyle(): String =
+        preferences.getString(KEY_CHART_STYLE, "line") ?: "line"
+
+    override fun setChartStyle(style: String) {
+        preferences.edit().putString(KEY_CHART_STYLE, style).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -101,6 +108,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_MARKET_PREFERENCES = "market_preferences"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
+        const val KEY_CHART_STYLE = "chart_style"
     }
 }
 
