@@ -13,6 +13,8 @@ name: iOS → TestFlight (asc)
 #   IOS_DISTRIBUTION_KEY_B64  base64 of the distribution private key (PEM)
 #   IOS_DISTRIBUTION_CERT_ID  ASC certificate id created from that key’s CSR
 # Optional:
+#   RUNNER_READ_TOKEN    Fine-grained PAT for this repo with Administration: read
+#                        (needed to prefer the self-hosted Mac automatically)
 #   ASC_APP_ID           App id (auto-resolved from the bundle id when empty)
 #   TESTFLIGHT_GROUP     Beta group name — set to also distribute to testers
 #   IOS_SECRETS_SWIFT_B64  base64 of iosApp/ExchangeConvertApp/Secrets.swift
@@ -45,10 +47,55 @@ env:
   ARTIFACTS: .asc/artifacts
 
 jobs:
+  select-runner:
+    name: Select available iOS runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    outputs:
+      runner: ${{ steps.select.outputs.runner }}
+    steps:
+      - name: Check self-hosted Mac availability
+        id: select
+        uses: actions/github-script@v7
+        env:
+          RUNNER_READ_TOKEN: ${{ secrets.RUNNER_READ_TOKEN }}
+        with:
+          github-token: ${{ secrets.RUNNER_READ_TOKEN || github.token }}
+          script: |
+            const hosted = ['macos-26'];
+            const selfHosted = ['self-hosted', 'macOS', 'ARM64', 'exchange-mac'];
+            let selected = hosted;
+            if (!process.env.RUNNER_READ_TOKEN) {
+              core.warning('RUNNER_READ_TOKEN is not configured; using the paid GitHub-hosted macOS runner.');
+            } else {
+              try {
+                const runners = await github.paginate(github.rest.actions.listSelfHostedRunnersForRepo, {
+                  ...context.repo,
+                  per_page: 100,
+                  request: { timeout: 10000 },
+                });
+                const requiredLabels = selfHosted.map(label => label.toLowerCase());
+                const available = runners.some(runner => {
+                  const labels = new Set((runner.labels || []).map(label => label.name.toLowerCase()));
+                  return runner.name === 'ExchangeMacRunner' && runner.status === 'online' && runner.busy === false
+                    && requiredLabels.every(label => labels.has(label));
+                });
+                if (available) selected = selfHosted;
+              } catch (error) {
+                core.warning(`Runner availability check failed (status ${error.status || 'unknown'}); using GitHub-hosted macOS.`);
+              }
+            }
+            core.setOutput('runner', JSON.stringify(selected));
+            core.info(`Selected iOS runner: ${selected.join(', ')}`);
+
   build-and-upload:
     name: Archive, export, upload
-    # Dedicated Apple Silicon Mac with Xcode 26+ and the CI signing cleanup below.
-    runs-on: [self-hosted, macOS, ARM64, exchange-mac]
+    needs: select-runner
+    # Prefer the idle local Mac; otherwise use GitHub's Xcode 26+ image.
+    # Selection is a snapshot: a subsequent disconnect can still queue the job.
+    runs-on: ${{ fromJSON(needs.select-runner.outputs.runner) }}
     timeout-minutes: 90
 
     env:
