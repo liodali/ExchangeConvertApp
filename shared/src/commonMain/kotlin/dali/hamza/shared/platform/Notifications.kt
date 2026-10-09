@@ -22,6 +22,14 @@ interface LocalNotifier {
     fun requestPermission(onResult: (Boolean) -> Unit)
 
     /**
+     * Make the platform ready to show notifications before any [notify]
+     * call — Android: create the channel eagerly so system-trayed pushes
+     * (FCM notification payloads) land on the right channel instead of the
+     * FCM fallback. Safe to call at app start; no-ops where unnecessary.
+     */
+    fun prepare() {}
+
+    /**
      * Post a notification immediately. Implementations must be safe to
      * call from a background worker and silently no-op without permission.
      */

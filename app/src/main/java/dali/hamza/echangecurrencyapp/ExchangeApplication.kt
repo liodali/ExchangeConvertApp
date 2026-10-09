@@ -8,6 +8,7 @@ import dali.hamza.shared.AndroidAppContext
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
 import dali.hamza.shared.domain.repository.IRepository
+import dali.hamza.shared.platform.LocalNotifier
 import dali.hamza.shared.platform.RateAlertScheduler
 import io.github.aakira.napier.Napier
 import io.sentry.android.core.SentryAndroid
@@ -70,6 +71,9 @@ class ExchangeApplication : Application() {
         // so it lands in logcat for backend/console testing. Guarded —
         // builds without google-services.json have no FirebaseApp and the
         // messaging SDK stays inert (see push/SovereignMessagingService).
+        // prepare() creates the rate_alerts channel up-front so system-trayed
+        // FCM pushes land on the right channel, not the FCM fallback.
+        runCatching { GlobalContext.get().get<LocalNotifier>().prepare() }
         if (FirebaseApp.getApps(this).isNotEmpty()) {
             FirebaseMessaging.getInstance().token
                 .addOnSuccessListener { token ->

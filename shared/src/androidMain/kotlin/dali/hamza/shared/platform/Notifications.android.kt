@@ -81,6 +81,11 @@ internal class LocalNotifierAndroid : LocalNotifier {
         }
     }
 
+    /** Channel created eagerly (see LocalNotifier.prepare) — FCM tray pushes need it to exist. */
+    override fun prepare() {
+        AndroidAppContext.appContext?.let { ensureChannel(it) }
+    }
+
     private fun ensureChannel(context: Context) {
         if (channelReady.get()) return
         if (Build.VERSION.SDK_INT >= 26) {
@@ -89,7 +94,7 @@ internal class LocalNotifierAndroid : LocalNotifier {
                 "Rate alerts",
                 NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
-                description = "Local exchange-rate alerts"
+                description = "Exchange-rate alerts"
             }
             NotificationManagerCompat.from(context).createNotificationChannel(channel)
         }
