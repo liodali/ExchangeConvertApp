@@ -68,27 +68,28 @@ that's the whole cutover.
    - Ads: no ads · Content rating questionnaire · Target audience 18+ · App access: all functionality available
 6. **Internal testing** track → add testers (emails or a Google Group).
 
-## 4. Ship it — version & build number come from the tag
+## 4. Ship it — shared version and build number
 
-Tag scheme: **`app-vX.Y.Z+BUILD[-dev]`** — the tag is the single source of truth:
+Edit [`version.xcconfig`](../version.xcconfig) in the repository root. It defines
+both Android and iOS versions; see [Shared app version](app-versioning.md).
 
-| Tag | versionName | versionCode |
-|---|---|---|
-| `app-v1.0.1+42` | `1.0.1` | `42` |
-| `app-v1.0.1+43-dev` | `1.0.1-dev` | `43` |
-| `app-v1.0.1-dev+44` | `1.0.1-dev` | `44` (dev before `+` also accepted) |
-| `app-v1.0.1` (no `+BUILD`) | `1.0.1` | run number (warning logged) |
-
-```bash
-GIT_EDITOR=true git tag -a app-v1.0.1+42 -m "Sovereign Ledger 1.0.1 (build 42)"
-git push origin app-v1.0.1+42
+```xcconfig
+MARKETING_VERSION = 0.7.3
+CURRENT_PROJECT_VERSION = 54
 ```
 
-Keep `BUILD` strictly increasing (Play requires it for every upload) — a simple
-`+1` per release is all it takes. The workflow validates the Play limit
-(2 100 000 000) and falls back to the run number with a warning when `+BUILD`
-is missing. Testers get the opt-in link from Console → Internal testing;
-promote internal → closed → production from the Console when ready.
+Commit that file, then run the workflow manually or create a matching tag:
+
+```bash
+git tag -a app-v0.7.3+54 -m "Sovereign Ledger 0.7.3 (build 54)"
+git push origin app-v0.7.3+54
+```
+
+Tags trigger releases; they are checked against the file and cannot override
+it. A tag without `+BUILD` uses the shared build number. `-dev` markers are
+accepted but do not alter the app's numeric version. Increment the build number
+before every new upload. Testers get the opt-in link from Console → Internal
+testing; promote internal → closed → production from the Console when ready.
 
 ## Listing assets (ready in `qa/store/`)
 
@@ -112,10 +113,7 @@ promote internal → closed → production from the Console when ready.
   Limitation: the check reads *active* releases only — codes consumed by
   since-deleted releases are invisible to it, so a green check does not
   guarantee Play will accept the rollout; the upload step is the backstop.
-- Version scheme: `app-vX.Y.Z+BUILD[-dev]` — both versionName and versionCode
-  are defined by the tag; the workflow derives and validates them.
-- Manual runs (`workflow_dispatch`): the "Run workflow" form takes a required
-  `version_code` (same 1–3-above-Play rule applies) and an optional `track`
-  (default `internal`; any closed-testing track must already exist in Play
+- Version and build number come from root `version.xcconfig` for both platforms.
+- Manual runs (`workflow_dispatch`) use the shared version/build and an optional
+  `track` (default `internal`; any closed-testing track must already exist in Play
   Console — the check fails with the list of available tracks otherwise).
-  Manual builds are versioned `dev.<versionCode>`.

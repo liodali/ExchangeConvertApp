@@ -1,6 +1,6 @@
 name: Android Release
 
-# Play Store pipeline — tag `app-v*` (e.g. app-v1.0.0) →
+# Play Store pipeline — tag `app-v*` (matching version.xcconfig) →
 #   signed release AAB → Google Play internal testing track.
 #
 # Required repository secrets (see docs/play-release.md):
@@ -26,10 +26,6 @@ on:
       - "app-v*"
   workflow_dispatch:
     inputs:
-      version_code:
-        description: "versionCode — must be 1–3 above Play's highest active code"
-        required: true
-        type: string
       track:
         description: "Play track: 'internal', or a closed-testing track name that already exists in Play Console"
         required: false
@@ -86,59 +82,24 @@ jobs:
             echo "KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}"
           } > key.properties
 
-      - name: Derive version from tag
+      - name: Read shared app version
+        env:
+          PLAY_TRACK: ${{ inputs.track || 'internal' }}
+          PLAY_PRIORITY: ${{ inputs.in_app_update_priority || '0' }}
         run: |
-          # Tag scheme: app-vX.Y.Z+BUILD[-dev]  (e.g. app-v1.0.1+42, app-v1.0.1+43-dev)
-          # Also accepts dev before the build: app-v1.0.1-dev+44
-          #   versionName = X.Y.Z ("-dev" appended when marked)
-          #   versionCode = BUILD (Play requires strictly increasing)
-          # workflow_dispatch: the version_code input IS the versionCode —
-          # a manual click without a valid one fails instead of inventing
-          # a number (run numbers can never satisfy the Play check).
-          TAG="${GITHUB_REF_NAME#app-v}"
-          PLAY_TRACK="${{ inputs.track || 'internal' }}"
-          PLAY_PRIORITY="${{ inputs.in_app_update_priority || '0' }}"
+          set -euo pipefail
+          VERSION_ARGS=()
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION_ARGS+=(--tag "$GITHUB_REF_NAME")
+          fi
+          python3 script/app-version.py --format android-env "${VERSION_ARGS[@]}" >> "$GITHUB_ENV"
           if ! [[ "$PLAY_PRIORITY" =~ ^[0-5]$ ]]; then
             echo "::error::in_app_update_priority must be 0–5 (got '$PLAY_PRIORITY')"
             exit 1
           fi
-          if [ "$TAG" = "$GITHUB_REF_NAME" ]; then
-            # workflow_dispatch / non-tag
-            VERSION_CODE="${{ inputs.version_code }}"
-            if ! [[ "$VERSION_CODE" =~ ^[0-9]+$ ]] || [ "$VERSION_CODE" -lt 1 ]; then
-              echo "::error::manual runs need a valid version_code input (got '${VERSION_CODE:-none}')"
-              exit 1
-            fi
-            VERSION_NAME="dev.$VERSION_CODE"
-          else
-            BASE="${TAG%%+*}"
-            IS_DEV=false
-            if [[ "$BASE" == *"-dev" ]]; then IS_DEV=true; BASE="${BASE%-dev}"; fi
-            if [[ "$TAG" == *"-dev" ]]; then IS_DEV=true; fi
-            CODE=""
-            if [[ "$TAG" == *"+"* ]]; then
-              CODE="${TAG#*+}"
-              CODE="${CODE%-dev}"
-            fi
-            if ! [[ "$CODE" =~ ^[0-9]+$ ]]; then
-              echo "::warning::tag '$GITHUB_REF_NAME' has no +BUILD — using run number as versionCode"
-              CODE="$GITHUB_RUN_NUMBER"
-            fi
-            if [ "$CODE" -gt 2100000000 ]; then
-              echo "::error::versionCode $CODE exceeds Play's 2100000000 limit"; exit 1
-            fi
-            if [ "$IS_DEV" = true ]; then
-              VERSION_NAME="$BASE-dev"
-            else
-              VERSION_NAME="$BASE"
-            fi
-            VERSION_CODE="$CODE"
-          fi
-          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
-          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
           echo "PLAY_TRACK=$PLAY_TRACK" >> "$GITHUB_ENV"
           echo "PLAY_UPDATE_PRIORITY=$PLAY_PRIORITY" >> "$GITHUB_ENV"
-          echo "release: versionName=$VERSION_NAME versionCode=$VERSION_CODE track=$PLAY_TRACK priority=$PLAY_PRIORITY"
+          python3 script/app-version.py
 
       - name: Check version code against Google Play
         if: steps.secrets.outputs.play == 'true' && steps.secrets.outputs.keystore == 'true'
