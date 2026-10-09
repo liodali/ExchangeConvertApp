@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "1049594159326",
+    "project_id": "familytasksreminder",
+    "storage_bucket": "familytasksreminder.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049594159326:android:145e4d531c21fb8328e24f",
+        "android_client_info": {
+          "package_name": "com.sovereignledger.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3GGnyTbugfTFgFAPRBOKjgSEpJDg1Xz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049594159326:android:52c53239da4895e228e24f",
+        "android_client_info": {
+          "package_name": "medali.hamza.familypurchases"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3GGnyTbugfTFgFAPRBOKjgSEpJDg1Xz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049594159326:android:8c928df84fa0088428e24f",
+        "android_client_info": {
+          "package_name": "medali.hamza.familypurchases.staging"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3GGnyTbugfTFgFAPRBOKjgSEpJDg1Xz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1049594159326:android:b4475be7277ae48828e24f",
+        "android_client_info": {
+          "package_name": "medali.hamza.familytaskreminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3GGnyTbugfTFgFAPRBOKjgSEpJDg1Xz0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

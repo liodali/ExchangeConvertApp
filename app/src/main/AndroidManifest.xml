@@ -32,6 +32,21 @@
         <meta-data
             android:name="io.sentry.auto-init"
             android:value="false" />
+
+        <!-- FCM — server-push rate alerts (plans/server-push-alerts.md).
+             Data messages are rendered by SovereignMessagingService through
+             the shared LocalNotifier; inert without google-services.json. -->
+        <service
+            android:name=".push.SovereignMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- system-trayed "notification" messages land on the alerts channel -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="rate_alerts" />
     </application>
 
 </manifest>

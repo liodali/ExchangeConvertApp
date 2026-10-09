@@ -2,6 +2,7 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.google.services) apply false
     id("com.google.devtools.ksp") version "2.3.6" apply false
     id("app.cash.sqldelight") version "2.3.2" apply false
 }

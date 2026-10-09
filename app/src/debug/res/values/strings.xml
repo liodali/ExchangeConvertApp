@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Debug builds wear their name on the label — side-by-side installs
-         (com.sovereignledger.app vs .debug) must be tellable apart at a
-         glance in the launcher and recents. -->
+    <!-- Debug builds share the release applicationId — the badge + label are
+         what tells them apart in the launcher and recents (no separate
+         .debug package anymore). -->
     <string name="app_name">Sovereign Ledger (debug)</string>
 </resources>

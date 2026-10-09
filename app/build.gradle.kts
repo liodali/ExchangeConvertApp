@@ -7,7 +7,14 @@ plugins {
     id("kotlin-android")
     id("com.google.devtools.ksp") version "2.3.6" apply true
     alias(libs.plugins.compose.compiler) apply true
-
+    alias(libs.plugins.google.services) apply false
+}
+// Firebase Cloud Messaging (server-push rate alerts — plans/server-push-alerts.md).
+// Applied only when the config file exists, so builds stay green until
+// google-services.json is dropped in from the Firebase console (both packages:
+// com.sovereignledger.app + .debug must be registered there).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 // Properties loading
 val properties = Properties().apply {
@@ -15,24 +22,32 @@ val properties = Properties().apply {
         load(rootProject.file("local.properties").inputStream())
     }
 }
-// Gradle property (-P / gradle.properties) → local.properties → default.
-// CI passes -PversionCode/-PversionName from the release tag.
+// Runtime configuration: Gradle property → local.properties → default.
+// App versions are loaded separately from the shared version.xcconfig.
 fun prop(name: String, fallback: String): String =
     (project.properties[name] as? String) ?: properties.getProperty(name) ?: fallback
 val composeVersion = rootProject.extra.get("compose_version") as String
 val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
-// Local default: derive from the latest app-v* tag so debug builds wear
-// the real version (CI still overrides via -PversionCode/-PversionName
-// from the release tag it builds).
-fun latestAppTag(): Pair<String, String>? = runCatching {
-    val tag = providers.exec {
-        commandLine("git", "describe", "--abbrev=0", "--match", "app-v*")
-    }.standardOutput.asText.get().trim()
-    val m = Regex("""app-v(\d+\.\d+\.\d+)[^+]*\+(\d+)""").find(tag) ?: return null
-    m.groupValues[1] to m.groupValues[2]
-}.getOrNull()
-val tagVersion = latestAppTag()
+// The same file is the base configuration for the iOS app in Xcode.
+val appVersionProperties = Properties().apply {
+    val content = providers.fileContents(rootProject.layout.projectDirectory.file("version.xcconfig"))
+        .asText.get()
+    content.lineSequence().map { it.substringBefore("//") }.joinToString("\n")
+        .reader().use { load(it) }
+}
+// Explicit -P overrides remain available for ad hoc builds; local.properties
+// and git tags no longer silently replace the shared app version.
+val appVersionName = providers.gradleProperty("versionName").orNull
+    ?: requireNotNull(appVersionProperties.getProperty("MARKETING_VERSION"))
+val appVersionCode = (providers.gradleProperty("versionCode").orNull
+    ?: requireNotNull(appVersionProperties.getProperty("CURRENT_PROJECT_VERSION"))).toLongOrNull()
+require(appVersionName.matches(Regex("""\d+\.\d+\.\d+"""))) {
+    "App version must be X.Y.Z (version.xcconfig: MARKETING_VERSION)"
+}
+require(appVersionCode != null && appVersionCode in 1L..2100000000L) {
+    "Build number must be 1..2100000000 (version.xcconfig: CURRENT_PROJECT_VERSION)"
+}
 
 android {
     compileSdk = 37
@@ -42,9 +57,8 @@ android {
         minSdk = 26
         // explicit: target doesn't silently move with future compileSdk bumps
         targetSdk = 37
-        // injectable from CI (-PversionCode=… / -PversionName=…)
-        versionCode = prop("versionCode", tagVersion?.second ?: "1").toInt()
-        versionName = prop("versionName", tagVersion?.first ?: "1.0.0")
+        versionCode = requireNotNull(appVersionCode).toInt()
+        versionName = appVersionName
 
         // GlitchTip (Sentry-compatible OSS) DSN — gradle prop →
         // local.properties → empty (crash reporting disabled).
@@ -105,8 +119,16 @@ android {
         }
         debug {
             resValue("string", "token", properties.getOrDefault("token", "").toString())
-            applicationIdSuffix = ".debug"
-
+            // No applicationIdSuffix: debug and release share
+            // com.sovereignledger.app (one google-services.json, one Firebase
+            // app entry with both SHA-1s). Debug builds are told apart by the
+            // bug-badged launcher icon + "(debug)" label (app/src/debug/res).
+            // Single id + different keys would block installs over the
+            // production app — so debug uses the release signature when the
+            // key is available (key.properties / CI SIGNING_* vars), making
+            // debug↔release overwrites seamless and data-preserving. Machines
+            // without the key fall back to the default debug keystore.
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
 
@@ -141,6 +163,14 @@ dependencies {
     implementation(libs.appcompat)
     // crash reporting → self-hosted GlitchTip (Sentry protocol)
     implementation(libs.sentry.android)
+    // logging — Napier sink is planted by shared's AndroidAppContext; the
+    // app module logs too (FCM service / token lifecycle)
+    implementation(libs.napier)
+    // Firebase Cloud Messaging — server-push rate alerts (Phase 2).
+    // Messaging only: no analytics/crashlytics (privacy stance; GlitchTip covers crashes).
+    // No-op at runtime until google-services.json is present.
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
     // Play In-App Updates — flexible/immediate update prompts for users
     // without Play auto-update
     implementation(libs.androidx.app.update)

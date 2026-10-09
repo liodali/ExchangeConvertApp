@@ -1,12 +1,15 @@
 package dali.hamza.echangecurrencyapp
 
 import android.app.Application
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import dali.hamza.echangecurrencyapp.di.appModule
 import dali.hamza.shared.AndroidAppContext
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.RateAlertScheduler
+import io.github.aakira.napier.Napier
 import io.sentry.android.core.SentryAndroid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,5 +65,25 @@ class ExchangeApplication : Application() {
                 koin.get<RateAlertScheduler>().update(hasActiveAlerts)
             }
         }
+
+        // FCM (server-push rate alerts): fetch the registration token early
+        // so it lands in logcat for backend/console testing. Guarded —
+        // builds without google-services.json have no FirebaseApp and the
+        // messaging SDK stays inert (see push/SovereignMessagingService).
+        if (FirebaseApp.getApps(this).isNotEmpty()) {
+            FirebaseMessaging.getInstance().token
+                .addOnSuccessListener { token ->
+                    if (BuildConfig.DEBUG) {
+                        Napier.i(tag = FCM_TAG) { "FCM registration token: $token" }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Napier.w(tag = FCM_TAG, throwable = e) { "FCM token fetch failed" }
+                }
+        }
+    }
+
+    private companion object {
+        const val FCM_TAG = "SovereignFCM"
     }
 }

@@ -8,6 +8,8 @@ coilCompose = "2.7.0"
 coilComposeCore = "3.4.0"
 sentryAndroid = "8.16.0"
 converterMoshi = "3.0.0"
+firebaseBom = "35.0.0"
+googleServices = "4.5.0"
 coreKtx = "1.18.0"
 coreKtxVersion = "1.7.0"
 coreSplashscreen = "1.2.0"
@@ -107,6 +109,9 @@ ext-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
 foundation = { module = "androidx.compose.foundation:foundation" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+# version comes from the BoM platform in the app module
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 jetbrains-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundationVersion" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -166,6 +171,7 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 [plugins]
 org_jetbrains_kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 # Add the Compose Compiler Gradle plugin, the version matches the Kotlin plugin
 androidLibrary = { id = "com.android.library", version.ref = "android-gradlePlugin" }
