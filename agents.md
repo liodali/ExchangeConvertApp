@@ -102,6 +102,7 @@ iosApp → SharedKMP (local SwiftPM package) → shared (Kotlin/Native framework
 | [`build.gradle.kts`](build.gradle.kts) | Root build: plugin declarations, global `extra` properties (`compose_version`, `kotlin_version`) |
 | [`settings.gradle.kts`](settings.gradle.kts) | Module includes + repository declarations |
 | [`gradle.properties`](gradle.properties) | Gradle/Android build properties |
+| [`version.xcconfig`](version.xcconfig) | Shared Android/iOS app version and build number; see [`docs/app-versioning.md`](docs/app-versioning.md) |
 | [`app/build.gradle.kts`](app/build.gradle.kts) | App module: Compose, Retrofit, Room, Koin, Coil, Navigation |
 | [`shared/build.gradle.kts`](shared/build.gradle.kts) | KMP module: Ktor, SQLDelight, Compose MP, Koin, iOS framework targets |
 | [`domain/build.gradle.kts`](domain/build.gradle.kts) | Domain module (lightweight, no AndroidX deps) |
@@ -403,7 +404,7 @@ cd exchange-api
 docker compose -f docker-compose.local.yml up   # full local stack (+ observability)
 ```
 
-Endpoints: `/currencies` (optional `?type=fiat|metal|crypto|all`), `/latest` (base/symbol accept metals XAU/XAG, mixed with fiat), `/historic`, `/currency/{png,svg}` (flags), `/health`, `/metrics`. Provider rotation (Beacon, currency-api, exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching. Gold/silver quotes come from the keyless exchange-rates.org precious-metals pages (`getLatestMetal`), stored metal-as-base in the same `currencyrates` cache; `/latest?base=USD&symbol=XAU` derives the inverse on the fly. Future asset-class plans (crypto, stocks) live in [`exchange-api/.plan/`](exchange-api/.plan).
+Endpoints: `/currencies` (optional `?type=fiat|metal|crypto|all`), `/latest` (base/symbol accept metals XAU/XAG, mixed with fiat), `/historic`, `/currency/{png,svg}` (flags), `/health`, `/metrics`. Server-push rate alerts (Phase 1, Oct 2026): `POST /auth/session` (anonymous session JWT from installId), authed `GET/POST/PATCH/DELETE /alerts[/{id}]` (tier caps guest 1/logged 3/base 10), `POST/DELETE /alerts/devices` (push token registration, one-token-one-session invariant), plus `AlertEvaluatorWorker` (5-min dry-run loop: rules parity with the KMP engine + rolling-2h digest budget) — see [`plans/server-push-alerts.md`](../plans/server-push-alerts.md). Provider rotation (Beacon, currency-api, exchangerates-api, exchange-rates.org scraper fallback) with Postgres caching. Gold/silver quotes come from the keyless exchange-rates.org precious-metals pages (`getLatestMetal`), stored metal-as-base in the same `currencyrates` cache; `/latest?base=USD&symbol=XAU` derives the inverse on the fly. Future asset-class plans (crypto, stocks) live in [`exchange-api/.plan/`](exchange-api/.plan).
 
 > The submodule holds its own git history. Local fixes there (Kotlin 2.3.21 bump, tolerant
 > `key.properties`, Gradle 9.4.1 wrapper, `rateRepository` visibility) are **uncommitted** in the
@@ -555,6 +556,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 - Android app is NOT yet wired to the shared UI — `MainActivity` still uses the app-local Compose UI and the legacy Retrofit repository; the legacy `strings.xml` server (`api.openexchangerate.com`) is a dead host
 - Android `actual`s of the shared storage/driver need a `Context` (`createSessionStorage(context)`, `createDatabaseDriver(context)`) until the shared module is initialized from `ExchangeApplication`
 - Rate alerts (local notifications) shipped Oct 2026: free tier capped at 2 alerts, WorkManager job on Android / BGAppRefresh + foreground checks on iOS — see [`plans/rate-alerts.md`](plans/rate-alerts.md) for the design and KMP gotchas
+- Server-push rate alerts are planned for **all tiers** via anonymous temporary sessions (guest: 1 server alert, 1 push/2h digest, 3 local; logged: 3 server alerts, 2 pushes/2h, 3 local; paid base tier later). Extend `exchange-api` with a session issuer + alerts module + FCM/APNs; ntfy evaluated and rejected — iOS own-app push can't route through it: see [`plans/server-push-alerts.md`](plans/server-push-alerts.md)
 - Shared UI icons are now real Material icons (`compose.materialIconsExtended`, added in Phase 1 of the redesign); the Ledger component library + bundled Manrope/Inter fonts live in `shared/ui/components/` + `shared/ui/theme/`
 
 ---
