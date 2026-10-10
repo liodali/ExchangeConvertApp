@@ -107,6 +107,9 @@ jobs:
       TESTFLIGHT_GROUP: ${{ secrets.TESTFLIGHT_GROUP }}
       # Team id for manual-signing export — not a secret (ships in every IPA).
       TEAM_ID: 47TCTNRU75
+      # 'true' when the Garage S3 cache credentials exist. Step `if:` may
+      # not reference the secrets context — evaluate it here instead.
+      S3_CACHE_ENABLED: ${{ secrets.S3_CACHE_KEY_ID != '' && 'true' || 'false' }}
 
     steps:
       - name: Checkout
@@ -136,7 +139,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Cache Kotlin/Native toolchain
-        if: ${{ secrets.S3_CACHE_KEY_ID == '' }}
+        if: env.S3_CACHE_ENABLED == 'false'
         uses: actions/cache@v4
         with:
           path: ~/.konan
@@ -149,7 +152,7 @@ jobs:
       # must never be used. v2: added the compose resource tree the fast
       # path was missing (fonts — crashes at launch without them).
       - name: Cache shared framework artifact
-        if: ${{ secrets.S3_CACHE_KEY_ID == '' }}
+        if: env.S3_CACHE_ENABLED == 'false'
         id: fwcache
         uses: actions/cache@v4
         with:
@@ -165,7 +168,7 @@ jobs:
       # (GitHub's cache scopes tag refs — every release rebuilds cold there).
       - name: Restore build caches (S3/Garage)
         id: s3cache
-        if: ${{ secrets.S3_CACHE_KEY_ID != '' }}
+        if: env.S3_CACHE_ENABLED == 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
@@ -453,7 +456,7 @@ jobs:
       # Archive step above, hence save-after-archive). Fire-and-forget:
       # a cache save failure must never fail a release.
       - name: Save build caches (S3/Garage)
-        if: ${{ secrets.S3_CACHE_KEY_ID != '' && steps.s3cache.outputs.fw != 'hit' }}
+        if: env.S3_CACHE_ENABLED == 'true' && steps.s3cache.outputs.fw != 'hit'
         continue-on-error: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
