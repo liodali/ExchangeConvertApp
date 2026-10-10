@@ -16,6 +16,7 @@ import dali.hamza.shared.ui.theme.LedgerStrings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -212,16 +213,39 @@ class RateAlertsViewModel(
         }
     }
 
+    /** One-shot confirmation for snackbar display ("Alert deleted"). */
+    val deleteEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+    /** Composite key of the row currently being deleted (spinner state). */
+    var deletingKey by mutableStateOf<String?>(null)
+        private set
+
+    /**
+     * Delete an alert from whichever engine owns it: a spinner replaces
+     * the row's delete button while it runs (server deletes are a network
+     * round-trip; local ones are near-instant), then a one-shot event
+     * confirms the result for the snackbar.
+     */
     fun removeAlert(alert: RateAlert) {
+        val key = "${alert.source}:${alert.id}"
+        if (deletingKey != null) return // one deletion in flight at a time
+        deletingKey = key
         viewModelScope.launch {
             when (alert.source) {
                 AlertSource.SERVER -> repository.removeServerRateAlert(alert.id)
                 AlertSource.LOCAL -> repository.removeRateAlert(alert.id)
             }
+            deletingKey = null
             message = null
             localAlerts = repository.getRateAlerts()
             serverAlerts = repository.getServerRateAlerts()
             scheduler.update(localAlerts.any { it.enabled })
+            deleteEvents.emit(
+                when (alert.source) {
+                    AlertSource.SERVER -> LedgerStrings.RateAlerts.SERVER_ALERT_DELETED
+                    AlertSource.LOCAL -> LedgerStrings.RateAlerts.LOCAL_ALERT_DELETED
+                }
+            )
         }
     }
 

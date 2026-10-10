@@ -156,6 +156,10 @@ object LedgerStrings {
         const val DELETE_ALERT_LABEL = "Delete"
         const val DELETE_ALERT_DESC = "Swipe left to reveal delete"
 
+        /** Snackbar confirmations after a delete completes. */
+        const val SERVER_ALERT_DELETED = "Alert removed from the server."
+        const val LOCAL_ALERT_DELETED = "Alert deleted."
+
         /** Shown under the ON DEVICE section when nothing is pushed yet. */
         const val LOCAL_TO_PUSH_HINT =
             "Pushed alerts arrive even when the app is closed — use “Move to push” under an alert."

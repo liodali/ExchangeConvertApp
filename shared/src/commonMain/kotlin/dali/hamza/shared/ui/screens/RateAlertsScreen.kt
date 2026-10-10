@@ -30,13 +30,17 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -87,11 +91,19 @@ fun RateAlertsScreen(
     val serverAtCap = viewModel.serverAlerts.size >= viewModel.maxServerAlerts
     val localAtCap = viewModel.localAlerts.size >= viewModel.maxLocalAlerts
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-    ) {
+    // delete confirmations ride a snackbar (server deletes are a network
+    // round-trip — the row's button already showed a spinner meanwhile)
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel) {
+        viewModel.deleteEvents.collect { snackbarHostState.showSnackbar(it) }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+        ) {
         LedgerTopAppBar(
             title = LedgerStrings.RateAlerts.TITLE,
             onBack = onBack,
@@ -153,6 +165,7 @@ fun RateAlertsScreen(
                                         alert = alert,
                                         onToggle = { viewModel.setEnabled(alert, it) },
                                         onDelete = { viewModel.removeAlert(alert) },
+                                        deleting = viewModel.deletingKey == "${alert.source}:${alert.id}",
                                     )
                                 }
                             }
@@ -188,6 +201,7 @@ fun RateAlertsScreen(
                                         alert = alert,
                                         onToggle = { viewModel.setEnabled(alert, it) },
                                         onDelete = { viewModel.removeAlert(alert) },
+                                        deleting = viewModel.deletingKey == "${alert.source}:${alert.id}",
                                         onConvertToPush = if (!serverAtCap) {
                                             { viewModel.convertToPush(alert) }
                                         } else {
@@ -222,6 +236,12 @@ fun RateAlertsScreen(
             Spacer(Modifier.height(32.dp))
             Spacer(Modifier.height(ledgerNavClearance()))
         }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 
     if (showAddDialog) {
@@ -310,6 +330,8 @@ private fun AlertRow(
     onDelete: () -> Unit,
     /** Non-null (and below the push cap) shows the "move to push" action. */
     onConvertToPush: (() -> Unit)? = null,
+    /** True while this row's deletion is in flight — spinner on the button. */
+    deleting: Boolean = false,
 ) {
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
@@ -343,14 +365,22 @@ private fun AlertRow(
                     .size(48.dp)
                     .clip(CircleShape)
                     .background(LedgerColors.Error.copy(alpha = 0.90f))
-                    .clickable { onDelete() },
+                    .clickable(enabled = !deleting) { onDelete() },
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.DeleteOutline,
-                    contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
-                    tint = LedgerColors.Canvas,
-                )
+                if (deleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = LedgerColors.Canvas,
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteOutline,
+                        contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
+                        tint = LedgerColors.Canvas,
+                    )
+                }
             }
         }
 
