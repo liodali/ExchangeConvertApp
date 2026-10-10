@@ -104,6 +104,33 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(style, forKey = KEY_CHART_STYLE)
     }
 
+    // ---- server-push alert session (Phase 2) ----
+
+    override fun getInstallId(): String? =
+        defaults.stringForKey(KEY_INSTALL_ID)
+
+    override fun setInstallId(value: String) {
+        defaults.setObject(value, forKey = KEY_INSTALL_ID)
+    }
+
+    override fun getSessionToken(): String? =
+        defaults.stringForKey(KEY_SESSION_TOKEN)
+
+    override fun setSessionToken(token: String?) {
+        if (token == null) {
+            defaults.removeObjectForKey(KEY_SESSION_TOKEN)
+        } else {
+            defaults.setObject(token, forKey = KEY_SESSION_TOKEN)
+        }
+    }
+
+    override fun getSessionExpiresAt(): Long =
+        defaults.doubleForKey(KEY_SESSION_EXPIRES_AT).toLong()
+
+    override fun setSessionExpiresAt(timestamp: Long) {
+        defaults.setObject(timestamp.toDouble(), forKey = KEY_SESSION_EXPIRES_AT)
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
@@ -116,6 +143,9 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
         const val KEY_CHART_STYLE = "chart_style"
+        const val KEY_INSTALL_ID = "push_install_id"
+        const val KEY_SESSION_TOKEN = "push_session_token"
+        const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"
     }
 }
 

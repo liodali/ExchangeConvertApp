@@ -92,6 +92,30 @@ interface ISessionStorage {
     fun getChartStyle(): String = "line"
 
     fun setChartStyle(style: String) {}
+
+    // ---- server-push alert session (Phase 2, plans/server-push-alerts.md) --
+    // Identity for the anonymous session JWT: installId + cached token.
+
+    /**
+     * Stable per-install identifier (UUID) minted on first app open —
+     * the `sub` of the anonymous session JWT. `null` until first minted.
+     */
+    fun getInstallId(): String? = null
+
+    fun setInstallId(value: String) {}
+
+    /**
+     * Cached anonymous session JWT for the alert endpoints.
+     * `null` = never issued (or cleared after a server switch).
+     */
+    fun getSessionToken(): String? = null
+
+    fun setSessionToken(token: String?) {}
+
+    /** Epoch millis when the session JWT expires. `0L` = unknown. */
+    fun getSessionExpiresAt(): Long = 0L
+
+    fun setSessionExpiresAt(timestamp: Long) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

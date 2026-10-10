@@ -124,6 +124,16 @@ private class FakeRepository : IRepository {
             )
         }
     }
+
+    // server-push alerts (Phase 2) — unused by History cluster tests
+    override suspend fun getServerRateAlerts(): List<RateAlert> = emptyList()
+
+    override suspend fun addServerRateAlert(alert: RateAlert): Result<RateAlert> =
+        Result.failure(IllegalStateException("unused"))
+
+    override suspend fun removeServerRateAlert(id: Long) = Unit
+
+    override suspend fun setServerRateAlertEnabled(id: Long, enabled: Boolean) = Unit
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

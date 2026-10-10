@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Push Notifications (server-push rate alerts, Phase 3).
+	  aps-environment=development routes tokens through the APNs sandbox —
+	  Xcode-signed debug builds only. TestFlight/App Store builds get the
+	  production environment from Apple at upload time. The backend picks
+	  the matching host via APNS_HOST (never mix: sandbox tokens are
+	  rejected by production and vice versa).
+	-->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>

@@ -14,8 +14,9 @@ import org.koin.core.context.GlobalContext
  * rendered through the shared [LocalNotifier] on the existing `rate_alerts`
  * channel, so push notifications look identical to the local engine's.
  *
- * Token lifecycle: [onNewToken] logs for now — Phase 2 wires the POST to
- * `/alerts/devices` once the backend session endpoints exist.
+ * Token lifecycle: [onNewToken] re-registers with the backend immediately
+ * (session ensure → POST /alerts/devices) so pushes keep flowing to the
+ * rotated token — Firebase calls this exactly when the token changes.
  *
  * The whole class is inert when no `google-services.json` is present: FCM
  * never delivers to an app without a FirebaseApp, and the manifest entry
@@ -27,7 +28,7 @@ class SovereignMessagingService : FirebaseMessagingService() {
         // full token only in debug builds — it identifies this install
         val printable = if (BuildConfig.DEBUG) token else "${token.take(12)}…"
         Napier.i(tag = TAG) { "FCM token rotated: $printable" }
-        // TODO(Phase 2): POST /alerts/devices {platform=ANDROID, token, bundleId}
+        PushRegistration.registerToken(this, token)
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

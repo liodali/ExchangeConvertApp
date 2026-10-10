@@ -230,9 +230,11 @@ fun HomeScreen(
             currencies = state.currencies,
             initialBase = state.fromCurrency?.name,
             initialQuote = quote,
-            atCap = rateAlertsViewModel.alerts.size >= rateAlertsViewModel.maxAlerts,
+            tier = rateAlertsViewModel.tier,
+            atLocalCap = rateAlertsViewModel.localAlerts.size >= rateAlertsViewModel.maxLocalAlerts,
+            atServerCap = rateAlertsViewModel.serverAlerts.size >= rateAlertsViewModel.maxServerAlerts,
             onDismiss = { alertQuote = null },
-            onConfirm = { base, quoteCurrency, mode, intervalMinutes, thresholdPercent ->
+            onConfirm = { base, quoteCurrency, mode, intervalMinutes, thresholdPercent, source ->
                 alertQuote = null
                 rateAlertsViewModel.addAlert(
                     base,
@@ -240,6 +242,7 @@ fun HomeScreen(
                     mode,
                     intervalMinutes,
                     thresholdPercent,
+                    source,
                 )
             },
         )

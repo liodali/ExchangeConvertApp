@@ -2,9 +2,15 @@ package dali.hamza.shared.data.repository
 
 import dali.hamza.shared.common.nowMillis
 import dali.hamza.shared.data.CurrenciesCatalog
+import dali.hamza.shared.data.network.AlertsApiError
 import dali.hamza.shared.data.network.CurrencyApi
+import dali.hamza.shared.data.network.RateAlertsApi
+import dali.hamza.shared.data.network.models.AlertDataAPI
+import dali.hamza.shared.data.session.PushSessionManager
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.database.AppDatabase
+import dali.hamza.shared.domain.models.AlertServiceUnavailableException
+import dali.hamza.shared.domain.models.AlertSource
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.models.ExchangeRate
@@ -15,6 +21,7 @@ import dali.hamza.shared.domain.models.RateAlertMode
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.currentEpochMillis
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -27,10 +34,14 @@ private const val REFRESH_INTERVAL_MS = 30L * 60L * 1000L
 /** Guest tier: rates refresh at most hourly (guest-mode decision, Oct 2026). */
 private const val GUEST_REFRESH_INTERVAL_MS = 60L * 60L * 1000L
 
+private const val TAG = "CurrencyRepository"
+
 class CurrencyRepositoryImpl(
     private val currencyApi: CurrencyApi,
     private val database: AppDatabase,
     private val sessionStorage: ISessionStorage,
+    private val alertsApi: RateAlertsApi,
+    private val sessionManager: PushSessionManager,
 ) : IRepository {
 
     override suspend fun getListCurrencies(): MyResponse<List<Currency>> =
@@ -286,6 +297,88 @@ class CurrencyRepositoryImpl(
     ): Unit = withContext(Dispatchers.Default) {
         database.rateAlertsQueries.updateAlertState(lastRate, lastNotifiedAt, id)
     }
+
+    // ---- server-push alerts (Phase 2) ----------------------------------
+
+    override suspend fun getServerRateAlerts(): List<RateAlert> =
+        withContext(Dispatchers.Default) {
+            val bearer = sessionManager.ensureSession() ?: return@withContext emptyList()
+            alertsApi.listAlerts(bearer)
+                .fold(
+                    onSuccess = { list -> list.map(::toRateAlert) },
+                    onFailure = { error ->
+                        Napier.w(tag = TAG, throwable = error) { "server alert list failed" }
+                        emptyList()
+                    },
+                )
+        }
+
+    override suspend fun addServerRateAlert(alert: RateAlert): Result<RateAlert> =
+        withContext(Dispatchers.Default) {
+            val bearer = sessionManager.ensureSession()
+                ?: return@withContext Result.failure(AlertServiceUnavailableException())
+            val serverAlerts = getServerRateAlerts()
+            if (serverAlerts.any { it.base == alert.base && it.quote == alert.quote }) {
+                return@withContext Result.failure(IllegalStateException(RateAlert.DUPLICATE_MESSAGE))
+            }
+            if (serverAlerts.size >= RateAlert.maxServerAlertsForTier(sessionStorage.getDataTier())) {
+                return@withContext Result.failure(IllegalStateException(RateAlert.SERVER_LIMIT_MESSAGE))
+            }
+            alertsApi.createAlert(
+                bearerToken = bearer,
+                base = alert.base,
+                quote = alert.quote,
+                mode = alert.mode,
+                intervalMinutes = alert.intervalMinutes,
+                thresholdPercent = alert.thresholdPercent,
+            ).mapCatching { dto -> toRateAlert(dto) }.recoverCatching { error ->
+                throw when (error) {
+                    is AlertsApiError -> IllegalStateException(
+                        when (error.errorCode) {
+                            AlertsApiError.CODE_DUPLICATE -> RateAlert.DUPLICATE_MESSAGE
+                            AlertsApiError.CODE_ALERT_CAP -> RateAlert.SERVER_LIMIT_MESSAGE
+                            else -> error.message
+                        }
+                    )
+                    // transport-level failure (offline, DNS, timeout) — lets
+                    // callers fall back to a local alert instead of dead-ending
+                    else -> AlertServiceUnavailableException()
+                }
+            }
+        }
+
+    override suspend fun removeServerRateAlert(id: Long): Unit =
+        withContext(Dispatchers.Default) {
+            val bearer = sessionManager.ensureSession() ?: return@withContext
+            alertsApi.deleteAlert(bearer, id).onFailure { error ->
+                Napier.w(tag = TAG, throwable = error) { "server alert delete failed (id=$id)" }
+            }
+            Unit
+        }
+
+    override suspend fun setServerRateAlertEnabled(id: Long, enabled: Boolean): Unit =
+        withContext(Dispatchers.Default) {
+            val bearer = sessionManager.ensureSession() ?: return@withContext
+            alertsApi.updateAlert(bearer, id, enabled = enabled).onFailure { error ->
+                Napier.w(tag = TAG, throwable = error) { "server alert toggle failed (id=$id)" }
+            }
+            Unit
+        }
+
+    private fun toRateAlert(dto: AlertDataAPI): RateAlert = RateAlert(
+        id = dto.id,
+        base = dto.base,
+        quote = dto.quote,
+        mode = runCatching { RateAlertMode.valueOf(dto.mode) }
+            .getOrDefault(RateAlertMode.PERIODIC),
+        intervalMinutes = dto.intervalMinutes,
+        thresholdPercent = dto.thresholdPercent,
+        enabled = dto.enabled,
+        lastRate = dto.lastRate,
+        lastNotifiedAt = dto.lastNotifiedAt,
+        createdAt = dto.createdAt,
+        source = AlertSource.SERVER,
+    )
 
     private fun toRateAlert(
         row: dali.hamza.shared.database.RateAlert,

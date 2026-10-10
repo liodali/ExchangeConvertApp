@@ -2,8 +2,10 @@ package dali.hamza.shared.di
 
 import dali.hamza.shared.data.alerts.RateAlertsEngine
 import dali.hamza.shared.data.network.CurrencyApi
+import dali.hamza.shared.data.network.RateAlertsApi
 import dali.hamza.shared.data.network.createHttpClient
 import dali.hamza.shared.data.repository.CurrencyRepositoryImpl
+import dali.hamza.shared.data.session.PushSessionManager
 import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.platform.createLocalNotifier
@@ -40,6 +42,9 @@ fun sharedModule(
     single(named("TOKEN")) { accessKey }
     single { createHttpClient(get(named("SERVER"))) }
     single { CurrencyApi(httpClient = get(), accessKey = get(named("TOKEN"))) }
+    // server-push alerts (Phase 2): same host/client as CurrencyApi
+    single { RateAlertsApi(httpClient = get()) }
+    single { PushSessionManager(alertsApi = get(), storage = get()) }
     single { createDatabaseDriver() }
     single { AppDatabase(get()) }
     single { createSessionStorage() }
@@ -58,7 +63,9 @@ fun sharedModule(
         CurrencyRepositoryImpl(
             currencyApi = get(),
             database = get(),
-            sessionStorage = get()
+            sessionStorage = get(),
+            alertsApi = get(),
+            sessionManager = get(),
         )
     }
     factory { SharedViewModel(get()) }

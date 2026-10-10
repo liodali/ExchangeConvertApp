@@ -29,7 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dali.hamza.shared.domain.models.AlertSource
 import dali.hamza.shared.domain.models.Currency
+import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.RateAlertMode
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -43,6 +45,21 @@ private enum class AlertPreset(val label: String) {
 }
 
 /**
+ * Cadence presets per delivery engine:
+ * - **On device** — as it always was: hourly / 2-hourly / on-move, run by
+ *   the local engine for every tier.
+ * - **Server push** — tier-gated ([RateAlert.serverIntervalsForTier]):
+ *   guests get the 2-hour digest only (their push budget is 1 per 2h);
+ *   login will offer 1h + 2h; paid cadence is defined with the tier work.
+ */
+private fun presetsFor(source: AlertSource, tier: DataTier): List<AlertPreset> = when (source) {
+    AlertSource.LOCAL -> listOf(AlertPreset.HOURLY, AlertPreset.TWO_HOURS, AlertPreset.ON_MOVE)
+    AlertSource.SERVER -> RateAlert.serverIntervalsForTier(tier).map { interval ->
+        if (interval == RateAlert.INTERVAL_HOURLY) AlertPreset.HOURLY else AlertPreset.TWO_HOURS
+    }
+}
+
+/**
  * "New Rate Alert" form — shared by the Rate Alerts screen and the Home
  * market-overview cards (bell action on a tracked market).
  *
@@ -53,8 +70,10 @@ private enum class AlertPreset(val label: String) {
  * (see CurrencyPickerSheet).
  *
  * The pair is pre-filled from [initialBase]/[initialQuote] but stays
- * editable through the currency pickers; [atCap] disables creation when
- * the free-tier alert limit is reached.
+ * editable through the currency pickers. Delivery is a toggle — **On
+ * device** (local engine, all modes) or **Push** (server-evaluated, 2h
+ * digest for guests); each list has its own cap and disables creation
+ * when reached.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,10 +87,15 @@ fun AddRateAlertDialog(
         mode: RateAlertMode,
         intervalMinutes: Long,
         thresholdPercent: Double,
+        source: AlertSource,
     ) -> Unit,
     modifier: Modifier = Modifier,
     initialQuote: String? = null,
-    atCap: Boolean = false,
+    tier: DataTier = DataTier.GUEST,
+    atLocalCap: Boolean = false,
+    atServerCap: Boolean = false,
+    /** Pre-selects the delivery toggle (Home bell defaults to Push). */
+    initialSource: AlertSource = AlertSource.LOCAL,
 ) {
     var base by remember { mutableStateOf(initialBase ?: "USD") }
     var quote by remember {
@@ -81,10 +105,14 @@ fun AddRateAlertDialog(
                 ?: "EUR"
         )
     }
-    var preset by remember { mutableStateOf(AlertPreset.HOURLY) }
+    // local delivery stays the default — push is the opt-in upgrade
+    var source by remember { mutableStateOf(initialSource) }
+    val presets = presetsFor(source, tier)
+    var preset by remember(source) { mutableStateOf(presets.first()) }
     var thresholdText by remember { mutableStateOf(LedgerStrings.RateAlerts.THRESHOLD_HINT) }
     var picking by remember { mutableStateOf(0) } // 1 = base, 2 = quote
 
+    val atCap = if (source == AlertSource.SERVER) atServerCap else atLocalCap
     val threshold = thresholdText.toDoubleOrNull()
     val valid = !atCap && base != quote &&
         (preset != AlertPreset.ON_MOVE || (threshold != null && threshold > 0.0 && threshold <= 50.0))
@@ -115,6 +143,24 @@ fun AddRateAlertDialog(
                 onClick = { picking = 2 },
             )
             Spacer(Modifier.height(20.dp))
+
+            // delivery toggle — on device (as it was) vs server push
+            Text(
+                text = LedgerStrings.RateAlerts.DELIVERY_SECTION,
+                style = MaterialTheme.typography.labelMedium,
+                color = LedgerColors.TextSecondary,
+            )
+            Spacer(Modifier.height(12.dp))
+            SegmentedRow(
+                options = listOf(
+                    LedgerStrings.RateAlerts.DELIVERY_LOCAL to AlertSource.LOCAL,
+                    LedgerStrings.RateAlerts.DELIVERY_PUSH to AlertSource.SERVER,
+                ),
+                selected = source,
+                onSelect = { source = it },
+            )
+
+            Spacer(Modifier.height(20.dp))
             Text(
                 text = LedgerStrings.RateAlerts.MODE_SECTION,
                 style = MaterialTheme.typography.labelMedium,
@@ -122,31 +168,18 @@ fun AddRateAlertDialog(
             )
             Spacer(Modifier.height(12.dp))
             // segmented preset control (same recipe as Appearance mode)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(LedgerColors.SurfaceElevated)
-                    .padding(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                AlertPreset.entries.forEach { option ->
-                    val selected = preset == option
-                    Text(
-                        text = option.label,
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (selected) LedgerColors.GreenSoft else Color.Transparent
-                            )
-                            .clickable { preset = option }
-                            .padding(vertical = 8.dp),
-                    )
-                }
+            SegmentedRow(
+                options = presets.map { it.label to it },
+                selected = preset,
+                onSelect = { preset = it },
+            )
+            if (source == AlertSource.SERVER && tier == DataTier.GUEST) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = LedgerStrings.RateAlerts.GUEST_PUSH_NOTE,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LedgerColors.TextTertiary,
+                )
             }
             if (preset == AlertPreset.ON_MOVE) {
                 Spacer(Modifier.height(16.dp))
@@ -186,6 +219,7 @@ fun AddRateAlertDialog(
                             if (preset == AlertPreset.ON_MOVE) RateAlertMode.THRESHOLD else RateAlertMode.PERIODIC,
                             if (preset == AlertPreset.TWO_HOURS) RateAlert.INTERVAL_TWO_HOURS else RateAlert.INTERVAL_HOURLY,
                             threshold ?: RateAlert.DEFAULT_THRESHOLD_PERCENT,
+                            source,
                         )
                     },
                     enabled = valid,
@@ -212,5 +246,43 @@ fun AddRateAlertDialog(
                 picking = 0
             },
         )
+    }
+}
+
+/**
+ * Two-or-more-option segmented control — the app's preset recipe (used
+ * for the Appearance mode and delivery/mode rows).
+ */
+@Composable
+private fun <T> SegmentedRow(
+    options: List<Pair<String, T>>,
+    selected: T,
+    onSelect: (T) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(LedgerColors.SurfaceElevated)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        options.forEach { (label, option) ->
+            val isSelected = option == selected
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = if (isSelected) LedgerColors.Green else LedgerColors.TextSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (isSelected) LedgerColors.GreenSoft else Color.Transparent
+                    )
+                    .clickable { onSelect(option) }
+                    .padding(vertical = 8.dp),
+            )
+        }
     }
 }

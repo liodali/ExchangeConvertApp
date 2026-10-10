@@ -1,6 +1,7 @@
 import SwiftUI
 import BackgroundTasks
 import Sentry
+import UserNotifications
 import SharedKMP
 
 /// Local rate-alert plumbing (shared `RateAlertsEngine`):
@@ -38,6 +39,16 @@ enum RateAlertsBackground {
         RateAlertsBridgeKt.runRateAlertsCheckNow(onDone: { _ in })
     }
 
+    /// APNs token → shared registration loop (Phase 3). Kotlin default
+    /// arguments don't cross the ObjC bridge — onDone is explicit.
+    static func registerPushToken(tokenHex: String, bundleId: String) {
+        PushRegistrationBridgeKt.registerPushToken(
+            tokenHex: tokenHex,
+            bundleId: bundleId,
+            onDone: { _ in }
+        )
+    }
+
     private static func handle(_ task: BGAppRefreshTask) {
         schedule() // re-arm the next background check right away
         let work = DispatchWorkItem {
@@ -56,7 +67,9 @@ enum RateAlertsBackground {
 /// Hosts the BGTaskScheduler registration (must happen before the app
 /// finishes launching) and warms the shared Koin container so a cold
 /// background launch can resolve the engine before any UI exists.
-final class AppDelegate: NSObject, UIApplicationDelegate {
+/// Phase 3: also registers for remote notifications — the APNs token
+/// flows through the shared `PushSessionManager` loop.
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -75,6 +88,53 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             accessKey: ExchangeSecrets.apiToken
         )
         RateAlertsBackground.register()
+
+        // Server-push rate alerts (Phase 3): foreground presentation +
+        // APNs registration. The token arrives asynchronously below; Koin
+        // is warm by then. Needs the Push Notifications capability
+        // (aps-environment entitlement) — tokens are silently absent
+        // without it.
+        UNUserNotificationCenter.current().delegate = self
+        UIApplication.shared.registerForRemoteNotifications()
         return true
+    }
+
+    /// APNs delivered a device token → hex → shared registration loop
+    /// (`POST /alerts/devices`, platform IOS, bundleId as the topic).
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        let tokenHex = deviceToken.map { String(format: "%02x", $0) }.joined()
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        RateAlertsBackground.registerPushToken(tokenHex: tokenHex, bundleId: bundleId)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        // Simulator without push support, missing entitlement, or no
+        // network — the next launch retries (registration runs every open).
+        NSLog("[PushSession] APNs registration failed: \(error.localizedDescription)")
+    }
+
+    // MARK: - UNUserNotificationCenterDelegate
+
+    /// Show pushes while the app is foregrounded (default hides them).
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .list, .sound])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        completionHandler()
     }
 }

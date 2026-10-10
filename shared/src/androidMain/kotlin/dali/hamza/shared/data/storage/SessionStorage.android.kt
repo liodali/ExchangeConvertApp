@@ -96,6 +96,33 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_CHART_STYLE, style).apply()
     }
 
+    // ---- server-push alert session (Phase 2) ----
+
+    override fun getInstallId(): String? =
+        preferences.getString(KEY_INSTALL_ID, null)
+
+    override fun setInstallId(value: String) {
+        preferences.edit().putString(KEY_INSTALL_ID, value).apply()
+    }
+
+    override fun getSessionToken(): String? =
+        preferences.getString(KEY_SESSION_TOKEN, null)
+
+    override fun setSessionToken(token: String?) {
+        if (token == null) {
+            preferences.edit().remove(KEY_SESSION_TOKEN).apply()
+        } else {
+            preferences.edit().putString(KEY_SESSION_TOKEN, token).apply()
+        }
+    }
+
+    override fun getSessionExpiresAt(): Long =
+        preferences.getLong(KEY_SESSION_EXPIRES_AT, 0L)
+
+    override fun setSessionExpiresAt(timestamp: Long) {
+        preferences.edit().putLong(KEY_SESSION_EXPIRES_AT, timestamp).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -109,6 +136,9 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
         const val KEY_CHART_STYLE = "chart_style"
+        const val KEY_INSTALL_ID = "push_install_id"
+        const val KEY_SESSION_TOKEN = "push_session_token"
+        const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"
     }
 }
 

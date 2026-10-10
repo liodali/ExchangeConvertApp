@@ -147,6 +147,16 @@ class RateAlertsEngineTest {
                 )
             }
         }
+
+        // server-push alerts (Phase 2) — unused by the local engine
+        override suspend fun getServerRateAlerts(): List<RateAlert> = emptyList()
+
+        override suspend fun addServerRateAlert(alert: RateAlert): Result<RateAlert> =
+            Result.failure(IllegalStateException("unused"))
+
+        override suspend fun removeServerRateAlert(id: Long) = Unit
+
+        override suspend fun setServerRateAlertEnabled(id: Long, enabled: Boolean) = Unit
     }
 
     private class Fixture(

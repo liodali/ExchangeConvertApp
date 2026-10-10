@@ -116,4 +116,25 @@ interface IRepository {
      * timestamp) for one alert.
      */
     suspend fun updateRateAlertState(id: Long, lastRate: Double?, lastNotifiedAt: Long)
+
+    // ---- server-push alerts (Phase 2, plans/server-push-alerts.md) ---------
+    // Evaluated on the exchange-api backend, delivered via FCM. An alert
+    // lives in exactly one place: these rows never enter the local table.
+
+    /**
+     * Server alerts under the current session. Empty when the session is
+     * unavailable (offline first launch) — best effort, never throws.
+     */
+    suspend fun getServerRateAlerts(): List<RateAlert>
+
+    /**
+     * Create a server-evaluated alert. Fails with
+     * [dali.hamza.shared.domain.models.RateAlert.DUPLICATE_MESSAGE] /
+     * `SERVER_LIMIT_MESSAGE` / `SERVER_UNAVAILABLE_MESSAGE`.
+     */
+    suspend fun addServerRateAlert(alert: RateAlert): Result<RateAlert>
+
+    suspend fun removeServerRateAlert(id: Long)
+
+    suspend fun setServerRateAlertEnabled(id: Long, enabled: Boolean)
 }

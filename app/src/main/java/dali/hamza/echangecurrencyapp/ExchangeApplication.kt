@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import dali.hamza.echangecurrencyapp.di.appModule
+import dali.hamza.echangecurrencyapp.push.PushRegistration
 import dali.hamza.shared.AndroidAppContext
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
@@ -67,10 +68,12 @@ class ExchangeApplication : Application() {
             }
         }
 
-        // FCM (server-push rate alerts): fetch the registration token early
-        // so it lands in logcat for backend/console testing. Guarded —
-        // builds without google-services.json have no FirebaseApp and the
-        // messaging SDK stays inert (see push/SovereignMessagingService).
+        // FCM (server-push rate alerts) — the Phase 2 registration loop:
+        // session ensure (installId → anon JWT) happens inside
+        // PushSessionManager.registerDevice, then the current FCM token is
+        // POSTed to /alerts/devices. Guarded — builds without
+        // google-services.json have no FirebaseApp and the messaging SDK
+        // stays inert (see push/SovereignMessagingService).
         // prepare() creates the rate_alerts channel up-front so system-trayed
         // FCM pushes land on the right channel, not the FCM fallback.
         runCatching { GlobalContext.get().get<LocalNotifier>().prepare() }
@@ -80,6 +83,9 @@ class ExchangeApplication : Application() {
                     if (BuildConfig.DEBUG) {
                         Napier.i(tag = FCM_TAG) { "FCM registration token: $token" }
                     }
+                    // every launch, no human involved — idempotent upsert;
+                    // self-heals stale sessions / reinstalls / host switches
+                    PushRegistration.registerToken(this, token)
                 }
                 .addOnFailureListener { e ->
                     Napier.w(tag = FCM_TAG, throwable = e) { "FCM token fetch failed" }

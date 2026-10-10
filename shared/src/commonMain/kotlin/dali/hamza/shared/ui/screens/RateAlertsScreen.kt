@@ -48,16 +48,10 @@ import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 
-/** Add-dialog preset (UI-only) mapped onto [RateAlertMode] + params. */
-private enum class AlertPreset(val label: String) {
-    HOURLY(LedgerStrings.RateAlerts.MODE_HOURLY),
-    TWO_HOURS(LedgerStrings.RateAlerts.MODE_TWO_HOURS),
-    ON_MOVE(LedgerStrings.RateAlerts.MODE_ON_MOVE),
-}
-
 /**
- * Rate Alerts (pushed route from Account) — manage the free-tier capped
- * local notification alerts: hourly / 2-hourly digests or threshold moves.
+ * Rate Alerts (pushed route from Account) — manage the tier-capped
+ * alerts: server-push (guest: one 2-hour digest alert, Phase 2) plus any
+ * pre-Phase-2 local alerts still running on the on-device engine.
  */
 @Composable
 fun RateAlertsScreen(
@@ -67,8 +61,9 @@ fun RateAlertsScreen(
     onBack: () -> Unit,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    val used = viewModel.alerts.size
-    val atCap = used >= viewModel.maxAlerts
+    // each engine has its own cap — the dialog owns the per-delivery UX
+    val serverAtCap = viewModel.serverAlerts.size >= viewModel.maxServerAlerts
+    val localAtCap = viewModel.localAlerts.size >= viewModel.maxLocalAlerts
 
     Column(
         modifier = Modifier
@@ -98,7 +93,11 @@ fun RateAlertsScreen(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,
-                    color = LedgerColors.Error,
+                    color = if (message == LedgerStrings.RateAlerts.PUSH_FALLBACK_NOTE) {
+                        LedgerColors.Gold
+                    } else {
+                        LedgerColors.Error
+                    },
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -113,37 +112,54 @@ fun RateAlertsScreen(
                     onAction = { showAddDialog = true },
                 )
             } else {
-                BentoCard {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        viewModel.alerts.forEach { alert ->
-                            AlertRow(
-                                alert = alert,
-                                onToggle = { viewModel.setEnabled(alert.id, it) },
-                                onDelete = { viewModel.removeAlert(alert.id) },
-                            )
+                // two engines, two sections — an alert lives in exactly one
+                if (viewModel.serverAlerts.isNotEmpty()) {
+                    SectionHeader(
+                        title = LedgerStrings.RateAlerts.SERVER_SECTION_TITLE,
+                        usage = LedgerStrings.RateAlerts.usage(
+                            viewModel.serverAlerts.size,
+                            viewModel.maxServerAlerts,
+                        ),
+                        atCap = serverAtCap,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    BentoCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            viewModel.serverAlerts.forEach { alert ->
+                                AlertRow(
+                                    alert = alert,
+                                    onToggle = { viewModel.setEnabled(alert, it) },
+                                    onDelete = { viewModel.removeAlert(alert) },
+                                )
+                            }
                         }
                     }
+                    Spacer(Modifier.height(24.dp))
+                }
+                if (viewModel.localAlerts.isNotEmpty()) {
+                    SectionHeader(
+                        title = LedgerStrings.RateAlerts.LOCAL_SECTION_TITLE,
+                        usage = LedgerStrings.RateAlerts.usage(
+                            viewModel.localAlerts.size,
+                            viewModel.maxLocalAlerts,
+                        ),
+                        atCap = localAtCap,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    BentoCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            viewModel.localAlerts.forEach { alert ->
+                                AlertRow(
+                                    alert = alert,
+                                    onToggle = { viewModel.setEnabled(alert, it) },
+                                    onDelete = { viewModel.removeAlert(alert) },
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
                 }
 
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = LedgerStrings.RateAlerts.usage(used, viewModel.maxAlerts),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (atCap) LedgerColors.Gold else LedgerColors.TextSecondary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (atCap) {
-                        LedgerChip(
-                            text = LedgerStrings.Account.COMING_SOON,
-                            tint = LedgerColors.Gold,
-                            cornerRadius = 4.dp,
-                        )
-                    }
-                }
                 Text(
                     text = LedgerStrings.RateAlerts.FREE_PLAN_NOTE,
                     style = MaterialTheme.typography.bodySmall,
@@ -151,11 +167,13 @@ fun RateAlertsScreen(
                 )
 
                 Spacer(Modifier.height(16.dp))
+                // the dialog owns the per-delivery cap UX — the button only
+                // locks when BOTH lists are full
                 LedgerButton(
                     text = LedgerStrings.RateAlerts.NEW_ALERT,
                     onClick = { showAddDialog = true },
                     leadingIcon = Icons.Outlined.Add,
-                    enabled = !atCap,
+                    enabled = !(serverAtCap && localAtCap),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -169,14 +187,38 @@ fun RateAlertsScreen(
         AddRateAlertDialog(
             currencies = currencies,
             initialBase = defaultBase,
+            tier = viewModel.tier,
+            atLocalCap = localAtCap,
+            atServerCap = serverAtCap,
             onDismiss = {
                 showAddDialog = false
                 viewModel.clearMessage()
             },
-            onConfirm = { base, quote, mode, intervalMinutes, thresholdPercent ->
+            onConfirm = { base, quote, mode, intervalMinutes, thresholdPercent, source ->
                 showAddDialog = false
-                viewModel.addAlert(base, quote, mode, intervalMinutes, thresholdPercent)
+                viewModel.addAlert(base, quote, mode, intervalMinutes, thresholdPercent, source)
             },
+        )
+    }
+}
+
+/** Small label-over-content header for the two alert sections. */
+@Composable
+private fun SectionHeader(title: String, usage: String, atCap: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = LedgerColors.TextSecondary,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = usage,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (atCap) LedgerColors.Gold else LedgerColors.TextTertiary,
         )
     }
 }

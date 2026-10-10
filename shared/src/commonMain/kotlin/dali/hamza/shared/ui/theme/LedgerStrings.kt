@@ -104,10 +104,10 @@ object LedgerStrings {
     object RateAlerts {
         const val TITLE = "Rate Alerts"
         const val HEADER_NOTE =
-            "Local notifications, checked in the background — on a schedule or when a pair moves."
+            "Pick a delivery per alert: server push (works even when the app is closed) or on-device checks."
         const val EMPTY_TITLE = "No alerts yet"
         const val EMPTY_MESSAGE =
-            "Track a pair and get notified every hour, every 2 hours, or when it moves."
+            "Track a pair — pushed from our servers or checked on device, your choice."
         const val NEW_ALERT = "New Alert"
         const val ADD = "Add alert"
         const val CANCEL = "Cancel"
@@ -115,6 +115,13 @@ object LedgerStrings {
         const val QUOTE_LABEL = "To"
         const val PICK_BASE_TITLE = "Choose base currency"
         const val PICK_QUOTE_TITLE = "Choose quote currency"
+
+        /** Delivery toggle — which engine evaluates the alert. */
+        const val DELIVERY_SECTION = "Deliver via"
+        const val DELIVERY_LOCAL = "On device"
+        const val DELIVERY_PUSH = "Push"
+        const val SERVER_SECTION_TITLE = "SERVER PUSH"
+        const val LOCAL_SECTION_TITLE = "ON DEVICE"
         const val MODE_SECTION = "Notify me"
         const val MODE_HOURLY = "Hourly"
         const val MODE_TWO_HOURS = "2 Hours"
@@ -124,7 +131,16 @@ object LedgerStrings {
 
         fun usage(used: Int, max: Int) = "$used of $max alerts used"
         const val FREE_PLAN_NOTE =
-            "Free plan tracks up to 2 pairs. Sovereign login will unlock more."
+            "Free plan: 1 pushed alert (checked every 2h) plus up to 2 on-device alerts. " +
+                "Sovereign login will unlock more."
+
+        /** Add dialog (guest, Push selected) — why only 2h is offered. */
+        const val GUEST_PUSH_NOTE =
+            "Free plan: pushed alerts are checked every 2 hours — one pushed alert."
+
+        /** Push add succeeded only on device (service unreachable). */
+        const val PUSH_FALLBACK_NOTE =
+            "Push service unreachable — alert saved on device instead."
 
         fun pairTitle(base: String, quote: String) = "$base → $quote"
         fun modeLabel(intervalMinutes: Long) = "Every ${intervalMinutes / 60}h"

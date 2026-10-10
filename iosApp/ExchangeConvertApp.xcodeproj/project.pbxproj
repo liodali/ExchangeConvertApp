@@ -27,6 +27,7 @@
 		A2000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2000014 /* RateAlertsBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateAlertsBackground.swift; sourceTree = "<group>"; };
 		A2000015 /* version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = version.xcconfig; path = ../version.xcconfig; sourceTree = SOURCE_ROOT; };
+		A2000016 /* ExchangeConvertApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExchangeConvertApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +63,7 @@
 				A2000012 /* Info.plist */,
 				A2000013 /* Assets.xcassets */,
 				A2000014 /* RateAlertsBackground.swift */,
+				A2000016 /* ExchangeConvertApp.entitlements */,
 			);
 			path = ExchangeConvertApp;
 			sourceTree = "<group>";
@@ -118,6 +120,11 @@
 				TargetAttributes = {
 					A6000001 = {
 						CreatedOnToolsVersion = 15.0;
+						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -324,6 +331,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = ExchangeConvertApp/ExchangeConvertApp.entitlements;
 				INFOPLIST_FILE = ExchangeConvertApp/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UILaunchScreen_ColorName = LaunchBackground;
@@ -360,6 +368,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = ExchangeConvertApp/ExchangeConvertApp.entitlements;
 				INFOPLIST_FILE = ExchangeConvertApp/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UILaunchScreen_ColorName = LaunchBackground;
