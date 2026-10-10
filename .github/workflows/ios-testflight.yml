@@ -41,6 +41,12 @@ env:
   SCHEME: ExchangeConvertApp
   CONFIGURATION: Release
   ARTIFACTS: .asc/artifacts
+  # S3-compatible cache backend (GarageHQ on the OVH VPS). Set as repo
+  # VARIABLES: S3_CACHE_ENDPOINT (https://s3.example.tld), S3_CACHE_BUCKET.
+  # Credentials: S3_CACHE_KEY_ID / S3_CACHE_SECRET secrets. When unset,
+  # the workflow falls back to GitHub's 10GB cache (LRU + tag-ref scoping).
+  S3_CACHE_ENDPOINT: ${{ vars.S3_CACHE_ENDPOINT }}
+  S3_CACHE_BUCKET: ${{ vars.S3_CACHE_BUCKET }}
 
 jobs:
   select-runner:
@@ -130,6 +136,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Cache Kotlin/Native toolchain
+        if: ${{ secrets.S3_CACHE_KEY_ID == '' }}
         uses: actions/cache@v4
         with:
           path: ~/.konan
@@ -142,6 +149,7 @@ jobs:
       # must never be used. v2: added the compose resource tree the fast
       # path was missing (fonts — crashes at launch without them).
       - name: Cache shared framework artifact
+        if: ${{ secrets.S3_CACHE_KEY_ID == '' }}
         id: fwcache
         uses: actions/cache@v4
         with:
@@ -149,6 +157,58 @@ jobs:
             shared/build/xcode-frameworks
             shared/build/generated/compose/resourceGenerator
           key: fw2-${{ runner.os }}-${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
+
+      # --- S3/Garage cache path (preferred when credentials exist) --------
+      # Same content as the two actions/cache steps above, but stored on our
+      # own GarageHQ bucket: no 10GB repo ceiling, no LRU eviction races with
+      # the Android workflow, and caches saved by TAG builds stay restorable
+      # (GitHub's cache scopes tag refs — every release rebuilds cold there).
+      - name: Restore build caches (S3/Garage)
+        id: s3cache
+        if: ${{ secrets.S3_CACHE_KEY_ID != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
+          AWS_ENDPOINT_URL: ${{ vars.S3_CACHE_ENDPOINT }}
+          AWS_DEFAULT_REGION: garage
+        run: |
+          set -uo pipefail
+          aws configure set default.s3.addressing_style path
+          KONAN_KEY="konan2/${RUNNER_OS}/${{ hashFiles('gradle/libs.versions.toml') }}"
+          FW_KEY="fw3/${RUNNER_OS}/${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}"
+
+          s3_has() { aws s3 ls "s3://${S3_CACHE_BUCKET}/$1/" 2>/dev/null | grep -q .; }
+
+          # konan: exact hit, else the newest older prefix (the KN toolchain
+          # accumulates versions — a stale tarball still saves a full download)
+          KONAN_SRC=""
+          if s3_has "$KONAN_KEY"; then
+            KONAN_SRC="$KONAN_KEY"
+          else
+            KONAN_SRC=$(aws s3 ls "s3://${S3_CACHE_BUCKET}/konan2/${RUNNER_OS}/" 2>/dev/null \
+              | awk '{print $2}' | sed 's:/$::' | sort | tail -1)
+            [ -n "$KONAN_SRC" ] && echo "konan: exact key miss, falling back to $KONAN_SRC"
+          fi
+          if [ -n "$KONAN_SRC" ]; then
+            aws s3 cp "s3://${S3_CACHE_BUCKET}/${KONAN_SRC}/konan.tgz" "$RUNNER_TEMP/konan.tgz" \
+              && tar -xzf "$RUNNER_TEMP/konan.tgz" -C "$HOME" && rm -f "$RUNNER_TEMP/konan.tgz" \
+              && echo "konan=hit" >> "$GITHUB_OUTPUT" \
+              || echo "konan restore failed — continuing cold"
+          fi
+          echo "konan_key=$KONAN_KEY" >> "$GITHUB_OUTPUT"
+
+          # framework: EXACT key only — a stale framework must never be used
+          # (same discipline as the actions/cache variant)
+          if s3_has "$FW_KEY"; then
+            if aws s3 cp "s3://${S3_CACHE_BUCKET}/${FW_KEY}/fw.tgz" "$RUNNER_TEMP/fw.tgz" \
+              && tar -xzf "$RUNNER_TEMP/fw.tgz" -C . && rm -f "$RUNNER_TEMP/fw.tgz"; then
+              echo "fw=hit" >> "$GITHUB_OUTPUT"
+            else
+              echo "framework restore failed — Gradle will rebuild"
+            fi
+          fi
+          echo "fw_key=$FW_KEY" >> "$GITHUB_OUTPUT"
+          echo "restore summary: konan=$(grep -o 'konan=.*' "$GITHUB_OUTPUT" | tail -1 || echo miss) fw=$(grep -o 'fw=.*' "$GITHUB_OUTPUT" | head -1 || echo miss)"
 
       - name: Install asc CLI
         run: |
@@ -341,9 +401,9 @@ jobs:
         env:
           VERSION: ${{ steps.ids.outputs.version }}
           BUILD_NUMBER: ${{ steps.ids.outputs.build_number }}
-          # 'true' only on an exact framework-cache hit — the scheme
-          # pre-action then restores the framework and skips Gradle
-          ASC_FW_CACHE_HIT: ${{ steps.fwcache.outputs.cache-hit }}
+          # 'true' on an exact framework-cache hit (GitHub cache OR S3/Garage)
+          # — the scheme pre-action then restores the framework and skips Gradle
+          ASC_FW_CACHE_HIT: ${{ (steps.fwcache.outputs.cache-hit == 'true' || steps.s3cache.outputs.fw == 'hit') && 'true' || '' }}
         run: |
           # Pre-flight: the signing keychain may have re-locked (session
           # state is not trustworthy across the Gradle phase) — unlock and
@@ -369,7 +429,8 @@ jobs:
             --xcodebuild-flag=PROVISIONING_PROFILE="$PROFILE_UUID" \
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
-            --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+            --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            --xcodebuild-flag=COMPILER_INDEX_STORE_ENABLE=NO
 
       # The cache fast path restores the framework but NOT the Compose
       # resources (the Gradle embed task normally copies them into the .app).
@@ -387,6 +448,40 @@ jobs:
           mkdir -p "$APP_IN_ARCHIVE/compose-resources"
           cp -R "$RES" "$APP_IN_ARCHIVE/compose-resources/"
           echo "staged $(basename "$(dirname "$RES")") compose resources into the archive app"
+
+      # Persist what the Gradle pre-action produced (it runs INSIDE the
+      # Archive step above, hence save-after-archive). Fire-and-forget:
+      # a cache save failure must never fail a release.
+      - name: Save build caches (S3/Garage)
+        if: ${{ secrets.S3_CACHE_KEY_ID != '' && steps.s3cache.outputs.fw != 'hit' }}
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
+          AWS_ENDPOINT_URL: ${{ vars.S3_CACHE_ENDPOINT }}
+          AWS_DEFAULT_REGION: garage
+          KONAN_KEY: ${{ steps.s3cache.outputs.konan_key }}
+          FW_KEY: ${{ steps.s3cache.outputs.fw_key }}
+        run: |
+          set -euo pipefail
+          aws configure set default.s3.addressing_style path
+          mkdir -p "$RUNNER_TEMP/s3cache"
+          # framework only exists when Gradle actually built it (fw miss)
+          if ls shared/build/xcode-frameworks/"$CONFIGURATION"/*/shared.framework >/dev/null 2>&1; then
+            tar -czf "$RUNNER_TEMP/s3cache/fw.tgz" \
+              shared/build/xcode-frameworks \
+              shared/build/generated/compose/resourceGenerator
+            aws s3 cp "$RUNNER_TEMP/s3cache/fw.tgz" "s3://${S3_CACHE_BUCKET}/${FW_KEY}/fw.tgz" --no-progress
+            rm -f "$RUNNER_TEMP/s3cache/fw.tgz"
+            echo "saved framework → ${FW_KEY}"
+          fi
+          # konan: skip when restored this run; save only newly downloaded toolchains
+          if [ "${{ steps.s3cache.outputs.konan }}" != "hit" ] && [ -d "$HOME/.konan" ]; then
+            tar -czf "$RUNNER_TEMP/s3cache/konan.tgz" -C "$HOME" konan
+            aws s3 cp "$RUNNER_TEMP/s3cache/konan.tgz" "s3://${S3_CACHE_BUCKET}/${KONAN_KEY}/konan.tgz" --no-progress
+            rm -f "$RUNNER_TEMP/s3cache/konan.tgz"
+            echo "saved konan → ${KONAN_KEY}"
+          fi
 
       - name: Export IPA (app-store-connect)
         run: |
