@@ -1,4 +1,4 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
 MARKETING_VERSION = 0.8.0
-CURRENT_PROJECT_VERSION = 54
+CURRENT_PROJECT_VERSION = 55
