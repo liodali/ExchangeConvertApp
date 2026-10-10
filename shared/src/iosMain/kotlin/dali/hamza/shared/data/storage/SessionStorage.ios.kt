@@ -131,12 +131,24 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(timestamp.toDouble(), forKey = KEY_SESSION_EXPIRES_AT)
     }
 
+    override fun getLastPushToken(): String? =
+        defaults.stringForKey(KEY_LAST_PUSH_TOKEN)
+
+    override fun setLastPushToken(token: String?) {
+        if (token == null) {
+            defaults.removeObjectForKey(KEY_LAST_PUSH_TOKEN)
+        } else {
+            defaults.setObject(token, forKey = KEY_LAST_PUSH_TOKEN)
+        }
+    }
+
     private companion object {
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
         const val KEY_CURRENCY = "currency"
         const val KEY_USERNAME = "username"
         const val KEY_LAST_UPDATE = "last_time_update_rates"
+        const val KEY_LAST_PUSH_TOKEN = "last_push_token"
         const val KEY_NOTIFICATIONS = "notifications_enabled"
         const val KEY_DEFAULT_PAIR = "default_pair"
         const val KEY_MARKET_PREFERENCES = "market_preferences"

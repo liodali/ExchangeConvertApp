@@ -4,6 +4,7 @@ import dali.hamza.shared.data.network.models.AlertDataAPI
 import dali.hamza.shared.data.network.models.AlertsErrorResponse
 import dali.hamza.shared.data.network.models.CreateAlertRequest
 import dali.hamza.shared.data.network.models.DeviceRegistrationRequest
+import dali.hamza.shared.data.network.models.DeviceRemovalRequest
 import dali.hamza.shared.data.network.models.SessionRequest
 import dali.hamza.shared.data.network.models.SessionResponse
 import dali.hamza.shared.data.network.models.UpdateAlertRequest
@@ -101,6 +102,21 @@ class RateAlertsApi(
                     appVersion = appVersion,
                 )
             )
+        }
+        Unit
+    }
+
+    /**
+     * Remove a push token from the session (server marks the row inactive).
+     * Called on token rotation — after the replacement registers — so the
+     * previous token doesn't linger as a live row until a send or the 30d
+     * hygiene pass removes it.
+     */
+    suspend fun unregisterDevice(bearerToken: String, token: String): Result<Unit> = call {
+        httpClient.delete("alerts/devices") {
+            bearerAuth(bearerToken)
+            contentType(ContentType.Application.Json)
+            setBody(DeviceRemovalRequest(token = token))
         }
         Unit
     }

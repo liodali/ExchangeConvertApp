@@ -116,6 +116,15 @@ interface ISessionStorage {
     fun getSessionExpiresAt(): Long = 0L
 
     fun setSessionExpiresAt(timestamp: Long) {}
+
+    /**
+     * Last push token this install registered with the server — rotation
+     * detection: when a new token registers and differs, the old one is
+     * unregistered right after. `null` = never registered.
+     */
+    fun getLastPushToken(): String? = null
+
+    fun setLastPushToken(token: String?) {}
 }
 
 const val DEFAULT_CURRENCY = "USD"

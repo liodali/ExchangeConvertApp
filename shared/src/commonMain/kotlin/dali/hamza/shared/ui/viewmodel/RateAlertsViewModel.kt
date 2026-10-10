@@ -70,6 +70,10 @@ class RateAlertsViewModel(
     var message by mutableStateOf<String?>(null)
         private set
 
+    /** True when [message] is informational (gold) rather than an error (red). */
+    var messageIsPositive by mutableStateOf(false)
+        private set
+
     init {
         refresh()
     }
@@ -140,6 +144,7 @@ class RateAlertsViewModel(
             } else {
                 result.exceptionOrNull()
             }
+            messageIsPositive = failure == null && note != null
             message = failure?.message ?: note
             localAlerts = repository.getRateAlerts()
             serverAlerts = repository.getServerRateAlerts()
@@ -163,6 +168,49 @@ class RateAlertsViewModel(
                 thresholdPercent = thresholdPercent,
             )
         )
+
+    /**
+     * Move a local alert to server push: create the pushed twin first, and
+     * only delete the local row when that succeeded — an unreachable push
+     * service never loses the alert (the local engine just keeps it).
+     * The cadence maps onto the closest one the tier allows
+     * ([RateAlert.serverIntervalsForTier]); threshold alerts become the
+     * 2-hour digest.
+     */
+    fun convertToPush(alert: RateAlert) {
+        viewModelScope.launch {
+            val intervals = RateAlert.serverIntervalsForTier(tier)
+            val interval =
+                if (alert.mode == RateAlertMode.PERIODIC && alert.intervalMinutes in intervals) {
+                    alert.intervalMinutes
+                } else {
+                    intervals.last()
+                }
+            repository.addServerRateAlert(
+                RateAlert(
+                    base = alert.base,
+                    quote = alert.quote,
+                    mode = RateAlertMode.PERIODIC,
+                    intervalMinutes = interval,
+                    thresholdPercent = alert.thresholdPercent,
+                    enabled = alert.enabled,
+                )
+            ).fold(
+                onSuccess = {
+                    repository.removeRateAlert(alert.id) // exactly one place
+                    messageIsPositive = true
+                    message = LedgerStrings.RateAlerts.movedToPush(alert.base, alert.quote)
+                    localAlerts = repository.getRateAlerts()
+                    serverAlerts = repository.getServerRateAlerts()
+                    scheduler.update(localAlerts.any { it.enabled })
+                },
+                onFailure = { failure ->
+                    messageIsPositive = false
+                    message = failure.message
+                },
+            )
+        }
+    }
 
     fun removeAlert(alert: RateAlert) {
         viewModelScope.launch {
@@ -191,5 +239,6 @@ class RateAlertsViewModel(
 
     fun clearMessage() {
         message = null
+        messageIsPositive = false
     }
 }

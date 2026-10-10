@@ -68,6 +68,11 @@ class PushSessionManager(
      * push token under the current session. Called on every app launch
      * and from the FCM `onNewToken` rotation hook.
      *
+     * Rotation hygiene: when the incoming token differs from the previous
+     * one persisted in [ISessionStorage], the OLD token is unregistered
+     * right after the new one registers — otherwise the dead row lingers
+     * as "active" until a send fails or the 30-day hygiene pass removes it.
+     *
      * @param pushToken FCM registration token (APNs device token as a hex
      *   string on iOS, Phase 3)
      * @param bundleId application id — APNs topic / build identity
@@ -80,17 +85,39 @@ class PushSessionManager(
     ): Result<Unit> {
         val bearer = ensureSession()
             ?: return Result.failure(IllegalStateException("No alert session — server unreachable or session mint failed"))
-        return alertsApi.registerDevice(
+        val result = alertsApi.registerDevice(
             bearerToken = bearer,
             platform = platform(),
             token = pushToken,
             bundleId = bundleId,
             appVersion = appVersion,
-        ).onSuccess {
+        )
+        result.onSuccess {
+            val previous = storage.getLastPushToken()
+            if (previous != null && previous != pushToken) {
+                // best-effort: the old row dies on the next send anyway
+                alertsApi.unregisterDevice(bearerToken = bearer, token = previous)
+                Napier.i(tag = TAG) { "previous push token unregistered (rotation)" }
+            }
+            storage.setLastPushToken(pushToken)
             Napier.i(tag = TAG) { "device registered for push alerts (${platform()})" }
         }.onFailure { error ->
             Napier.w(tag = TAG, throwable = error) { "device registration failed" }
         }
+        return result
+    }
+
+    /**
+     * Explicit sign-out / opt-out: retire the current token (server marks
+     * the row inactive — no more pushes until a future launch re-registers).
+     */
+    suspend fun unregisterDevice(pushToken: String? = null): Result<Unit> {
+        val token = pushToken ?: storage.getLastPushToken()
+            ?: return Result.failure(IllegalStateException("No push token registered on this install"))
+        val bearer = ensureSession() ?: return Result.failure(IllegalStateException("No alert session"))
+        return alertsApi.unregisterDevice(bearerToken = bearer, token = token)
+            .onSuccess { Napier.i(tag = TAG) { "push token unregistered" } }
+            .onFailure { Napier.w(tag = TAG) { "push token unregister failed" } }
     }
 
     /** `POST /auth/session` and cache the result. Null on failure. */

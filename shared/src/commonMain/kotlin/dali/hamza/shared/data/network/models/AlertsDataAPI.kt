@@ -35,6 +35,12 @@ data class DeviceRegistrationRequest(
     @SerialName("appVersion") val appVersion: String? = null,
 )
 
+/** `DELETE /alerts/devices` — sign-out / token-rotation cleanup (Bearer). */
+@Serializable
+data class DeviceRemovalRequest(
+    @SerialName("token") val token: String,
+)
+
 /** `POST /alerts` — create one server-evaluated alert (Bearer). */
 @Serializable
 data class CreateAlertRequest(

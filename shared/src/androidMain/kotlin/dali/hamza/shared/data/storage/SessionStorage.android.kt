@@ -123,6 +123,13 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putLong(KEY_SESSION_EXPIRES_AT, timestamp).apply()
     }
 
+    override fun getLastPushToken(): String? =
+        preferences.getString(KEY_LAST_PUSH_TOKEN, null)
+
+    override fun setLastPushToken(token: String?) {
+        preferences.edit().putString(KEY_LAST_PUSH_TOKEN, token).apply()
+    }
+
     private companion object {
         const val PREF_NAME = "shared_session"
         const val KEY_CURRENCY = "currency"
@@ -132,6 +139,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_DEFAULT_PAIR = "default_pair"
         const val KEY_DATA_TIER = "data_tier"
         const val KEY_BIOMETRIC_UNLOCK = "biometric_unlock"
+        const val KEY_LAST_PUSH_TOKEN = "last_push_token"
         const val KEY_MARKET_PREFERENCES = "market_preferences"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"

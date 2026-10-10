@@ -1,19 +1,32 @@
 package dali.hamza.shared.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material3.Icon
@@ -24,14 +37,20 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dali.hamza.shared.domain.models.AlertSource
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.RateAlertMode
@@ -47,6 +66,8 @@ import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Rate Alerts (pushed route from Account) — manage the tier-capped
@@ -93,7 +114,7 @@ fun RateAlertsScreen(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (message == LedgerStrings.RateAlerts.PUSH_FALLBACK_NOTE) {
+                    color = if (viewModel.messageIsPositive) {
                         LedgerColors.Gold
                     } else {
                         LedgerColors.Error
@@ -126,11 +147,13 @@ fun RateAlertsScreen(
                     BentoCard {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             viewModel.serverAlerts.forEach { alert ->
-                                AlertRow(
-                                    alert = alert,
-                                    onToggle = { viewModel.setEnabled(alert, it) },
-                                    onDelete = { viewModel.removeAlert(alert) },
-                                )
+                                key(alert.id) {
+                                    AlertRow(
+                                        alert = alert,
+                                        onToggle = { viewModel.setEnabled(alert, it) },
+                                        onDelete = { viewModel.removeAlert(alert) },
+                                    )
+                                }
                             }
                         }
                     }
@@ -145,15 +168,32 @@ fun RateAlertsScreen(
                         ),
                         atCap = localAtCap,
                     )
+                    // exactly the "locals but nothing pushed" case: nudge
+                    // the upgrade the tier still has room for
+                    if (viewModel.serverAlerts.isEmpty() && !serverAtCap) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = LedgerStrings.RateAlerts.LOCAL_TO_PUSH_HINT,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = LedgerColors.TextTertiary,
+                        )
+                    }
                     Spacer(Modifier.height(12.dp))
                     BentoCard {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             viewModel.localAlerts.forEach { alert ->
-                                AlertRow(
-                                    alert = alert,
-                                    onToggle = { viewModel.setEnabled(alert, it) },
-                                    onDelete = { viewModel.removeAlert(alert) },
-                                )
+                                key(alert.id) {
+                                    AlertRow(
+                                        alert = alert,
+                                        onToggle = { viewModel.setEnabled(alert, it) },
+                                        onDelete = { viewModel.removeAlert(alert) },
+                                        onConvertToPush = if (!serverAtCap) {
+                                            { viewModel.convertToPush(alert) }
+                                        } else {
+                                            null
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -248,75 +288,157 @@ private fun PermissionBanner(onEnable: () -> Unit) {
     }
 }
 
+/** Anchors for the swipe-to-reveal delete action (right → left). */
+private enum class AlertRowAnchor { Settled, Revealed }
+
+/** Width of the revealed delete strip (icon-only action). */
+private val AlertRevealWidth = 72.dp
+
+/**
+ * One alert row. Swiping **right → left** reveals a delete strip that
+ * stays open until tapped — the delete happens only on that explicit
+ * click (push rows DELETE on the server via [RateAlertsViewModel.removeAlert]'s
+ * source dispatch). On-device rows below the push cap also show a compact
+ * "Move to push" action under the content.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AlertRow(
     alert: RateAlert,
     onToggle: (Boolean) -> Unit,
     onDelete: () -> Unit,
+    /** Non-null (and below the push cap) shows the "move to push" action. */
+    onConvertToPush: (() -> Unit)? = null,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(LedgerColors.Canvas)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.weight(1f),
-        ) {
-            // mode chip gets its own line above the pair — matches the
-            // design's small-label-over-content pattern (Heading 3)
-            LedgerChip(
-                text = modeChipLabel(alert),
-                tint = if (alert.mode == RateAlertMode.THRESHOLD) {
-                    LedgerColors.Gold
-                } else {
-                    LedgerColors.Blue
-                },
-                cornerRadius = 6.dp,
-            )
-            Text(
-                text = LedgerStrings.RateAlerts.pairTitle(alert.base, alert.quote),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = LedgerColors.TextPrimary,
-            )
-            alert.lastRate?.let { rate ->
-                Text(
-                    text = LedgerStrings.RateAlerts.lastRateLabel(rate),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LedgerColors.TextSecondary,
-                )
-            } ?: Text(
-                text = LedgerStrings.RateAlerts.AWAITING_CHECK,
-                style = MaterialTheme.typography.bodySmall,
-                color = LedgerColors.TextTertiary,
-            )
-            // lastNotifiedAt is seeded with the creation time (so periodic
-            // alerts wait a full interval) — only real firings are shown
-            if (alert.lastNotifiedAt > alert.createdAt) {
-                Text(
-                    text = LedgerStrings.RateAlerts.notifiedAt(alert.lastNotifiedAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = LedgerColors.TextTertiary,
-                )
-            }
-        }
-        Switch(
-            checked = alert.enabled,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = LedgerColors.Green,
-                checkedTrackColor = LedgerColors.Green.copy(alpha = 0.25f),
-            ),
+    val density = LocalDensity.current
+    val scope = rememberCoroutineScope()
+    val revealPx = with(density) { AlertRevealWidth.toPx() }
+    // anchors at CONSTRUCTION: the offset lambda below runs during the
+    // very first layout pass, before any LaunchedEffect coroutine —
+    // requireOffset()/late anchoring would crash that frame (SIGABRT on
+    // iOS). Anchors in the constructor + the non-throwing offset property.
+    val swipeState = remember(revealPx) {
+        AnchoredDraggableState(
+            initialValue = AlertRowAnchor.Settled,
+            anchors = DraggableAnchors {
+                AlertRowAnchor.Settled at 0f
+                AlertRowAnchor.Revealed at -revealPx
+            },
         )
-        IconButton(onClick = onDelete) {
+    }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        // revealed action — anchored to the right edge, tap to confirm
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .width(AlertRevealWidth)
+                .clip(RoundedCornerShape(16.dp))
+                .background(LedgerColors.Error.copy(alpha = 0.12f))
+                .clickable { onDelete() },
+            contentAlignment = Alignment.Center,
+        ) {
             Icon(
                 imageVector = Icons.Outlined.DeleteOutline,
-                contentDescription = LedgerStrings.RateAlerts.TITLE,
+                contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
                 tint = LedgerColors.Error,
+            )
+        }
+
+        // foreground card — slides left, revealing the action behind it
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset { IntOffset(swipeState.offset.roundToInt(), 0) }
+                .anchoredDraggable(swipeState, Orientation.Horizontal)
+                .clip(RoundedCornerShape(16.dp))
+                .background(LedgerColors.Canvas)
+                // tapping the card while revealed collapses the action
+                .clickable(
+                    interactionSource = null,
+                    indication = null,
+                ) {
+                    if (swipeState.currentValue == AlertRowAnchor.Revealed) {
+                        scope.launch { swipeState.animateTo(AlertRowAnchor.Settled) }
+                    }
+                }
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                // mode chip gets its own line above the pair — matches the
+                // design's small-label-over-content pattern (Heading 3)
+                LedgerChip(
+                    text = modeChipLabel(alert),
+                    tint = if (alert.mode == RateAlertMode.THRESHOLD) {
+                        LedgerColors.Gold
+                    } else {
+                        LedgerColors.Blue
+                    },
+                    cornerRadius = 6.dp,
+                )
+                Text(
+                    text = LedgerStrings.RateAlerts.pairTitle(alert.base, alert.quote),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = LedgerColors.TextPrimary,
+                )
+                alert.lastRate?.let { rate ->
+                    Text(
+                        text = LedgerStrings.RateAlerts.lastRateLabel(rate),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextSecondary,
+                    )
+                } ?: Text(
+                    text = LedgerStrings.RateAlerts.AWAITING_CHECK,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LedgerColors.TextTertiary,
+                )
+                // lastNotifiedAt is seeded with the creation time (so periodic
+                // alerts wait a full interval) — only real firings are shown
+                if (alert.lastNotifiedAt > alert.createdAt) {
+                    Text(
+                        text = LedgerStrings.RateAlerts.notifiedAt(alert.lastNotifiedAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                }
+                // upgrade path: move this on-device alert to server push
+                if (onConvertToPush != null && alert.source == AlertSource.LOCAL) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(LedgerColors.Blue.copy(alpha = 0.10f))
+                            .clickable { onConvertToPush() }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudUpload,
+                            contentDescription = null,
+                            tint = LedgerColors.Blue,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Text(
+                            text = LedgerStrings.RateAlerts.CONVERT_TO_PUSH,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = LedgerColors.Blue,
+                        )
+                    }
+                }
+            }
+            Switch(
+                checked = alert.enabled,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = LedgerColors.Green,
+                    checkedTrackColor = LedgerColors.Green.copy(alpha = 0.25f),
+                ),
             )
         }
     }

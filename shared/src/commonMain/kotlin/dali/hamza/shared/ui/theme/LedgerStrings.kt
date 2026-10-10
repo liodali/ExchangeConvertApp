@@ -142,6 +142,24 @@ object LedgerStrings {
         const val PUSH_FALLBACK_NOTE =
             "Push service unreachable — alert saved on device instead."
 
+        /** Confirmation when a local alert moved to server push. */
+        fun movedToPush(base: String, quote: String) =
+            "$base → $quote moved to server push."
+
+        /** Row action: move one on-device alert to server push (a11y). */
+        const val CONVERT_TO_PUSH_DESC = "Move to server push"
+
+        /** Compact under-content action label. */
+        const val CONVERT_TO_PUSH = "Move to push"
+
+        /** Swipe-to-reveal delete affordance (a11y + label). */
+        const val DELETE_ALERT_LABEL = "Delete"
+        const val DELETE_ALERT_DESC = "Swipe left to reveal delete"
+
+        /** Shown under the ON DEVICE section when nothing is pushed yet. */
+        const val LOCAL_TO_PUSH_HINT =
+            "Pushed alerts arrive even when the app is closed — use “Move to push” under an alert."
+
         fun pairTitle(base: String, quote: String) = "$base → $quote"
         fun modeLabel(intervalMinutes: Long) = "Every ${intervalMinutes / 60}h"
         fun thresholdLabel(percent: Double) =
