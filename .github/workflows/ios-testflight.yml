@@ -179,11 +179,16 @@ jobs:
           AWS_DEFAULT_REGION: garage
         run: |
           set -uo pipefail
-          aws configure set default.s3.addressing_style path
           KONAN_KEY="konan2/${RUNNER_OS}/${{ hashFiles('gradle/libs.versions.toml') }}"
           FW_KEY="fw3/${RUNNER_OS}/${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}"
+          echo "konan_key=$KONAN_KEY" >> "$GITHUB_OUTPUT"
+          echo "fw_key=$FW_KEY" >> "$GITHUB_OUTPUT"
+          aws configure set default.s3.addressing_style path
 
-          s3_has() { aws s3 ls "s3://${S3_CACHE_BUCKET}/$1/" 2>/dev/null | grep -q .; }
+          # Garage quirk: `aws s3 ls` on a missing prefix exits 1 (AWS S3
+          # exits 0 with empty output) — every ls must be failure-tolerant
+          # or the runner's bash -e aborts the step silently.
+          s3_has() { { aws s3 ls "s3://${S3_CACHE_BUCKET}/$1/" 2>/dev/null || true; } | grep -q .; }
 
           # konan: exact hit, else the newest older prefix (the KN toolchain
           # accumulates versions — a stale tarball still saves a full download)
@@ -191,7 +196,7 @@ jobs:
           if s3_has "$KONAN_KEY"; then
             KONAN_SRC="$KONAN_KEY"
           else
-            KONAN_SRC=$(aws s3 ls "s3://${S3_CACHE_BUCKET}/konan2/${RUNNER_OS}/" 2>/dev/null \
+            KONAN_SRC=$( { aws s3 ls "s3://${S3_CACHE_BUCKET}/konan2/${RUNNER_OS}/" 2>/dev/null || true; } \
               | awk '{print $2}' | sed 's:/$::' | sort | tail -1)
             if [ -n "$KONAN_SRC" ]; then
               echo "konan: exact key miss, falling back to $KONAN_SRC"
@@ -203,7 +208,6 @@ jobs:
               && echo "konan=hit" >> "$GITHUB_OUTPUT" \
               || echo "konan restore failed — continuing cold"
           fi
-          echo "konan_key=$KONAN_KEY" >> "$GITHUB_OUTPUT"
 
           # framework: EXACT key only — a stale framework must never be used
           # (same discipline as the actions/cache variant)
@@ -215,7 +219,6 @@ jobs:
               echo "framework restore failed — Gradle will rebuild"
             fi
           fi
-          echo "fw_key=$FW_KEY" >> "$GITHUB_OUTPUT"
           echo "restore summary: konan=$(grep -o 'konan=.*' "$GITHUB_OUTPUT" | tail -1 || echo miss) fw=$(grep -o 'fw=.*' "$GITHUB_OUTPUT" | head -1 || echo miss)"
 
       - name: Install asc CLI
@@ -468,10 +471,18 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
           AWS_ENDPOINT_URL: ${{ vars.S3_CACHE_ENDPOINT }}
           AWS_DEFAULT_REGION: garage
-          KONAN_KEY: ${{ steps.s3cache.outputs.konan_key }}
-          FW_KEY: ${{ steps.s3cache.outputs.fw_key }}
+          # Compute keys independently: restore can fail before emitting outputs.
+          KONAN_KEY: konan2/${{ runner.os }}/${{ hashFiles('gradle/libs.versions.toml') }}
+          FW_KEY: fw3/${{ runner.os }}/${{ hashFiles('shared/src/**/*.kt', 'shared/src/**/*.sq', 'shared/build.gradle.kts', 'gradle/libs.versions.toml') }}
         run: |
           set -euo pipefail
+          # never save under empty keys — a restore step that died early
+          # leaves them unset (that's how an fw.tgz landed at the bucket
+          # root on the first attempt)
+          if [ -z "${FW_KEY:-}" ] || [ -z "${KONAN_KEY:-}" ]; then
+            echo "::warning::cache keys missing (restore did not complete) — skipping save"
+            exit 0
+          fi
           aws configure set default.s3.addressing_style path
           mkdir -p "$RUNNER_TEMP/s3cache"
           # framework only exists when Gradle actually built it (fw miss)
@@ -485,7 +496,7 @@ jobs:
           fi
           # konan: skip when restored this run; save only newly downloaded toolchains
           if [ "${{ steps.s3cache.outputs.konan }}" != "hit" ] && [ -d "$HOME/.konan" ]; then
-            tar -czf "$RUNNER_TEMP/s3cache/konan.tgz" -C "$HOME" konan
+            tar -czf "$RUNNER_TEMP/s3cache/konan.tgz" -C "$HOME" .konan
             aws s3 cp "$RUNNER_TEMP/s3cache/konan.tgz" "s3://${S3_CACHE_BUCKET}/${KONAN_KEY}/konan.tgz" --no-progress
             rm -f "$RUNNER_TEMP/s3cache/konan.tgz"
             echo "saved konan → ${KONAN_KEY}"
