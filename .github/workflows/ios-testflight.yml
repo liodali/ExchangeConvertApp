@@ -169,6 +169,9 @@ jobs:
       - name: Restore build caches (S3/Garage)
         id: s3cache
         if: env.S3_CACHE_ENABLED == 'true'
+        # cache problems must NEVER block a release — a dead restore
+        # degrades to a cold Gradle build via the empty outputs
+        continue-on-error: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
@@ -190,7 +193,9 @@ jobs:
           else
             KONAN_SRC=$(aws s3 ls "s3://${S3_CACHE_BUCKET}/konan2/${RUNNER_OS}/" 2>/dev/null \
               | awk '{print $2}' | sed 's:/$::' | sort | tail -1)
-            [ -n "$KONAN_SRC" ] && echo "konan: exact key miss, falling back to $KONAN_SRC"
+            if [ -n "$KONAN_SRC" ]; then
+              echo "konan: exact key miss, falling back to $KONAN_SRC"
+            fi
           fi
           if [ -n "$KONAN_SRC" ]; then
             aws s3 cp "s3://${S3_CACHE_BUCKET}/${KONAN_SRC}/konan.tgz" "$RUNNER_TEMP/konan.tgz" \
