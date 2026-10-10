@@ -355,6 +355,7 @@ matches the Sovereign positioning.)
 | Var | Purpose |
 |---|---|
 | `ALERTS_EVAL_INTERVAL_MS` | evaluator tick (default 300000) |
+| `ALERTS_QUIET_NIGHT_START_HOUR` / `ALERTS_QUIET_NIGHT_END_HOUR` / `ALERTS_QUIET_TZ` / `ALERTS_QUIET_WEEKENDS` | quiet hours (v0.5.3): night 20–8 Europe/Berlin silences ALL pairs; weekends silence non-crypto only (crypto trades 24/7); fully-quiet bases skip provider fetches; baselines survive so Monday 08:00 emits at most one notification per moved pair |
 | `ALERTS_FRESHNESS_TTL_MS` | rate cache TTL for evaluation (default 600000) |
 | `ALERTS_ENABLED` | feature kill-switch (worker + routes + session issuer) |
 | `SESSION_JWT_TTL_DAYS` | anon JWT lifetime (default 30) |
