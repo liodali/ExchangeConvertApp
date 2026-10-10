@@ -3,6 +3,8 @@ package dali.hamza.shared.data.network
 import dali.hamza.shared.data.network.models.AlertDataAPI
 import dali.hamza.shared.data.network.models.AlertsErrorResponse
 import dali.hamza.shared.data.network.models.CreateAlertRequest
+import dali.hamza.shared.data.network.models.DeviceDataAPI
+import dali.hamza.shared.data.network.models.DevicePauseRequest
 import dali.hamza.shared.data.network.models.DeviceRegistrationRequest
 import dali.hamza.shared.data.network.models.DeviceRemovalRequest
 import dali.hamza.shared.data.network.models.SessionRequest
@@ -117,6 +119,31 @@ class RateAlertsApi(
             bearerAuth(bearerToken)
             contentType(ContentType.Application.Json)
             setBody(DeviceRemovalRequest(token = token))
+        }
+        Unit
+    }
+
+    /** Own registered push devices (future admin panel / device management UI). */
+    suspend fun listDevices(bearerToken: String): Result<List<DeviceDataAPI>> = call {
+        httpClient.get("alerts/devices") {
+            bearerAuth(bearerToken)
+        }.body<List<DeviceDataAPI>>()
+    }
+
+    /**
+     * Per-device pause — PATCH /alerts/devices/{id} {pausedUntil}. 0 resumes.
+     * Used by the Account "Push Notifications" preference: off pauses this
+     * device's pushes server-side; on resumes them.
+     */
+    suspend fun setDevicePaused(
+        bearerToken: String,
+        deviceId: Long,
+        pausedUntil: Long,
+    ): Result<Unit> = call {
+        httpClient.patch("alerts/devices/$deviceId") {
+            bearerAuth(bearerToken)
+            contentType(ContentType.Application.Json)
+            setBody(DevicePauseRequest(pausedUntil = pausedUntil))
         }
         Unit
     }

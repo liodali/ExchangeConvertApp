@@ -41,6 +41,25 @@ data class DeviceRemovalRequest(
     @SerialName("token") val token: String,
 )
 
+/** `GET /alerts/devices` — own registered devices. */
+@Serializable
+data class DeviceDataAPI(
+    @SerialName("id") val id: Long,
+    @SerialName("platform") val platform: String,
+    @SerialName("bundleId") val bundleId: String? = null,
+    @SerialName("appVersion") val appVersion: String? = null,
+    @SerialName("active") val active: Boolean = false,
+    @SerialName("paused") val paused: Boolean = false,
+    @SerialName("pausedUntil") val pausedUntil: Long = 0L,
+    @SerialName("lastSeenAt") val lastSeenAt: Long = 0L,
+)
+
+/** `PATCH /alerts/devices/{id}` — per-device pause (0 = resume). */
+@Serializable
+data class DevicePauseRequest(
+    @SerialName("pausedUntil") val pausedUntil: Long,
+)
+
 /** `POST /alerts` — create one server-evaluated alert (Bearer). */
 @Serializable
 data class CreateAlertRequest(

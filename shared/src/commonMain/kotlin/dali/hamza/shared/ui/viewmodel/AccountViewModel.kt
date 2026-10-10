@@ -3,6 +3,7 @@ package dali.hamza.shared.ui.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dali.hamza.shared.data.session.PushSessionManager
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.domain.repository.IRepository
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class AccountViewModel(
     private val storage: ISessionStorage,
     private val repository: IRepository? = null,
+    private val pushSessionManager: PushSessionManager? = null,
 ) {
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -110,6 +112,11 @@ class AccountViewModel(
     fun toggleNotifications() {
         notificationsEnabled = !notificationsEnabled
         storage.setNotificationsEnabled(notificationsEnabled)
+        // mirror the preference server-side: pause/resume this device's push
+        // (best-effort — the local engine gate above stays authoritative)
+        viewModelScope.launch {
+            runCatching { pushSessionManager?.setDevicePaused(!notificationsEnabled) }
+        }
     }
 
     /** "Edit Profile" — persists the new display name. */

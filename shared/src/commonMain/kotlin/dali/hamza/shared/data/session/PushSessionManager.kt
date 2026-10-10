@@ -1,6 +1,7 @@
 package dali.hamza.shared.data.session
 
 import dali.hamza.shared.data.network.RateAlertsApi
+import dali.hamza.shared.data.network.models.DeviceDataAPI
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.platform.appVersionName
 import dali.hamza.shared.platform.currentEpochMillis
@@ -120,6 +121,29 @@ class PushSessionManager(
             .onFailure { Napier.w(tag = TAG) { "push token unregister failed" } }
     }
 
+    /**
+     * Per-device pause — backs the Account "Push Notifications" preference:
+     * `paused = true` silences this device's pushes server-side (indefinite,
+     * enforced server-max as one year) without unregistering the token or
+     * touching other devices; `false` resumes. Best-effort — the local
+     * engine's own preference gate remains the primary control.
+     */
+    suspend fun setDevicePaused(paused: Boolean) {
+        val bearer = ensureSession() ?: return
+        runCatching {
+            val own = alertsApi.listDevices(bearerToken = bearer)
+                .getOrDefault(emptyList())
+                .firstOrNull { it.platform == platform() }
+                ?: return
+            val until = if (paused) currentEpochMillis() + PAUSE_INDEFINITE_MS else 0L
+            alertsApi.setDevicePaused(bearerToken = bearer, deviceId = own.id, pausedUntil = until)
+        }.onSuccess {
+            Napier.i(tag = TAG) { "device ${if (paused) "paused" else "resumed"} server-side" }
+        }.onFailure {
+            Napier.w(tag = TAG) { "device pause sync failed (server unreachable — local gate still applies)" }
+        }
+    }
+
     /** `POST /auth/session` and cache the result. Null on failure. */
     private suspend fun mintSession(): String? =
         alertsApi.createSession(
@@ -144,6 +168,9 @@ class PushSessionManager(
 
         /** Refresh the JWT when less than 7 days remain (plan §3.1). */
         const val SESSION_REFRESH_MARGIN_MS = 7L * 24 * 60 * 60 * 1000L
+
+        /** "Indefinite" pause — the server enforces a 1-year maximum. */
+        const val PAUSE_INDEFINITE_MS = 364L * 24 * 60 * 60 * 1000L
 
         const val PLATFORM_ANDROID = "ANDROID"
         const val PLATFORM_IOS = "IOS"

@@ -69,7 +69,7 @@ fun sharedModule(
         )
     }
     factory { SharedViewModel(get()) }
-    factory { AccountViewModel(storage = get(), repository = get()) }
+    factory { AccountViewModel(storage = get(), repository = get(), pushSessionManager = get()) }
     factory { HistoryViewModel(get()) }
     factory { HomeViewModel(get()) }
     factory { RateAlertsViewModel(get(), get(), get(), get()) }
