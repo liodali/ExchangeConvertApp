@@ -460,7 +460,7 @@ Other iOS notes:
 | 0 | This decision record reviewed & accepted (tier matrix + digest semantics) | — |
 | 1 | Backend foundation: Ktorm tables + boot DDL, `POST /auth/session` issuer, `/alerts` CRUD + device reg behind session JWTs, evaluator worker **dry-run** (logs fires/budget decisions, no push), unit tests mirroring `RateAlertsEngineTest` fixtures + budget-window tests | ✅ **DONE Oct 9 2026** — verified locally end-to-end (anon session mint → CRUD 201/409/403/401 → device reg 204 → evaluator: baseline seed → fire/rebase → SENT → HELD (budget exhausted) → digest flush after window aged out). 12/12 new unit tests; full suite green. See "Phase 1 gotchas" (§7) |
 | 2 | Android delivery: FCM dispatcher + Firebase wiring + app SessionManager/installId; FCM `validate_only` smoke test, then live on staging | kill app on emulator → push arrives < 1 min after a manipulated-threshold fire; second fire within 2h is held then flushed as digest |
-| 3 | iOS delivery: pushy APNs dispatcher + AppDelegate wiring; sandbox E2E | ✅ **code complete Oct 10 2026** — `ApnsDispatcher` (ES256 token auth, per-device topic) + `AlertDispatchers` router + iosMain bridge + AppDelegate registration + `aps-environment` entitlement; staging carries `APNS_*` (DEVELOPMENT host). ⬜ remaining: sandbox E2E on a physical iPhone (Xcode debug build → token registers → push arrives) |
+| 3 | iOS delivery: pushy APNs dispatcher + AppDelegate wiring; sandbox E2E | ✅ **DONE Oct 10 2026** — verified on a real device (Dali's iPhone, iPhone 12 mini): Xcode debug build → session + APNs sandbox token auto-registered (`platform=IOS`, bundleId topic) → hair-trigger alert via API → notification delivered through `api.sandbox.push.apple.com`. Two deploy fixes found on the way: `preferIPv4Stack` (Railway containers are IPv4-only; prod Dockerfile already had it) and the retry loop absorbing Railway's transient DNS failures (netty resolver watch item below) |
 | 4 | Tier integration & UI: local cap 3 (client), `source` toggle + two-section Rate Alerts screen, budget copy ("1 push / 2h · guest"), anon→login merge endpoint stub, lapse fallback | guest flow exercises both server and local alerts without duplication |
 | 5 | Hardening: metrics dashboard, token hygiene + anon purge jobs, quota counters, load test evaluator (1k alerts across tiers), docs | dashboards in the existing Prometheus/Uptime Kuma stack |
 | ✱ later | Base tier budgets (10 alerts, richer cadence), extract `alert-rules` multiplatform module shared by commonMain + exchange-api (rules now duplicated — keep pinned by shared test fixtures), quiet hours, absolute price targets, ntfy/webhook/email as opt-in channels | — |
@@ -489,6 +489,17 @@ feature meanwhile.
   `authenticate("auth-jwt")` crash at boot — name the provider explicitly.
 - Gson bypasses Kotlin defaults → alert DTOs use nullable fields + explicit
   validation, never non-null data-class fields.
+- **Netty DNS on Railway (watch item, Phase 3 E2E)**: pushy's netty resolver
+  intermittently fails to resolve `api.*.push.apple.com` inside Railway
+  containers (search-domain + UDP quirks) while the JVM resolver works fine.
+  The HELD-retry loop absorbs it — if it ever gets noisy, tune netty via
+  `io.netty.resolver.dns.defaultNameServerFallback` or force the JDK resolver
+  on the APNs client. Also: containers without IPv6 routes need
+  `-Djava.net.preferIPv4Stack=true` (both Dockerfiles set it now).
+- **POST /alerts returns 204 instead of 201** when the immediate
+  `findAlert(id, userId)` after insert races the connection — cosmetic,
+  alert is created and evaluated; fix by returning the entity from
+  `createAlert` directly (Phase 4 cleanup).
 
 - **Stateless anon sessions can't be individually revoked** (no denylist) —
   acceptable; the one-device-one-session invariant (§3.2) is the real quota
