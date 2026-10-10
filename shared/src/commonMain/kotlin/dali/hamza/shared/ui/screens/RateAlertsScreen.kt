@@ -97,6 +97,9 @@ fun RateAlertsScreen(
     LaunchedEffect(viewModel) {
         viewModel.deleteEvents.collect { snackbarHostState.showSnackbar(it) }
     }
+    LaunchedEffect(viewModel) {
+        viewModel.toggleEvents.collect { snackbarHostState.showSnackbar(it) }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

@@ -216,6 +216,9 @@ class RateAlertsViewModel(
     /** One-shot confirmation for snackbar display ("Alert deleted"). */
     val deleteEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
+    /** One-shot confirmation for the enable/disable switch. */
+    val toggleEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+
     /** Composite key of the row currently being deleted (spinner state). */
     var deletingKey by mutableStateOf<String?>(null)
         private set
@@ -258,6 +261,9 @@ class RateAlertsViewModel(
             localAlerts = repository.getRateAlerts()
             serverAlerts = repository.getServerRateAlerts()
             scheduler.update(localAlerts.any { it.enabled })
+            toggleEvents.emit(
+                LedgerStrings.RateAlerts.alertToggled(alert.base, alert.quote, enabled)
+            )
         }
     }
 

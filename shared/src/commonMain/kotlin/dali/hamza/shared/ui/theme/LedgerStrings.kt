@@ -160,6 +160,10 @@ object LedgerStrings {
         const val SERVER_ALERT_DELETED = "Alert removed from the server."
         const val LOCAL_ALERT_DELETED = "Alert deleted."
 
+        /** Snackbar confirmation for the enable/disable switch. */
+        fun alertToggled(base: String, quote: String, enabled: Boolean) =
+            "$base → $quote ${if (enabled) "resumed" else "paused"}."
+
         /** Shown under the ON DEVICE section when nothing is pushed yet. */
         const val LOCAL_TO_PUSH_HINT =
             "Pushed alerts arrive even when the app is closed — use “Move to push” under an alert."
