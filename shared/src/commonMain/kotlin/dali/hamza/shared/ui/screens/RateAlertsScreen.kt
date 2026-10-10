@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -328,22 +329,29 @@ private fun AlertRow(
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        // revealed action — anchored to the right edge, tap to confirm
+        // revealed action — anchored to the right edge; a solid red
+        // circular button (no strip tint), tap it to confirm the delete
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .width(AlertRevealWidth)
-                .clip(RoundedCornerShape(16.dp))
-                .background(LedgerColors.Error.copy(alpha = 0.12f))
-                .clickable { onDelete() },
+                .width(AlertRevealWidth),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                imageVector = Icons.Outlined.DeleteOutline,
-                contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
-                tint = LedgerColors.Error,
-            )
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(LedgerColors.Error.copy(alpha = 0.90f))
+                    .clickable { onDelete() },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.DeleteOutline,
+                    contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
+                    tint = LedgerColors.Canvas,
+                )
+            }
         }
 
         // foreground card — slides left, revealing the action behind it
