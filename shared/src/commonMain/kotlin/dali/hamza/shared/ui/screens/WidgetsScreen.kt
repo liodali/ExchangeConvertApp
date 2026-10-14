@@ -104,6 +104,33 @@ fun WidgetsScreen(
                 if (viewModel.hostBridge.canManage) {
                     WidgetConfigList(viewModel)
                 } else {
+                    // iOS: no enumeration — show what the widgets report
+                    // rendering (detection-by-render) + the add guide
+                    if (viewModel.activePairs.isNotEmpty()) {
+                        BentoCard {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    "ON YOUR HOME SCREEN",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = LedgerColors.TextTertiary,
+                                )
+                                viewModel.activePairs.forEach { (base, quote) ->
+                                    Text(
+                                        "$base/$quote",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = LedgerColors.TextPrimary,
+                                    )
+                                }
+                                Text(
+                                    "Detected from widget refreshes — iOS doesn't expose placed widgets.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = LedgerColors.TextTertiary,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                    }
                     IosGuideCard()
                 }
 

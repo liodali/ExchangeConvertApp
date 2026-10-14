@@ -18,6 +18,8 @@
 		E10000000000000000000101 /* ExchangeWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000104 /* ExchangeWidgetsBundle.swift */; };
 		E10000000000000000000102 /* MarketRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000105 /* MarketRateWidget.swift */; };
 		E10000000000000000000103 /* ExchangeWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E10000000000000000000108 /* ExchangeWidgets.appex */; };
+		E10000000000000000000117 /* QuickConvertWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000115 /* QuickConvertWidget.swift */; };
+		E10000000000000000000118 /* MarketGridWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000116 /* MarketGridWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		E10000000000000000000106 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E10000000000000000000107 /* ExchangeWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExchangeWidgets.entitlements; sourceTree = "<group>"; };
 		E10000000000000000000108 /* ExchangeWidgets.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExchangeWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E10000000000000000000115 /* QuickConvertWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickConvertWidget.swift; sourceTree = "<group>"; };
+		E10000000000000000000116 /* MarketGridWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketGridWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +108,8 @@
 			isa = PBXGroup;
 			children = (
 				E10000000000000000000104 /* ExchangeWidgetsBundle.swift */,
+				E10000000000000000000115 /* QuickConvertWidget.swift */,
+				E10000000000000000000116 /* MarketGridWidget.swift */,
 				E10000000000000000000105 /* MarketRateWidget.swift */,
 				E10000000000000000000106 /* Info.plist */,
 				E10000000000000000000107 /* ExchangeWidgets.entitlements */,
@@ -288,6 +294,8 @@
 			files = (
 				E10000000000000000000101 /* ExchangeWidgetsBundle.swift in Sources */,
 				E10000000000000000000102 /* MarketRateWidget.swift in Sources */,
+				E10000000000000000000117 /* QuickConvertWidget.swift in Sources */,
+				E10000000000000000000118 /* MarketGridWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

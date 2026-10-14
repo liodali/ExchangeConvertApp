@@ -2,6 +2,7 @@ import SwiftUI
 import BackgroundTasks
 import Sentry
 import UserNotifications
+import WidgetKit
 import SharedKMP
 
 /// Local rate-alert plumbing (shared `RateAlertsEngine`):
@@ -88,6 +89,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
             accessKey: ExchangeSecrets.apiToken
         )
         RateAlertsBackground.register()
+        // Widgets (Phase 3): shared bridge exports market pairs to the App
+        // Group; the WidgetKit reload rides this Swift relay (the Kotlin
+        // framework doesn't link WidgetKit, and it must run on main).
+        IosWidgetRelay.shared.onRefresh = {
+            DispatchQueue.main.async {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        }
 
         // Server-push rate alerts (Phase 3): foreground presentation +
         // APNs registration. The token arrives asynchronously below; Koin

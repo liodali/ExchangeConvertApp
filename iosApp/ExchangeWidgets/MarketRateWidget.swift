@@ -7,7 +7,28 @@ import AppIntents
 let appGroupID = "group.dali.hamza.ExchangeConvertApp"
 let snapshotsKey = "widgets.snapshots.json"
 let configsKey = "widgets.configs.json"
+let activeKey = "widgets.ios.active.json"
+let marketsKey = "widgets.ios.markets.json"
 let apiHost = "https://exchange-api-production-dfba.up.railway.app"
+
+/// Report what the system asked us to render — the app's "on your home
+/// screen" list is detection-by-render (iOS has no widget enumeration).
+func reportActive(pair: String) {
+    guard let defaults = appGroupDefaults() else { return }
+    var list = (try? JSONDecoder().decode([String].self, from: defaults.data(forKey: activeKey) ?? Data())) ?? []
+    if !list.contains(pair) {
+        list.append(pair)
+        if let data = try? JSONEncoder().encode(list) {
+            defaults.set(data, forKey: activeKey)
+        }
+    }
+}
+
+/// Market-preference pairs exported by the app (grid widget source).
+func readMarketPairs() -> [String] {
+    guard let data = appGroupDefaults()?.data(forKey: marketsKey) else { return [] }
+    return (try? JSONDecoder().decode([String].self, from: data)) ?? []
+}
 
 struct WidgetSnapshotDTO: Codable {
     let base: String
@@ -146,6 +167,8 @@ struct MarketRateProvider: AppIntentTimelineProvider {
     }
 
     func timeline(for configuration: MarketRateIntent, in context: Context) async -> Timeline<MarketEntry> {
+        let option = configuration.pair ?? PairOption.fallback
+        reportActive(pair: option.rawValue)
         // hourly entries for the next ~6h — inside the WidgetKit budget
         var entries: [MarketEntry] = []
         for hour in 0..<6 {
@@ -201,6 +224,7 @@ struct MarketRateEntryView: View {
                     .foregroundStyle(textSecondary.opacity(0.6))
             }
         }
+        .widgetURL(URL(string: "sovereign://history?base=\(entry.base)&quote=\(entry.quote)"))
     }
 
     private func rateText(_ value: Double) -> String {

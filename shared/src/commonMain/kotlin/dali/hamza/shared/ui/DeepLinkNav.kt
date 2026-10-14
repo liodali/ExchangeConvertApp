@@ -19,4 +19,10 @@ object DeepLinkNav {
     /** Pair carried by the route (history deep links from widgets). */
     @Volatile
     var pendingPair: Pair<String, String>? = null
+
+    /** Swift-callable stash (Kotlin Pair is awkward across the bridge). */
+    fun stash(route: String, pairBase: String? = null, pairQuote: String? = null) {
+        pendingRoute = route
+        pendingPair = if (pairBase != null && pairQuote != null) pairBase to pairQuote else null
+    }
 }

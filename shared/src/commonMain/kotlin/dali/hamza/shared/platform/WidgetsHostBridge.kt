@@ -41,7 +41,17 @@ interface WidgetsHostBridge {
      * realtime = 15-min periodic + foreground refreshes, default 30-min.
      */
     fun applyRefreshPolicy(realtime: Boolean)
+
+    /**
+     * Pairs currently placed on the home screen, best effort — iOS can't
+     * enumerate widget instances, so the extension reports what it renders
+     * into the App Group (detection-by-render). Empty when unsupported.
+     */
+    fun activeWidgetPairs(): List<Pair<String, String>> = emptyList()
 }
+
+/** Platform default bridge (Android registers its own via Koin). */
+expect fun createWidgetsHostBridge(): WidgetsHostBridge
 
 /** Fallback used when no platform implementation is registered in Koin. */
 object DefaultWidgetsHostBridge : WidgetsHostBridge {

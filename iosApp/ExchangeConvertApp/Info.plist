@@ -21,5 +21,18 @@
 	<array>
 		<string>dali.hamza.shared.ratealerts</string>
 	</array>
+	<!-- Home-screen widgets (plans/widgets.md Phase 3): widget taps deep
+	     link into the shared navigation via DeepLinkNav. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>dali.hamza.ExchangeConvertApp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>sovereign</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

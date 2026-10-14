@@ -325,13 +325,13 @@ fun ExchangeCurrencyApp(
                                 repository = KoinPlatform.getKoin()?.get()
                                     ?: error("initSharedKoin() must run before ExchangeCurrencyApp()"),
                                 storage = KoinPlatform.getKoin()?.get(),
-                                // no platform bridge registered (iOS until Phase 3) —
-                                // Koin get() THROWS on missing definitions, so catch and
-                                // fall back instead of crashing composition
+                                // no platform bridge registered — use the
+                                // platform factory (iOS reloads WidgetKit
+                                // timelines; Android registers via Koin)
                                 bridge = runCatching {
                                     KoinPlatform.getKoin()?.get<dali.hamza.shared.platform.WidgetsHostBridge>()
                                 }.getOrNull()
-                                    ?: dali.hamza.shared.platform.DefaultWidgetsHostBridge,
+                                    ?: dali.hamza.shared.platform.createWidgetsHostBridge(),
                             )
                         },
                         onBack = { navController.popBackStack() },

@@ -56,7 +56,12 @@ class WidgetsViewModel(
     /** One-shot UI messages (forget confirmation). */
     val events = MutableSharedFlow<String>(extraBufferCapacity = 4)
 
+    /** Pairs the platform detected on the home screen (iOS render reports). */
+    var activePairs by mutableStateOf<List<Pair<String, String>>>(emptyList())
+        private set
+
     init {
+        activePairs = bridge.activeWidgetPairs()
         refresh()
     }
 

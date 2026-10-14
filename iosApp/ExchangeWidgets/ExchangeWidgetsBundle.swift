@@ -11,5 +11,7 @@ import SwiftUI
 struct ExchangeWidgetsBundle: WidgetBundle {
     var body: some Widget {
         MarketRateWidget()
+        QuickConvertWidget()
+        MarketGridWidget()
     }
 }
