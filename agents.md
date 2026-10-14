@@ -458,6 +458,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 - [`plans/kmp-migration-architecture.md`](plans/kmp-migration-architecture.md) — Architecture decisions
 - [`plans/kmp-ui-unification-plan.md`](plans/kmp-ui-unification-plan.md) — UI unification strategy
 - [`plans/redesign-migration-strategy.md`](plans/redesign-migration-strategy.md) — **Phase 7 redesign strategy** (Sovereign Ledger UI from `ui-design.pen`): design tokens, screen↔logic mapping, 8 phases with the business-logic freeze rules
+- [`plans/widgets.md`](plans/widgets.md) — Home-screen widgets plan (market-rate + quick-convert): shared snapshot repository, Android Glance + iOS WidgetKit, Account → Widgets entry
 
 ### 9.2 Migration Rules for AI Agents
 
@@ -561,6 +562,7 @@ The project is in an **active, incomplete migration** from Android-only to KMP. 
 - Rate alerts (local notifications) shipped Oct 2026: free tier capped at 2 alerts, WorkManager job on Android / BGAppRefresh + foreground checks on iOS — see [`plans/rate-alerts.md`](plans/rate-alerts.md) for the design and KMP gotchas
 - Server-push rate alerts: Phase 1 backend shipped on `exchange-api` (anon session issuer + authed `/alerts` CRUD + `/alerts/devices` + budgeted evaluator). Phase 2 client wiring (Oct 2026): `PushSessionManager` runs the launch loop (installId → `POST /auth/session` → cached JWT → `POST /alerts/devices` with the FCM token, re-fed on `onNewToken` via `app/push/PushRegistration.kt`). Add-alert dialog has a **delivery toggle** — "On device" (local engine, all modes, default) or "Push" (`AlertSource.SERVER`, tier-gated cadence via `RateAlert.serverIntervalsForTier`: guest 2h-only / login 1h+2h / paid TBD with the tier+auth work); the Rate Alerts screen renders two sections with per-list counters, and an unreachable push service falls back to saving the alert on device (`PUSH_FALLBACK_NOTE`) instead of dead-ending. Phase 3 (Oct 2026): iOS push — `ApnsDispatcher` (pushy, ES256, per-device topic from the registered bundleId) behind `AlertDispatchers` per-platform routing on `exchange-api`; iOS registers via `shared/.../platform/PushRegistrationBridge.kt` + AppDelegate (`aps-environment` entitlement; sandbox ⇄ production tokens never mix — staging runs `APNS_HOST=DEVELOPMENT`): see [`plans/server-push-alerts.md`](plans/server-push-alerts.md)
 - Shared UI icons are now real Material icons (`compose.materialIconsExtended`, added in Phase 1 of the redesign); the Ledger component library + bundled Manrope/Inter fonts live in `shared/ui/components/` + `shared/ui/theme/`
+- Home-screen widgets (Oct 2026): **single-market widget shipped on Android** (Glance, wave-blob background rendered at runtime from the design sketch, palette-tinted halo, day-Δ chip, 30-min WorkManager refresh, config-activity pair picker) — shared `WidgetsRepository`/`WidgetSnapshotStore` in `shared/data/widgets/`; Quick Convert + iOS WidgetKit extension pending — see [`plans/widgets.md`](plans/widgets.md)
 
 ---
 
