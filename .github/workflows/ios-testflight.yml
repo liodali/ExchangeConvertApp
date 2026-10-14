@@ -375,13 +375,17 @@ jobs:
           fi
           # App Group capability on both ids (idempotent) — profiles must
           # carry the group.dali.hamza.ExchangeConvertApp entitlement.
-          asc bundle-ids capabilities add --bundle "$BUNDLE_ID" --capability APP_GROUPS \
+          # NOTE: capabilities add needs the bundle RESOURCE id, not the
+          # identifier string (ASC rejects the relationship otherwise).
+          asc bundle-ids capabilities add --bundle "$BUNDLE_RESOURCE_ID" --capability APP_GROUPS \
             || echo "::warning::APP_GROUPS already present on $BUNDLE_ID (or add failed)"
-          asc bundle-ids capabilities add --bundle "$EXT_BUNDLE_ID" --capability APP_GROUPS \
+          asc bundle-ids capabilities add --bundle "$EXT_BUNDLE_RESOURCE_ID" --capability APP_GROUPS \
             || echo "::warning::APP_GROUPS already present on $EXT_BUNDLE_ID (or add failed)"
 
           # Create profiles owned by this run. Never delete other profiles
           # for the bundles, including profiles used by local Xcode builds.
+          # ASC enforces UNIQUE profile names — app and extension get
+          # distinct names; per-target wiring happens in the pbxproj patch.
           asc profiles create --name "$PROFILE_NAME" \
             --profile-type IOS_APP_STORE --bundle "$BUNDLE_RESOURCE_ID" \
             --certificate "$CERT_ID" --output json > "$CI_SIGNING_DIR/created-profile.json"
@@ -391,7 +395,8 @@ jobs:
           asc profiles download --id "$PROFILE_ID" --output "$PROFILE"
 
           EXT_PROFILE="$CI_SIGNING_DIR/ExtAppStore.mobileprovision"
-          asc profiles create --name "$PROFILE_NAME" \
+          EXT_PROFILE_NAME="$PROFILE_NAME-Ext"
+          asc profiles create --name "$EXT_PROFILE_NAME" \
             --profile-type IOS_APP_STORE --bundle "$EXT_BUNDLE_RESOURCE_ID" \
             --certificate "$CERT_ID" --output json > "$CI_SIGNING_DIR/created-profile-ext.json"
           EXT_PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
@@ -446,8 +451,39 @@ jobs:
           python3 .github/scripts/ios-signing-state.py profiles-install "$EXT_PROFILE"
           EXT_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$CI_SIGNING_DIR/ext-profile.plist")
           echo "EXT_PROFILE_UUID=$EXT_UUID" >> "$GITHUB_ENV"
+          echo "EXT_PROFILE_NAME=$EXT_PROFILE_NAME" >> "$GITHUB_ENV"
           security find-identity -p codesigning "$KC"
           rm -f "$KEY"
+
+      - name: Wire per-target provisioning profiles (Release)
+        run: |
+          set -euo pipefail
+          # ASC rejects duplicate profile names, so one global
+          # PROVISIONING_PROFILE_SPECIFIER can't serve two targets. Patch
+          # each target's Release config with ITS profile name — checkout
+          # isolation means the edit never leaves this runner.
+          python3 - "$PROJECT/project.pbxproj" "$PROFILE_NAME" "$EXT_PROFILE_NAME" <<'PY'
+          import sys, re
+          path, app_name, ext_name = sys.argv[1:4]
+          s = open(path).read()
+
+          def inject(anchor_id, value, label):
+              global s
+              anchor = f"{anchor_id} = {{\n\t\t\tisa = XCBuildConfiguration;"
+              assert anchor in s, f"{label} config anchor not found"
+              s = s.replace(
+                  anchor,
+                  anchor + f"\n\t\t\tPROVISIONING_PROFILE_SPECIFIER = {value};",
+                  1,
+              )
+
+          # Release configs: app (A9000004) + extension (E1…111)
+          inject("A9000004 /* Release */", app_name, "app")
+          inject("E10000000000000000000111 /* Release */", ext_name, "extension")
+          open(path, "w").write(s)
+          print(f"profiles wired: app={app_name} ext={ext_name}")
+          PY
+          plutil -lint "$PROJECT"
 
       - name: Archive (Release · generic/iOS · manual signing)
         env:
@@ -478,7 +514,6 @@ jobs:
             --xcodebuild-flag=-derivedDataPath \
             --xcodebuild-flag="$RUNNER_TEMP/xcode-dd" \
             --xcodebuild-flag=CODE_SIGN_STYLE=Manual \
-            --xcodebuild-flag=PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
             --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
