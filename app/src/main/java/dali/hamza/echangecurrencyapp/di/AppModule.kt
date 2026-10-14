@@ -12,6 +12,10 @@ import dali.hamza.core.common.ISessionManager
 import dali.hamza.core.common.SessionManager
 import dali.hamza.core.datasource.network.converter.RateConverter
 import dali.hamza.echangecurrencyapp.R
+import dali.hamza.echangecurrencyapp.widgets.QuickConvertWidgetReceiver
+import dali.hamza.echangecurrencyapp.widgets.WidgetsHostBridgeAndroid
+import dali.hamza.shared.platform.WidgetKind
+import dali.hamza.shared.platform.WidgetsHostBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +29,9 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 
 val appModule = module {
+    // Home-screen widgets (plans/widgets.md): Android bridge for the
+    // shared Account → Widgets screen (pin / reconfigure / refresh)
+    single<WidgetsHostBridge> { WidgetsHostBridgeAndroid(androidContext()) }
     single(named("DB")) {
         androidContext().resources.getString(R.string.db_name)
     }

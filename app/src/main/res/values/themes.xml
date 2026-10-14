@@ -37,6 +37,18 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <!-- Widget config ("Select market") — renders as a bottom sheet over
+         the launcher: translucent window, dimmed backdrop, dark surface. -->
+    <style name="Theme.ExchangeCurrencyApp.Sheet" parent="Theme.ExchangeCurrencyApp.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="Theme.SplashScreen.MySplash" parent="Theme.ExchangeCurrencyApp">
         <item name="windowSplashScreenBackground">@color/md_theme_light_onPrimary</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>

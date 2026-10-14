@@ -6,6 +6,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import dali.hamza.echangecurrencyapp.di.appModule
 import dali.hamza.echangecurrencyapp.push.PushRegistration
 import dali.hamza.shared.AndroidAppContext
+import dali.hamza.shared.data.widgets.WidgetSnapshotStore
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
 import dali.hamza.shared.domain.repository.IRepository
@@ -65,6 +66,29 @@ class ExchangeApplication : Application() {
                 val koin = GlobalContext.get()
                 val hasActiveAlerts = koin.get<IRepository>().getEnabledRateAlerts().isNotEmpty()
                 koin.get<RateAlertScheduler>().update(hasActiveAlerts)
+            }
+        }
+
+        // Market-rate widget: keep the 30-min snapshot refresh aligned with
+        // the widget set (plans/widgets.md Phase 1). Glance keeps the LAST
+        // render after an app update — an immediate pass on every app start
+        // repaints placed widgets with current code. Instance detection
+        // covers the zero-config grid too (it stores no config).
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            runCatching {
+                val manager = androidx.glance.appwidget.GlanceAppWidgetManager(this@ExchangeApplication)
+                val hasInstances = listOf(
+                    dali.hamza.echangecurrencyapp.widgets.MarketRateWidget(),
+                    dali.hamza.echangecurrencyapp.widgets.MarketRateCardWidget(),
+                    dali.hamza.echangecurrencyapp.widgets.MarketGridWidget(),
+                    dali.hamza.echangecurrencyapp.widgets.QuickConvertWidget(),
+                ).any { widget -> manager.getGlanceIds(widget.javaClass).isNotEmpty() }
+                val store = GlobalContext.get().get<WidgetSnapshotStore>()
+                val hasWidgets = hasInstances || store.readConfigs().isNotEmpty()
+                dali.hamza.echangecurrencyapp.widgets.WidgetRefreshScheduler.update(this@ExchangeApplication, hasWidgets)
+                if (hasWidgets) {
+                    dali.hamza.echangecurrencyapp.widgets.WidgetRefreshScheduler.refreshNow(this@ExchangeApplication)
+                }
             }
         }
 

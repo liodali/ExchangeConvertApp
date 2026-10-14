@@ -33,6 +33,60 @@
             android:name="io.sentry.auto-init"
             android:value="false" />
 
+        <!-- Home-screen widgets (plans/widgets.md Phase 1) — two looks for
+             the same market widget: circular wave (RxvJn sketch) and
+             rounded card (prEnT sketch). Both share the config activity. -->
+        <receiver
+            android:name=".widgets.MarketRateWidgetReceiver"
+            android:exported="false"
+            android:label="@string/market_widget_wave_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/market_rate_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.MarketRateCardWidgetReceiver"
+            android:exported="false"
+            android:label="@string/market_widget_card_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/market_rate_card_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.MarketGridWidgetReceiver"
+            android:exported="false"
+            android:label="@string/market_grid_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/market_grid_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.QuickConvertWidgetReceiver"
+            android:exported="false"
+            android:label="@string/quick_convert_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_convert_widget_info" />
+        </receiver>
+        <activity
+            android:name=".widgets.MarketRateWidgetConfigActivity"
+            android:exported="true"
+            android:label="@string/market_widget_config_label"
+            android:theme="@style/Theme.ExchangeCurrencyApp.Sheet"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- FCM — server-push rate alerts (plans/server-push-alerts.md).
              Data messages are rendered by SovereignMessagingService through
              the shared LocalNotifier; inert without google-services.json. -->

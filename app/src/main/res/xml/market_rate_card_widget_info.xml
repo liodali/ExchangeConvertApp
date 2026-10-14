@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rounded-card market widget (prEnT sketch) -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/market_rate_card_loading"
+    android:configure="dali.hamza.echangecurrencyapp.widgets.MarketRateWidgetConfigActivity"
+    android:previewLayout="@layout/market_rate_card_preview"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />
