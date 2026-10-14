@@ -350,18 +350,53 @@ jobs:
           CERT_ID=$(cat "$CI_SIGNING_DIR/certificate-id")
           PROFILE="$CI_SIGNING_DIR/AppStore.mobileprovision"
 
-          BUNDLE_RESOURCE_ID=$(asc bundle-ids list --identifier "$BUNDLE_ID" --paginate --output json \
-            | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert len(d)==1, "Expected one bundle ID"; print(d[0]["id"])')
+          PROFILE_NAME="ExchangeConvertApp-CI-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
-          # Create a profile owned by this run. Never delete other profiles
-          # for the bundle, including profiles used by local Xcode builds.
-          asc profiles create --name "ExchangeConvertApp-CI-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+          # asc's --identifier filter is a CONTAINS match — since the
+          # widget extension (…$BUNDLE_ID.ExchangeWidgets) exists, the app
+          # query returns both. Resolve the EXACT identifier only.
+          BUNDLE_RESOURCE_ID=$(asc bundle-ids list --identifier "$BUNDLE_ID" --paginate --output json \
+            | python3 -c 'import json,sys; want=sys.argv[1]; m=[b for b in json.load(sys.stdin)["data"] if b["attributes"]["identifier"]==want]; assert len(m)==1, f"Expected exactly one bundle id {want}, got {len(m)}"; print(m[0]["id"])' "$BUNDLE_ID")
+
+          # Widget extension (ExchangeWidgets.appex) needs its own App Store
+          # profile: register the bundle id if missing, enable the shared
+          # App Group on both ids, and mint a second profile under the SAME
+          # NAME as the app's — PROVISIONING_PROFILE_SPECIFIER then resolves
+          # per-target (each target picks the same-named profile matching
+          # its own bundle id).
+          EXT_BUNDLE_ID="$BUNDLE_ID.ExchangeWidgets"
+          EXT_BUNDLE_RESOURCE_ID=$(asc bundle-ids list --identifier "$EXT_BUNDLE_ID" --paginate --output json \
+            | python3 -c 'import json,sys; want=sys.argv[1]; m=[b for b in json.load(sys.stdin)["data"] if b["attributes"]["identifier"]==want]; print(m[0]["id"] if len(m)==1 else "")' "$EXT_BUNDLE_ID")
+          if [ -z "$EXT_BUNDLE_RESOURCE_ID" ]; then
+            EXT_BUNDLE_RESOURCE_ID=$(asc bundle-ids create \
+              --identifier "$EXT_BUNDLE_ID" --name "ExchangeWidgets" --platform IOS --output json \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["id"])')
+            echo "registered extension bundle id $EXT_BUNDLE_ID ($EXT_BUNDLE_RESOURCE_ID)"
+          fi
+          # App Group capability on both ids (idempotent) — profiles must
+          # carry the group.dali.hamza.ExchangeConvertApp entitlement.
+          asc bundle-ids capabilities add --bundle "$BUNDLE_ID" --capability APP_GROUPS \
+            || echo "::warning::APP_GROUPS already present on $BUNDLE_ID (or add failed)"
+          asc bundle-ids capabilities add --bundle "$EXT_BUNDLE_ID" --capability APP_GROUPS \
+            || echo "::warning::APP_GROUPS already present on $EXT_BUNDLE_ID (or add failed)"
+
+          # Create profiles owned by this run. Never delete other profiles
+          # for the bundles, including profiles used by local Xcode builds.
+          asc profiles create --name "$PROFILE_NAME" \
             --profile-type IOS_APP_STORE --bundle "$BUNDLE_RESOURCE_ID" \
             --certificate "$CERT_ID" --output json > "$CI_SIGNING_DIR/created-profile.json"
           PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
             "$CI_SIGNING_DIR/created-profile.json")
           rm -f "$PROFILE"
           asc profiles download --id "$PROFILE_ID" --output "$PROFILE"
+
+          EXT_PROFILE="$CI_SIGNING_DIR/ExtAppStore.mobileprovision"
+          asc profiles create --name "$PROFILE_NAME" \
+            --profile-type IOS_APP_STORE --bundle "$EXT_BUNDLE_RESOURCE_ID" \
+            --certificate "$CERT_ID" --output json > "$CI_SIGNING_DIR/created-profile-ext.json"
+          EXT_PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
+            "$CI_SIGNING_DIR/created-profile-ext.json")
+          asc profiles download --id "$EXT_PROFILE_ID" --output "$EXT_PROFILE"
 
           # Rebuild the p12 with the SYSTEM LibreSSL: asc's p12 (and any
           # OpenSSL 3.x one) uses AES-256/SHA-256 PKCS12 that macOS
@@ -405,6 +440,12 @@ jobs:
           NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$CI_SIGNING_DIR/profile.plist")
           echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
+          # install the extension profile alongside — the manual export
+          # resolves each target's profile from the installed set
+          security cms -D -i "$EXT_PROFILE" > "$CI_SIGNING_DIR/ext-profile.plist"
+          python3 .github/scripts/ios-signing-state.py profiles-install "$EXT_PROFILE"
+          EXT_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$CI_SIGNING_DIR/ext-profile.plist")
+          echo "EXT_PROFILE_UUID=$EXT_UUID" >> "$GITHUB_ENV"
           security find-identity -p codesigning "$KC"
           rm -f "$KEY"
 
@@ -437,7 +478,7 @@ jobs:
             --xcodebuild-flag=-derivedDataPath \
             --xcodebuild-flag="$RUNNER_TEMP/xcode-dd" \
             --xcodebuild-flag=CODE_SIGN_STYLE=Manual \
-            --xcodebuild-flag=PROVISIONING_PROFILE="$PROFILE_UUID" \
+            --xcodebuild-flag=PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             --xcodebuild-flag=CODE_SIGN_IDENTITY="Apple Distribution" \
             --xcodebuild-flag=MARKETING_VERSION="$VERSION" \
             --xcodebuild-flag=CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
@@ -546,16 +587,18 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${CI_SIGNING_DIR:-}" ] && [ -d "$CI_SIGNING_DIR" ] || exit 0
-          # Delete only the remote profile whose creation receipt this run owns.
-          if [ -s "$CI_SIGNING_DIR/created-profile.json" ]; then
-            if PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
-              "$CI_SIGNING_DIR/created-profile.json"); then
-              asc profiles delete --id "$PROFILE_ID" --confirm \
-                || echo "::warning::Could not delete CI profile $PROFILE_ID; local cleanup will continue"
-            else
-              echo "::warning::Invalid CI profile receipt; local cleanup will continue"
+          # Delete only the remote profiles whose creation receipts this run owns.
+          for receipt in "$CI_SIGNING_DIR/created-profile.json" "$CI_SIGNING_DIR/created-profile-ext.json"; do
+            if [ -s "$receipt" ]; then
+              if PROFILE_ID=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["data"]["id"])' \
+                "$receipt"); then
+                asc profiles delete --id "$PROFILE_ID" --confirm \
+                  || echo "::warning::Could not delete CI profile $PROFILE_ID; local cleanup will continue"
+              else
+                echo "::warning::Invalid CI profile receipt; local cleanup will continue"
+              fi
             fi
-          fi
+          done
           rm -f "$CI_SIGNING_DIR/distribution.key" "$CI_SIGNING_DIR/ci.p12" \
             "$CI_SIGNING_DIR/asc/AuthKey_${ASC_KEY_ID}.p8" "$CI_SIGNING_DIR/asc-config.json"
           python3 .github/scripts/ios-signing-state.py cleanup
