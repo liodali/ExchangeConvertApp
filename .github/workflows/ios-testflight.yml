@@ -440,7 +440,7 @@ jobs:
           rm -f "$CI_SIGNING_DIR/ci.p12"
 
           security cms -D -i "$PROFILE" > "$CI_SIGNING_DIR/profile.plist"
-          python3 .github/scripts/ios-signing-state.py profiles-install "$PROFILE"
+          EXPECTED_BUNDLE_ID="$BUNDLE_ID" python3 .github/scripts/ios-signing-state.py profiles-install "$PROFILE"
           UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$CI_SIGNING_DIR/profile.plist")
           NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$CI_SIGNING_DIR/profile.plist")
           echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
@@ -448,7 +448,7 @@ jobs:
           # install the extension profile alongside — the manual export
           # resolves each target's profile from the installed set
           security cms -D -i "$EXT_PROFILE" > "$CI_SIGNING_DIR/ext-profile.plist"
-          python3 .github/scripts/ios-signing-state.py profiles-install "$EXT_PROFILE"
+          EXPECTED_BUNDLE_ID="$EXT_BUNDLE_ID" python3 .github/scripts/ios-signing-state.py profiles-install "$EXT_PROFILE"
           EXT_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$CI_SIGNING_DIR/ext-profile.plist")
           echo "EXT_PROFILE_UUID=$EXT_UUID" >> "$GITHUB_ENV"
           echo "EXT_PROFILE_NAME=$EXT_PROFILE_NAME" >> "$GITHUB_ENV"

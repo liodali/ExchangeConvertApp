@@ -32,13 +32,17 @@ def add_keychain(root):
 
 def install_profiles(root, profile):
     content = profile.read_bytes()
-    with (root / 'profile.plist').open('rb') as source:
-        metadata = plistlib.load(source)
+    decoded = subprocess.run(
+        ['security', 'cms', '-D', '-i', str(profile)],
+        check=True, capture_output=True,
+    ).stdout
+    metadata = plistlib.loads(decoded)
     if os.environ['TEAM_ID'] not in metadata.get('TeamIdentifier', []):
         raise ValueError('Profile team does not match TEAM_ID')
     app_id = metadata.get('Entitlements', {}).get('application-identifier', '')
-    if app_id.split('.', 1)[-1] != os.environ['BUNDLE_ID']:
-        raise ValueError('Profile bundle ID does not match BUNDLE_ID')
+    expected = os.environ.get('EXPECTED_BUNDLE_ID', os.environ['BUNDLE_ID'])
+    if app_id.split('.', 1)[-1] != expected:
+        raise ValueError(f'Profile bundle ID {app_id} does not match {expected}')
     uuid = metadata['UUID']
     if not uuid or any(c not in '0123456789abcdefABCDEF-' for c in uuid):
         raise ValueError('Invalid provisioning profile UUID')
@@ -48,17 +52,18 @@ def install_profiles(root, profile):
     # to the developer's own Xcode.
     destination = home / 'Library/MobileDevice/Provisioning Profiles' / f'{uuid}.mobileprovision'
     destination.parent.mkdir(parents=True, exist_ok=True)
-    installed = []
+    manifest_path = root / 'installed-profiles.json'
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else []
     if destination.exists():
         # Same UUID = same profile; never overwrite, never fail.
         print(f'::warning::Profile {uuid} already installed — leaving it untouched')
     else:
         # Exclusive creation leaves any existing local profile untouched.
         with destination.open('xb') as target:
-            installed.append({'path': str(destination), 'sha256': hashlib.sha256(content).hexdigest()})
+            manifest.append({'path': str(destination), 'sha256': hashlib.sha256(content).hexdigest()})
             target.write(content)
-    (root / 'installed-profiles.json').write_text(json.dumps(installed))
-    print(f'Installed CI profile {uuid} in the legacy profiles directory')
+    manifest_path.write_text(json.dumps(manifest))
+    print(f'Installed CI profile {uuid} for {expected} in the legacy profiles directory')
 
 
 def cleanup(root):
