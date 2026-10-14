@@ -246,6 +246,8 @@ dependencies {
 
     // WorkerManager dependencies
     implementation(libs.androidx.work.runtime.ktx)
+    // Home-screen widgets (plans/widgets.md Phase 1) — Glance
+    implementation(libs.androidx.glance.appwidget)
     //dataStore
     implementation(libs.datastore.preferences)
     implementation(libs.preference.ktx)
