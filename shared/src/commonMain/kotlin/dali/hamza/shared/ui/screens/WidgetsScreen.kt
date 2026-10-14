@@ -144,39 +144,44 @@ fun WidgetsScreen(
                     )
                     Spacer(Modifier.height(12.dp))
                 }
-                LedgerButton(
-                    text = LedgerStrings.Widgets.REFRESH,
-                    onClick = viewModel::refresh,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(12.dp))
+                // refresh controls are Android-only (its widgets own a
+                // worker); iOS widgets self-schedule via WidgetKit budgets
+                if (viewModel.hostBridge.canManage) {
+                    LedgerButton(
+                        text = LedgerStrings.Widgets.REFRESH,
+                        onClick = viewModel::refresh,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(12.dp))
 
-                // refresh policy: realtime-ish vs battery-friendly
-                BentoCard {
-                    Column(Modifier.padding(16.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    "Realtime rates",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = LedgerColors.TextPrimary,
-                                )
-                                Text(
-                                    "Faster widget updates (every 15 min + on app open). Uses more battery.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = LedgerColors.TextTertiary,
+                    // refresh policy: realtime-ish vs battery-friendly
+                    BentoCard {
+                        Column(Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        "Realtime rates",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = LedgerColors.TextPrimary,
+                                    )
+                                    Text(
+                                        "Faster widget updates (every 15 min + on app open). Uses more battery.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = LedgerColors.TextTertiary,
+                                    )
+                                }
+                                Switch(
+                                    checked = viewModel.realtime,
+                                    onCheckedChange = { viewModel.toggleRealtime() },
                                 )
                             }
-                            Switch(
-                                checked = viewModel.realtime,
-                                onCheckedChange = { viewModel.toggleRealtime() },
-                            )
                         }
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
                 Spacer(Modifier.height(24.dp))
                 Spacer(Modifier.height(ledgerNavClearance() * 0.4f))
