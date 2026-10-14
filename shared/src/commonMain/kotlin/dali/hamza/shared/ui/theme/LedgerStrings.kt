@@ -101,6 +101,63 @@ object LedgerStrings {
         const val DIALOG_SAVE = "Save"
     }
 
+    object Widgets {
+        const val TITLE = "Widgets"
+        const val HEADER_NOTE =
+            "Your home-screen market widgets. Add a pair here or long-press the home screen."
+        const val EMPTY_TITLE = "No widgets yet"
+        const val EMPTY_MESSAGE =
+            "Add a market widget to see a live rate at a glance."
+        const val ADD = "Add market widget"
+        const val ADD_CONFIRM = "Add widget"
+        const val YOUR_MARKETS = "YOUR MARKETS"
+        const val NEW_PAIR = "NEW PAIR"
+        const val TYPE = "TYPE"
+        const val GRID_NOTE =
+            "No setup — the grid follows the markets selected in your Account."
+        const val KIND_CARD_TITLE = "Market · Card"
+        const val KIND_CARD_DESC = "One pair on a rounded card. Classic look."
+        const val KIND_WAVE_TITLE = "Market · Wave"
+        const val KIND_WAVE_DESC = "One pair inside a circular wave shape."
+        const val KIND_GRID_TITLE = "Markets · Grid"
+        const val KIND_GRID_DESC = "Up to three markets from your selection."
+        const val KIND_CONVERT_TITLE = "Quick Convert"
+        const val KIND_CONVERT_DESC = "Type an amount, see the converted value."
+
+        fun kindTitle(kind: dali.hamza.shared.platform.WidgetKind): String = when (kind) {
+            dali.hamza.shared.platform.WidgetKind.MARKET_CARD -> KIND_CARD_TITLE
+            dali.hamza.shared.platform.WidgetKind.MARKET_WAVE -> KIND_WAVE_TITLE
+            dali.hamza.shared.platform.WidgetKind.MARKET_GRID -> KIND_GRID_TITLE
+            dali.hamza.shared.platform.WidgetKind.QUICK_CONVERT -> KIND_CONVERT_TITLE
+        }
+
+        /** Short type label for the management list rows. */
+        fun typeLabel(type: dali.hamza.shared.domain.models.WidgetType): String = when (type) {
+            dali.hamza.shared.domain.models.WidgetType.MARKET_CARD -> "Market · Card"
+            dali.hamza.shared.domain.models.WidgetType.MARKET_WAVE -> "Market · Wave"
+            dali.hamza.shared.domain.models.WidgetType.MARKET_GRID -> "Markets · Grid"
+            dali.hamza.shared.domain.models.WidgetType.QUICK_CONVERT -> "Quick Convert"
+        }
+
+        fun kindDescription(kind: dali.hamza.shared.platform.WidgetKind): String = when (kind) {
+            dali.hamza.shared.platform.WidgetKind.MARKET_CARD -> KIND_CARD_DESC
+            dali.hamza.shared.platform.WidgetKind.MARKET_WAVE -> KIND_WAVE_DESC
+            dali.hamza.shared.platform.WidgetKind.MARKET_GRID -> KIND_GRID_DESC
+            dali.hamza.shared.platform.WidgetKind.QUICK_CONVERT -> KIND_CONVERT_DESC
+        }
+        const val NOT_PLACED = "Not placed yet"
+        const val RECONFIGURE = "Change pair"
+        const val FORGET = "Forget"
+        const val FORGOTTEN =
+            "Removed from the app — long-press the widget on the home screen to delete it fully"
+        const val REFRESH = "Refresh widgets"
+        const val IOS_GUIDE_TITLE = "Add from the home screen"
+        const val IOS_GUIDE_MESSAGE =
+            "Touch and hold your home screen, tap +, search Sovereign Ledger and pick the market widget."
+        const val PREFILL_BASE = "widget.extra.BASE"
+        const val PREFILL_QUOTE = "widget.extra.QUOTE"
+    }
+
     object RateAlerts {
         const val TITLE = "Rate Alerts"
         const val HEADER_NOTE =

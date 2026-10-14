@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.ManageAccounts
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.Widgets
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Star
@@ -101,6 +102,7 @@ fun AccountScreen(
     onColorPaletteChanged: (LedgerColorPalette) -> Unit = {},
     onChartStyleChanged: (LedgerChartStyle) -> Unit = {},
     onOpenRateAlerts: () -> Unit = {},
+    onOpenWidgets: () -> Unit = {},
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
@@ -502,6 +504,11 @@ fun AccountScreen(
                         label = LedgerStrings.RateAlerts.TITLE,
                         icon = Icons.Outlined.NotificationsActive,
                         onClick = onOpenRateAlerts,
+                    )
+                    LedgerListRow(
+                        label = LedgerStrings.Widgets.TITLE,
+                        icon = Icons.Outlined.Widgets,
+                        onClick = onOpenWidgets,
                     )
                     LedgerListRow(
                         label = LedgerStrings.Account.LANGUAGE,
