@@ -483,7 +483,7 @@ jobs:
           open(path, "w").write(s)
           print(f"profiles wired: app={app_name} ext={ext_name}")
           PY
-          plutil -lint "$PROJECT"
+          plutil -lint "$PROJECT/project.pbxproj"
 
       - name: Archive (Release · generic/iOS · manual signing)
         env:
