@@ -7,6 +7,9 @@ import dali.hamza.shared.data.network.createHttpClient
 import dali.hamza.shared.data.repository.CurrencyRepositoryImpl
 import dali.hamza.shared.data.session.PushSessionManager
 import dali.hamza.shared.data.storage.createSessionStorage
+import dali.hamza.shared.data.widgets.WidgetSnapshotStore
+import dali.hamza.shared.data.widgets.WidgetsRepository
+import dali.hamza.shared.data.widgets.createWidgetSnapshotStore
 import dali.hamza.shared.platform.createBiometricAuthenticator
 import dali.hamza.shared.platform.createLocalNotifier
 import dali.hamza.shared.platform.createRateAlertScheduler
@@ -45,6 +48,9 @@ fun sharedModule(
     // server-push alerts (Phase 2): same host/client as CurrencyApi
     single { RateAlertsApi(httpClient = get()) }
     single { PushSessionManager(alertsApi = get(), storage = get()) }
+    // home-screen widgets (plans/widgets.md Phase 1)
+    single { createWidgetSnapshotStore() }
+    single { WidgetsRepository(currencyApi = get(), store = get(), storage = get()) }
     single { createDatabaseDriver() }
     single { AppDatabase(get()) }
     single { createSessionStorage() }

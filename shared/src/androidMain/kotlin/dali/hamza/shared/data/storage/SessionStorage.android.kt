@@ -96,6 +96,13 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_CHART_STYLE, style).apply()
     }
 
+    override fun getWidgetRealtime(): Boolean =
+        preferences.getBoolean(KEY_WIDGET_REALTIME, false)
+
+    override fun setWidgetRealtime(enabled: Boolean) {
+        preferences.edit().putBoolean(KEY_WIDGET_REALTIME, enabled).apply()
+    }
+
     // ---- server-push alert session (Phase 2) ----
 
     override fun getInstallId(): String? =
@@ -144,6 +151,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
         const val KEY_CHART_STYLE = "chart_style"
+        const val KEY_WIDGET_REALTIME = "widget_realtime"
         const val KEY_INSTALL_ID = "push_install_id"
         const val KEY_SESSION_TOKEN = "push_session_token"
         const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"

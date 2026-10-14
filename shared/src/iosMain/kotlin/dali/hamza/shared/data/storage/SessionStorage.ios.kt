@@ -104,6 +104,12 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(style, forKey = KEY_CHART_STYLE)
     }
 
+    override fun getWidgetRealtime(): Boolean = defaults.boolForKey(KEY_WIDGET_REALTIME)
+
+    override fun setWidgetRealtime(enabled: Boolean) {
+        defaults.setBool(enabled, forKey = KEY_WIDGET_REALTIME)
+    }
+
     // ---- server-push alert session (Phase 2) ----
 
     override fun getInstallId(): String? =
@@ -155,6 +161,7 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_COLOR_PALETTE = "color_palette"
         const val KEY_CHART_STYLE = "chart_style"
+        const val KEY_WIDGET_REALTIME = "widget_realtime"
         const val KEY_INSTALL_ID = "push_install_id"
         const val KEY_SESSION_TOKEN = "push_session_token"
         const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"

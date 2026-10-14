@@ -93,6 +93,16 @@ interface ISessionStorage {
 
     fun setChartStyle(style: String) {}
 
+    /**
+     * Widget refresh policy (Account → Widgets): `true` = realtime-ish
+     * (15-min periodic + refresh on every app foreground), `false` = the
+     * battery-friendly 30-min default. True widget "realtime" isn't
+     * possible on Android — this is the fastest drain-safe cadence.
+     */
+    fun getWidgetRealtime(): Boolean = false
+
+    fun setWidgetRealtime(enabled: Boolean) {}
+
     // ---- server-push alert session (Phase 2, plans/server-push-alerts.md) --
     // Identity for the anonymous session JWT: installId + cached token.
 
