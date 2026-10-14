@@ -86,11 +86,13 @@ struct QuickProvider: AppIntentTimelineProvider {
 struct QuickConvertEntryView: View {
     let entry: QuickEntry
 
-    private let surface = Color(red: 42 / 255, green: 42 / 255, blue: 42 / 255)
-    private let textPrimary = Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255)
-    private let textSecondary = Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255)
-    private let accent = Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255)
-    private let gold = Color(red: 233 / 255, green: 195 / 255, blue: 73 / 255)
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    private var textPrimary: Color { renderingMode == .fullColor ? Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255) : .primary }
+    private var textSecondary: Color { renderingMode == .fullColor ? Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255) : .secondary }
+    private var accent: Color { renderingMode == .fullColor ? Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255) : .primary }
+    private var gold: Color { renderingMode == .fullColor ? Color(red: 233 / 255, green: 195 / 255, blue: 73 / 255) : .primary }
+    private var chipSurface: Color { renderingMode == .fullColor ? Color(red: 53 / 255, green: 53 / 255, blue: 52 / 255) : Color.primary.opacity(0.08) }
 
     private let presets: [Double] = [1, 10, 100, 1000]
 
@@ -98,7 +100,7 @@ struct QuickConvertEntryView: View {
         VStack(spacing: 6) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("AMOUNT").font(.system(size: 9, weight: .bold)).foregroundStyle(.gray)
+                    Text("AMOUNT").font(.system(size: 9, weight: .bold)).foregroundStyle(textSecondary)
                     HStack(spacing: 6) {
                         Text(amountLabel).font(.system(size: 20, weight: .bold)).foregroundStyle(textPrimary)
                         codeChip(entry.base)
@@ -111,14 +113,14 @@ struct QuickConvertEntryView: View {
                 }
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("CONVERTED").font(.system(size: 9, weight: .bold)).foregroundStyle(.gray)
+                    Text("CONVERTED").font(.system(size: 9, weight: .bold)).foregroundStyle(textSecondary)
                     HStack(spacing: 6) {
                         Text(resultText).font(.system(size: 20, weight: .bold)).foregroundStyle(textPrimary)
                         codeChip(entry.quote)
                     }
                     if let rate = entry.rate {
                         Text("cached rate \(String(format: "%.4f", rate))")
-                            .font(.system(size: 9)).foregroundStyle(.gray)
+                            .font(.system(size: 9)).foregroundStyle(textSecondary)
                     }
                 }
             }
@@ -131,7 +133,7 @@ struct QuickConvertEntryView: View {
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(
-                                (preset == entry.amount ? accent : Color(red: 53 / 255, green: 53 / 255, blue: 52 / 255))
+                                (preset == entry.amount ? accent : chipSurface)
                                     .opacity(preset == entry.amount ? 0.2 : 1),
                                 in: RoundedRectangle(cornerRadius: 10)
                             )
@@ -170,7 +172,7 @@ struct QuickConvertEntryView: View {
             .foregroundStyle(textSecondary)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
-            .background(Color(red: 53 / 255, green: 53 / 255, blue: 52 / 255), in: RoundedRectangle(cornerRadius: 8))
+            .background(chipSurface, in: RoundedRectangle(cornerRadius: 8))
     }
 }
 

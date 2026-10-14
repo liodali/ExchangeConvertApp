@@ -52,18 +52,20 @@ struct GridProvider: TimelineProvider {
 struct MarketGridEntryView: View {
     let entry: GridEntry
 
-    private let textPrimary = Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255)
-    private let textSecondary = Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255)
-    private let cardSurface = Color(red: 58 / 255, green: 58 / 255, blue: 57 / 255)
-    private let positive = Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255)
-    private let negative = Color(red: 255 / 255, green: 180 / 255, blue: 171 / 255)
-    private let gold = Color(red: 233 / 255, green: 195 / 255, blue: 73 / 255)
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    private var textPrimary: Color { renderingMode == .fullColor ? Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255) : .primary }
+    private var textSecondary: Color { renderingMode == .fullColor ? Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255) : .secondary }
+    private var cardSurface: Color { renderingMode == .fullColor ? Color(red: 58 / 255, green: 58 / 255, blue: 57 / 255) : Color.primary.opacity(0.08) }
+    private var positive: Color { renderingMode == .fullColor ? Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255) : .primary }
+    private var negative: Color { renderingMode == .fullColor ? Color(red: 255 / 255, green: 180 / 255, blue: 171 / 255) : .primary }
+    private var gold: Color { renderingMode == .fullColor ? Color(red: 233 / 255, green: 195 / 255, blue: 73 / 255) : .primary }
 
     var body: some View {
         VStack(spacing: 8) {
             HStack {
                 Text("MARKETS").font(.system(size: 11, weight: .bold)).foregroundStyle(textSecondary)
-                Text("your markets").font(.system(size: 8)).foregroundStyle(.gray)
+                Text("your markets").font(.system(size: 8)).foregroundStyle(textSecondary)
                 Spacer()
                 Text("Manage").font(.system(size: 10, weight: .bold)).foregroundStyle(gold)
             }
@@ -71,7 +73,7 @@ struct MarketGridEntryView: View {
                 Spacer()
                 VStack(spacing: 4) {
                     Text("Pick 2–3 markets").font(.system(size: 12, weight: .bold)).foregroundStyle(textSecondary)
-                    Text("Account → Market Preferences").font(.system(size: 9)).foregroundStyle(.gray)
+                    Text("Account → Market Preferences").font(.system(size: 9)).foregroundStyle(textSecondary)
                 }
                 Spacer()
             } else {

@@ -190,11 +190,16 @@ struct MarketRateProvider: AppIntentTimelineProvider {
 struct MarketRateEntryView: View {
     let entry: MarketEntry
 
-    private let surface = Color(red: 42 / 255, green: 42 / 255, blue: 42 / 255)
-    private let textPrimary = Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255)
-    private let textSecondary = Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255)
-    private let positive = Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255)
-    private let negative = Color(red: 255 / 255, green: 180 / 255, blue: 171 / 255)
+    // iOS tinted/accented widget modes swap our dark surface for a system
+    // tinted background — fixed white text becomes invisible. Use semantic
+    // colors there and only paint the dark theme in full-color mode.
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    private var surface: Color { Color(red: 42 / 255, green: 42 / 255, blue: 42 / 255) }
+    private var textPrimary: Color { renderingMode == .fullColor ? Color(red: 229 / 255, green: 226 / 255, blue: 225 / 255) : .primary }
+    private var textSecondary: Color { renderingMode == .fullColor ? Color(red: 197 / 255, green: 198 / 255, blue: 205 / 255) : .secondary }
+    private var positive: Color { renderingMode == .fullColor ? Color(red: 78 / 255, green: 222 / 255, blue: 163 / 255) : .primary }
+    private var negative: Color { renderingMode == .fullColor ? Color(red: 255 / 255, green: 180 / 255, blue: 171 / 255) : .primary }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -244,6 +249,7 @@ struct MarketRateWidget: Widget {
         AppIntentConfiguration(kind: "MarketRate", intent: MarketRateIntent.self, provider: MarketRateProvider()) { entry in
             MarketRateEntryView(entry: entry)
                 .containerBackground(for: .widget) {
+                    // tinted/accented modes supply their own background
                     Color(red: 42 / 255, green: 42 / 255, blue: 42 / 255)
                 }
         }
