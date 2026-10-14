@@ -463,25 +463,23 @@ jobs:
           # each target's Release config with ITS profile name — checkout
           # isolation means the edit never leaves this runner.
           python3 - "$PROJECT/project.pbxproj" "$PROFILE_NAME" "$EXT_PROFILE_NAME" <<'PY'
-          import sys, re
+          import sys
           path, app_name, ext_name = sys.argv[1:4]
           s = open(path).read()
 
-          def inject(anchor_id, value, label):
+          def inject(anchor_id, value):
               global s
-              anchor = f"{anchor_id} = {{\n\t\t\tisa = XCBuildConfiguration;"
-              assert anchor in s, f"{label} config anchor not found"
-              s = s.replace(
-                  anchor,
-                  anchor + f"\n\t\t\tPROVISIONING_PROFILE_SPECIFIER = {value};",
-                  1,
-              )
+              start = s.index(anchor_id)
+              # settings must live INSIDE buildSettings — keys at config
+              # level are silently ignored by Xcode
+              bs = s.index("buildSettings = {", start) + len("buildSettings = {")
+              s = s[:bs] + f"\n\t\t\t\tCODE_SIGN_STYLE = Manual;\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = {value};" + s[bs:]
 
           # Release configs: app (A9000004) + extension (E1…111)
-          inject("A9000004 /* Release */", app_name, "app")
-          inject("E10000000000000000000111 /* Release */", ext_name, "extension")
+          inject("A9000004 /* Release */", app_name)
+          inject("E10000000000000000000111 /* Release */", ext_name)
           open(path, "w").write(s)
-          print(f"profiles wired: app={app_name} ext={ext_name}")
+          print(f"profiles wired inside buildSettings: app={app_name} ext={ext_name}")
           PY
           plutil -lint "$PROJECT/project.pbxproj"
 
