@@ -510,26 +510,33 @@ private fun QuickExchangeSection(
 
         CurrencyRow(label = "From", currency = from, onClick = onPickFrom)
 
+        // swap ⇄ — centered between the two currency rows, compact
         Box(
             modifier = Modifier
-                .padding(vertical = 12.dp)
-                .padding(start = 16.dp)
-                .size(44.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(LedgerColors.GreenSoft)
-                .clickable(onClick = onSwap),
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                Icons.Outlined.SwapHoriz,
-                contentDescription = "Swap currencies",
-                tint = LedgerColors.Green,
-            )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(LedgerColors.GreenSoft)
+                    .clickable(onClick = onSwap),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.SwapHoriz,
+                    contentDescription = "Swap currencies",
+                    tint = LedgerColors.Green,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
 
         CurrencyRow(label = "To", currency = to, onClick = onPickTo)
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         if (error != null) {
             Text(
@@ -547,7 +554,7 @@ private fun QuickExchangeSection(
                 isLoading -> "…"
                 else -> "—"
             },
-            style = MaterialTheme.typography.displaySmall.copy(
+            style = MaterialTheme.typography.headlineMedium.copy(
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
             ),
@@ -555,7 +562,7 @@ private fun QuickExchangeSection(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         // design fee row: "Fee (0.01%)  $0.10 USD"
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -741,7 +748,7 @@ private fun ActivityRow(tx: Transaction, tint: androidx.compose.ui.graphics.Colo
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Exchanged ${tx.base} to ${tx.quote}",
+                text = "${tx.base} → ${tx.quote}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
