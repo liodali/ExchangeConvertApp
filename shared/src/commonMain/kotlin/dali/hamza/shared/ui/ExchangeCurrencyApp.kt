@@ -56,6 +56,7 @@ import dali.hamza.shared.ui.screens.FeedbackScreen
 import dali.hamza.shared.ui.screens.FullConverterScreen
 import dali.hamza.shared.ui.screens.HistoryScreen
 import dali.hamza.shared.ui.screens.RateAlertsScreen
+import dali.hamza.shared.ui.screens.WidgetsScreen
 import dali.hamza.shared.ui.screens.SupportScreen
 import dali.hamza.shared.ui.screens.ConverterCurrencyScreen
 import dali.hamza.shared.ui.screens.HomeScreen
@@ -86,6 +87,7 @@ object Routes {
     const val CONVERTER = "converter"
     const val FULL_CONVERTER = "full-converter"
     const val RATE_ALERTS = "rate-alerts"
+    const val WIDGETS = "widgets"
     const val FAQ = "faq"
     const val SUPPORT = "support"
     const val CONTACT = "contact"
@@ -142,6 +144,19 @@ fun ExchangeCurrencyApp(
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
+        // one-shot deep link (widget/notification intents → host activity
+        // stashes the route here before the NavHost exists)
+        var historyPairOverride by remember { mutableStateOf<Pair<String, String>?>(null) }
+        LaunchedEffect(Unit) {
+            DeepLinkNav.pendingRoute?.let { route ->
+                // history links carry a pair — shown as the History override
+                // WITHOUT touching the shared pair (Home markets stay as-is)
+                historyPairOverride = DeepLinkNav.pendingPair
+                runCatching { navController.navigate(route) }
+                DeepLinkNav.pendingRoute = null
+                DeepLinkNav.pendingPair = null
+            }
+        }
         // Hosts always start Koin before composing — resolve the cluster VMs
         // from the shared container (same instance both platforms use).
         val accountViewModel = remember {
@@ -252,6 +267,7 @@ fun ExchangeCurrencyApp(
                         sharedViewModel = viewModel,
                         historyViewModel = historyViewModel,
                         chartStyle = chartStyle,
+                        pairOverride = historyPairOverride,
                     )
                 }
                 composable(Routes.ACCOUNT) {
@@ -270,6 +286,7 @@ fun ExchangeCurrencyApp(
                         onChartStyleChanged = { chartStyle = it },
                         onOpenSupport = { navController.navigate(Routes.SUPPORT) },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
+                        onOpenWidgets = { navController.navigate(Routes.WIDGETS) },
                     )
                 }
                 composable(Routes.CONVERTER) {
@@ -298,6 +315,20 @@ fun ExchangeCurrencyApp(
                         },
                         currencies = sharedState.currencies,
                         defaultBase = sharedState.fromCurrency?.name,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+                composable(Routes.WIDGETS) {
+                    WidgetsScreen(
+                        viewModel = remember {
+                            dali.hamza.shared.ui.viewmodel.WidgetsViewModel(
+                                repository = KoinPlatform.getKoin()?.get()
+                                    ?: error("initSharedKoin() must run before ExchangeCurrencyApp()"),
+                                storage = KoinPlatform.getKoin()?.get(),
+                                bridge = KoinPlatform.getKoin()?.get()
+                                    ?: dali.hamza.shared.platform.DefaultWidgetsHostBridge,
+                            )
+                        },
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -398,6 +429,9 @@ fun ExchangeCurrencyApp(
                         LedgerBottomNav(
                             currentDestination = destinationForRoute(currentRoute),
                             onSelectDestination = { destination ->
+                                // History tab = the app pair again (widget
+                                // deep-link override only rides the pushed nav)
+                                if (destination == LedgerDestination.HISTORY) historyPairOverride = null
                                 navController.navigate(routeFor(destination)) {
                                     popUpTo(Routes.HOME) { saveState = true }
                                     launchSingleTop = true

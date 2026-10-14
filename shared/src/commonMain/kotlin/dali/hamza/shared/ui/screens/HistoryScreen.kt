@@ -73,11 +73,17 @@ fun HistoryScreen(
     sharedViewModel: SharedViewModel,
     historyViewModel: HistoryViewModel,
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
+    /**
+     * Widget deep-link pair — shown INSTEAD of the shared app pair without
+     * mutating it (tapping a widget must not change the Home markets).
+     * Cleared when the user opens the History tab directly.
+     */
+    pairOverride: Pair<String, String>? = null,
 ) {
     val state by historyViewModel.state.collectAsState()
     val sharedState by sharedViewModel.state.collectAsState()
-    val base = sharedState.fromCurrency?.name
-    val quote = sharedState.toCurrency?.name
+    val base = pairOverride?.first ?: sharedState.fromCurrency?.name
+    val quote = pairOverride?.second ?: sharedState.toCurrency?.name
     val username = sharedState.username
 
     LaunchedEffect(base, quote) {
@@ -462,7 +468,7 @@ private fun TransactionRow(tx: Transaction) {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Exchanged ${tx.base} to ${tx.quote}",
+                text = "${tx.base} → ${tx.quote}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = LedgerColors.TextPrimary,
             )

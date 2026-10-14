@@ -56,6 +56,16 @@ class MainActivity : FragmentActivity() {
         if (::updateChecker.isInitialized) updateChecker.refresh()
         // rate alerts: one throttled engine pass on foreground
         dali.hamza.shared.platform.RateAlertsAndroid.checkOnForeground()
+        // widgets: realtime policy refreshes on every foreground too
+        runCatching {
+            val realtime = org.koin.core.context.GlobalContext.get()
+                .get<dali.hamza.shared.data.storage.ISessionStorage>()
+                .getWidgetRealtime()
+            if (realtime) {
+                dali.hamza.echangecurrencyapp.widgets.WidgetRefreshScheduler
+                    .refreshNow(this)
+            }
+        }
     }
 
     /**
@@ -91,6 +101,19 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         dali.hamza.shared.AndroidAppContext.currentActivity = this
         installSplashScreen()
+        // Deep link from widget/notification intents: stash the route for
+        // the shared NavHost (consumed once after composition). History
+        // links also carry the pair to preselect.
+        intent?.let { incoming ->
+            incoming.getStringExtra(dali.hamza.shared.ui.DeepLinkNav.EXTRA_ROUTE)?.let {
+                dali.hamza.shared.ui.DeepLinkNav.pendingRoute = it
+            }
+            val pairBase = incoming.getStringExtra(dali.hamza.shared.ui.DeepLinkNav.EXTRA_PAIR_BASE)
+            val pairQuote = incoming.getStringExtra(dali.hamza.shared.ui.DeepLinkNav.EXTRA_PAIR_QUOTE)
+            if (pairBase != null && pairQuote != null) {
+                dali.hamza.shared.ui.DeepLinkNav.pendingPair = pairBase to pairQuote
+            }
+        }
         // In-app update prompts (Play In-App Updates) — see AppUpdateChecker
         updateChecker = AppUpdateChecker(this)
         // Flutter-style edge-to-edge: system bars stay visible and transparent,
