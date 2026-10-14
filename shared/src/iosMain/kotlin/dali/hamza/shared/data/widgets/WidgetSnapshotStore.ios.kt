@@ -8,9 +8,10 @@ import kotlinx.serialization.serializer
 import platform.Foundation.NSUserDefaults
 
 /**
- * iOS actual — NSUserDefaults-backed JSON blobs. The WidgetKit extension
- * (Phase 3, `plans/widgets.md`) will switch the suite to the App Group
- * container so the extension process can read snapshots written by the app.
+ * iOS actual — App Group-backed JSON blobs: the WidgetKit extension
+ * (Phase 3) reads the snapshots in its own process via
+ * `group.dali.hamza.ExchangeConvertApp`. Falls back to standard defaults
+ * when the group isn't entitled (unit tests / previews).
  */
 actual class WidgetSnapshotStore actual constructor() {
 
@@ -19,7 +20,9 @@ actual class WidgetSnapshotStore actual constructor() {
         encodeDefaults = true
         coerceInputValues = true // pre-split MARKET_RATE configs → MARKET_CARD
     }
-    private val defaults: NSUserDefaults get() = NSUserDefaults.standardUserDefaults
+
+    private val defaults: NSUserDefaults
+        get() = NSUserDefaults(suiteName = APP_GROUP) ?: NSUserDefaults.standardUserDefaults
 
     private inline fun <reified T> read(key: String): List<T> {
         return try {
@@ -71,6 +74,7 @@ actual class WidgetSnapshotStore actual constructor() {
         const val CONFIGS_KEY = "widgets.configs.json"
         const val SNAPSHOTS_KEY = "widgets.snapshots.json"
         const val PENDING_KEY = "widgets.pending.json"
+        const val APP_GROUP = "group.dali.hamza.ExchangeConvertApp"
     }
 }
 
