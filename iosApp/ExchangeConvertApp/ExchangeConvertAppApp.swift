@@ -17,17 +17,25 @@ struct ExchangeConvertAppApp: App {
                     let host = url.host ?? "open"
                     var base: String?
                     var quote: String?
+                    var amount: String?
                     if let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) {
                         for item in comps.queryItems ?? [] {
                             if item.name == "base" { base = item.value }
                             if item.name == "quote" { quote = item.value }
+                            if item.name == "amount" { amount = item.value }
                         }
                     }
-                    let route = host == "history" ? "history" : "home"
+                    let route: String
+                    switch host {
+                    case "history": route = "history"
+                    case "converter": route = "full-converter"
+                    default: route = "home"
+                    }
                     DeepLinkNav.shared.stash(
                         route: route,
                         pairBase: base,
-                        pairQuote: quote
+                        pairQuote: quote,
+                        amount: amount
                     )
                 }
         }

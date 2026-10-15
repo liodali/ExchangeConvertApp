@@ -1,28 +1,46 @@
 package dali.hamza.shared.ui
 
-import kotlin.concurrent.Volatile
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /**
- * One-shot deep-link handoff from platform hosts into the shared
- * navigation: the Android host (widget intents, notifications) puts a
- * route extra on the launch Intent; [ExchangeCurrencyApp] consumes it
- * once after the NavHost is ready and clears it.
+ * Deep-link handoff from platform hosts into the shared navigation.
+ * Hosts (widget taps via URL scheme / intents, notifications) stash a
+ * pending link; [ExchangeCurrencyApp] reacts and navigates.
+ *
+ * Backed by Compose state so links delivered while the app is ALREADY
+ * running (iOS onOpenURL on a warm app) still navigate — the old one-shot
+ * LaunchedEffect(Unit) consumed cold-start links only.
  */
 object DeepLinkNav {
     const val EXTRA_ROUTE = "dali.hamza.shared.route"
     const val EXTRA_PAIR_BASE = "dali.hamza.shared.pair.base"
     const val EXTRA_PAIR_QUOTE = "dali.hamza.shared.pair.quote"
+    const val EXTRA_AMOUNT = "dali.hamza.shared.amount"
 
-    @Volatile
-    var pendingRoute: String? = null
+    data class PendingLink(
+        val route: String,
+        val base: String? = null,
+        val quote: String? = null,
+        val amount: String? = null,
+    )
 
-    /** Pair carried by the route (history deep links from widgets). */
-    @Volatile
-    var pendingPair: Pair<String, String>? = null
+    var pending: PendingLink? by mutableStateOf(null)
+        private set
 
-    /** Swift-callable stash (Kotlin Pair is awkward across the bridge). */
-    fun stash(route: String, pairBase: String? = null, pairQuote: String? = null) {
-        pendingRoute = route
-        pendingPair = if (pairBase != null && pairQuote != null) pairBase to pairQuote else null
+    /** Swift/Android-callable stash (Kotlin Pair is awkward across bridges). */
+    fun stash(
+        route: String,
+        pairBase: String? = null,
+        pairQuote: String? = null,
+        amount: String? = null,
+    ) {
+        pending = PendingLink(route, pairBase, pairQuote, amount)
+    }
+
+    /** Consumed by the NavHost after navigation. */
+    fun clear() {
+        pending = null
     }
 }

@@ -144,7 +144,7 @@ struct QuickConvertEntryView: View {
                 Text("Open app ↗").font(.system(size: 10, weight: .bold)).foregroundStyle(gold)
             }
         }
-        .widgetURL(URL(string: "sovereign://history?base=\(entry.base)&quote=\(entry.quote)"))
+        .widgetURL(URL(string: "sovereign://converter?base=\(entry.base)&quote=\(entry.quote)&amount=\(Int(entry.amount))"))
     }
 
     private var amountLabel: String { amountLabel(entry.amount) }

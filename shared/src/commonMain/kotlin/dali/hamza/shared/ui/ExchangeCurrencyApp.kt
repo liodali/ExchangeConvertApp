@@ -144,17 +144,36 @@ fun ExchangeCurrencyApp(
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
-        // one-shot deep link (widget/notification intents → host activity
-        // stashes the route here before the NavHost exists)
+        // one-shot → reactive: deep links work on cold start AND when the
+        // app is already composed (iOS onOpenURL on a warm app)
         var historyPairOverride by remember { mutableStateOf<Pair<String, String>?>(null) }
-        LaunchedEffect(Unit) {
-            DeepLinkNav.pendingRoute?.let { route ->
-                // history links carry a pair — shown as the History override
-                // WITHOUT touching the shared pair (Home markets stay as-is)
-                historyPairOverride = DeepLinkNav.pendingPair
-                runCatching { navController.navigate(route) }
-                DeepLinkNav.pendingRoute = null
-                DeepLinkNav.pendingPair = null
+        val deepLink = DeepLinkNav.pending
+        LaunchedEffect(deepLink) {
+            deepLink?.let { link ->
+                when (link.route) {
+                    "history" -> link.base?.let { b ->
+                        link.quote?.let { q -> historyPairOverride = b to q }
+                    }
+                    // converter links prefill pair + amount, then convert
+                    "full-converter", "converter" -> {
+                        link.base?.let { code ->
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(code)
+                                ?.let(viewModel::selectFromCurrency)
+                        }
+                        link.quote?.let { code ->
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(code)
+                                ?.let(viewModel::selectToCurrency)
+                        }
+                        link.amount?.let { value ->
+                            viewModel.onAmountChange(value)
+                            viewModel.convert()
+                        }
+                    }
+                }
+                if (link.route != "home") {
+                    runCatching { navController.navigate(link.route) }
+                }
+                DeepLinkNav.clear()
             }
         }
         // Hosts always start Koin before composing — resolve the cluster VMs

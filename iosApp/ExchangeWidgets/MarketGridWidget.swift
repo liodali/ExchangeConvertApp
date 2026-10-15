@@ -77,11 +77,13 @@ struct MarketGridEntryView: View {
                 }
                 Spacer()
             } else {
-                // equal share — 2 markets each get the extra space (max 3)
+                // equal share — 2 markets each get the extra space (max 3).
+                // Each card links to the HISTORY page for its own pair.
                 HStack(spacing: 10) {
                     ForEach(entry.cards.prefix(3).indices, id: \.self) { index in
                         let card = entry.cards[index]
-                        VStack(spacing: 6) {
+                        Link(destination: URL(string: "sovereign://history?base=\(card.base)&quote=\(card.quote)")!) {
+                            VStack(spacing: 6) {
                             Text("\(card.base)/\(card.quote)")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(textSecondary)
@@ -104,6 +106,7 @@ struct MarketGridEntryView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(cardSurface, in: RoundedRectangle(cornerRadius: 12))
+                        }
                     }
                 }
             }
