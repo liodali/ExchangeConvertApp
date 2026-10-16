@@ -413,8 +413,8 @@ Endpoints: `/currencies` (optional `?type=fiat|metal|crypto|all`), `/latest` (ba
 > `key.properties`, Gradle 9.4.1 wrapper, `rateRepository` visibility) are **uncommitted** in the
 > submodule — commit/push inside `exchange-api/` first, then bump the parent's gitlink.
 >
-> Deployment tooling lives in the submodule: staging on Railway (`railway.json` +
-> `Dockerfile.railway`) and production on the VPS via Ansible (`deploy/ansible/`) —
+> Deployment tooling lives in the submodule: staging on the OpenShip fork (`openship.json`,
+> `Dockerfile.staging`, and `deploy/staging.sh`) and production on the VPS via Ansible (`deploy/ansible/`) —
 > see [`exchange-api/deploy/README.md`](exchange-api/deploy/README.md).
 
 ---

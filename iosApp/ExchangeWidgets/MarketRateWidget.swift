@@ -9,7 +9,7 @@ let snapshotsKey = "widgets.snapshots.json"
 let configsKey = "widgets.configs.json"
 let activeKey = "widgets.ios.active.json"
 let marketsKey = "widgets.ios.markets.json"
-let apiHost = "https://exchange-api-production-dfba.up.railway.app"
+let apiHost = "https://exchange-api-staging.op.dev.kahuna.adetify.com"
 
 /// Report what the system asked us to render — the app's "on your home
 /// screen" list is detection-by-render (iOS has no widget enumeration).
