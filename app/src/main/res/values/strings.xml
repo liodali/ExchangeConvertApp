@@ -1,5 +1,12 @@
 <resources>
     <string name="app_name">Sovereign Ledger</string>
+    <!-- AppFunctions (Android intelligence system): agent-facing app
+         descriptions. `app_function_app_description` is read by agents to
+         decide when our tools apply; keep in sync with res/xml/app_metadata.xml -->
+    <string name="app_function_app_description">Live currency converter and exchange-rate tools (Sovereign Ledger).
+        Use when the user asks to convert amounts, check exchange rates (fiat, gold, silver, crypto),
+        review rate history/trends, manage rate alerts, or open a conversion in the app.</string>
+    <string name="app_function_app_display_description">Currency converter &amp; rate alerts</string>
     <string name="amount_label">Amount</string>
     <string name="select_currency_label_bt">select an currency</string>
     <string name="server">https://api.openexchangerate.com/</string>

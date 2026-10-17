@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Agent-facing app metadata (Android intelligence system / AppFunctions).
+     The description text is read by agents to orchestrate our tools —
+     keep Operational Patterns / Constraints in sync with the service KDocs. -->
+<AppFunctionAppMetadata xmlns:appfn="http://schemas.android.com/apk/androidx.appfunctions"
+    appfn:description="Sovereign Ledger — live currency converter, exchange rates, rate history and rate alerts.
+Operational Patterns:
+  - Resolve currency names the user says (euro, dirham, gold) to ISO codes with 'getCurrencies' before calling other functions.
+  - Use 'convertCurrency' for any conversion, and with amount 1 to answer rate questions; metals (XAU gold, XAG silver) and crypto (BTC) are supported codes.
+  - Use 'getHistoricalRates' for trend questions (min/max/percent change over a window).
+  - 'openAppScreen' returns a PendingIntent that opens the app UI on a screen; converter links accept base/quote/amount prefill and auto-convert. Launch it when the user wants to see or continue in the app.
+Constraints:
+  - from/to (or base/quote) must be different codes returned by 'getCurrencies'.
+  - Rate alerts: free plan caps at 2 on-device (LOCAL) alerts and 1 pushed (SERVER) alert, one alert per pair.
+  - PERIODIC alert intervals must be 60 or 120 minutes."
+    appfn:displayDescription="@string/app_function_app_display_description" />

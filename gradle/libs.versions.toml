@@ -4,6 +4,10 @@ activityKtx = "1.13.0"
 androidxDatastorePreferences = "1.1.1"
 appcompat = "1.7.1"
 appUpdate = "2.1.0"
+# AppFunctions (Android intelligence system) — pinned to the version the
+# official sample (android/appfunctions) builds against; alpha13 renames
+# @AppFunction → @AppFunctionDeclaration, so bump mindfully.
+appfunctions = "1.0.0-alpha10"
 coilCompose = "2.7.0"
 coilComposeCore = "3.4.0"
 sentryAndroid = "8.16.0"
@@ -82,6 +86,8 @@ androidx-app-update = { module = "com.google.android.play:app-update", version.r
 androidx-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
+androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-compiler", version.ref = "appfunctions" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
 sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }

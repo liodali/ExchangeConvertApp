@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appfn="http://schemas.android.com/apk/androidx.appfunctions"
+    xmlns:tools="http://schemas.android.com/tools">
 <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Local rate alerts (Account → Rate Alerts): posting notifications
          needs the runtime permission on Android 13+ -->
@@ -12,6 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExchangeCurrencyApp"
+        appfn:description="@string/app_function_app_description"
+        appfn:displayDescription="@string/app_function_app_display_description"
         >
         <activity
             android:name=".ui.MainActivity"
@@ -101,6 +105,29 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="rate_alerts" />
+
+        <!-- AppFunctions (Android intelligence system, developer.android.com/ai/appfunctions).
+             KSP generates this concrete service from BaseCurrencyAppFunctionService
+             (appfunctions/CurrencyAppFunctions.kt) plus the schema XML asset.
+             Only bound on Android 16+ (API 36); harmless on older devices. -->
+        <service
+            android:name=".appfunctions.CurrencyAppFunctionService"
+            android:permission="android.permission.BIND_APP_FUNCTION_SERVICE"
+            android:exported="true"
+            tools:targetApi="36">
+            <property
+                android:name="android.app.appfunctions.schema"
+                android:value="app_functions_schema.xsd" />
+            <property
+                android:name="android.app.appfunctions.v2"
+                android:value="currency_app_function_service.xml" />
+            <intent-filter>
+                <action android:name="android.app.appfunctions.AppFunctionService" />
+            </intent-filter>
+        </service>
+        <property
+            android:name="android.app.appfunctions.app_metadata"
+            android:resource="@xml/app_metadata" />
     </application>
 
 </manifest>

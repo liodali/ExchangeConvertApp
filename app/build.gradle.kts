@@ -246,6 +246,12 @@ dependencies {
 
     // WorkerManager dependencies
     implementation(libs.androidx.work.runtime.ktx)
+    // AppFunctions (Android intelligence system, developer.android.com/ai/appfunctions)
+    // — exposes convert/rates/history/alerts/deep-links to on-device agents
+    // (Gemini & co.). KSP generates CurrencyAppFunctionService + the schema
+    // XML asset; Koin (started in ExchangeApplication) supplies the repo.
+    implementation(libs.androidx.appfunctions)
+    ksp(libs.androidx.appfunctions.compiler)
     // Home-screen widgets (plans/widgets.md Phase 1) — Glance
     implementation(libs.androidx.glance.appwidget)
     //dataStore
