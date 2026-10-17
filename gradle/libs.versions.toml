@@ -16,9 +16,9 @@ coreKtxVersion = "1.7.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 espressoCore = "3.7.0"
-foundationVersion = "1.10.3"
+foundationVersion = "1.12.2"
 fragmentKtx = "1.9.1"
-gradle = "9.1.0"
+gradle = "9.4.1"
 glance = "1.2.0"
 gson = "2.14.0"
 jetbrainsNavigation = "2.9.2"
@@ -28,30 +28,28 @@ koinAndroid = "4.2.2"
 koinAndroidxCompose = "4.2.2"
 koinAndroidxNavigation = "4.2.2"
 koinAndroidxWorkmanager = "4.2.2"
-kotlin = "2.3.20"
-android-gradlePlugin = "9.1.0"
-kotlinGradlePlugin = "2.2.10"
+kotlin = "2.4.21"
+android-gradlePlugin = "9.4.1"
+kotlinGradlePlugin = "2.4.21"
 kotlinxCoroutinesAndroid = "1.11.0"
 kotlinxCoroutinesCore = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
-ksp = "2.3.6"
+ksp = "2.3.12"
 ktor = "3.6.0"
 kmpObservableViewmodel = "1.1.0"
-androidx-ui-tooling = "1.7.4"
-lifecycleRuntimeCompose = "2.10.0"
-lifecycleRuntimeKtx = "2.10.0"
-lifecycleService = "2.10.0"
-lifecycleViewmodelCompose = "2.10.0"
-lifecycleViewmodelKtx = "2.10.0"
+lifecycleRuntimeCompose = "2.11.0"
+lifecycleRuntimeKtx = "2.11.0"
+lifecycleService = "2.11.0"
+lifecycleViewmodelCompose = "2.11.0"
+lifecycleViewmodelKtx = "2.11.0"
 loggingInterceptor = "5.5.0"
 material = "1.14.0"
-material3 = "1.4.0"
 material3Version = "1.9.0"
 mockitoAndroid = "5.24.0"
 mockitoKotlin = "6.4.0"
 mockwebserver = "5.5.0"
 napier = "2.7.1"
-navigationCompose = "2.9.7"
+navigationCompose = "2.10.2"
 pagingCommonKtx = "3.5.3"
 pagingVersion = "3.5.3"
 preferenceKtx = "1.2.1"
@@ -59,12 +57,10 @@ roomVersion = "2.8.5"
 
 # KMP specific versions
 
-compose-plugin = "1.10.3"
+compose-plugin = "1.12.2"
 koin = "4.2.2"
-runtimeVersion = "1.10.3"
-sqlDelightVersion = "2.3.2"
-uiTestJunit4Android = "1.10.6"
-uiTestManifest = "1.10.6"
+runtimeVersion = "1.12.2"
+sqlDelightVersion = "2.4.1"
 workRuntimeKtx = "2.12.0"
 
 [libraries]
@@ -82,14 +78,13 @@ androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
 sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }
-androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationCompose" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationCompose" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigationCompose" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationCompose" }
-androidx-ui-test-junit4-android = { module = "androidx.compose.ui:ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
-androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
+androidx-ui-test-junit4-android = { module = "androidx.compose.ui:ui-test-junit4-android" }
+androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
@@ -176,3 +171,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqlDelightVersion" }

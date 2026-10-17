@@ -8,7 +8,7 @@ plugins {
     id("app.cash.sqldelight")
 }
 
-val sqlDelightVersion = "2.3.2"
+val sqlDelightVersion = libs.versions.sqlDelightVersion.get()
 
 kotlin {
     androidTarget()
@@ -16,8 +16,9 @@ kotlin {
     // The iOS framework is consumed by iosApp through a local Swift package
     // (see iosApp/SharedKMP) built by the :shared:embedAndSignAppleFrameworkForXcode
     // Gradle task, which runs as an Xcode scheme pre-action.
+    // NOTE: no iosX64 — Compose 1.12+ (Kotlin 2.4 toolchain) no longer
+    // publishes Intel iOS-simulator artifacts; Apple Silicon only.
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {

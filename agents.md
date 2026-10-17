@@ -22,17 +22,17 @@ This document describes the project structure, conventions, and key patterns to 
 
 | Category | Technology | Version |
 |---|---|---|
-| **Language** | Kotlin | 2.1.20 |
-| **UI (Android)** | Jetpack Compose + BOM | 2025.04.01 / Compose 1.8.0 |
-| **UI (iOS)** | SwiftUI + Compose Multiplatform (hybrid) | Compose MP 1.7.0 |
-| **DI** | Koin (multiplatform) | 4.2.0 |
+| **Language** | Kotlin | 2.4.21 |
+| **UI (Android)** | Jetpack Compose + BOM | 2026.09.00 / Compose 1.12 |
+| **UI (iOS)** | SwiftUI + Compose Multiplatform (hybrid) | Compose MP 1.12.2 |
+| **DI** | Koin (multiplatform) | 4.2.2 |
 | **Networking (legacy)** | Retrofit + Moshi + OkHttp | — |
-| **Networking (KMP)** | Ktor Client | 3.4.2 |
+| **Networking (KMP)** | Ktor Client | 3.6.0 |
 | **Database (legacy Android)** | Room | — |
-| **Database (KMP)** | SQLDelight | 2.3.2 |
+| **Database (KMP)** | SQLDelight | 2.4.1 |
 | **Serialization** | Kotlinx Serialization + Moshi (legacy) | — |
-| **Coroutines** | Kotlinx Coroutines | 1.10.2 |
-| **Image Loading** | Coil 3 | 3.0.0-alpha01 |
+| **Coroutines** | Kotlinx Coroutines | 1.11.0 |
+| **Image Loading** | Coil 2 (Coil 3 pending ImageLoader wiring) | 2.7.0 |
 | **Build** | Gradle KTS + Version Catalog (`libs.versions.toml`) | — |
 
 ---

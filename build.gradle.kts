@@ -3,16 +3,11 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.google.services) apply false
-    id("com.google.devtools.ksp") version "2.3.6" apply false
-    id("app.cash.sqldelight") version "2.3.2" apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.sqldelight) apply false
 }
 buildscript {
 
-    extra.apply {
-        set("compose_version", "1.8.0")
-        set("hilt_version", "2.52")
-        set("kotlin_version", "2.1.20")
-    }
     repositories {
         google()
         mavenCentral()

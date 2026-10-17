@@ -26,8 +26,6 @@ val properties = Properties().apply {
 // App versions are loaded separately from the shared version.xcconfig.
 fun prop(name: String, fallback: String): String =
     (project.properties[name] as? String) ?: properties.getProperty(name) ?: fallback
-val composeVersion = rootProject.extra.get("compose_version") as String
-val kotlinVersion = rootProject.extra.get("kotlin_version") as String
 
 // The same file is the base configuration for the iOS app in Xcode.
 val appVersionProperties = Properties().apply {
@@ -139,6 +137,11 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            // Kotlin 2.4 default module names are "{group}:{name}" — the colon
+            // breaks appfunctions-compiler alpha10's generated registry file
+            // names ($<moduleName>_FunctionComponentRegistry). Override until
+            // the appfunctions compiler sanitizes it (google/ksp#2964).
+            moduleName.set("echangecurrencyapp_app")
         }
     }
 
@@ -147,16 +150,12 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = composeVersion
-        //kotlinCompilerVersion = kotlinVersion
-    }
 }
 
 dependencies {
 
 
-    val composeBom = platform("androidx.compose:compose-bom:2025.04.01")
+    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
     implementation(composeBom)
 
     implementation(libs.core.ktx)
