@@ -3,8 +3,8 @@ package dali.hamza.echangecurrencyapp.appfunctions
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.annotation.RequiresApi
-import androidx.appfunctions.AppFunction
 import androidx.appfunctions.AppFunctionAppUnknownException
+import androidx.appfunctions.AppFunctionDeclaration
 import androidx.appfunctions.AppFunctionElementNotFoundException
 import androidx.appfunctions.AppFunctionInvalidArgumentException
 import androidx.appfunctions.AppFunctionService
@@ -61,7 +61,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @throws AppFunctionElementNotFoundException If either code is unknown — call "getCurrencies" to resolve valid codes.
      * @throws AppFunctionAppUnknownException If rates are temporarily unavailable (offline / backend unreachable). Suggest retrying later.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun convertCurrency(
         amount: Double,
         from: String,
@@ -106,7 +106,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @return Up to 40 [CurrencyInfo] entries sorted by code.
      * @throws AppFunctionInvalidArgumentException If a query is provided but matches nothing.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getCurrencies(query: String? = null): List<CurrencyInfo> {
         val currencies = when (val response = repository.getListCurrencies()) {
             is MyResponse.Success -> response.data
@@ -138,7 +138,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @throws AppFunctionElementNotFoundException If base is unknown, or none of the requested symbols are available.
      * @throws AppFunctionAppUnknownException If rates are temporarily unavailable.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getExchangeRates(
         base: String? = null,
         symbols: List<String>? = null,
@@ -201,7 +201,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @throws AppFunctionElementNotFoundException If either code is unknown.
      * @throws AppFunctionAppUnknownException If no history is available for the pair in the window.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun getHistoricalRates(
         base: String,
         quote: String,
@@ -262,7 +262,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @throws AppFunctionInvalidArgumentException If codes are unknown or equal, mode/interval/threshold are invalid, the pair is already tracked, or the free-tier cap (2 alerts) is reached.
      * @throws AppFunctionElementNotFoundException If either code is unknown.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun addRateAlert(
         base: String,
         quote: String,
@@ -318,7 +318,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      *
      * @return All alerts as [RateAlertInfo]; use alertId + source with "deleteRateAlert".
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun listRateAlerts(): List<RateAlertInfo> {
         val local = repository.getRateAlerts().map { it.toInfo() }
         val server = runCatching { repository.getServerRateAlerts() }
@@ -335,7 +335,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @return A human-readable confirmation message.
      * @throws AppFunctionInvalidArgumentException If alertId is negative.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun deleteRateAlert(
         alertId: Long,
         @AppFunctionStringValueConstraint(enumValues = ["LOCAL", "SERVER"])
@@ -367,7 +367,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
      * @throws AppFunctionInvalidArgumentException If screen is not one of the supported values.
      * @throws AppFunctionElementNotFoundException If base/quote codes are unknown.
      */
-    @AppFunction(isDescribedByKDoc = true)
+    @AppFunctionDeclaration(isDescribedByKDoc = true)
     suspend fun openAppScreen(
         @AppFunctionStringValueConstraint(enumValues = ["home", "converter", "full-converter", "history", "rate-alerts", "widgets", "account"])
         screen: String,

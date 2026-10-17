@@ -1,6 +1,6 @@
 # AppFunctions — agent integration (Android intelligence system)
 
-**Status:** shipped (Oct 2026) · **Library:** `androidx.appfunctions:1.0.0-alpha10` · **Docs:** <https://developer.android.com/ai/appfunctions>
+**Status:** shipped (Oct 2026) · **Library:** `androidx.appfunctions:1.0.0-alpha13` · **Docs:** <https://developer.android.com/ai/appfunctions>
 
 ## What this gives us
 
@@ -64,8 +64,8 @@ agent-rendered UI from our data — not needed for v1.)
   cross-function **operational patterns + constraints** text agents use for
   orchestration (keep in sync with the KDocs!).
 - **Version** pinned in `gradle/libs.versions.toml` → `appfunctions`.
-  ⚠️ alpha13 renames `@AppFunction` → `@AppFunctionDeclaration` — a bump is
-  a small migration, not a version-only change.
+  alpha13 renamed `@AppFunction` → `@AppFunctionDeclaration` (applied Oct
+  2026); `@AppFunctionSerializable` is unchanged.
 
 ### API-shape gotchas learned
 

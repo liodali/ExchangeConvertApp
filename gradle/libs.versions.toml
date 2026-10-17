@@ -2,10 +2,10 @@
 activityKtx = "1.13.0"
 appcompat = "1.8.0"
 appUpdate = "2.1.0"
-# AppFunctions (Android intelligence system) — pinned to the version the
-# official sample (android/appfunctions) builds against; alpha13 renames
-# @AppFunction → @AppFunctionDeclaration, so bump mindfully.
-appfunctions = "1.0.0-alpha10"
+# AppFunctions (Android intelligence system) — alpha13 renamed
+# @AppFunction → @AppFunctionDeclaration (applied) and removed
+# AppFunctionContext/AppFunctionConfiguration (unused here).
+appfunctions = "1.0.0-alpha13"
 coilCompose = "2.7.0"
 sentryAndroid = "8.61.0"
 converterMoshi = "3.0.0"
