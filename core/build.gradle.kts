@@ -1,7 +1,7 @@
 plugins {
     id("com.android.library")
     id("kotlin-android")
-    kotlin("plugin.serialization") version "2.1.20"
+    alias(libs.plugins.kotlinxSerialization)
 
 }
 
@@ -48,38 +48,35 @@ dependencies {
     implementation(libs.core.ktx)
 
     //ktor
-    val ktorVersion = "3.1.2"
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.cio)
-
-    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation(libs.ktor.client.logging)
 
     //serialization
     implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
-    val coroutinesVersion = "1.10.2"
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     //dataStore
     implementation(libs.datastore.preferences)
     implementation(libs.preference.ktx)
     // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.logging.interceptor)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
-    androidTestImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
-    androidTestImplementation("org.mockito:mockito-android:5.23.0")
-    testImplementation("com.google.code.gson:gson:2.13.2")
-    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:$coroutinesVersion")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+    testImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
+    testImplementation(libs.gson)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
 
     implementation(project(":database"))

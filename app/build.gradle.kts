@@ -5,7 +5,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.devtools.ksp") version "2.3.6" apply true
+    alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler) apply true
     alias(libs.plugins.google.services) apply false
 }
@@ -201,11 +201,9 @@ dependencies {
     debugImplementation(libs.ui.tooling)
 
 
-    //coil
-    // implementation "com.google.accompanist:accompanist-coil:0.34.0"
-    implementation(libs.coil.compose)//io.coil-kt.coil3:coil:3.0.0-alpha01
-    implementation(libs.coil.compose.core)
-//io.coil-kt.coil3:coil:3.0.0-alpha01
+    //coil — flag images (Coil 2 line; Coil 3 migration needs ImageLoader
+    //wiring in ExchangeApplication — see plans)
+    implementation(libs.coil.compose)
 
 
     implementation(libs.kotlinx.coroutines.core)
@@ -229,8 +227,6 @@ dependencies {
     implementation(libs.converter.moshi)
     implementation(libs.logging.interceptor)
 
-    //picasso
-    implementation(libs.picasso)
 
     //room
     implementation(libs.room.runtime)

@@ -1,79 +1,71 @@
 [versions]
-activityCompose = "1.10.1"
 activityKtx = "1.13.0"
-androidxDatastorePreferences = "1.1.1"
-appcompat = "1.7.1"
+appcompat = "1.8.0"
 appUpdate = "2.1.0"
 # AppFunctions (Android intelligence system) — pinned to the version the
 # official sample (android/appfunctions) builds against; alpha13 renames
 # @AppFunction → @AppFunctionDeclaration, so bump mindfully.
 appfunctions = "1.0.0-alpha10"
 coilCompose = "2.7.0"
-coilComposeCore = "3.4.0"
-sentryAndroid = "8.16.0"
+sentryAndroid = "8.61.0"
 converterMoshi = "3.0.0"
-firebaseBom = "35.0.0"
+firebaseBom = "35.0.2"
 googleServices = "4.5.0"
-coreKtx = "1.18.0"
+coreKtx = "1.19.1"
 coreKtxVersion = "1.7.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 espressoCore = "3.7.0"
-espressoIntents = "3.3.0"
-foundation = "1.10.6"
 foundationVersion = "1.10.3"
-fragmentKtx = "1.8.9"
+fragmentKtx = "1.9.1"
 gradle = "9.1.0"
 glance = "1.2.0"
-gson = "2.13.2"
+gson = "2.14.0"
+jetbrainsNavigation = "2.9.2"
 junit = "4.13.2"
 junitVersion = "1.3.0"
-koinAndroid = "4.2.1"
-koinAndroidxCompose = "4.2.1"
-koinAndroidxNavigation = "4.2.1"
-koinAndroidxWorkmanager = "4.2.1"
+koinAndroid = "4.2.2"
+koinAndroidxCompose = "4.2.2"
+koinAndroidxNavigation = "4.2.2"
+koinAndroidxWorkmanager = "4.2.2"
 kotlin = "2.3.20"
 android-gradlePlugin = "9.1.0"
 kotlinGradlePlugin = "2.2.10"
-kotlinxCoroutinesAndroid = "1.10.2"
-kotlinxCoroutinesCore = "1.10.2"
+kotlinxCoroutinesAndroid = "1.11.0"
+kotlinxCoroutinesCore = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 ksp = "2.3.6"
-ktor = "3.4.2"
-kmpObservableViewmodel = "1.0.3"
+ktor = "3.6.0"
+kmpObservableViewmodel = "1.1.0"
 androidx-ui-tooling = "1.7.4"
-ktorVersion = "3.4.2"
 lifecycleRuntimeCompose = "2.10.0"
 lifecycleRuntimeKtx = "2.10.0"
 lifecycleService = "2.10.0"
 lifecycleViewmodelCompose = "2.10.0"
 lifecycleViewmodelKtx = "2.10.0"
-loggingInterceptor = "5.3.2"
-material = "1.13.0"
+loggingInterceptor = "5.5.0"
+material = "1.14.0"
 material3 = "1.4.0"
 material3Version = "1.9.0"
-mockitoAndroid = "5.23.0"
-mockitoKotlin = "6.3.0"
-mockwebserver = "5.3.2"
+mockitoAndroid = "5.24.0"
+mockitoKotlin = "6.4.0"
+mockwebserver = "5.5.0"
 napier = "2.7.1"
 navigationCompose = "2.9.7"
-pagingCommonKtx = "3.4.2"
-pagingVersion = "3.4.2"
-picasso = "2.71828"
+pagingCommonKtx = "3.5.3"
+pagingVersion = "3.5.3"
 preferenceKtx = "1.2.1"
-roomVersion = "2.8.4"
+roomVersion = "2.8.5"
 
 # KMP specific versions
 
 compose-plugin = "1.10.3"
-koin = "4.2.1"
-runtime = "1.10.6"
+koin = "4.2.2"
 runtimeVersion = "1.10.3"
 sqlDelightVersion = "2.3.2"
-ui = "1.10.6"
 uiTestJunit4Android = "1.10.6"
 uiTestManifest = "1.10.6"
-workRuntimeKtx = "2.11.2"
+workRuntimeKtx = "2.12.0"
 
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -84,7 +76,6 @@ android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = 
 # Play In-App Updates — prompt users who disabled Play auto-update
 androidx-app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
 androidx-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
-androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 androidx-appfunctions = { module = "androidx.appfunctions:appfunctions", version.ref = "appfunctions" }
 androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-compiler", version.ref = "appfunctions" }
@@ -97,22 +88,19 @@ androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationCompose" }
 androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigationCompose" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationCompose" }
-androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
-androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 androidx-ui-test-junit4-android = { module = "androidx.compose.ui:ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilComposeCore" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelightVersion" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
-espresso-contrib = { module = "com.android.support.test.espresso:espresso-contrib", version.ref = "espressoIntents" }
+espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espressoCore" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-espresso-intents = { module = "com.android.support.test.espresso:espresso-intents", version.ref = "espressoIntents" }
+espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoCore" }
 ext-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
 foundation = { module = "androidx.compose.foundation:foundation" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
@@ -122,6 +110,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 jetbrains-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundationVersion" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jetbrainsNavigation" }
 junit = { module = "junit:junit", version.ref = "junit" }
 junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junitVersion" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
@@ -133,11 +122,11 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorVersion" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorVersion" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 kmp-observable-viewmodel = { module = "com.rickclephas.kmp:kmp-observableviewmodel-core", version.ref = "kmpObservableViewmodel" }
@@ -159,7 +148,6 @@ napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelightVersion" }
 paging-common-ktx = { module = "androidx.paging:paging-common-ktx", version.ref = "pagingCommonKtx" }
 paging-runtime-ktx = { module = "androidx.paging:paging-runtime-ktx", version.ref = "pagingVersion" }
-picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterMoshi" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
@@ -174,7 +162,7 @@ ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 # KMP specific libraries
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityKtx" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 [plugins]
