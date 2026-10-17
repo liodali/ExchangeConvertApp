@@ -10,7 +10,7 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDisplayName</key>
-	<string>Sovereign Ledger</string>
+	<string>Dinarly</string>
 	<!-- Required for the biometric app-lock (Account → App Lock). Without
 	     this iOS terminates the app the first time Face ID is invoked. -->
 	<key>NSFaceIDUsageDescription</key>

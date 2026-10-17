@@ -34,7 +34,7 @@ enum AppScreenOption: String, AppEnum {
 /// amount (the app converts automatically), history preselects the pair.
 @available(iOS 16.0, *)
 struct OpenAppScreenIntent: AppIntent {
-    static var title: LocalizedStringResource = "Open Sovereign Ledger"
+    static var title: LocalizedStringResource = "Open Dinarly"
     static var description = IntentDescription(
         "Opens the app on a chosen screen — the converter can start from a pair and an amount."
     )

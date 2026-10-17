@@ -120,7 +120,7 @@ fun AccountScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "Sovereign Ledger",
+            title = "Dinarly",
             avatarInitials = viewModel.username,
             trailing = {
                 // bell opens the local rate alerts (the support hub keeps

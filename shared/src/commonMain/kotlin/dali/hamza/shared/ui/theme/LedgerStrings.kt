@@ -10,7 +10,7 @@ package dali.hamza.shared.ui.theme
 object LedgerStrings {
 
     /** Pushed-screen top bar title (design: every sub-screen header). */
-    const val APP_TITLE = "SOVEREIGN LEDGER"
+    const val APP_TITLE = "DINARLY"
 
     object Account {
         const val BADGE_PRIVATE = "PRIVATE CLIENT"
@@ -95,7 +95,7 @@ object LedgerStrings {
         /** Live version of the installed build (from the package, not a
          *  design string) + last-sync label — Account screen footer. */
         fun footer(lastSync: String) =
-            "SOVEREIGN LEDGER NODE V${dali.hamza.shared.platform.appVersionName()} • LAST SYNC: $lastSync"
+            "DINARLY NODE V${dali.hamza.shared.platform.appVersionName()} • LAST SYNC: $lastSync"
 
         const val DIALOG_CANCEL = "Cancel"
         const val DIALOG_SAVE = "Save"

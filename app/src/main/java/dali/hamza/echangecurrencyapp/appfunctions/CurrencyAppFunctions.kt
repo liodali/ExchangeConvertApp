@@ -27,7 +27,7 @@ import org.koin.core.component.inject
 import java.time.LocalDate
 
 /**
- * Sovereign Ledger's on-device MCP tool surface (Android intelligence
+ * Dinarly's on-device MCP tool surface (Android intelligence
  * system). Exposes currency conversion, live rates, historical trends and
  * rate-alert management to system agents (Gemini and any app holding
  * `EXECUTE_APP_FUNCTIONS`), plus [openAppScreen] which hands back a
@@ -97,7 +97,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
     }
 
     /**
-     * List the currencies Sovereign Ledger supports for conversion and alerts.
+     * List the currencies Dinarly supports for conversion and alerts.
      * Required workflow: call this whenever a user refers to a currency by
      * name ("euro", "dirham", "gold") to resolve it to a valid ISO code
      * before calling convertCurrency or addRateAlert.
@@ -354,7 +354,7 @@ abstract class BaseCurrencyAppFunctionService : AppFunctionService(), KoinCompon
     }
 
     /**
-     * Open a screen of the Sovereign Ledger app and hand back a launchable
+     * Open a screen of the Dinarly app and hand back a launchable
      * [PendingIntent]. Launching it shows the app's own UI to the user —
      * use this whenever the user wants to see or continue working in the app
      * (e.g. after a conversion, or to review their alerts).

@@ -3,7 +3,7 @@
      The description text is read by agents to orchestrate our tools —
      keep Operational Patterns / Constraints in sync with the service KDocs. -->
 <AppFunctionAppMetadata xmlns:appfn="http://schemas.android.com/apk/androidx.appfunctions"
-    appfn:description="Sovereign Ledger — live currency converter, exchange rates, rate history and rate alerts.
+    appfn:description="Dinarly — live currency converter, exchange rates, rate history and rate alerts.
 Operational Patterns:
   - Resolve currency names the user says (euro, dirham, gold) to ISO codes with 'getCurrencies' before calling other functions.
   - Use 'convertCurrency' for any conversion, and with amount 1 to answer rate questions; metals (XAU gold, XAG silver) and crypto (BTC) are supported codes.

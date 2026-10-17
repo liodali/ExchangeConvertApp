@@ -8,7 +8,7 @@ This document describes the project structure, conventions, and key patterns to 
 
 | Property | Value |
 |---|---|
-| **Name** | ExchangeConvertApp (Exchange Rate Currency Converter) |
+| **Name** | ExchangeConvertApp — display name **Dinarly** (renamed from "Sovereign Ledger", Oct 2026; bundle IDs unchanged) |
 | **Root package** | `dali.hamza.echangecurrencyapp` (note: `e` not `x` — legacy typo) |
 | **Description** | Android + iOS (KMP) app that converts amounts between currencies using live exchange rates |
 | **API** | [exchangerate.host](https://api.exchangerate.host/) |

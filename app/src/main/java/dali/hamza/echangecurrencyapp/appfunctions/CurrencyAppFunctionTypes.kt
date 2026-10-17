@@ -3,7 +3,7 @@ package dali.hamza.echangecurrencyapp.appfunctions
 import androidx.appfunctions.AppFunctionSerializable
 
 /**
- * A tradable currency known to Sovereign Ledger.
+ * A tradable currency known to Dinarly.
  *
  * [code] is the ISO-4217-style code agents must pass to the other functions
  * (fiat like "EUR", metals like "XAU" gold / "XAG" silver, crypto like "BTC").

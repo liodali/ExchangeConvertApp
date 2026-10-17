@@ -3,5 +3,5 @@
     <!-- Debug builds share the release applicationId — the badge + label are
          what tells them apart in the launcher and recents (no separate
          .debug package anymore). -->
-    <string name="app_name">Sovereign Ledger (debug)</string>
+    <string name="app_name">Dinarly (debug)</string>
 </resources>

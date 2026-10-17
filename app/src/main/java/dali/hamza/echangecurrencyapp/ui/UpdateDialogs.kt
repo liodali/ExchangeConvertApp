@@ -37,7 +37,7 @@ fun UpdateDialogs(
             title = { Text("Update available", fontSize = 18.sp) },
             text = {
                 Text(
-                    "Sovereign Ledger ${state.versionCode} is out. " +
+                    "Dinarly ${state.versionCode} is out. " +
                         "Update now — you can keep using the app while it downloads."
                 )
             },
