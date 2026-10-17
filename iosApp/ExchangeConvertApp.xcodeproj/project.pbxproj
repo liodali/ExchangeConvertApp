@@ -16,6 +16,11 @@
 		A1000012 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000011 /* Secrets.swift */; };
 		A1000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000013 /* Assets.xcassets */; };
 		A1000014 /* RateAlertsBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000014 /* RateAlertsBackground.swift */; };
+		A1000015 /* CurrencyEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000017 /* CurrencyEntity.swift */; };
+		A1000016 /* ConversionIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000018 /* ConversionIntents.swift */; };
+		A1000017 /* RateAlertIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000019 /* RateAlertIntents.swift */; };
+		A1000018 /* OpenAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000020 /* OpenAppIntents.swift */; };
+		A1000019 /* SovereignShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000021 /* SovereignShortcuts.swift */; };
 		E10000000000000000000101 /* ExchangeWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000104 /* ExchangeWidgetsBundle.swift */; };
 		E10000000000000000000102 /* MarketRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000105 /* MarketRateWidget.swift */; };
 		E10000000000000000000103 /* ExchangeWidgets.appex in CopyFiles */ = {isa = PBXBuildFile; fileRef = E10000000000000000000108 /* ExchangeWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
@@ -57,6 +62,11 @@
 		A2000014 /* RateAlertsBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateAlertsBackground.swift; sourceTree = "<group>"; };
 		A2000015 /* version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = version.xcconfig; path = ../version.xcconfig; sourceTree = SOURCE_ROOT; };
 		A2000016 /* ExchangeConvertApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExchangeConvertApp.entitlements; sourceTree = "<group>"; };
+		A2000017 /* CurrencyEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyEntity.swift; sourceTree = "<group>"; };
+		A2000018 /* ConversionIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionIntents.swift; sourceTree = "<group>"; };
+		A2000019 /* RateAlertIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateAlertIntents.swift; sourceTree = "<group>"; };
+		A2000020 /* OpenAppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAppIntents.swift; sourceTree = "<group>"; };
+		A2000021 /* SovereignShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SovereignShortcuts.swift; sourceTree = "<group>"; };
 		E10000000000000000000104 /* ExchangeWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeWidgetsBundle.swift; sourceTree = "<group>"; };
 		E10000000000000000000105 /* MarketRateWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketRateWidget.swift; sourceTree = "<group>"; };
 		E10000000000000000000106 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -109,8 +119,21 @@
 				A2000013 /* Assets.xcassets */,
 				A2000014 /* RateAlertsBackground.swift */,
 				A2000016 /* ExchangeConvertApp.entitlements */,
+				A5000005 /* AppIntents */,
 			);
 			path = ExchangeConvertApp;
+			sourceTree = "<group>";
+		};
+		A5000005 /* AppIntents */ = {
+			isa = PBXGroup;
+			children = (
+				A2000017 /* CurrencyEntity.swift */,
+				A2000018 /* ConversionIntents.swift */,
+				A2000019 /* RateAlertIntents.swift */,
+				A2000020 /* OpenAppIntents.swift */,
+				A2000021 /* SovereignShortcuts.swift */,
+			);
+			path = AppIntents;
 			sourceTree = "<group>";
 		};
 		A5000003 /* Products */ = {
@@ -280,6 +303,11 @@
 				A1000011 /* ComposeViewControllerProvider.swift in Sources */,
 				A1000012 /* Secrets.swift in Sources */,
 				A1000014 /* RateAlertsBackground.swift in Sources */,
+				A1000015 /* CurrencyEntity.swift in Sources */,
+				A1000016 /* ConversionIntents.swift in Sources */,
+				A1000017 /* RateAlertIntents.swift in Sources */,
+				A1000018 /* OpenAppIntents.swift in Sources */,
+				A1000019 /* SovereignShortcuts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -500,6 +528,7 @@
 		};
 		E10000000000000000000110 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000015 /* version.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = ExchangeWidgets/ExchangeWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -519,6 +548,7 @@
 		};
 		E10000000000000000000111 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A2000015 /* version.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = ExchangeWidgets/ExchangeWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
