@@ -76,7 +76,7 @@ fun OnboardingScreen(
             LedgerLogoMark()
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "SOVEREIGN LEDGER",
+                text = "DINARLY",
                 style = MaterialTheme.typography.labelMedium,
                 letterSpacing = 3.sp,
                 color = LedgerColors.Gold,

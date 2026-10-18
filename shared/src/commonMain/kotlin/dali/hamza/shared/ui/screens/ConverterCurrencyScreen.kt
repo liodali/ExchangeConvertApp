@@ -96,7 +96,7 @@ fun ConverterCurrencyScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "SOVEREIGN LEDGER",
+            title = "DINARLY",
             onBack = onBack,
         )
 

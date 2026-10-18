@@ -62,7 +62,7 @@ fun AboutScreen(
             ) {
                 LedgerLogoMark(size = 36.dp)
                 Text(
-                    text = "SOVEREIGN LEDGER",
+                    text = "DINARLY",
                     style = MaterialTheme.typography.labelMedium,
                     letterSpacing = 3.sp,
                     color = LedgerColors.Gold,

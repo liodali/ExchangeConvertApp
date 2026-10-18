@@ -71,7 +71,7 @@ fun FullConverterScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        LedgerTopAppBar(title = "SOVEREIGN LEDGER", onBack = onBack)
+        LedgerTopAppBar(title = "DINARLY", onBack = onBack)
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(24.dp))

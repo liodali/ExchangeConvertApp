@@ -29,6 +29,9 @@ struct ExchangeConvertAppApp: App {
                     switch host {
                     case "history": route = "history"
                     case "converter": route = "full-converter"
+                    case "account": route = "account"
+                    case "alerts": route = "rate-alerts"
+                    case "widgets": route = "widgets"
                     default: route = "home"
                     }
                     DeepLinkNav.shared.stash(

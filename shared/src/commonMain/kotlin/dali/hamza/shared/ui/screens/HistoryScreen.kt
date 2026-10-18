@@ -96,7 +96,7 @@ fun HistoryScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "Sovereign Ledger",
+            title = "Dinarly",
             leading = { LedgerLogoMark() },
             avatarInitials = username,
         )
