@@ -36,6 +36,10 @@ import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.key
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -107,6 +111,7 @@ fun AccountScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
     var marketSlot by remember { mutableStateOf<Int?>(null) }
+    var addingMarket by remember { mutableStateOf(false) }
     var pickingBase by remember { mutableStateOf(false) }
     val isSovereign = viewModel.dataTier == DataTier.SOVEREIGN
     val biometricAuthenticator = remember {
@@ -286,7 +291,9 @@ fun AccountScreen(
                         onClick = { pickingBase = true },
                     )
                     // market slots — long-press drag to reorder (persisted;
-                    // mirrors the Home dashboard card drag)
+                    // mirrors the Home dashboard card drag); swipe a row to
+                    // delete (kept: the last remaining market is not
+                    // dismissible)
                     ReorderableColumn(
                         items = viewModel.marketPreferences,
                         key = { it },
@@ -296,14 +303,63 @@ fun AccountScreen(
                         },
                         spacing = 16.dp,
                     ) { code, _ ->
+                        key(code) {
                         val slot = viewModel.marketPreferences.indexOf(code)
                         val name = currencies
                             .firstOrNull { it.name == code }?.fullCountryName
-                        LedgerListRow(
-                            label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
-                                (name?.let { " · $it" } ?: ""),
-                            value = code,
-                            onClick = { marketSlot = slot },
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value == SwipeToDismissBoxValue.EndToStart &&
+                                    viewModel.marketPreferences.size > 1
+                                ) {
+                                    viewModel.removeMarketPreference(code)
+                                    onMarketPreferencesChanged(viewModel.marketPreferences)
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        )
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = false,
+                            enableDismissFromEndToStart = viewModel.marketPreferences.size > 1,
+                            backgroundContent = {
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(LedgerColors.Error.copy(alpha = 0.14f))
+                                        .padding(horizontal = 20.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.DeleteOutline,
+                                        contentDescription = "Remove market",
+                                        tint = LedgerColors.Error,
+                                        modifier = Modifier.size(22.dp),
+                                    )
+                                }
+                            },
+                        ) {
+                            LedgerListRow(
+                                label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
+                                    (name?.let { " · $it" } ?: ""),
+                                value = code,
+                                onClick = { marketSlot = slot },
+                            )
+                        }
+                        }
+                    }
+                    // add-market row — visible whenever a slot is free
+                    // (after a swipe-delete or from the start with < 3);
+                    // same full-width button style as the Widgets screen
+                    if (viewModel.marketPreferences.size < 3) {
+                        LedgerButton(
+                            text = "Add market",
+                            onClick = { addingMarket = true },
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -661,6 +717,22 @@ fun AccountScreen(
             onCurrencySelected = { currency ->
                 viewModel.updateMarketPreference(slot, currency.name)
                 onMarketPreferencesChanged(viewModel.marketPreferences)
+            },
+        )
+    }
+
+    if (addingMarket) {
+        CurrencyPickerSheet(
+            visible = true,
+            currencies = currencies.filter {
+                it.name != baseCurrency && it.name !in viewModel.marketPreferences
+            },
+            title = LedgerStrings.Account.MARKET_PICK_TITLE,
+            onDismiss = { addingMarket = false },
+            onCurrencySelected = { currency ->
+                viewModel.addMarketPreference(currency.name)
+                onMarketPreferencesChanged(viewModel.marketPreferences)
+                addingMarket = false
             },
         )
     }

@@ -90,6 +90,23 @@ class AccountViewModel(
         storage.setMarketPreferences(marketPreferences)
     }
 
+    /**
+     * Remove a market (swipe-to-dismiss in Account). Keeps at least one
+     * dashboard card — the last row is not dismissible.
+     */
+    fun removeMarketPreference(code: String) {
+        if (marketPreferences.size <= 1) return
+        marketPreferences = marketPreferences.filterNot { it == code }
+        storage.setMarketPreferences(marketPreferences)
+    }
+
+    /** Append a market up to the 3-slot cap (the "Add market" row). */
+    fun addMarketPreference(code: String) {
+        if (marketPreferences.size >= 3 || code in marketPreferences) return
+        marketPreferences = marketPreferences + code
+        storage.setMarketPreferences(marketPreferences)
+    }
+
     fun updateThemeMode(mode: LedgerThemeMode) {
         themeMode = mode
         storage.setThemeMode(mode.stored)
