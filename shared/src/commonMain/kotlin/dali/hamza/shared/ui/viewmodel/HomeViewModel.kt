@@ -9,6 +9,7 @@ import dali.hamza.shared.domain.repository.IRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,16 +42,21 @@ class HomeViewModel(
 ) {
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var cardsJob: Job? = null
 
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
     /** Reload pair cards (7-day series) for the session base + top rates. */
     fun load(base: String?, topRates: List<ExchangeRate>) {
-        if (base == null || topRates.isEmpty()) return
+        cardsJob?.cancel()
+        if (base == null || topRates.isEmpty()) {
+            _state.update { it.copy(pairCards = emptyList(), isLoading = false) }
+            return
+        }
         val symbols = topRates.take(3).map { it.name }
         _state.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
+        cardsJob = viewModelScope.launch {
             val cards = topRates.take(3).map { rate ->
                 PairCardData(quote = rate.name, rate = rate.rate)
             }

@@ -8,6 +8,7 @@ import dali.hamza.shared.domain.models.RateAlert
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -26,12 +27,16 @@ import kotlin.test.assertTrue
 /**
  * In-memory [IRepository] double for History cluster tests.
  */
-private class FakeRepository : IRepository {
+internal class FakeRepository : IRepository {
 
     val recorded = mutableListOf<Transaction>()
     val historicalRequests = mutableListOf<List<String>>() // base, symbol, from, to
 
     var liveRates: List<ExchangeRate> = emptyList()
+    var currentCurrency: String = "EUR"
+    val baseChanges = mutableListOf<String>()
+    var ratesByBase: Map<String, List<ExchangeRate>> = emptyMap()
+    var historicalGate: CompletableDeferred<Unit>? = null
     var series: List<HistoricalRate> = emptyList()
     var transactions: List<Transaction> = emptyList()
 
@@ -44,11 +49,14 @@ private class FakeRepository : IRepository {
     override suspend fun saveExchangeRatesOfCurrentCurrency() = Unit
 
     override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> =
-        MyResponse.Success(liveRates)
+        MyResponse.Success(ratesByBase[currentCurrency] ?: liveRates)
 
-    override suspend fun getCurrentCurrency(): String = "EUR"
+    override suspend fun getCurrentCurrency(): String = currentCurrency
 
-    override suspend fun setCurrentCurrency(value: String) = Unit
+    override suspend fun setCurrentCurrency(value: String) {
+        currentCurrency = value
+        baseChanges += value
+    }
 
     override suspend fun refreshExchangeRates() = Unit
 
@@ -71,8 +79,10 @@ private class FakeRepository : IRepository {
         symbols: List<String>,
         from: String,
         to: String,
-    ): MyResponse<Map<String, List<HistoricalRate>>> =
-        MyResponse.Success(emptyMap())
+    ): MyResponse<Map<String, List<HistoricalRate>>> {
+        historicalGate?.await()
+        return MyResponse.Success(emptyMap())
+    }
 
     override suspend fun getTransactions(): List<Transaction> = transactions
 

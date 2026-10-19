@@ -211,7 +211,7 @@ fun ExchangeCurrencyApp(
         if (!onboarded) {
             OnboardingScreen(
                 currencies = sharedState.currencies,
-                base = sharedState.fromCurrency?.name,
+                base = sharedState.marketBase.takeIf { it.isNotEmpty() },
                 onDone = { baseCode, codes ->
                     // Persist AND refresh the AccountViewModel snapshot: it is
                     // created at first composition — before onboarding runs —
@@ -222,11 +222,7 @@ fun ExchangeCurrencyApp(
                     marketPreferences = codes
                     // apply the chosen base: persists it and refetches all
                     // rates quoted against the new base
-                    if (baseCode != sharedState.fromCurrency?.name) {
-                        sharedState.currencies
-                            .firstOrNull { it.name == baseCode }
-                            ?.let(viewModel::selectFromCurrency)
-                    }
+                    viewModel.selectMarketBase(baseCode)
                     onboarded = true
                 },
                 modifier = Modifier
@@ -293,13 +289,9 @@ fun ExchangeCurrencyApp(
                     AccountScreen(
                         viewModel = accountViewModel,
                         currencies = sharedState.currencies,
-                        baseCurrency = sharedState.fromCurrency?.name,
+                        baseCurrency = sharedState.marketBase.takeIf { it.isNotEmpty() },
                         onMarketPreferencesChanged = { marketPreferences = it },
-                        onBaseCurrencyChanged = { code ->
-                            sharedState.currencies
-                                .firstOrNull { it.name == code }
-                                ?.let(viewModel::selectFromCurrency)
-                        },
+                        onBaseCurrencyChanged = viewModel::selectMarketBase,
                         onThemeModeChanged = { themeMode = it },
                         onColorPaletteChanged = { colorPalette = it },
                         onChartStyleChanged = { chartStyle = it },

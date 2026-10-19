@@ -22,7 +22,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -166,12 +168,23 @@ fun ConverterCurrencyScreen(
                 Spacer(Modifier.height(20.dp))
 
                 // ---- from / to selectors ---------------------------------
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     CurrencySelector(
                         code = base ?: "—",
                         modifier = Modifier.weight(1f),
                         onClick = { pickerFor = true },
                     )
+                    IconButton(onClick = viewModel::swapCurrencies) {
+                        Icon(
+                            imageVector = Icons.Outlined.SwapHoriz,
+                            contentDescription = "Swap currencies",
+                            tint = LedgerColors.Blue,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
                     CurrencySelector(
                         code = quote ?: "—",
                         modifier = Modifier.weight(1f),

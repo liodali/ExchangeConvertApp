@@ -120,18 +120,20 @@ fun HomeScreen(
     val topRates = state.rates.topPairs()
 
     // market-overview cards: the user's onboarding selections (Account can
-    // change them); falls back to the design majors while nothing is chosen
-    val cardsRates = remember(state.rates, marketPreferences, state.fromCurrency?.name) {
-        val base = state.fromCurrency?.name
+    // change them); falls back to the design majors while nothing is chosen.
+    // Keyed on the stored market base — never on the converter's
+    // From: changing a quick exchange must not re-quote the dashboard.
+    val marketBase = state.marketBase.ifEmpty { "USD" }
+    val cardsRates = remember(state.rates, marketPreferences, marketBase) {
         marketPreferences
-            .filter { it != base }
+            .filter { it != marketBase }
             .mapNotNull { code -> state.rates.firstOrNull { it.name == code } }
-            .ifEmpty { topRates.take(3) }
+            .let { selected -> if (marketPreferences.isEmpty()) topRates.take(3) else selected }
     }
 
-    // pair cards: reload when the base or selected rates change
-    LaunchedEffect(state.fromCurrency?.name, cardsRates) {
-        homeViewModel.load(state.fromCurrency?.name, cardsRates)
+    // pair cards: reload when the market base or selected rates change
+    LaunchedEffect(marketBase, cardsRates) {
+        homeViewModel.load(marketBase, cardsRates)
     }
     // recent activity: keep fresh while Home is visible
     LaunchedEffect(Unit) {
@@ -173,7 +175,7 @@ fun HomeScreen(
                 pairCards = homeState.pairCards.ifEmpty {
                     cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
                 },
-                base = state.fromCurrency?.name,
+                base = marketBase,
                 alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
                 onAddAlert = { alertQuote = it },
                 onOpenRateAlerts = onOpenRateAlerts,
@@ -228,7 +230,7 @@ fun HomeScreen(
     alertQuote?.let { quote ->
         AddRateAlertDialog(
             currencies = state.currencies,
-            initialBase = state.fromCurrency?.name,
+            initialBase = marketBase,
             initialQuote = quote,
             tier = rateAlertsViewModel.tier,
             atLocalCap = rateAlertsViewModel.localAlerts.size >= rateAlertsViewModel.maxLocalAlerts,
