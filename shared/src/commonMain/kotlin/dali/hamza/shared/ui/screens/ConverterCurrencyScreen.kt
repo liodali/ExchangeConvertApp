@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,6 +72,7 @@ fun ConverterCurrencyScreen(
     onBack: () -> Unit,
     onOpenFullConverter: () -> Unit = {},
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
+    isExpanded: Boolean = false,
 ) {
     val state by viewModel.state.collectAsState()
     val historyState by historyViewModel.state.collectAsState()
@@ -120,177 +122,194 @@ fun ConverterCurrencyScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ============ Quick Exchange ===================================
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (isExpanded) 2 else 1,
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
+                // ============ Quick Exchange ===============================
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Quick Exchange",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                        ),
-                        color = LedgerColors.TextPrimary,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "Convert currencies using live rates",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = LedgerColors.TextTertiary,
-                    )
-                }
-                Text(
-                    text = "FULL CONVERTER",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = LedgerColors.Blue,
-                    modifier = Modifier.clickable(onClick = onOpenFullConverter),
-                )
-            }
-            Spacer(Modifier.height(16.dp))
-
-            BentoCard(fill = LedgerColors.SurfaceElevated, cornerRadius = 16.dp) {
-                // ---- amount -----------------------------------------------
-                Text(
-                    text = "Amount",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                    color = LedgerColors.TextTertiary,
-                )
-                Spacer(Modifier.height(8.dp))
-                AmountField(
-                    value = state.amount,
-                    onValueChange = viewModel::onAmountChange,
-                )
-
-                Spacer(Modifier.height(20.dp))
-
-                // ---- from / to selectors ---------------------------------
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    CurrencySelector(
-                        code = base ?: "—",
-                        modifier = Modifier.weight(1f),
-                        onClick = { pickerFor = true },
-                    )
-                    IconButton(onClick = viewModel::swapCurrencies) {
-                        Icon(
-                            imageVector = Icons.Outlined.SwapHoriz,
-                            contentDescription = "Swap currencies",
-                            tint = LedgerColors.Blue,
-                            modifier = Modifier.size(28.dp),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Quick Exchange",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 20.sp,
+                                ),
+                                color = LedgerColors.TextPrimary,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Convert currencies using live rates",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                        }
+                        Text(
+                            text = "FULL CONVERTER",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = LedgerColors.Blue,
+                            modifier = Modifier.clickable(onClick = onOpenFullConverter),
                         )
                     }
-                    CurrencySelector(
-                        code = quote ?: "—",
-                        modifier = Modifier.weight(1f),
-                        onClick = { pickerFor = false },
-                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    BentoCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        fill = LedgerColors.SurfaceElevated,
+                        cornerRadius = 16.dp,
+                    ) {
+                        // ---- amount -----------------------------------------------
+                        Text(
+                            text = "Amount",
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            color = LedgerColors.TextTertiary,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        AmountField(
+                            value = state.amount,
+                            onValueChange = viewModel::onAmountChange,
+                        )
+
+                        Spacer(Modifier.height(20.dp))
+
+                        // ---- from / to selectors ---------------------------------
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CurrencySelector(
+                                code = base ?: "—",
+                                modifier = Modifier.weight(1f),
+                                onClick = { pickerFor = true },
+                            )
+                            IconButton(onClick = viewModel::swapCurrencies) {
+                                Icon(
+                                    imageVector = Icons.Outlined.SwapHoriz,
+                                    contentDescription = "Swap currencies",
+                                    tint = LedgerColors.Blue,
+                                    modifier = Modifier.size(28.dp),
+                                )
+                            }
+                            CurrencySelector(
+                                code = quote ?: "—",
+                                modifier = Modifier.weight(1f),
+                                onClick = { pickerFor = false },
+                            )
+                        }
+
+                        Spacer(Modifier.height(20.dp))
+
+                        // ---- result ----------------------------------------------
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(LedgerColors.CardAlt.copy(alpha = 0.35f))
+                                .padding(16.dp),
+                        ) {
+                            Text(
+                                text = "Converted Amount",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = state.convertedAmount?.let { fixed(it, 2) } ?: "0.00",
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                                color = LedgerColors.TextPrimary,
+                            )
+                        }
+
+                        Spacer(Modifier.height(20.dp))
+
+                        // ---- convert ---------------------------------------------
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(LedgerColors.Green.copy(alpha = 0.20f))
+                                .clickable(enabled = state.convertedAmount != null) { viewModel.convert() },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "Convert",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = LedgerColors.Green,
+                            )
+                        }
+                    }
                 }
 
-                Spacer(Modifier.height(20.dp))
-
-                // ---- result ----------------------------------------------
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.CardAlt.copy(alpha = 0.35f))
-                        .padding(16.dp),
-                ) {
+                // ============ Price history ===============================
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Converted Amount",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = LedgerColors.TextTertiary,
+                        text = "Price History",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
+                        color = LedgerColors.TextPrimary,
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = state.convertedAmount?.let { fixed(it, 2) } ?: "0.00",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LedgerColors.TextPrimary,
+                        text = "30 day trend — ${base ?: "—"} to ${quote ?: "—"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
                     )
-                }
-
-                Spacer(Modifier.height(20.dp))
-
-                // ---- convert ---------------------------------------------
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.Green.copy(alpha = 0.20f))
-                        .clickable(enabled = state.convertedAmount != null) { viewModel.convert() },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Convert",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LedgerColors.Green,
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Price history ===================================
-            Text(
-                text = "Price History",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
-                color = LedgerColors.TextPrimary,
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "30 day trend — ${base ?: "—"} to ${quote ?: "—"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = LedgerColors.TextTertiary,
-            )
-            Spacer(Modifier.height(16.dp))
-            BentoCard(fill = LedgerColors.SurfaceElevated, cornerRadius = 16.dp) {
-                if (historyState.series.size >= 2) {
-                    LedgerChart(
-                        points = historyState.series.map { it.rate },
-                        labels = historyState.series.map { it.date },
-                        style = chartStyle,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(192.dp),
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(192.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(LedgerColors.Card.copy(alpha = 0.25f)),
-                        contentAlignment = Alignment.Center,
+                    Spacer(Modifier.height(16.dp))
+                    BentoCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        fill = LedgerColors.SurfaceElevated,
+                        cornerRadius = 16.dp,
+                    ) {
+                        if (historyState.series.size >= 2) {
+                            LedgerChart(
+                                points = historyState.series.map { it.rate },
+                                labels = historyState.series.map { it.date },
+                                style = chartStyle,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(192.dp),
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(192.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(LedgerColors.Card.copy(alpha = 0.25f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = "Loading price history…",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = LedgerColors.TextTertiary,
+                                )
+                            }
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text(
-                            text = "Loading price history…",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LedgerColors.TextTertiary,
+                            text = historyState.series.firstOrNull()?.date ?: "",
+                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                            color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
+                        )
+                        Text(
+                            text = historyState.series.lastOrNull()?.date ?: "",
+                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+                            color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
                         )
                     }
                 }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = historyState.series.firstOrNull()?.date ?: "",
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                    color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
-                )
-                Text(
-                    text = historyState.series.lastOrNull()?.date ?: "",
-                    style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                    color = LedgerColors.TextSecondary.copy(alpha = 0.50f),
-                )
             }
 
             Spacer(Modifier.height(24.dp))
@@ -303,13 +322,19 @@ fun ConverterCurrencyScreen(
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
             Spacer(Modifier.height(16.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (isExpanded) 3 else 1,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 state.rates.forEach { rate ->
                     val name = state.currencies
                         .firstOrNull { it.name == rate.name }
                         ?.fullCountryName
                         ?: ""
                     RateGridCard(
+                        modifier = Modifier.weight(1f),
                         rate = rate,
                         currencyName = name,
                         deltaPercent = historyState.gridDeltas[rate.name],
@@ -417,11 +442,17 @@ private fun CurrencySelector(
 /** One "Available Rates" card — code + name on the left, rate + delta right. */
 @Composable
 private fun RateGridCard(
+    modifier: Modifier = Modifier,
     rate: ExchangeRate,
     currencyName: String,
     deltaPercent: Double?,
 ) {
-    BentoCard(fill = LedgerColors.SurfaceElevated, cornerRadius = 16.dp, padding = PaddingValues(20.dp)) {
+    BentoCard(
+        modifier = modifier,
+        fill = LedgerColors.SurfaceElevated,
+        cornerRadius = 16.dp,
+        padding = PaddingValues(20.dp),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(

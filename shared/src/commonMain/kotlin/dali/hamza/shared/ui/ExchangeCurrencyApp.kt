@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.draw.blur
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +34,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -46,6 +53,10 @@ import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerDestination
+import dali.hamza.shared.ui.components.LedgerNavRail
+import dali.hamza.shared.ui.components.LedgerRailDestination
+import dali.hamza.shared.ui.components.LedgerWindowMode
+import dali.hamza.shared.ui.components.isExpanded
 import dali.hamza.shared.ui.screens.AccountScreen
 import dali.hamza.shared.ui.screens.AboutScreen
 import dali.hamza.shared.ui.screens.ChatwootScreen
@@ -77,8 +88,9 @@ import org.koin.mp.KoinPlatform
 /**
  * Route names of the Sovereign Ledger app (Navigation-Compose MP).
  *
- * Top-level (bottom bar visible): [HOME], [HISTORY], [ACCOUNT].
- * Pushed (bottom bar hidden): [CONVERTER], [FAQ], [SUPPORT], [CONTACT], [FEEDBACK].
+ * Compact top-level (bottom bar visible): [HOME], [HISTORY], [ACCOUNT].
+ * [SUPPORT] is a pushed route on compact layouts and a rail destination on
+ * wider layouts. Other detail routes are pushed.
  */
 object Routes {
     const val HOME = "home"
@@ -99,6 +111,24 @@ object Routes {
 
     val topLevel = setOf(HOME, HISTORY, ACCOUNT)
 }
+
+/** Maps any route onto the rail's five destinations (tablet shell). */private fun railForRoute(route: String?): LedgerRailDestination = when (route) {
+    Routes.CONVERTER, Routes.FULL_CONVERTER -> LedgerRailDestination.RATES
+    Routes.HISTORY -> LedgerRailDestination.HISTORY
+    Routes.ACCOUNT -> LedgerRailDestination.ACCOUNT
+    Routes.SUPPORT, Routes.FAQ, Routes.CONTACT, Routes.FEEDBACK, Routes.CHAT,
+    Routes.TERMS, Routes.PRIVACY, Routes.ABOUT,
+    -> LedgerRailDestination.SUPPORT
+    else -> LedgerRailDestination.OVERVIEW
+}
+
+/** Two-letter avatar initials for the rail (design "HM"). */
+private fun railInitials(username: String): String =
+    username.split(' ', limit = 3)
+        .mapNotNull { it.firstOrNull()?.uppercase() }
+        .take(2)
+        .joinToString("")
+        .ifEmpty { "DN" }
 
 /**
  * Root of the shared Compose Multiplatform app.
@@ -144,6 +174,10 @@ fun ExchangeCurrencyApp(
         val navController = rememberNavController()
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
+        // Keep compact navigation available on the support hub so users can
+        // move directly to Account without backing out of Support first.
+        val showCompactNavigation =
+            currentRoute in Routes.topLevel || currentRoute == Routes.SUPPORT
         // one-shot → reactive: deep links work on cold start AND when the
         // app is already composed (iOS onOpenURL on a warm app)
         var historyPairOverride by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -248,13 +282,35 @@ fun ExchangeCurrencyApp(
                 }
             }
         }
-        val appNavHost: @Composable (Modifier) -> Unit = { navModifier ->
+        val appNavHost: @Composable (Modifier, LedgerWindowMode) -> Unit = { navModifier, mode ->
             NavHost(
                 navController = navController,
                 startDestination = Routes.HOME,
                 modifier = navModifier,
+                // NATIVE iOS-style slide transitions:
+                // push  → new page slides in from the right edge (full width)
+                // back  → disposed page slides out to the right edge and FADES
+                //         while sliding; the previous page slides in from the
+                //         left third beneath it.
+                // Each destination paints its own canvas backdrop
+                // (see PageCanvas below), so a page always carries its
+                // background with it — the disposed page's background can
+                // never drop out mid-slide (the original iOS bug).
+                enterTransition = {
+                    slideInHorizontally(tween(350)) { it } + fadeIn(tween(350))
+                },
+                exitTransition = {
+                    slideOutHorizontally(tween(350)) { -it / 3 } + fadeOut(tween(350))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(tween(350)) { -it / 3 } + fadeIn(tween(350))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(tween(350)) { it } + fadeOut(tween(350))
+                },
             ) {
                 composable(Routes.HOME) {
+                    PageCanvas {
                     HomeScreen(
                         viewModel = viewModel,
                         marketPreferences = marketPreferences,
@@ -276,18 +332,24 @@ fun ExchangeCurrencyApp(
                         },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
                     )
+                    }
                 }
                 composable(Routes.HISTORY) {
+                    PageCanvas {
                     HistoryScreen(
                         sharedViewModel = viewModel,
                         historyViewModel = historyViewModel,
                         chartStyle = chartStyle,
                         pairOverride = historyPairOverride,
+                        isExpanded = mode.isExpanded,
                     )
+                    }
                 }
                 composable(Routes.ACCOUNT) {
+                    PageCanvas {
                     AccountScreen(
                         viewModel = accountViewModel,
+                        showSupportEntry = mode == LedgerWindowMode.COMPACT,
                         currencies = sharedState.currencies,
                         baseCurrency = sharedState.marketBase.takeIf { it.isNotEmpty() },
                         onMarketPreferencesChanged = { marketPreferences = it },
@@ -295,12 +357,21 @@ fun ExchangeCurrencyApp(
                         onThemeModeChanged = { themeMode = it },
                         onColorPaletteChanged = { colorPalette = it },
                         onChartStyleChanged = { chartStyle = it },
-                        onOpenSupport = { navController.navigate(Routes.SUPPORT) },
+                        onOpenSupport = {
+                            navController.navigate(Routes.SUPPORT) {
+                                if (mode != LedgerWindowMode.COMPACT) {
+                                    popUpTo(Routes.HOME) { saveState = true }
+                                    launchSingleTop = true
+                                }
+                            }
+                        },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
                         onOpenWidgets = { navController.navigate(Routes.WIDGETS) },
                     )
+                    }
                 }
                 composable(Routes.CONVERTER) {
+                    PageCanvas {
                     ConverterCurrencyScreen(
                         viewModel = viewModel,
                         // separate instance from the History tab (Koin factory)
@@ -310,15 +381,20 @@ fun ExchangeCurrencyApp(
                         chartStyle = chartStyle,
                         onBack = { navController.popBackStack() },
                         onOpenFullConverter = { navController.navigate(Routes.FULL_CONVERTER) },
+                        isExpanded = mode.isExpanded,
                     )
+                    }
                 }
                 composable(Routes.FULL_CONVERTER) {
+                    PageCanvas {
                     FullConverterScreen(
                         viewModel = viewModel,
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.RATE_ALERTS) {
+                    PageCanvas {
                     RateAlertsScreen(
                         viewModel = remember {
                             KoinPlatform.getKoin()?.get<RateAlertsViewModel>()
@@ -328,8 +404,10 @@ fun ExchangeCurrencyApp(
                         defaultBase = sharedState.fromCurrency?.name,
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.WIDGETS) {
+                    PageCanvas {
                     WidgetsScreen(
                         viewModel = remember {
                             dali.hamza.shared.ui.viewmodel.WidgetsViewModel(
@@ -347,16 +425,24 @@ fun ExchangeCurrencyApp(
                         },
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.FAQ) {
+                    PageCanvas {
                     FaqScreen(
                         onBack = { navController.popBackStack() },
                         onOpenContact = { navController.navigate(Routes.CONTACT) },
                     )
+                    }
                 }
                 composable(Routes.SUPPORT) {
+                    PageCanvas {
                     SupportScreen(
-                        onBack = { navController.popBackStack() },
+                        onBack = if (mode == LedgerWindowMode.COMPACT) {
+                            { navController.popBackStack() }
+                        } else {
+                            null
+                        },
                         onOpenFaq = { navController.navigate(Routes.FAQ) },
                         onOpenContact = { navController.navigate(Routes.CONTACT) },
                         // feedback lives in the Chatwoot inbox — the form
@@ -366,43 +452,113 @@ fun ExchangeCurrencyApp(
                         onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
                         onOpenAbout = { navController.navigate(Routes.ABOUT) },
                     )
+                    }
                 }
                 composable(Routes.TERMS) {
+                    PageCanvas {
                     LegalScreen(
                         title = "Terms & Conditions",
                         url = dali.hamza.shared.platform.AppLinks.TERMS_URL,
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.PRIVACY) {
+                    PageCanvas {
                     LegalScreen(
                         title = "Privacy Policy",
                         url = dali.hamza.shared.platform.AppLinks.PRIVACY_URL,
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.ABOUT) {
+                    PageCanvas {
                     AboutScreen(
                         onOpenTerms = { navController.navigate(Routes.TERMS) },
                         onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
                         onBack = { navController.popBackStack() },
                     )
+                    }
                 }
                 composable(Routes.CHAT) {
+                    PageCanvas {
                     ChatwootScreen(
                         onBack = { navController.popBackStack() },
                         userName = sharedState.username,
                     )
+                    }
                 }
                 composable(Routes.CONTACT) {
+                    PageCanvas {
                     ContactSupportScreen(onBack = { navController.popBackStack() })
+                    }
                 }
                 composable(Routes.FEEDBACK) {
+                    PageCanvas {
                     FeedbackScreen(onBack = { navController.popBackStack() })
+                    }
                 }
             }
         }
 
+        // ---- adaptive shell (plans/tablet-ui.md) ---------------------------
+        // COMPACT (phones, folded duos): bottom navigation, exactly as before.
+        // MEDIUM/EXPANDED (tablets, iPad, unfolded): the design's 72dp rail.
+        val navigateRail: (LedgerRailDestination) -> Unit = { destination ->
+            when (destination) {
+                LedgerRailDestination.OVERVIEW -> navController.navigate(Routes.HOME) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                LedgerRailDestination.RATES -> navController.navigate(Routes.CONVERTER) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                LedgerRailDestination.HISTORY -> {
+                    // History tab = the app pair again (widget deep-link
+                    // override only rides the pushed nav)
+                    historyPairOverride = null
+                    navController.navigate(Routes.HISTORY) {
+                        popUpTo(Routes.HOME) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+                LedgerRailDestination.ACCOUNT -> navController.navigate(Routes.ACCOUNT) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                LedgerRailDestination.SUPPORT -> navController.navigate(Routes.SUPPORT) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+
+        val navigateCompact: (LedgerDestination) -> Unit = { destination ->
+            val returnsToAccount = destination == LedgerDestination.ACCOUNT &&
+                currentRoute == Routes.SUPPORT &&
+                navController.previousBackStackEntry?.destination?.route == Routes.ACCOUNT
+            if (returnsToAccount) {
+                navController.popBackStack()
+            } else {
+                if (destination == LedgerDestination.HISTORY) historyPairOverride = null
+                navController.navigate(routeFor(destination)) {
+                    popUpTo(Routes.HOME) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+
+        // platform split, parameterized by window mode so both the bottom
+        // bar path and the rail path share it
+        val appShell: @Composable (LedgerWindowMode) -> Unit = { mode ->
         if (isIos()) {
             Box(
                 modifier = modifier
@@ -413,19 +569,14 @@ fun ExchangeCurrencyApp(
                     .then(sinkModifier)
                     .blur(if (locked) 20.dp else 0.dp),
             ) {
-                appNavHost(Modifier.fillMaxSize().then(keyboardSink))
+                appNavHost(Modifier.fillMaxSize().then(keyboardSink), mode)
 
                 // floating liquid-glass nav — on top of the scrolling content
-                if (currentRoute in Routes.topLevel) {
+                // (compact windows only; tablets use the design rail)
+                if (mode == LedgerWindowMode.COMPACT && showCompactNavigation) {
                     LedgerBottomNav(
                         currentDestination = destinationForRoute(currentRoute),
-                        onSelectDestination = { destination ->
-                            navController.navigate(routeFor(destination)) {
-                                popUpTo(Routes.HOME) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                        onSelectDestination = navigateCompact,
                         modifier = Modifier.align(Alignment.BottomCenter),
                     )
                 }
@@ -441,19 +592,10 @@ fun ExchangeCurrencyApp(
                     .then(sinkModifier)
                     .blur(if (locked) 20.dp else 0.dp),
                 bottomBar = {
-                    if (currentRoute in Routes.topLevel) {
+                    if (mode == LedgerWindowMode.COMPACT && showCompactNavigation) {
                         LedgerBottomNav(
                             currentDestination = destinationForRoute(currentRoute),
-                            onSelectDestination = { destination ->
-                                // History tab = the app pair again (widget
-                                // deep-link override only rides the pushed nav)
-                                if (destination == LedgerDestination.HISTORY) historyPairOverride = null
-                                navController.navigate(routeFor(destination)) {
-                                    popUpTo(Routes.HOME) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
+                            onSelectDestination = navigateCompact,
                         )
                     }
                 }
@@ -462,8 +604,35 @@ fun ExchangeCurrencyApp(
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .then(keyboardSink)
+                        .then(keyboardSink),
+                    mode,
                 )
+            }
+        }
+        }
+
+        // ---- adaptive nav: bottom bar (compact) vs design rail (tablet) ----
+        LedgerWindowMode { mode ->
+            if (mode == LedgerWindowMode.COMPACT) {
+                appShell(mode)
+            } else {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    LedgerNavRail(
+                        selected = railForRoute(currentRoute),
+                        onSelect = navigateRail,
+                        initials = railInitials(sharedState.username),
+                        onSettings = {
+                            navController.navigate(Routes.ACCOUNT) {
+                                popUpTo(Routes.HOME) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    )
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                        appShell(mode)
+                    }
+                }
             }
         }
         }
@@ -496,7 +665,7 @@ private fun routeFor(destination: LedgerDestination): String = when (destination
 
 private fun destinationForRoute(route: String?): LedgerDestination = when (route) {
     Routes.HISTORY -> LedgerDestination.HISTORY
-    Routes.ACCOUNT -> LedgerDestination.ACCOUNT
+    Routes.ACCOUNT, Routes.SUPPORT -> LedgerDestination.ACCOUNT
     else -> LedgerDestination.HOME
 }
 
@@ -551,5 +720,19 @@ private fun LockScreen(
                 onClick = onPrompt,
             )
         }
+    }
+}
+
+/**
+ * Opaque page backdrop for every NavHost destination: each page paints its
+ * own canvas so a sliding page always CARRIES its background with it.
+ * The app container's canvas stays fixed behind the NavHost and cannot
+ * follow a page mid-transition — without this, the disposed page's
+ * background visibly dropped out during the native slide (the iOS bug).
+ */
+@Composable
+private fun PageCanvas(content: @Composable () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize().background(LedgerColors.Canvas)) {
+        content()
     }
 }

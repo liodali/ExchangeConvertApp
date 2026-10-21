@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -79,6 +80,7 @@ fun HistoryScreen(
      * Cleared when the user opens the History tab directly.
      */
     pairOverride: Pair<String, String>? = null,
+    isExpanded: Boolean = false,
 ) {
     val state by historyViewModel.state.collectAsState()
     val sharedState by sharedViewModel.state.collectAsState()
@@ -141,251 +143,260 @@ fun HistoryScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ============ Historical graph ================================
-            BentoCard {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                maxItemsInEachRow = if (isExpanded) 2 else 1,
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                // ============ Historical graph ================================
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "${state.base ?: "—"} TO ${state.quote ?: "—"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = LedgerColors.TextSecondary,
+                        )
+                        state.changePercent?.let { percent ->
+                            LedgerChip(
+                                text = signed(percent, 2, "%"),
+                                tint = if (percent >= 0) LedgerColors.Green else LedgerColors.Error,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text = state.currentRate?.let { formatRate(it) } ?: "—",
+                            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = LedgerColors.TextPrimary,
+                        )
+                        state.delta?.let { delta ->
+                            Text(
+                                text = signed(delta, 6, ""),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                                color = if (delta >= 0) LedgerColors.Green else LedgerColors.Error,
+                                modifier = Modifier.padding(bottom = 6.dp),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "${state.base ?: "—"} TO ${state.quote ?: "—"}",
+                        text = "Live market rate" + (state.lastUpdatedLabel?.let { " • $it" } ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
-                    state.changePercent?.let { percent ->
-                        LedgerChip(
-                            text = signed(percent, 2, "%"),
-                            tint = if (percent >= 0) LedgerColors.Green else LedgerColors.Error,
-                        )
+                    Spacer(Modifier.height(16.dp))
+
+                    // ---- range chips -----------------------------------------
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(LedgerColors.Canvas)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        HistoryRange.entries.forEach { range ->
+                            val selected = state.range == range
+                            Text(
+                                text = range.label,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                // accent pairing on both modes (white text was
+                                // unreadable on the light chip)
+                                color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                    .clickable { historyViewModel.selectRange(range) }
+                                    .padding(vertical = 8.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    LedgerChart(
+                        points = state.series.map { it.rate },
+                        labels = state.series.map { it.date },
+                        style = chartStyle,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        state.series.firstOrNull()?.let {
+                            MonoDate(it.date)
+                        }
+                        state.series.getOrNull(state.series.size / 2)?.let {
+                            MonoDate(it.date)
+                        }
+                        state.series.lastOrNull()?.let {
+                            MonoDate(it.date)
+                        }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+
+                // ============ All-time best rate ==============================
+                BentoCard(
+                    modifier = Modifier.weight(1f),
+                    fill = LedgerColors.SurfaceRaised,
+                    cornerRadius = 32.dp,
                 ) {
-                    Text(
-                        text = state.currentRate?.let { formatRate(it) } ?: "—",
-                        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = LedgerColors.TextPrimary,
-                    )
-                    state.delta?.let { delta ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = LedgerColors.Gold,
+                            modifier = Modifier.size(18.dp),
+                        )
                         Text(
-                            text = signed(delta, 6, ""),
+                            text = "ALL-TIME BEST RATE",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = LedgerColors.TextSecondary,
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text = state.bestRate?.let { formatRate(it) } ?: "—",
+                            style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = LedgerColors.TextPrimary,
+                        )
+                        Text(
+                            text = "${state.base ?: ""}/${state.quote ?: ""}",
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
                             ),
-                            color = if (delta >= 0) LedgerColors.Green else LedgerColors.Error,
-                            modifier = Modifier.padding(bottom = 6.dp),
+                            color = LedgerColors.Gold,
+                            modifier = Modifier.padding(bottom = 8.dp),
                         )
                     }
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "Live market rate" + (state.lastUpdatedLabel?.let { " • $it" } ?: ""),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LedgerColors.TextSecondary,
-                )
-                Spacer(Modifier.height(16.dp))
-
-                // ---- range chips -----------------------------------------
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.Canvas)
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    HistoryRange.entries.forEach { range ->
-                        val selected = state.range == range
-                        Text(
-                            text = range.label,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            // accent pairing on both modes (white text was
-                            // unreadable on the light chip)
-                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
-                                .clickable { historyViewModel.selectRange(range) }
-                                .padding(vertical = 8.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                LedgerChart(
-                    points = state.series.map { it.rate },
-                    labels = state.series.map { it.date },
-                    style = chartStyle,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    state.series.firstOrNull()?.let {
-                        MonoDate(it.date)
-                    }
-                    state.series.getOrNull(state.series.size / 2)?.let {
-                        MonoDate(it.date)
-                    }
-                    state.series.lastOrNull()?.let {
-                        MonoDate(it.date)
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ All-time best rate ==============================
-            BentoCard(fill = LedgerColors.SurfaceRaised, cornerRadius = 32.dp) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Star,
-                        contentDescription = null,
-                        tint = LedgerColors.Gold,
-                        modifier = Modifier.size(18.dp),
-                    )
+                    Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "ALL-TIME BEST RATE",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = state.bestTimestamp?.let {
+                            "Achieved on ${DateUtils.formatDateTime(it)}"
+                        } ?: "From the recorded market history",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
-                }
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Text(
-                        text = state.bestRate?.let { formatRate(it) } ?: "—",
-                        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = LedgerColors.TextPrimary,
-                    )
-                    Text(
-                        text = "${state.base ?: ""}/${state.quote ?: ""}",
-                        style = MaterialTheme.typography.labelLarge.copy(
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        color = LedgerColors.Gold,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = state.bestTimestamp?.let {
-                        "Achieved on ${DateUtils.formatDateTime(it)}"
-                    } ?: "From the recorded market history",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LedgerColors.TextSecondary,
-                )
 
-                Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(24.dp))
 
-                // ---- comparison ------------------------------------------
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(LedgerColors.SurfaceElevated)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Text(
-                        text = "COMPARISON",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LedgerColors.TextSecondary,
-                    )
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "Current Rate",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LedgerColors.TextSecondary,
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Text(
-                            text = state.currentRate?.let { formatRate(it) } ?: "—",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                            color = LedgerColors.TextPrimary,
-                        )
-                    }
-                    val current = state.currentRate
-                    val best = state.bestRate
-                    val fraction = if (current != null && best != null && best > 0.0) {
-                        (current / best).coerceIn(0.0, 1.0).toFloat()
-                    } else {
-                        0f
-                    }
-                    Box(
+                    // ---- comparison ------------------------------------------
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(RoundedCornerShape(9999.dp))
-                            .background(LedgerColors.CardHigh),
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(LedgerColors.SurfaceElevated)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(fraction)
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(9999.dp))
-                                .background(LedgerColors.Green),
-                        )
-                    }
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        val fromPeak = if (current != null && best != null && best > 0.0) {
-                            signed((current - best) / best * 100.0, 2, "%") + " from Peak"
-                        } else {
-                            "—"
-                        }
                         Text(
-                            text = fromPeak,
+                            text = "COMPARISON",
                             style = MaterialTheme.typography.labelSmall,
                             color = LedgerColors.TextSecondary,
                         )
-                        Spacer(Modifier.weight(1f))
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Current Rate",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = LedgerColors.TextSecondary,
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                text = state.currentRate?.let { formatRate(it) } ?: "—",
+                                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                                color = LedgerColors.TextPrimary,
+                            )
+                        }
+                        val current = state.currentRate
+                        val best = state.bestRate
+                        val fraction = if (current != null && best != null && best > 0.0) {
+                            (current / best).coerceIn(0.0, 1.0).toFloat()
+                        } else {
+                            0f
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(9999.dp))
+                                .background(LedgerColors.CardHigh),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(fraction)
+                                    .height(8.dp)
+                                    .clip(RoundedCornerShape(9999.dp))
+                                    .background(LedgerColors.Green),
+                            )
+                        }
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            val fromPeak = if (current != null && best != null && best > 0.0) {
+                                signed((current - best) / best * 100.0, 2, "%") + " from Peak"
+                            } else {
+                                "—"
+                            }
+                            Text(
+                                text = fromPeak,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LedgerColors.TextSecondary,
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                text = "Historical High",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = LedgerColors.Green,
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // ---- insight ---------------------------------------------
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(LedgerColors.Green.copy(alpha = 0.06f))
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.QueryStats,
+                            contentDescription = null,
+                            tint = LedgerColors.Green,
+                            modifier = Modifier.size(18.dp),
+                        )
                         Text(
-                            text = "Historical High",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = LedgerColors.Green,
+                            text = state.topPercentile?.let { top ->
+                                "The current rate is performing within the top $top% of the selected range."
+                            } ?: "Execute an exchange to start building your ledger history.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = LedgerColors.TextSecondary,
                         )
                     }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // ---- insight ---------------------------------------------
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.Green.copy(alpha = 0.06f))
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.QueryStats,
-                        contentDescription = null,
-                        tint = LedgerColors.Green,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(
-                        text = state.topPercentile?.let { top ->
-                            "The current rate is performing within the top $top% of the selected range."
-                        } ?: "Execute an exchange to start building your ledger history.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = LedgerColors.TextSecondary,
-                    )
                 }
             }
 

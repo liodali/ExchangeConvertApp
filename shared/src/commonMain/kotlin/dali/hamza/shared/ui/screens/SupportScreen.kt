@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,20 +47,22 @@ import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerSearchField
 import dali.hamza.shared.ui.components.LedgerTopAppBar
+import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.theme.LedgerStrings.Faq
 import dali.hamza.shared.ui.theme.LedgerStrings.Support
 
 /**
- * Support & Information hub (design frame `9vaMD`) — pushed route.
+ * Support & Information hub (design frame `9vaMD`) — pushed on compact
+ * layouts and a sibling destination in the tablet navigation rail.
  *
  * Hero + article search, the three help-category cards (FAQ / Contact /
  * Feedback), the Resources & Legal editorial list, and the version footer.
  */
 @Composable
 fun SupportScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onOpenFaq: () -> Unit,
     onOpenContact: () -> Unit,
     onOpenFeedback: () -> Unit,
@@ -103,24 +106,53 @@ fun SupportScreen(
             val normalized = query.trim()
             if (normalized.isEmpty()) {
                 // ============ Help categories ==============================
-                HelpCategoryCard(
-                    title = Support.FAQ_TITLE,
-                    description = Support.FAQ_DESC,
-                    icon = Icons.Outlined.HelpOutline,
-                    tint = LedgerColors.Blue,
-                    onClick = onOpenFaq,
-                )
-                Spacer(Modifier.height(16.dp))
-                // "Contact Us" entry removed — Feedback (Chatwoot live chat)
-                // is the support channel; the contact page + route remain
-                // reachable for deep links.
-                HelpCategoryCard(
-                    title = Support.FEEDBACK_TITLE,
-                    description = Support.FEEDBACK_DESC,
-                    icon = Icons.Outlined.Reviews,
-                    tint = LedgerColors.Gold,
-                    onClick = onOpenFeedback,
-                )
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    if (maxWidth >= 600.dp) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            HelpCategoryCard(
+                                title = Support.FAQ_TITLE,
+                                description = Support.FAQ_DESC,
+                                icon = Icons.Outlined.HelpOutline,
+                                tint = LedgerColors.Blue,
+                                onClick = onOpenFaq,
+                                modifier = Modifier.weight(1f),
+                            )
+                            // Feedback (Chatwoot live chat) is the support
+                            // channel; Contact remains reachable by deep link.
+                            HelpCategoryCard(
+                                title = Support.FEEDBACK_TITLE,
+                                description = Support.FEEDBACK_DESC,
+                                icon = Icons.Outlined.Reviews,
+                                tint = LedgerColors.Gold,
+                                onClick = onOpenFeedback,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            HelpCategoryCard(
+                                title = Support.FAQ_TITLE,
+                                description = Support.FAQ_DESC,
+                                icon = Icons.Outlined.HelpOutline,
+                                tint = LedgerColors.Blue,
+                                onClick = onOpenFaq,
+                            )
+                            HelpCategoryCard(
+                                title = Support.FEEDBACK_TITLE,
+                                description = Support.FEEDBACK_DESC,
+                                icon = Icons.Outlined.Reviews,
+                                tint = LedgerColors.Gold,
+                                onClick = onOpenFeedback,
+                            )
+                        }
+                    }
+                }
 
                 Spacer(Modifier.height(32.dp))
 
@@ -211,7 +243,7 @@ fun SupportScreen(
                 color = LedgerColors.TextMutedAlt,
             )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(ledgerNavClearance()))
         }
     }
 }
@@ -224,11 +256,12 @@ private fun HelpCategoryCard(
     icon: ImageVector,
     tint: Color,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     BentoCard(
         fill = LedgerColors.SurfaceElevated,
         cornerRadius = 16.dp,
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

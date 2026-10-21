@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,11 +66,14 @@ import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.ui.components.AddRateAlertDialog
 import dali.hamza.shared.ui.components.BentoCard
+import dali.hamza.shared.ui.components.LedgerWindowMode
+import dali.hamza.shared.ui.components.LedgerChart
+import dali.hamza.shared.ui.components.LedgerChartStyle
+import dali.hamza.shared.ui.components.isExpanded
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerButtonVariant
-import dali.hamza.shared.ui.components.LedgerChartStyle
 import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
@@ -144,6 +150,7 @@ fun HomeScreen(
         }
     }
 
+    LedgerWindowMode { windowMode ->
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -170,46 +177,116 @@ fun HomeScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ============ 1. Market Overview ================================
-            MarketOverviewSection(
-                pairCards = homeState.pairCards.ifEmpty {
+            if (windowMode.isExpanded) {
+                // ---- iPad layout (plans/tablet-ui.md): market column = the
+                // user's markets as a selector + the SELECTED market's chart
+                // + quick exchange below; 292dp tools column = favorites
+                // (all markets w/ selection + 7-day stats) + recent activity
+                var selectedQuote by remember { mutableStateOf<String?>(null) }
+                val expandedCards = homeState.pairCards.ifEmpty {
                     cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
-                },
-                base = marketBase,
-                alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
-                onAddAlert = { alertQuote = it },
-                onOpenRateAlerts = onOpenRateAlerts,
-                chartStyle = chartStyle,
-            )
+                }
+                val selectedCard = expandedCards.firstOrNull { it.quote == selectedQuote }
+                    ?: expandedCards.firstOrNull()
 
-            Spacer(Modifier.height(32.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        MarketOverviewSection(
+                            pairCards = expandedCards,
+                            base = marketBase,
+                            alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
+                            onAddAlert = { alertQuote = it },
+                            onOpenRateAlerts = onOpenRateAlerts,
+                            chartStyle = chartStyle,
+                            expanded = true,
+                            selectedQuote = selectedCard?.quote,
+                            onSelectQuote = { selectedQuote = it },
+                        )
 
-            // ============ 2. Quick Exchange =================================
-            QuickExchangeSection(
-                amount = state.amount,
-                onAmountChange = viewModel::onAmountChange,
-                from = state.fromCurrency,
-                to = state.toCurrency,
-                convertedAmount = state.convertedAmount,
-                isLoading = state.isLoading,
-                error = state.error,
-                onPickFrom = { pickerFor = true },
-                onPickTo = { pickerFor = false },
-                onSwap = viewModel::swapCurrencies,
-                onExecute = viewModel::convert,
-                onOpenConverter = onOpenConverter,
-            )
+                        selectedCard?.let { card ->
+                            Spacer(Modifier.height(16.dp))
+                            SelectedMarketPanel(
+                                card = card,
+                                base = marketBase,
+                                chartStyle = chartStyle,
+                            )
+                        }
 
-            Spacer(Modifier.height(32.dp))
+                        Spacer(Modifier.height(16.dp))
+                        QuickExchangeSection(
+                            amount = state.amount,
+                            onAmountChange = viewModel::onAmountChange,
+                            from = state.fromCurrency,
+                            to = state.toCurrency,
+                            convertedAmount = state.convertedAmount,
+                            isLoading = state.isLoading,
+                            error = state.error,
+                            onPickFrom = { pickerFor = true },
+                            onPickTo = { pickerFor = false },
+                            onSwap = viewModel::swapCurrencies,
+                            onExecute = viewModel::convert,
+                            onOpenConverter = onOpenConverter,
+                        )
+                    }
+                    Column(modifier = Modifier.width(292.dp)) {
+                        FavoritesPanel(
+                            cards = expandedCards,
+                            base = marketBase,
+                            selectedQuote = selectedCard?.quote,
+                            onSelect = { selectedQuote = it },
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        RecentActivitySection(
+                            transactions = homeState.recentTransactions,
+                            onOpenHistory = onOpenHistory,
+                        )
+                    }
+                }
+            } else {
+                // ============ 1. Market Overview ================================
+                MarketOverviewSection(
+                    pairCards = homeState.pairCards.ifEmpty {
+                        cardsRates.map { PairCardData(quote = it.name, rate = it.rate) }
+                    },
+                    base = marketBase,
+                    alertedQuotes = rateAlertsViewModel.alerts.map { it.quote }.toSet(),
+                    onAddAlert = { alertQuote = it },
+                    onOpenRateAlerts = onOpenRateAlerts,
+                    chartStyle = chartStyle,
+                )
 
-            // ============ 3. Recent Activity (minimized) ====================
-            RecentActivitySection(
-                transactions = homeState.recentTransactions,
-                onOpenHistory = onOpenHistory,
-            )
+                Spacer(Modifier.height(32.dp))
+
+                // ============ 2. Quick Exchange =================================
+                QuickExchangeSection(
+                    amount = state.amount,
+                    onAmountChange = viewModel::onAmountChange,
+                    from = state.fromCurrency,
+                    to = state.toCurrency,
+                    convertedAmount = state.convertedAmount,
+                    isLoading = state.isLoading,
+                    error = state.error,
+                    onPickFrom = { pickerFor = true },
+                    onPickTo = { pickerFor = false },
+                    onSwap = viewModel::swapCurrencies,
+                    onExecute = viewModel::convert,
+                    onOpenConverter = onOpenConverter,
+                )
+
+                Spacer(Modifier.height(32.dp))
+
+                // ============ 3. Recent Activity (minimized) ====================
+                RecentActivitySection(
+                    transactions = homeState.recentTransactions,
+                    onOpenHistory = onOpenHistory,
+                )
+            }
 
             Spacer(Modifier.height(48.dp))
         }
+    }
     }
 
     pickerFor?.let { pickingFrom ->
@@ -267,6 +344,11 @@ private fun MarketOverviewSection(
     onAddAlert: (String) -> Unit,
     onOpenRateAlerts: () -> Unit,
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
+    expanded: Boolean = false,
+    // tablet drill-in: when set, cards act as a selector for the detail
+    // panel (selected card outlined, click switches the chart/favorites)
+    selectedQuote: String? = null,
+    onSelectQuote: ((String) -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -293,20 +375,64 @@ private fun MarketOverviewSection(
     }
 
     // long-press drag reordering lives in Onboarding + Account → Market
-    // Preferences (same persisted order); Home cards just render it
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        pairCards.forEach { card ->
-            val hasAlert = card.quote in alertedQuotes
-            PairCard(
-                card = card,
-                base = base,
-                hasAlert = hasAlert,
-                onAlert = {
-                    // tracked market → manage it; untracked → offer to add
-                    if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
-                },
-                chartStyle = chartStyle,
-            )
+    // Preferences (same persisted order); Home cards just render it.
+    // Expanded (iPad): snapshot strip — the cards share one row and act as
+    // a selector for the detail panel when onSelectQuote is set.
+    if (expanded) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            pairCards.forEach { card ->
+                val hasAlert = card.quote in alertedQuotes
+                val isSelected = onSelectQuote != null && card.quote == selectedQuote
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .then(
+                            if (isSelected) {
+                                Modifier.border(
+                                    width = 1.5.dp,
+                                    color = LedgerColors.Green,
+                                    shape = RoundedCornerShape(16.dp),
+                                )
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .then(
+                            if (onSelectQuote != null) {
+                                Modifier.clickable { onSelectQuote(card.quote) }
+                            } else {
+                                Modifier
+                            },
+                        ),
+                ) {
+                    PairCard(
+                        card = card,
+                        base = base,
+                        hasAlert = hasAlert,
+                        onAlert = {
+                            if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
+                        },
+                        chartStyle = chartStyle,
+                    )
+                }
+            }
+        }
+    } else {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            pairCards.forEach { card ->
+                val hasAlert = card.quote in alertedQuotes
+                PairCard(
+                    card = card,
+                    base = base,
+                    hasAlert = hasAlert,
+                    onAlert = {
+                        // tracked market → manage it; untracked → offer to add
+                        if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
+                    },
+                    chartStyle = chartStyle,
+                )
+            }
         }
     }
 }
@@ -851,3 +977,172 @@ private fun pow10(exponent: Int): Double {
     repeat(exponent) { result *= 10.0 }
     return result
 }
+
+// ===========================================================================
+// Tablet-only panels (expanded windows, plans/tablet-ui.md Phase 2)
+// ===========================================================================
+
+/**
+ * The selected market's detail panel (iPad Home, market column): pair
+ * title + live rate + Δ chip over its 7-day chart — design `Tablet EUR USD
+ * Chart Panel` adapted to whichever market the user picked.
+ */
+@Composable
+private fun SelectedMarketPanel(
+    card: PairCardData,
+    base: String?,
+    chartStyle: LedgerChartStyle,
+) {
+    val pairTitle = base?.let { "${card.quote}/$it" } ?: card.quote
+    BentoCard(
+        fill = LedgerColors.Card,
+        padding = PaddingValues(20.dp),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = pairTitle,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = LedgerColors.TextPrimary,
+                    )
+                    Text(
+                        text = shortCurrencyName(card.quote),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                }
+                card.deltaPercent?.let { DeltaChip(percent = it) }
+            }
+
+            Text(
+                text = formatRateForPanel(card.rate),
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp,
+                ),
+                color = LedgerColors.TextPrimary,
+            )
+
+            if (card.spark.isNotEmpty()) {
+                LedgerChart(
+                    points = card.spark,
+                    style = chartStyle,
+                    modifier = Modifier.fillMaxWidth().height(220.dp),
+                )
+            } else {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                ) {
+                    Text(
+                        text = "Loading 7-day history…",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Favorites panel (iPad Home, tools column): every tracked market as a
+ * selectable row (rate + Δ), plus the selected market's 7-day high/low —
+ * the "history of favorites" view from the tablet review.
+ */
+@Composable
+private fun FavoritesPanel(
+    cards: List<PairCardData>,
+    base: String?,
+    selectedQuote: String?,
+    onSelect: (String) -> Unit,
+) {
+    val selected = cards.firstOrNull { it.quote == selectedQuote }
+
+    BentoCard(
+        fill = LedgerColors.Card,
+        padding = PaddingValues(20.dp),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                text = "Your markets",
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+            )
+
+            cards.forEach { card ->
+                val isSelected = card.quote == selectedQuote
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) LedgerColors.GreenSoft else Color.Transparent,
+                        )
+                        .clickable { onSelect(card.quote) }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                ) {
+                    Text(
+                        text = base?.let { "${card.quote}/$it" } ?: card.quote,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        ),
+                        color = if (isSelected) LedgerColors.Green else LedgerColors.TextPrimary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    card.deltaPercent?.let { delta ->
+                        DeltaChip(percent = delta)
+                    }
+                }
+            }
+
+            selected?.let { sel ->
+                if (sel.spark.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
+                    HorizontalDivider(color = LedgerColors.BorderSoft, thickness = 1.dp)
+                    Spacer(Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "7-day low",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                            Text(
+                                text = formatRateForPanel(sel.spark.minOrNull() ?: sel.rate),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = LedgerColors.TextSecondary,
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = "7-day high",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                            Text(
+                                text = formatRateForPanel(sel.spark.maxOrNull() ?: sel.rate),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = LedgerColors.TextSecondary,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Compact rate formatting for the tablet panels (KMP-safe). */
+private fun formatRateForPanel(rate: Double): String {
+    val decimals = if (rate >= 100.0) 2 else if (rate >= 1.0) 4 else 6
+    val factor = pow10(decimals)
+    val rounded = kotlin.math.round(rate * factor) / factor
+    var text = rounded.toString()
+    if (!text.contains('.')) text += ".0"
+    while (text.substringAfter('.').length < decimals) text += "0"
+    return text
+}
+

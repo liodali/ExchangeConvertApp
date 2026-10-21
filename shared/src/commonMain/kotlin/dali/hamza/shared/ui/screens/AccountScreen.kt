@@ -5,7 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,12 +94,14 @@ import dali.hamza.shared.ui.viewmodel.AccountViewModel
  * Sections follow the pen file: profile hero (avatar + tier badges + edit),
  * personal information, security health (clearance ring), security &
  * authentication, preferences (persisted notifications toggle), vault
- * management, support entry point and the node/version footer.
+ * management, a compact-layout support entry point and the node/version
+ * footer. Wide layouts place the settings cards in a two-column grid.
  */
 @Composable
 fun AccountScreen(
     viewModel: AccountViewModel,
     onOpenSupport: () -> Unit,
+    showSupportEntry: Boolean = true,
     currencies: List<Currency> = emptyList(),
     baseCurrency: String? = null,
     onMarketPreferencesChanged: (List<String>) -> Unit = {},
@@ -128,8 +132,7 @@ fun AccountScreen(
             title = "Dinarly",
             avatarInitials = viewModel.username,
             trailing = {
-                // bell opens the local rate alerts (the support hub keeps
-                // its own card + CTA at the bottom of this screen)
+                // Bell opens the local rate alerts.
                 IconButton(onClick = onOpenRateAlerts) {
                     Icon(
                         imageVector = Icons.Outlined.Notifications,
@@ -153,502 +156,497 @@ fun AccountScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // ============ Account access (guest mode) ====================
-            // login ships later — guests only manage their display name
-            BentoCard {
-                LedgerListRow(
-                    label = LedgerStrings.Account.LOGIN,
-                    icon = Icons.Outlined.ManageAccounts,
-                    trailing = {
-                        LedgerChip(
-                            text = LedgerStrings.Account.COMING_SOON,
-                            tint = LedgerColors.Gold,
-                            cornerRadius = 4.dp,
-                        )
-                    },
-                )
-                Spacer(Modifier.height(16.dp))
-                LedgerListRow(
-                    label = LedgerStrings.Account.DATA_PLAN,
-                    icon = Icons.Outlined.Star,
-                    iconTint = if (viewModel.dataTier == DataTier.SOVEREIGN) {
-                        LedgerColors.Green
-                    } else {
-                        LedgerColors.TextTertiary
-                    },
-                    value = if (viewModel.dataTier == DataTier.SOVEREIGN) {
-                        LedgerStrings.Account.dataPlanSovereign()
-                    } else {
-                        LedgerStrings.Account.dataPlanGuest()
-                    },
-                )
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = LedgerStrings.Account.DATA_PLAN_NOTE,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LedgerColors.TextTertiary,
-                )
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Personal information (Sovereign only) ============
-            // guest mode has no profile backend — persona fields wait for login
-            if (isSovereign) {
-                BentoCard {
-                SectionHeader(
-                    title = LedgerStrings.Account.PERSONAL_INFO,
-                    icon = Icons.Outlined.PersonOutline,
-                )
-                Spacer(Modifier.height(24.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                    LedgerInfoField(
-                        label = LedgerStrings.Account.PHONE_LABEL,
-                        value = LedgerStrings.Account.PHONE_VALUE,
-                    )
-                    LedgerInfoField(
-                        label = LedgerStrings.Account.RESIDENCE_LABEL,
-                        value = LedgerStrings.Account.RESIDENCE_VALUE,
-                    )
-                }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Security health ==================================
-            BentoCard {
-                SectionHeader(
-                    title = LedgerStrings.Account.SECURITY_HEALTH,
-                    icon = Icons.Outlined.SupportAgent,
-                    iconTint = LedgerColors.Green,
-                    titleColor = LedgerColors.Green,
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = LedgerStrings.Account.SECURITY_HEALTH_DESC,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = LedgerColors.TextSecondary,
-                )
-                Spacer(Modifier.height(24.dp))
-                ClearanceRow()
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Security & authentication =======================
-            // guests have no password — that row waits for Sovereign login
-            BentoCard {
-                SectionLabel(LedgerStrings.Account.SECURITY_SECTION)
-                Spacer(Modifier.height(16.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    if (isSovereign) {
-                        LedgerListRow(
-                            label = LedgerStrings.Account.CHANGE_PASSWORD,
-                            icon = Icons.Outlined.Password,
-                        )
-                    }
-                    LedgerListRow(
-                        label = LedgerStrings.Account.BIOMETRIC_UNLOCK,
-                        icon = Icons.Outlined.Fingerprint,
-                        trailing = {
-                            Switch(
-                                checked = viewModel.biometricUnlock,
-                                onCheckedChange = { enable ->
-                                    if (enable) {
-                                        // confirm with the system prompt before arming
-                                        biometricAuthenticator.authenticate { ok ->
-                                            if (ok) viewModel.updateBiometricUnlock(true)
-                                        }
-                                    } else {
-                                        viewModel.updateBiometricUnlock(false)
-                                    }
-                                },
-                                enabled = !viewModel.biometricUnlock || biometricAuthenticator.isAvailable(),
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = LedgerColors.Green,
-                                    checkedTrackColor = LedgerColors.Green.copy(alpha = 0.25f),
-                                ),
-                            )
-                        },
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Market preferences (dashboard cards) ============
-            BentoCard {
-                SectionLabel(LedgerStrings.Account.MARKET_SECTION)
-                Spacer(Modifier.height(16.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    LedgerListRow(
-                        label = "${LedgerStrings.Account.BASE_LABEL} · ${
-                            currencies.firstOrNull { it.name == baseCurrency }?.fullCountryName
-                                ?: "Currency"
-                        }",
-                        value = baseCurrency ?: "—",
-                        onClick = { pickingBase = true },
-                    )
-                    // market slots — long-press drag to reorder (persisted;
-                    // mirrors the Home dashboard card drag); swipe a row to
-                    // delete (kept: the last remaining market is not
-                    // dismissible)
-                    ReorderableColumn(
-                        items = viewModel.marketPreferences,
-                        key = { it },
-                        onMove = { from, to ->
-                            viewModel.moveMarketPreference(from, to)
-                            onMarketPreferencesChanged(viewModel.marketPreferences)
-                        },
-                        spacing = 16.dp,
-                    ) { code, _ ->
-                        key(code) {
-                        val slot = viewModel.marketPreferences.indexOf(code)
-                        val name = currencies
-                            .firstOrNull { it.name == code }?.fullCountryName
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { value ->
-                                if (value == SwipeToDismissBoxValue.EndToStart &&
-                                    viewModel.marketPreferences.size > 1
-                                ) {
-                                    viewModel.removeMarketPreference(code)
-                                    onMarketPreferencesChanged(viewModel.marketPreferences)
-                                    true
-                                } else {
-                                    false
-                                }
-                            },
-                        )
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            enableDismissFromStartToEnd = false,
-                            enableDismissFromEndToStart = viewModel.marketPreferences.size > 1,
-                            backgroundContent = {
-                                Row(
-                                    horizontalArrangement = Arrangement.End,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(LedgerColors.Error.copy(alpha = 0.14f))
-                                        .padding(horizontal = 20.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.DeleteOutline,
-                                        contentDescription = "Remove market",
-                                        tint = LedgerColors.Error,
-                                        modifier = Modifier.size(22.dp),
-                                    )
-                                }
-                            },
-                        ) {
-                            LedgerListRow(
-                                label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
-                                    (name?.let { " · $it" } ?: ""),
-                                value = code,
-                                onClick = { marketSlot = slot },
-                            )
-                        }
-                        }
-                    }
-                    // add-market row — visible whenever a slot is free
-                    // (after a swipe-delete or from the start with < 3);
-                    // same full-width button style as the Widgets screen
-                    if (viewModel.marketPreferences.size < 3) {
-                        LedgerButton(
-                            text = "Add market",
-                            onClick = { addingMarket = true },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Appearance (mode + palette, design qDCZE) =======
-            BentoCard {
-                SectionLabel(LedgerStrings.Account.APPEARANCE_SECTION)
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val expandedGrid = maxWidth >= 720.dp
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
+                    maxItemsInEachRow = if (expandedGrid) 2 else 1,
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = LedgerStrings.Account.APPEARANCE_TITLE,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = LedgerColors.TextPrimary,
-                        )
-                        Text(
-                            text = LedgerStrings.Account.APPEARANCE_DESC,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = LedgerColors.TextTertiary,
-                        )
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                // segmented mode control (design: System / Light / Dark)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.SurfaceElevated)
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    listOf(
-                        LedgerStrings.Account.MODE_SYSTEM to LedgerThemeMode.SYSTEM,
-                        LedgerStrings.Account.MODE_LIGHT to LedgerThemeMode.LIGHT,
-                        LedgerStrings.Account.MODE_DARK to LedgerThemeMode.DARK,
-                    ).forEach { (label, mode) ->
-                        val selected = viewModel.themeMode == mode
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
-                                .clickable {
-                                    viewModel.updateThemeMode(mode)
-                                    onThemeModeChanged(mode)
-                                }
-                                .padding(vertical = 8.dp),
-                        )
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
-                // palette choices (design swatches)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(
-                        text = LedgerStrings.Account.PALETTE_SECTION,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = LedgerColors.TextPrimary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = viewModel.colorPalette.label,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = LedgerColors.Green,
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    paletteSwatches.forEach { (palette, swatches) ->
-                        val selected = viewModel.colorPalette == palette
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
-                                .border(
-                                    1.dp,
-                                    if (selected) LedgerColors.Green.copy(alpha = 0.45f) else LedgerColors.BorderSoft,
-                                    RoundedCornerShape(12.dp),
-                                )
-                                .clickable {
-                                    viewModel.updateColorPalette(palette)
-                                    onColorPaletteChanged(palette)
-                                }
-                                .padding(vertical = 12.dp),
-                        ) {
-                            Row {
-                                swatches.forEachIndexed { index, swatch ->
-                                    Box(
-                                        modifier = Modifier
-                                            .offset(x = (-6 * index).dp)
-                                            .size(18.dp)
-                                            .clip(CircleShape)
-                                            .background(swatch)
-                                            .border(1.5.dp, LedgerColors.SurfaceElevated, CircleShape),
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = palette.label,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(20.dp))
-                // chart style: line vs bar historical graph (design `ATVsN`)
-                Text(
-                    text = LedgerStrings.Account.CHART_STYLE_TITLE,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = LedgerColors.TextPrimary,
-                )
-                Text(
-                    text = LedgerStrings.Account.CHART_STYLE_DESC,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LedgerColors.TextTertiary,
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(LedgerColors.SurfaceElevated)
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    listOf(
-                        LedgerStrings.Account.CHART_STYLE_LINE to LedgerChartStyle.LINE,
-                        LedgerStrings.Account.CHART_STYLE_BAR to LedgerChartStyle.BAR,
-                    ).forEach { (label, style) ->
-                        val selected = viewModel.chartStyle == style
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
-                                .clickable {
-                                    viewModel.updateChartStyle(style)
-                                    onChartStyleChanged(style)
-                                }
-                                .padding(vertical = 8.dp),
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Preferences =====================================
-            BentoCard {
-                SectionLabel(LedgerStrings.Account.PREFERENCES)
-                Spacer(Modifier.height(16.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // ============ Account access (guest mode) ====================
+                // login ships later — guests only manage their display name
+                BentoCard(modifier = Modifier.weight(1f)) {
                     LedgerListRow(
-                        label = LedgerStrings.Account.PUSH_NOTIFICATIONS,
-                        icon = Icons.Outlined.Notifications,
-                        onClick = viewModel::toggleNotifications,
+                        label = LedgerStrings.Account.LOGIN,
+                        icon = Icons.Outlined.ManageAccounts,
                         trailing = {
                             LedgerChip(
-                                text = if (viewModel.notificationsEnabled) {
-                                    LedgerStrings.Account.ENABLED
-                                } else {
-                                    LedgerStrings.Account.DISABLED
-                                },
-                                tint = if (viewModel.notificationsEnabled) {
-                                    LedgerColors.Green
-                                } else {
-                                    LedgerColors.TextTertiary
-                                },
+                                text = LedgerStrings.Account.COMING_SOON,
+                                tint = LedgerColors.Gold,
                                 cornerRadius = 4.dp,
                             )
                         },
                     )
+                    Spacer(Modifier.height(16.dp))
                     LedgerListRow(
-                        label = LedgerStrings.RateAlerts.TITLE,
-                        icon = Icons.Outlined.NotificationsActive,
-                        onClick = onOpenRateAlerts,
+                        label = LedgerStrings.Account.DATA_PLAN,
+                        icon = Icons.Outlined.Star,
+                        iconTint = if (viewModel.dataTier == DataTier.SOVEREIGN) {
+                            LedgerColors.Green
+                        } else {
+                            LedgerColors.TextTertiary
+                        },
+                        value = if (viewModel.dataTier == DataTier.SOVEREIGN) {
+                            LedgerStrings.Account.dataPlanSovereign()
+                        } else {
+                            LedgerStrings.Account.dataPlanGuest()
+                        },
                     )
-                    LedgerListRow(
-                        label = LedgerStrings.Widgets.TITLE,
-                        icon = Icons.Outlined.Widgets,
-                        onClick = onOpenWidgets,
-                    )
-                    LedgerListRow(
-                        label = LedgerStrings.Account.LANGUAGE,
-                        icon = Icons.Outlined.Language,
-                        value = LedgerStrings.Account.LANGUAGE_VALUE,
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = LedgerStrings.Account.DATA_PLAN_NOTE,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
                     )
                 }
-            }
 
-            Spacer(Modifier.height(24.dp))
+                // ============ Personal information (Sovereign only) ============
+                // guest mode has no profile backend — persona fields wait for login
+                if (isSovereign) {
+                    BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionHeader(
+                        title = LedgerStrings.Account.PERSONAL_INFO,
+                        icon = Icons.Outlined.PersonOutline,
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                        LedgerInfoField(
+                            label = LedgerStrings.Account.PHONE_LABEL,
+                            value = LedgerStrings.Account.PHONE_VALUE,
+                        )
+                        LedgerInfoField(
+                            label = LedgerStrings.Account.RESIDENCE_LABEL,
+                            value = LedgerStrings.Account.RESIDENCE_VALUE,
+                        )
+                    }
+                    }
+                }
 
-            // ============ Vault management / local data ===================
-            if (isSovereign) {
-                BentoCard {
-                    SectionLabel(LedgerStrings.Account.VAULT_SECTION)
+                // ============ Security health ==================================
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionHeader(
+                        title = LedgerStrings.Account.SECURITY_HEALTH,
+                        icon = Icons.Outlined.SupportAgent,
+                        iconTint = LedgerColors.Green,
+                        titleColor = LedgerColors.Green,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = LedgerStrings.Account.SECURITY_HEALTH_DESC,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = LedgerColors.TextSecondary,
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    ClearanceRow()
+                }
+
+                // ============ Security & authentication =======================
+                // guests have no password — that row waits for Sovereign login
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionLabel(LedgerStrings.Account.SECURITY_SECTION)
+                    Spacer(Modifier.height(16.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        if (isSovereign) {
+                            LedgerListRow(
+                                label = LedgerStrings.Account.CHANGE_PASSWORD,
+                                icon = Icons.Outlined.Password,
+                            )
+                        }
+                        LedgerListRow(
+                            label = LedgerStrings.Account.BIOMETRIC_UNLOCK,
+                            icon = Icons.Outlined.Fingerprint,
+                            trailing = {
+                                Switch(
+                                    checked = viewModel.biometricUnlock,
+                                    onCheckedChange = { enable ->
+                                        if (enable) {
+                                            // confirm with the system prompt before arming
+                                            biometricAuthenticator.authenticate { ok ->
+                                                if (ok) viewModel.updateBiometricUnlock(true)
+                                            }
+                                        } else {
+                                            viewModel.updateBiometricUnlock(false)
+                                        }
+                                    },
+                                    enabled = !viewModel.biometricUnlock || biometricAuthenticator.isAvailable(),
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = LedgerColors.Green,
+                                        checkedTrackColor = LedgerColors.Green.copy(alpha = 0.25f),
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                }
+
+                // ============ Market preferences (dashboard cards) ============
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionLabel(LedgerStrings.Account.MARKET_SECTION)
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         LedgerListRow(
-                            label = LedgerStrings.Account.LOG_OUT,
-                            icon = Icons.AutoMirrored.Outlined.Logout,
-                            emphasize = true,
+                            label = "${LedgerStrings.Account.BASE_LABEL} · ${
+                                currencies.firstOrNull { it.name == baseCurrency }?.fullCountryName
+                                    ?: "Currency"
+                            }",
+                            value = baseCurrency ?: "—",
+                            onClick = { pickingBase = true },
+                        )
+                        // market slots — long-press drag to reorder (persisted;
+                        // mirrors the Home dashboard card drag); swipe a row to
+                        // delete (kept: the last remaining market is not
+                        // dismissible)
+                        ReorderableColumn(
+                            items = viewModel.marketPreferences,
+                            key = { it },
+                            onMove = { from, to ->
+                                viewModel.moveMarketPreference(from, to)
+                                onMarketPreferencesChanged(viewModel.marketPreferences)
+                            },
+                            spacing = 16.dp,
+                        ) { code, _ ->
+                            key(code) {
+                            val slot = viewModel.marketPreferences.indexOf(code)
+                            val name = currencies
+                                .firstOrNull { it.name == code }?.fullCountryName
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { value ->
+                                    if (value == SwipeToDismissBoxValue.EndToStart &&
+                                        viewModel.marketPreferences.size > 1
+                                    ) {
+                                        viewModel.removeMarketPreference(code)
+                                        onMarketPreferencesChanged(viewModel.marketPreferences)
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
+                            )
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                enableDismissFromStartToEnd = false,
+                                enableDismissFromEndToStart = viewModel.marketPreferences.size > 1,
+                                backgroundContent = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.End,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(LedgerColors.Error.copy(alpha = 0.14f))
+                                            .padding(horizontal = 20.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.DeleteOutline,
+                                            contentDescription = "Remove market",
+                                            tint = LedgerColors.Error,
+                                            modifier = Modifier.size(22.dp),
+                                        )
+                                    }
+                                },
+                            ) {
+                                LedgerListRow(
+                                    label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
+                                        (name?.let { " · $it" } ?: ""),
+                                    value = code,
+                                    onClick = { marketSlot = slot },
+                                )
+                            }
+                            }
+                        }
+                        // add-market row — visible whenever a slot is free
+                        // (after a swipe-delete or from the start with < 3);
+                        // same full-width button style as the Widgets screen
+                        if (viewModel.marketPreferences.size < 3) {
+                            LedgerButton(
+                                text = "Add market",
+                                onClick = { addingMarket = true },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+
+                // ============ Appearance (mode + palette, design qDCZE) =======
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionLabel(LedgerStrings.Account.APPEARANCE_SECTION)
+                    Spacer(Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = LedgerStrings.Account.APPEARANCE_TITLE,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = LedgerColors.TextPrimary,
+                            )
+                            Text(
+                                text = LedgerStrings.Account.APPEARANCE_DESC,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    // segmented mode control (design: System / Light / Dark)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(LedgerColors.SurfaceElevated)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        listOf(
+                            LedgerStrings.Account.MODE_SYSTEM to LedgerThemeMode.SYSTEM,
+                            LedgerStrings.Account.MODE_LIGHT to LedgerThemeMode.LIGHT,
+                            LedgerStrings.Account.MODE_DARK to LedgerThemeMode.DARK,
+                        ).forEach { (label, mode) ->
+                            val selected = viewModel.themeMode == mode
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                    .clickable {
+                                        viewModel.updateThemeMode(mode)
+                                        onThemeModeChanged(mode)
+                                    }
+                                    .padding(vertical = 8.dp),
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    // palette choices (design swatches)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            text = LedgerStrings.Account.PALETTE_SECTION,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = LedgerColors.TextPrimary,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            text = viewModel.colorPalette.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = LedgerColors.Green,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        paletteSwatches.forEach { (palette, swatches) ->
+                            val selected = viewModel.colorPalette == palette
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                    .border(
+                                        1.dp,
+                                        if (selected) LedgerColors.Green.copy(alpha = 0.45f) else LedgerColors.BorderSoft,
+                                        RoundedCornerShape(12.dp),
+                                    )
+                                    .clickable {
+                                        viewModel.updateColorPalette(palette)
+                                        onColorPaletteChanged(palette)
+                                    }
+                                    .padding(vertical = 12.dp),
+                            ) {
+                                Row {
+                                    swatches.forEachIndexed { index, swatch ->
+                                        Box(
+                                            modifier = Modifier
+                                                .offset(x = (-6 * index).dp)
+                                                .size(18.dp)
+                                                .clip(CircleShape)
+                                                .background(swatch)
+                                                .border(1.5.dp, LedgerColors.SurfaceElevated, CircleShape),
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                Text(
+                                    text = palette.label,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    // chart style: line vs bar historical graph (design `ATVsN`)
+                    Text(
+                        text = LedgerStrings.Account.CHART_STYLE_TITLE,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = LedgerColors.TextPrimary,
+                    )
+                    Text(
+                        text = LedgerStrings.Account.CHART_STYLE_DESC,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(LedgerColors.SurfaceElevated)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        listOf(
+                            LedgerStrings.Account.CHART_STYLE_LINE to LedgerChartStyle.LINE,
+                            LedgerStrings.Account.CHART_STYLE_BAR to LedgerChartStyle.BAR,
+                        ).forEach { (label, style) ->
+                            val selected = viewModel.chartStyle == style
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (selected) LedgerColors.GreenSoft else Color.Transparent)
+                                    .clickable {
+                                        viewModel.updateChartStyle(style)
+                                        onChartStyleChanged(style)
+                                    }
+                                    .padding(vertical = 8.dp),
+                            )
+                        }
+                    }
+                }
+
+                // ============ Preferences =====================================
+                BentoCard(modifier = Modifier.weight(1f)) {
+                    SectionLabel(LedgerStrings.Account.PREFERENCES)
+                    Spacer(Modifier.height(16.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LedgerListRow(
+                            label = LedgerStrings.Account.PUSH_NOTIFICATIONS,
+                            icon = Icons.Outlined.Notifications,
+                            onClick = viewModel::toggleNotifications,
+                            trailing = {
+                                LedgerChip(
+                                    text = if (viewModel.notificationsEnabled) {
+                                        LedgerStrings.Account.ENABLED
+                                    } else {
+                                        LedgerStrings.Account.DISABLED
+                                    },
+                                    tint = if (viewModel.notificationsEnabled) {
+                                        LedgerColors.Green
+                                    } else {
+                                        LedgerColors.TextTertiary
+                                    },
+                                    cornerRadius = 4.dp,
+                                )
+                            },
                         )
                         LedgerListRow(
-                            label = LedgerStrings.Account.DELETE_ACCOUNT,
+                            label = LedgerStrings.RateAlerts.TITLE,
+                            icon = Icons.Outlined.NotificationsActive,
+                            onClick = onOpenRateAlerts,
+                        )
+                        LedgerListRow(
+                            label = LedgerStrings.Widgets.TITLE,
+                            icon = Icons.Outlined.Widgets,
+                            onClick = onOpenWidgets,
+                        )
+                        LedgerListRow(
+                            label = LedgerStrings.Account.LANGUAGE,
+                            icon = Icons.Outlined.Language,
+                            value = LedgerStrings.Account.LANGUAGE_VALUE,
+                        )
+                    }
+                }
+
+                // ============ Vault management / local data ===================
+                if (isSovereign) {
+                    BentoCard(modifier = Modifier.weight(1f)) {
+                        SectionLabel(LedgerStrings.Account.VAULT_SECTION)
+                        Spacer(Modifier.height(16.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            LedgerListRow(
+                                label = LedgerStrings.Account.LOG_OUT,
+                                icon = Icons.AutoMirrored.Outlined.Logout,
+                                emphasize = true,
+                            )
+                            LedgerListRow(
+                                label = LedgerStrings.Account.DELETE_ACCOUNT,
+                                icon = Icons.Outlined.DeleteOutline,
+                                emphasize = true,
+                            )
+                        }
+                    }
+                } else {
+                    // guests have no session to log out of — local data instead
+                    BentoCard(modifier = Modifier.weight(1f)) {
+                        SectionLabel(LedgerStrings.Account.LOCAL_DATA_SECTION)
+                        Spacer(Modifier.height(16.dp))
+                        LedgerListRow(
+                            label = LedgerStrings.Account.CLEAR_LEDGER,
                             icon = Icons.Outlined.DeleteOutline,
+                            iconTint = LedgerColors.Error,
+                            onClick = { showClearDialog = true },
                             emphasize = true,
                         )
                     }
                 }
-            } else {
-                // guests have no session to log out of — local data instead
-                BentoCard {
-                    SectionLabel(LedgerStrings.Account.LOCAL_DATA_SECTION)
-                    Spacer(Modifier.height(16.dp))
-                    LedgerListRow(
-                        label = LedgerStrings.Account.CLEAR_LEDGER,
-                        icon = Icons.Outlined.DeleteOutline,
-                        iconTint = LedgerColors.Error,
-                        onClick = { showClearDialog = true },
-                        emphasize = true,
-                    )
-                }
-            }
 
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Support entry point =============================
-            SectionLabel(LedgerStrings.Account.SUPPORT_SECTION)
-            Spacer(Modifier.height(16.dp))
-            BentoCard {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                ) {
-                    IconTile(
-                        icon = Icons.Outlined.SupportAgent,
-                        tint = LedgerColors.Blue,
-                        size = 57.dp,
-                    )
-                    Column {
-                        Text(
-                            text = LedgerStrings.Account.SUPPORT_CARD_TITLE,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = LedgerStrings.Account.SUPPORT_CARD_DESC,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = LedgerColors.TextSecondary,
-                        )
+                if (showSupportEntry) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        SectionLabel(LedgerStrings.Account.SUPPORT_SECTION)
+                        Spacer(Modifier.height(16.dp))
+                        BentoCard(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            ) {
+                                IconTile(
+                                    icon = Icons.Outlined.SupportAgent,
+                                    tint = LedgerColors.Blue,
+                                    size = 57.dp,
+                                )
+                                Column {
+                                    Text(
+                                        text = LedgerStrings.Account.SUPPORT_CARD_TITLE,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                        ),
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = LedgerStrings.Account.SUPPORT_CARD_DESC,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = LedgerColors.TextSecondary,
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(24.dp))
+                            LedgerButton(
+                                text = LedgerStrings.Account.SUPPORT_CARD_CTA,
+                                onClick = onOpenSupport,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
-                Spacer(Modifier.height(24.dp))
-                LedgerButton(
-                    text = LedgerStrings.Account.SUPPORT_CARD_CTA,
-                    onClick = onOpenSupport,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                }
             }
-
-            Spacer(Modifier.height(24.dp))
 
             // ============ Node footer =====================================
             Text(
