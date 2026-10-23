@@ -125,6 +125,37 @@ jobs:
             app/build/outputs/bundle/release/app-release.aab
             app/build/outputs/mapping/release/mapping.txt
 
+      - name: Publish artifacts to S3 (presigned links)
+        # Same Garage S3 as the CI cache, different folder: artifacts/.
+        # Runs even when the Play upload later rejects — links land in the
+        # run summary; presigned GETs live 7 days (sigv4 max).
+        if: vars.S3_CACHE_ENDPOINT != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
+          AWS_ENDPOINT_URL: ${{ vars.S3_CACHE_ENDPOINT }}
+          AWS_DEFAULT_REGION: garage
+          S3_BUCKET: ${{ vars.S3_CACHE_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws configure set default.s3.addressing_style path
+          DEST="s3://${S3_BUCKET}/artifacts/android/${VERSION_NAME}-${VERSION_CODE}"
+          {
+            echo "### Build artifacts (S3, links expire in 7 days)"
+            echo "| File | Size | Link |"
+            echo "|---|---|---|"
+            for f in app/build/outputs/bundle/release/app-release.aab \
+                     app/build/outputs/mapping/release/mapping.txt; do
+              name=$(basename "$f")
+              aws s3 cp "$f" "$DEST/$name" >/dev/null
+              url=$(aws s3 presign "$DEST/$name" --expires-in 604800)
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+              size=$(du -h "$f" | cut -f1)
+              echo "| \`$name\` | $size | [download]($url) (HTTP $code) |"
+            done
+            echo "_s3 path: ${DEST}_"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Prepare release notes (whatsnew)
         # Tag runs: the annotated tag's message IS the release notes —
         # subject line + body. It feeds both the GitHub release body and
