@@ -2,12 +2,17 @@ package dali.hamza.shared.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +34,8 @@ import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerLogoMark
+import dali.hamza.shared.ui.components.LedgerWindowMode
+import dali.hamza.shared.ui.components.isExpanded
 import dali.hamza.shared.ui.components.ReorderableColumn
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerStrings
@@ -60,118 +67,103 @@ fun OnboardingScreen(
         currencies.firstOrNull { it.name == code }?.fullCountryName ?: "Currency"
     }
 
-    Column(
+    // ---- adaptive layout (plans/tablet-ui.md) -----------------------------
+    // phones/medium: single centered column (max 720dp).
+    // expanded (iPad landscape, big tablets): branding pane left + form
+    // pane right — the tall phone flow becomes a compact two-pane setup.
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LedgerColors.Canvas)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .background(LedgerColors.Canvas),
     ) {
-        Spacer(Modifier.height(64.dp))
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            LedgerLogoMark()
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "DINARLY",
-                style = MaterialTheme.typography.labelMedium,
-                letterSpacing = 3.sp,
-                color = LedgerColors.Gold,
-            )
-        }
-
-        Spacer(Modifier.height(40.dp))
-
-        Text(
-            text = "Choose your markets",
-            style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
-            color = LedgerColors.TextPrimary,
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "Set the currency everything is quoted against, then pick " +
-                "the three markets your dashboard follows. " +
-                "You can change them anytime in Account.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = LedgerColors.TextSecondary,
-        )
-
-        Spacer(Modifier.height(32.dp))
-
-        // ---- base currency -----------------------------------------------
-        BentoCard {
-            Text(
-                text = LedgerStrings.Account.BASE_CURRENCY,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = LedgerColors.TextSecondary,
-            )
-            Spacer(Modifier.height(16.dp))
-            LedgerListRow(
-                label = nameFor(baseCode),
-                value = baseCode,
-                onClick = { pickingBase = true },
-            )
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = "All rates on your dashboard are compared to this currency.",
-                style = MaterialTheme.typography.bodySmall,
-                color = LedgerColors.TextTertiary,
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // ---- market slots --------------------------------------------------
-        BentoCard {
-            Text(
-                text = LedgerStrings.Account.MARKET_SECTION,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = LedgerColors.TextSecondary,
-            )
-            Spacer(Modifier.height(16.dp))
-            // long-press drag to reorder the slots — the "Market 01/02/03"
-            // labels renumber live, and the order carries into the
-            // dashboard and Account after Continue
-            ReorderableColumn(
-                items = selections,
-                key = { it },
-                onMove = { from, to ->
-                    selections.add(to, selections.removeAt(from))
-                },
-                spacing = 16.dp,
-            ) { code, _ ->
-                val index = selections.indexOf(code)
-                LedgerListRow(
-                    label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1} · ${nameFor(code)}",
-                    value = code,
-                    onClick = { marketSlot = index },
-                )
+        LedgerWindowMode { mode ->
+            if (mode.isExpanded) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 64.dp, vertical = 48.dp),
+                    horizontalArrangement = Arrangement.spacedBy(56.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        OnboardingBranding(centered = false)
+                        Spacer(Modifier.height(32.dp))
+                        OnboardingTitle()
+                    }
+                    Column(
+                        modifier = Modifier
+                            .width(460.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                    ) {
+                        OnboardingBaseCard(
+                            baseCode = baseCode,
+                            nameFor = nameFor,
+                            onPick = { pickingBase = true },
+                        )
+                        OnboardingMarketsCard(
+                            selections = selections,
+                            nameFor = nameFor,
+                            onPickSlot = { marketSlot = it },
+                        )
+                        LedgerButton(
+                            text = if (currencies.isEmpty()) "Loading markets…" else "Continue",
+                            onClick = { onDone(baseCode, selections.toList()) },
+                            enabled = currencies.isNotEmpty(),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Text(
+                            text = "Change anytime in Account → Market Preferences.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LedgerColors.TextTertiary,
+                        )
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .widthIn(max = 720.dp)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp),
+                ) {
+                    Spacer(Modifier.height(64.dp))
+                    OnboardingBranding(centered = true)
+                    Spacer(Modifier.height(40.dp))
+                    OnboardingTitle()
+                    Spacer(Modifier.height(32.dp))
+                    OnboardingBaseCard(
+                        baseCode = baseCode,
+                        nameFor = nameFor,
+                        onPick = { pickingBase = true },
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    OnboardingMarketsCard(
+                        selections = selections,
+                        nameFor = nameFor,
+                        onPickSlot = { marketSlot = it },
+                    )
+                    Spacer(Modifier.height(32.dp))
+                    LedgerButton(
+                        text = if (currencies.isEmpty()) "Loading markets…" else "Continue",
+                        onClick = { onDone(baseCode, selections.toList()) },
+                        enabled = currencies.isNotEmpty(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Change anytime in Account → Market Preferences.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LedgerColors.TextTertiary,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                    Spacer(Modifier.height(48.dp))
+                }
             }
         }
-
-        Spacer(Modifier.height(32.dp))
-
-        LedgerButton(
-            text = if (currencies.isEmpty()) "Loading markets…" else "Continue",
-            onClick = { onDone(baseCode, selections.toList()) },
-            enabled = currencies.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        Text(
-            text = "Change anytime in Account → Market Preferences.",
-            style = MaterialTheme.typography.labelSmall,
-            color = LedgerColors.TextTertiary,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-        )
-
-        Spacer(Modifier.height(48.dp))
     }
+
 
     if (pickingBase) {
         CurrencyPickerSheet(
@@ -210,3 +202,99 @@ fun OnboardingScreen(
 private fun fallbackMajor(exclude: List<String>): String =
     listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
         ?: "EUR"
+
+// ---- onboarding sections (shared by the phone column and tablet panes) --
+
+@Composable
+private fun OnboardingBranding(centered: Boolean) {
+    Column(
+        horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
+    ) {
+        LedgerLogoMark()
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "DINARLY",
+            style = MaterialTheme.typography.labelMedium,
+            letterSpacing = 3.sp,
+            color = LedgerColors.Gold,
+        )
+    }
+}
+
+@Composable
+private fun OnboardingTitle() {
+    Text(
+        text = "Choose your markets",
+        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
+        color = LedgerColors.TextPrimary,
+    )
+    Spacer(Modifier.height(12.dp))
+    Text(
+        text = "Set the currency everything is quoted against, then pick " +
+            "the three markets your dashboard follows. " +
+            "You can change them anytime in Account.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = LedgerColors.TextSecondary,
+    )
+}
+
+@Composable
+private fun OnboardingBaseCard(
+    baseCode: String,
+    nameFor: (String) -> String,
+    onPick: () -> Unit,
+) {
+    BentoCard {
+        Text(
+            text = LedgerStrings.Account.BASE_CURRENCY,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = LedgerColors.TextSecondary,
+        )
+        Spacer(Modifier.height(16.dp))
+        LedgerListRow(
+            label = nameFor(baseCode),
+            value = baseCode,
+            onClick = onPick,
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "All rates on your dashboard are compared to this currency.",
+            style = MaterialTheme.typography.bodySmall,
+            color = LedgerColors.TextTertiary,
+        )
+    }
+}
+
+@Composable
+private fun OnboardingMarketsCard(
+    selections: androidx.compose.runtime.snapshots.SnapshotStateList<String>,
+    nameFor: (String) -> String,
+    onPickSlot: (Int) -> Unit,
+) {
+    BentoCard {
+        Text(
+            text = LedgerStrings.Account.MARKET_SECTION,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = LedgerColors.TextSecondary,
+        )
+        Spacer(Modifier.height(16.dp))
+        // long-press drag to reorder the slots — the "Market 01/02/03"
+        // labels renumber live, and the order carries into the dashboard
+        // and Account after Continue
+        ReorderableColumn(
+            items = selections,
+            key = { it },
+            onMove = { from, to ->
+                selections.add(to, selections.removeAt(from))
+            },
+            spacing = 16.dp,
+        ) { code, _ ->
+            val index = selections.indexOf(code)
+            LedgerListRow(
+                label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${index + 1} · ${nameFor(code)}",
+                value = code,
+                onClick = { onPickSlot(index) },
+            )
+        }
+    }
+}

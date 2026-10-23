@@ -2,7 +2,9 @@ package dali.hamza.shared.ui.components
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -42,7 +44,11 @@ val LedgerWindowMode.isExpanded: Boolean
 /** Provides [content] with the [LedgerWindowMode] of the current window. */
 @Composable
 fun LedgerWindowMode(content: @Composable BoxScope.(LedgerWindowMode) -> Unit) {
-    BoxWithConstraints {
+    // fillMaxSize: without it the box wraps its content and both the
+    // reported maxWidth and any child alignment (e.g. centered onboarding
+    // columns) collapse to the content's own width — centering silently
+    // becomes flush-left.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         content(ledgerWindowMode(maxWidth))
     }
 }
