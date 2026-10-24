@@ -141,6 +141,10 @@
     <string name="acct_disabled">Disattivate</string>
     <string name="acct_language">Lingua</string>
     <string name="acct_language_value">Italiano</string>
+    <string name="acct_language_phone">Segui la lingua del telefono</string>
+    <string name="lang_restart_note">La nuova lingua verrà applicata al riavvio dell\'app.</string>
+    <string name="lang_restart_now">Riavvia ora</string>
+    <string name="lang_restart_later">Più tardi</string>
     <string name="acct_market_slot">Mercato</string>
     <string name="acct_market_section">PREFERENZE DI MERCATO</string>
     <string name="acct_market_pick">Scegli valuta</string>
@@ -167,7 +171,7 @@
     <string name="acct_support_title">Assistenza &amp; Knowledge Base</string>
     <string name="acct_support_desc">Accedi alle FAQ, contatta l\'assistenza ed esplora risorse utili.</string>
     <string name="acct_support_cta">Esplora l\'hub di assistenza</string>
-    <string name="acct_login">Accesso Sovereign</string>
+    <string name="acct_login">Accesso a Dinarly</string>
     <string name="acct_coming_soon">IN ARRIVO</string>
     <string name="acct_data_plan">Piano dati</string>
     <string name="acct_data_plan_note">Il piano ospite aggiorna i tassi ogni ora. L\'accesso Sovereign sblocca i dati in tempo reale.</string>

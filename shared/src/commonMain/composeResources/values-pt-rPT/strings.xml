@@ -61,6 +61,10 @@
     <string name="acct_clear_title">Limpar o registo local?</string>
     <string name="acct_clear_message">Todos os câmbios registados neste dispositivo serão removidos.</string>
     <string name="acct_language_value">Português (Portugal)</string>
+    <string name="acct_language_phone">Seguir o idioma do telemóvel</string>
+    <string name="lang_restart_note">O novo idioma será aplicado após reiniciar a aplicação.</string>
+    <string name="lang_restart_now">Reiniciar agora</string>
+    <string name="lang_restart_later">Mais tarde</string>
     <string name="acct_chart_desc">Os gráficos de histórico são apresentados como linha ou barras</string>
     <string name="acct_vault_section">GESTÃO DE COFRE</string>
     <string name="acct_log_out">Sair do Registo</string>
@@ -68,7 +72,7 @@
     <string name="acct_support_section">SUPORTE &amp; INFORMAÇÃO</string>
     <string name="acct_support_desc">Aceda ao nosso FAQ, fale com o suporte e explore recursos úteis.</string>
     <string name="acct_support_cta">Explorar Centro de Suporte</string>
-    <string name="acct_login">Iniciar Sessão Sovereign</string>
+    <string name="acct_login">Iniciar sessão no Dinarly</string>
     <string name="acct_data_plan_note">O plano de convidado atualiza as cotações de hora a hora. O login Sovereign desbloqueia dados em tempo real.</string>
 
     <!-- ===== Widgets ===== -->

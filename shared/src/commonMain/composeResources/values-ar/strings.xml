@@ -142,6 +142,10 @@
     <string name="acct_disabled">معطّل</string>
     <string name="acct_language">اللغة</string>
     <string name="acct_language_value">العربية</string>
+    <string name="acct_language_phone">لغة الهاتف</string>
+    <string name="lang_restart_note">يُطبَّق تغيير اللغة بعد إعادة تشغيل التطبيق.</string>
+    <string name="lang_restart_now">إعادة التشغيل الآن</string>
+    <string name="lang_restart_later">لاحقًا</string>
     <string name="acct_market_slot">سوق</string>
     <string name="acct_market_section">تفضيلات السوق</string>
     <string name="acct_market_pick">اختر العملة</string>
@@ -168,7 +172,7 @@
     <string name="acct_support_title">الدعم وقاعدة المعرفة</string>
     <string name="acct_support_desc">اطلع على الأسئلة الشائعة، وتواصل مع الدعم، واستكشف موارد مفيدة.</string>
     <string name="acct_support_cta">استكشاف مركز الدعم</string>
-    <string name="acct_login">تسجيل دخول Sovereign</string>
+    <string name="acct_login">تسجيل الدخول إلى Dinarly</string>
     <string name="acct_coming_soon">قريباً</string>
     <string name="acct_data_plan">خطة البيانات</string>
     <string name="acct_data_plan_note">تحدّث خطة الزوار الأسعار كل ساعة، بينما يمنحك تسجيل الدخول إلى Sovereign البيانات الفورية.</string>

@@ -142,6 +142,10 @@
     <string name="acct_disabled">Deaktiviert</string>
     <string name="acct_language">Sprache</string>
     <string name="acct_language_value">Deutsch</string>
+    <string name="acct_language_phone">Systemsprache folgen</string>
+    <string name="lang_restart_note">Die neue Sprache wird nach dem Neustart aktiv.</string>
+    <string name="lang_restart_now">Jetzt neu starten</string>
+    <string name="lang_restart_later">Später</string>
     <string name="acct_market_slot">Markt</string>
     <string name="acct_market_section">MARKTEINSTELLUNGEN</string>
     <string name="acct_market_pick">Währung wählen</string>
@@ -168,7 +172,7 @@
     <string name="acct_support_title">Support &amp; Wissensdatenbank</string>
     <string name="acct_support_desc">Greifen Sie auf unsere FAQ zu, kontaktieren Sie den Support und entdecken Sie hilfreiche Ressourcen.</string>
     <string name="acct_support_cta">Support-Hub entdecken</string>
-    <string name="acct_login">Sovereign-Login</string>
+    <string name="acct_login">Dinarly-Login</string>
     <string name="acct_coming_soon">BALD VERFÜGBAR</string>
     <string name="acct_data_plan">Datenplan</string>
     <string name="acct_data_plan_note">Im Gastplan werden Kurse stündlich aktualisiert. Der Sovereign-Login schaltet Echtzeitdaten frei.</string>
