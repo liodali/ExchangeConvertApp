@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import dali.hamza.shared.AndroidAppContext
 
 actual fun currentLanguageTag(): String =
@@ -20,4 +22,19 @@ actual fun openLanguageSettings() {
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri)
     }.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
     runCatching { context.startActivity(intent) }
+}
+
+actual fun applyLanguageOverride(tag: String?) {
+    // AppCompatDelegate: 13+ routes through the system LocaleManager
+    // (persists, mirrors in system settings); below 13 appcompat backports
+    // the locale + persists via the autoStoreLocales manifest service.
+    // Compatible activities recreate and Locale.getDefault() — what CMP
+    // resources read — updates immediately.
+    AppCompatDelegate.setApplicationLocales(
+        if (tag.isNullOrBlank()) {
+            LocaleListCompat.getEmptyLocaleList()
+        } else {
+            LocaleListCompat.forLanguageTags(tag)
+        },
+    )
 }

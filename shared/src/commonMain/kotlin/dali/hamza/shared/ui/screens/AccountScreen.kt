@@ -91,7 +91,9 @@ import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
-import dali.hamza.shared.platform.openLanguageSettings
+import dali.hamza.shared.platform.applyLanguageOverride
+import dali.hamza.shared.ui.components.LanguagePickerSheet
+import dali.hamza.shared.ui.components.endonymFor
 import echangecurrencyapp.shared.generated.resources.Res
 import echangecurrencyapp.shared.generated.resources.acct_add_market
 import echangecurrencyapp.shared.generated.resources.acct_appearance_desc
@@ -191,6 +193,7 @@ fun AccountScreen(
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showClearDialog by remember { mutableStateOf(false) }
+    var showLanguageSheet by remember { mutableStateOf(false) }
     var marketSlot by remember { mutableStateOf<Int?>(null) }
     var addingMarket by remember { mutableStateOf(false) }
     var pickingBase by remember { mutableStateOf(false) }
@@ -645,8 +648,9 @@ fun AccountScreen(
                         LedgerListRow(
                             label = stringResource(Res.string.acct_language),
                             icon = Icons.Outlined.Language,
-                            value = stringResource(Res.string.acct_language_value),
-                            onClick = ::openLanguageSettings,
+                            value = viewModel.languageOverride?.let { endonymFor(it) }
+                                ?: stringResource(Res.string.acct_language_value),
+                            onClick = { showLanguageSheet = true },
                         )
                     }
                 }
@@ -825,6 +829,20 @@ fun AccountScreen(
                 showClearDialog = false
                 viewModel.clearLedger()
             },
+        )
+    }
+
+    if (showLanguageSheet) {
+        LanguagePickerSheet(
+            currentOverride = viewModel.languageOverride,
+            onSelect = { tag ->
+                viewModel.setLanguageOverride(tag)
+                // Android recreates and re-resolves immediately; iOS stores
+                // the override and offers a restart
+                applyLanguageOverride(tag)
+                showLanguageSheet = false
+            },
+            onDismiss = { showLanguageSheet = false },
         )
     }
 }

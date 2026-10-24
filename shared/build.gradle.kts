@@ -72,6 +72,8 @@ kotlin {
         androidMain.dependencies {
             // Biometric app-lock (BiometricPrompt in the platform actual)
             implementation(libs.androidx.biometric)
+            // In-app language override (AppCompatDelegate per-app locales)
+            implementation(libs.appcompat)
             // Local rate-alert background job (WorkManager worker actual)
             implementation(libs.androidx.work.runtime.ktx)
             // Ktor Android Engine

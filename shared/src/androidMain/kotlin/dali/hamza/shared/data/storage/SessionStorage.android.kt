@@ -31,6 +31,17 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         preferences.edit().putString(KEY_USERNAME, value).apply()
     }
 
+    override fun getLanguageOverride(): String? =
+        preferences.getString(KEY_LANGUAGE_OVERRIDE, null)
+
+    override fun setLanguageOverride(tag: String?) {
+        if (tag != null) {
+            preferences.edit().putString(KEY_LANGUAGE_OVERRIDE, tag).apply()
+        } else {
+            preferences.edit().remove(KEY_LANGUAGE_OVERRIDE).apply()
+        }
+    }
+
     override fun setLastUpdate(timestamp: Long) {
         preferences.edit().putLong(KEY_LAST_UPDATE, timestamp).apply()
     }
@@ -159,6 +170,7 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
         const val KEY_INSTALL_ID = "push_install_id"
         const val KEY_SESSION_TOKEN = "push_session_token"
         const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"
+        const val KEY_LANGUAGE_OVERRIDE = "language_override"
     }
 }
 

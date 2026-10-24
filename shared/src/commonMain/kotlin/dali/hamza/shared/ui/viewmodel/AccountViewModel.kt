@@ -144,6 +144,12 @@ class AccountViewModel(
         username = storage.getUsername()
     }
 
+    /** In-app language override (null = follow the phone language). */
+    val languageOverride: String?
+        get() = storage.getLanguageOverride()
+
+    fun setLanguageOverride(tag: String?) = storage.setLanguageOverride(tag)
+
     /**
      * Guest-mode "Clear Local Ledger" — wipes every recorded exchange
      * from this device. No-op when the repository isn't wired.

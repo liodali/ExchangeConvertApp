@@ -143,6 +143,10 @@
     <string name="acct_disabled">Disabled</string>
     <string name="acct_language">Language</string>
     <string name="acct_language_value">English (US)</string>
+    <string name="acct_language_phone">Follow phone language</string>
+    <string name="lang_restart_note">The new language applies after the app restarts.</string>
+    <string name="lang_restart_now">Restart now</string>
+    <string name="lang_restart_later">Later</string>
     <string name="acct_market_slot">Market</string>
     <string name="acct_market_section">MARKET PREFERENCES</string>
     <string name="acct_market_pick">Choose currency</string>
@@ -169,7 +173,7 @@
     <string name="acct_support_title">Support &amp; Knowledge Base</string>
     <string name="acct_support_desc">Access our FAQ, contact support, and explore helpful resources.</string>
     <string name="acct_support_cta">Explore Support Hub</string>
-    <string name="acct_login">Sovereign Login</string>
+    <string name="acct_login">Dinarly Login</string>
     <string name="acct_coming_soon">COMING SOON</string>
     <string name="acct_data_plan">Data Plan</string>
     <string name="acct_data_plan_note">Guest plan refreshes rates hourly. Sovereign login unlocks realtime data.</string>

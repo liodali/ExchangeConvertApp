@@ -31,6 +31,17 @@ class IosSessionStorage : ISessionStorage {
         defaults.setObject(value, forKey = KEY_USERNAME)
     }
 
+    override fun getLanguageOverride(): String? =
+        defaults.stringForKey(KEY_LANGUAGE_OVERRIDE)
+
+    override fun setLanguageOverride(tag: String?) {
+        if (tag != null) {
+            defaults.setObject(tag, forKey = KEY_LANGUAGE_OVERRIDE)
+        } else {
+            defaults.removeObjectForKey(KEY_LANGUAGE_OVERRIDE)
+        }
+    }
+
     override fun setLastUpdate(timestamp: Long) {
         defaults.setObject(timestamp.toDouble(), forKey = KEY_LAST_UPDATE)
     }
@@ -169,6 +180,7 @@ class IosSessionStorage : ISessionStorage {
         const val KEY_INSTALL_ID = "push_install_id"
         const val KEY_SESSION_TOKEN = "push_session_token"
         const val KEY_SESSION_EXPIRES_AT = "push_session_expires_at"
+        const val KEY_LANGUAGE_OVERRIDE = "language_override"
     }
 }
 

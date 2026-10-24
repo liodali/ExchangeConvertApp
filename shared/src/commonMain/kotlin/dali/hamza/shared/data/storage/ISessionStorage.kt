@@ -30,6 +30,15 @@ interface ISessionStorage {
     fun setUsername(value: String)
 
     /**
+     * In-app UI language override (BCP-47), null = follow the phone
+     * language. Mirrors the platform's per-app locale storage; the shared
+     * copy drives the picker's selected-state.
+     */
+    fun getLanguageOverride(): String? = null
+
+    fun setLanguageOverride(tag: String?) {}
+
+    /**
      * Push notifications preference (Account → Preferences).
      * Defaults to `true`; implementations should persist it.
      */
@@ -143,3 +152,8 @@ const val DEFAULT_USERNAME = "DINARLY"
 /** Pre-rebrand default (Sovereign Ledger era) — read-migrated to [DEFAULT_USERNAME]. */
 const val LEGACY_DEFAULT_USERNAME = "SOVEREIGN"
 const val DEFAULT_PAIR = "EUR/USD"
+
+/** Supported in-app UI languages (BCP-47) — mirrors the locale resources. */
+val SUPPORTED_LANGUAGE_TAGS: List<String> = listOf(
+    "en", "de", "ar", "it", "es", "pt-BR", "pt-PT",
+)

@@ -14,3 +14,16 @@ expect fun currentLanguageTag(): String
  * are present. The app restarts/recreates itself on change — no in-app state.
  */
 expect fun openLanguageSettings()
+
+/**
+ * Applies an in-app language override picked from the language sheet.
+ *
+ * - null → follow the phone language again
+ * - tag (BCP-47, one of [dali.hamza.shared.data.storage.SUPPORTED_LANGUAGE_TAGS])
+ *   → the app UI switches to it
+ *
+ * Android recreates the activity immediately (AppCompatDelegate routes to
+ * the system LocaleManager on 13+, backports below). iOS needs one relaunch
+ * — the actual presents the restart confirmation itself.
+ */
+expect fun applyLanguageOverride(tag: String?)

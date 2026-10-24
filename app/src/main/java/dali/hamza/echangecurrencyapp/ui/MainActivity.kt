@@ -3,9 +3,9 @@ package dali.hamza.echangecurrencyapp.ui
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
-import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dali.hamza.shared.ui.ExchangeCurrencyApp
@@ -25,7 +25,7 @@ import org.koin.core.context.GlobalContext
  *   (No bounds check on purpose: in Compose, `currentFocus` is the whole
  *   Compose surface, so a bounds test can never detect "outside".)
  */
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var updateChecker: AppUpdateChecker
 
