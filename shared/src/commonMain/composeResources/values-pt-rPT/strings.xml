@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dinarly shared UI strings — European Portuguese (pt-PT) OVERRIDES.
+     Only keys that genuinely differ from the pt-BR base (values-pt) live here;
+     every other key falls back to values-pt at runtime.
+     Typical pt-PT adaptations: ecrã inicial, gerir/gestão, registo, guardar, eliminar,
+     equipa, gestor, sénior, connosco, detetado, encriptado, aplicação, premir,
+     "a carregar" instead of gerunds, "em direto" instead of "ao vivo".
+     Brand names (Dinarly, Sovereign, Gemini, Siri, ISO currency codes) stay untranslated.
+     NOTE: \' escapes apostrophes; %% escapes a literal percent sign. -->
+<resources>
+    <!-- ===== Navigation & common ===== -->
+    <string name="nav_settings">Definições</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_delete">Eliminar</string>
+
+    <!-- ===== Biometric lock (app shell) ===== -->
+    <string name="lock_verify">Tem de verificar a sua biometria para continuar</string>
+    <string name="lock_locked">O seu registo está bloqueado</string>
+
+    <!-- ===== Home ===== -->
+    <string name="home_loading_rates">A carregar cotações em direto…</string>
+    <string name="home_live">EM DIRETO</string>
+    <string name="home_your_markets">Os seus mercados</string>
+    <string name="home_loading_7d">A carregar o histórico de 7 dias…</string>
+    <string name="home_no_exchanges">Ainda sem câmbios — faça uma conversão para iniciar o seu registo.</string>
+    <string name="home_execute_exchange">Executar Câmbio</string>
+
+    <!-- ===== Quick exchange (Home card) ===== -->
+    <string name="quick_title">Câmbio Rápido</string>
+
+    <!-- ===== Converter screen ===== -->
+    <string name="conv_live_base">Cotações em direto com %1$s como moeda base</string>
+    <string name="conv_quick_desc">Converta moedas com cotações em direto</string>
+    <string name="conv_loading_history">A carregar o histórico de preços…</string>
+
+    <!-- ===== Full converter ===== -->
+    <string name="fconv_desc">Execute uma conversão à cotação de mercado em direto</string>
+    <string name="fconv_execute">Executar Câmbio</string>
+
+    <!-- ===== History screen ===== -->
+    <string name="hist_zero_fees">Como membro do nível Sovereign, beneficia de 0% de comissões de câmbio em todos os principais pares de moedas.</string>
+    <string name="hist_live_rate">Cotação de mercado em direto</string>
+    <string name="hist_from_history">Com base no histórico de mercado registado</string>
+    <string name="hist_start_building">Execute um câmbio para começar a construir o histórico do seu registo.</string>
+    <string name="hist_no_records">Ainda não há registos para este par</string>
+    <string name="hist_appear">Os câmbios que executar aparecem aqui instantaneamente.</string>
+
+    <!-- ===== Onboarding ===== -->
+    <string name="onb_loading">A carregar mercados…</string>
+    <string name="onb_title">Escolha os seus mercados</string>
+    <string name="onb_desc">Defina a moeda contra a qual todas as cotações são feitas e escolha os três mercados que o seu painel acompanha. Pode alterá-los a qualquer momento em Conta.</string>
+
+    <!-- ===== Account ===== -->
+    <string name="acct_badge_verified">REGISTO VERIFICADO</string>
+    <string name="acct_edit_profile_hint">Nome de apresentação Sovereign</string>
+    <string name="acct_personal_info">Dados Pessoais</string>
+    <string name="acct_security_desc">O seu cofre está protegido por encriptação de nível militar e chaves de hardware multifator.</string>
+    <string name="acct_clearance">Autorização de Nível 3</string>
+    <string name="acct_change_password">Alterar Palavra-passe</string>
+    <string name="acct_clear_ledger">Limpar Registo Local</string>
+    <string name="acct_clear_title">Limpar o registo local?</string>
+    <string name="acct_clear_message">Todos os câmbios registados neste dispositivo serão removidos.</string>
+    <string name="acct_language_value">Português (Portugal)</string>
+    <string name="acct_chart_desc">Os gráficos de histórico são apresentados como linha ou barras</string>
+    <string name="acct_vault_section">GESTÃO DE COFRE</string>
+    <string name="acct_log_out">Sair do Registo</string>
+    <string name="acct_delete_account">Eliminar Conta Permanentemente</string>
+    <string name="acct_support_section">SUPORTE &amp; INFORMAÇÃO</string>
+    <string name="acct_support_desc">Aceda ao nosso FAQ, fale com o suporte e explore recursos úteis.</string>
+    <string name="acct_support_cta">Explorar Centro de Suporte</string>
+    <string name="acct_login">Iniciar Sessão Sovereign</string>
+    <string name="acct_data_plan_note">O plano de convidado atualiza as cotações de hora a hora. O login Sovereign desbloqueia dados em tempo real.</string>
+
+    <!-- ===== Widgets ===== -->
+    <string name="wg_header">Os seus widgets de mercado no ecrã inicial. Adicione um par aqui ou mantenha premido o ecrã inicial.</string>
+    <string name="wg_empty_message">Adicione um widget de mercado para ver uma cotação em direto num relance.</string>
+    <string name="wg_your_markets">OS SEUS MERCADOS</string>
+    <string name="wg_kind_grid">Mercados · Grelha</string>
+    <string name="wg_kind_card_desc">Um par num cartão arredondado. Visual clássico.</string>
+    <string name="wg_kind_convert_desc">Introduza um valor e veja o valor convertido.</string>
+    <string name="wg_forgotten">Removido da aplicação — mantenha premido o widget no ecrã inicial para o eliminar por completo</string>
+    <string name="wg_ios_title">Adicionar a partir do ecrã inicial</string>
+    <string name="wg_ios_message">Mantenha premido o ecrã inicial, toque em +, procure Dinarly e escolha o widget de mercado.</string>
+    <string name="wg_on_home_screen">NO SEU ECRÃ INICIAL</string>
+    <string name="wg_detected_note">Detetado através das atualizações dos widgets — o iOS não expõe os widgets adicionados.</string>
+    <string name="wg_realtime_desc">Atualizações de widget mais rápidas (de 15 em 15 min + ao abrir a aplicação). Usa mais bateria.</string>
+    <string name="wg_dialog_grid_title">Acompanhe os seus mercados</string>
+    <string name="wg_dialog_max_pairs">Máximo de 3 pares — toque num chip para remover.</string>
+
+    <!-- ===== Rate alerts ===== -->
+    <string name="alerts_header">Escolha a entrega de cada alerta: push do servidor (funciona mesmo com a aplicação fechada) ou verificações no dispositivo.</string>
+    <string name="alerts_empty_message">Acompanhe um par — com push dos nossos servidores ou verificação no dispositivo, a escolha é sua.</string>
+    <string name="alerts_free_note">Plano gratuito: 1 alerta push (verificado de 2 em 2 h) e até 2 alertas no dispositivo. O login Sovereign desbloqueará mais.</string>
+    <string name="alerts_guest_note">Plano gratuito: alertas push verificados de 2 em 2 horas — um alerta push.</string>
+    <string name="alerts_push_fallback">Serviço de push inacessível — alerta guardado no dispositivo.</string>
+    <string name="alerts_local_deleted">Alerta eliminado.</string>
+    <string name="alerts_local_hint">Os alertas push chegam mesmo com a aplicação fechada — use “Mover para push” abaixo de um alerta.</string>
+    <string name="alerts_every">De %1$d em %1$d h</string>
+    <string name="alerts_permission_banner">As notificações estão desativadas para esta aplicação — ative-as para receber alertas de cotação.</string>
+    <string name="alerts_awaiting">A aguardar a primeira verificação em segundo plano</string>
+
+    <!-- ===== FAQ ===== -->
+    <string name="faq_hero_desc">Pesquise na nossa base de conhecimento ou navegue pelas categorias abaixo para obter orientação sobre cotações, segurança e gestão de conta.</string>
+    <string name="faq_search_hint">Pesquise na nossa base de conhecimento…</string>
+    <string name="faq_sec_q1">Como é protegido o material da minha chave privada?</string>
+    <string name="faq_sec_a1">O Sovereign Ledger utiliza Computação Multi-Partidária (MPC) de nível institucional, distribuída por enclaves seguros isolados a nível global. A sua chave nunca é construída na íntegra, o que torna as violações de ponto único matematicamente impossíveis.</string>
+    <string name="faq_sec_q2">Configurar a autenticação por chave de hardware</string>
+    <string name="faq_sec_a2">Emparelhe a sua chave de hardware em Segurança &amp; Autenticação → Desbloqueio Biométrico. Insira o dispositivo, mantenha o botão premido durante cinco segundos e confirme o código de emparelhamento apresentado no seu registo.</string>
+    <string name="faq_sec_q3">O que fazer se o meu dispositivo principal for comprometido?</string>
+    <string name="faq_sec_a3">Congele a sessão instantaneamente a partir de qualquer dispositivo secundário e revogue a chave comprometida. Os clientes Sovereign também podem solicitar uma rotação de dispositivo assistida pelo concierge no prazo de uma hora.</string>
+    <string name="faq_trading_t1">Compreender o Slippage de Execução</string>
+    <string name="faq_account">Gestão de Conta</string>
+    <string name="faq_account_desc">Tudo o que está relacionado com upgrades de nível, documentação de conformidade e aprovações com múltiplas assinaturas.</string>
+    <string name="faq_acc_a1">Os requisitos incluem ativos comprovados superiores a US$ 1 milhão e uma análise de conformidade inicial. Os upgrades são processados no prazo de 48 horas.</string>
+    <string name="faq_acc_q2">Adicionar um Cossignatário</string>
+    <string name="faq_acc_a2">Inicie a configuração multi-sig através do Centro de Segurança. A outra parte também deve concluir a verificação de identidade.</string>
+    <string name="faq_acc_q3">Gerar Declarações Fiscais</string>
+    <string name="faq_cta_desc">A nossa equipa de concierge dedicada está disponível 24/7 para membros do nível Sovereign.</string>
+
+    <!-- ===== Support hub ===== -->
+    <string name="sup_contact">Fale Connosco</string>
+    <string name="sup_contact_desc">Fale com a nossa equipa de suporte premium.</string>
+    <string name="sup_feedback_desc">Envie feedback — fale connosco em tempo real.</string>
+    <string name="sup_chat">Chat em Direto</string>
+    <string name="sup_chat_soon">Chat em direto em breve</string>
+    <string name="sup_chat_desc">O suporte por chat está a ser integrado. Entretanto, fale connosco através de Contacto ou Feedback.</string>
+    <string name="sup_rate">Avaliar Aplicação</string>
+    <string name="sup_share">Partilhar com Colegas</string>
+
+    <!-- ===== About ===== -->
+    <string name="about_tagline">Cotações de câmbio em direto e um registo privado de conversões — sem conta, sem rastreio.</string>
+    <string name="about_powered_by">Cotações por api.exchange.dev.adetify.com · autoalojado, sem rastreadores</string>
+
+    <!-- ===== Contact / concierge ===== -->
+    <string name="ct_hero_desc">Assistência discreta e prioritária para clientes Sovereign. Selecione abaixo o canal da sua preferência ou envie uma mensagem segura diretamente ao seu representante designado.</string>
+    <string name="ct_live_chat">Chat em Direto</string>
+    <string name="ct_live_chat_desc">Diálogo de texto imediato e encriptado com um gestor de relacionamento sénior.</string>
+    <string name="ct_phone_desc">Acesso global 24/7 através de linhas encriptadas e seguras.</string>
+    <string name="ct_dispatch_desc">Confirmação de recebimento garantida no prazo de 1 hora.</string>
+    <string name="ct_subject_placeholder">Selecione o tema…</string>
+    <string name="ct_topic_feature">Sugestão de Funcionalidade</string>
+    <string name="ct_description_placeholder">Forneça detalhes específicos sobre o seu pedido…</string>
+    <string name="ct_success_desc">A sua mensagem segura está a caminho do seu representante. Aguarde a confirmação no prazo de 1 hora.</string>
+
+    <!-- ===== Feedback ===== -->
+    <string name="fb_hero_desc">As suas percepções moldam a arquitetura do Sovereign Ledger. Diga-nos como podemos elevar a sua experiência de banco privado.</string>
+    <string name="fb_cat_feature">Nova Funcionalidade</string>
+    <string name="fb_cat_support">Pedido de Suporte</string>
+    <string name="fb_suggestions_placeholder">Descreva a sua experiência ou o seu pedido de funcionalidade…</string>
+    <string name="fb_success_desc">Obrigado — as suas percepções aprimoram o instrumento para cada cliente Sovereign.</string>
+</resources>

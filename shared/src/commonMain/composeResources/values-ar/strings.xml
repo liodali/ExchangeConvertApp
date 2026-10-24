@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dinarly shared UI strings — Arabic translation (Modern Standard Arabic, فصحى).
+     Translated from the English baseline in values/strings.xml; keys and order are identical.
+     Brand names (Dinarly, Sovereign, Gemini, Siri, ISO currency codes) stay untranslated.
+     NOTE: \' escapes apostrophes; %% escapes a literal percent sign. -->
+<resources>
+    <!-- ===== Navigation & common ===== -->
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_overview">نظرة عامة</string>
+    <string name="nav_rates">الأسعار</string>
+    <string name="nav_history">السجلّ</string>
+    <string name="nav_account">الحساب</string>
+    <string name="nav_support">الدعم</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="back_desc">رجوع</string>
+    <string name="common_cancel">إلغاء</string>
+    <string name="common_save">حفظ</string>
+    <string name="common_continue">متابعة</string>
+    <string name="common_search">بحث</string>
+    <string name="common_from">من</string>
+    <string name="common_to">إلى</string>
+    <string name="common_amount">المبلغ</string>
+    <string name="common_convert">تحويل</string>
+    <string name="common_delete">حذف</string>
+    <string name="legal_terms">الشروط والأحكام</string>
+    <string name="legal_privacy">سياسة الخصوصية</string>
+
+    <!-- ===== Biometric lock (app shell) ===== -->
+    <string name="lock_verify">يلزم التحقق من بصمتك الحيوية للمتابعة</string>
+    <string name="lock_locked">دفترك مغلق</string>
+    <string name="lock_try_again">حاول مجدداً</string>
+    <string name="lock_unlock">فتح القفل</string>
+    <string name="lock_not_setup">البصمة الحيوية غير مُعدّة — انقر لإعادة المحاولة</string>
+
+    <!-- ===== Home ===== -->
+    <string name="home_refresh_desc">تحديث الأسعار</string>
+    <string name="home_market_overview">نظرة عامة على السوق</string>
+    <string name="home_loading_rates">جارٍ تحميل الأسعار المباشرة…</string>
+    <string name="home_live">مباشر</string>
+    <string name="home_just_now">الآن</string>
+    <string name="home_greeting_morning">صباح الخير</string>
+    <string name="home_greeting_afternoon">طاب نهارك</string>
+    <string name="home_greeting_evening">مساء الخير</string>
+    <string name="home_greeting_night">تصبح على خير</string>
+    <string name="home_your_markets">أسواقك</string>
+    <string name="home_day_low">أدنى مستوى خلال 7 أيام</string>
+    <string name="home_day_high">أعلى مستوى خلال 7 أيام</string>
+    <string name="home_loading_7d">جارٍ تحميل سجلّ 7 أيام…</string>
+    <string name="home_recent_activity">النشاط الأخير</string>
+    <string name="home_history">السجلّ</string>
+    <string name="home_open_history_desc">فتح السجلّ</string>
+    <string name="home_no_exchanges">لا توجد عمليات تبادل بعد — نفّذ تحويلاً لبدء دفترك.</string>
+    <string name="home_fee">العمولة (0.01%)</string>
+    <string name="home_fee_value">$0.10 USD</string>
+    <string name="home_execute_exchange">تنفيذ التبادل</string>
+    <string name="home_open_full_converter">فتح المحوّل الكامل</string>
+    <string name="home_change">تغيير</string>
+    <string name="home_select">اختر…</string>
+    <string name="home_today">اليوم، %1$s</string>
+    <string name="home_yesterday">أمس، %1$s</string>
+    <string name="home_from_currency">عملة المصدر</string>
+    <string name="home_to_currency">عملة الهدف</string>
+
+    <!-- ===== Quick exchange (Home card) ===== -->
+    <string name="quick_title">تبادل سريع</string>
+    <string name="quick_amount_placeholder">0.00</string>
+    <string name="quick_swap_desc">تبديل العملات</string>
+
+    <!-- ===== Converter screen ===== -->
+    <string name="conv_title">أسعار الصرف</string>
+    <string name="conv_live_base">أسعار مباشرة استناداً إلى العملة الأساسية %1$s</string>
+    <string name="conv_quick_desc">حوّل بين العملات بأسعار مباشرة</string>
+    <string name="conv_full_converter">المحوّل الكامل</string>
+    <string name="conv_converted_amount">المبلغ المحوّل</string>
+    <string name="conv_price_history">سجلّ الأسعار</string>
+    <string name="conv_30d_trend">اتجاه 30 يوماً — من %1$s إلى %2$s</string>
+    <string name="conv_loading_history">جارٍ تحميل سجلّ الأسعار…</string>
+    <string name="conv_available_rates">الأسعار المتاحة</string>
+
+    <!-- ===== Full converter ===== -->
+    <string name="fconv_title">محوّل العملات</string>
+    <string name="fconv_desc">نفّذ تحويلاً بسعر السوق المباشر</string>
+    <string name="fconv_amount_label">المبلغ</string>
+    <string name="fconv_from_label">من</string>
+    <string name="fconv_to_label">إلى</string>
+    <string name="fconv_rate_line">1 %1$s = %2$s %3$s</string>
+    <string name="fconv_execute">تنفيذ التبادل</string>
+
+    <!-- ===== History screen ===== -->
+    <string name="hist_premium">ميزة بريميوم</string>
+    <string name="hist_zero_fees">بصفتك عضواً في فئة Sovereign، تستمتع بعمولة تبادل 0% على جميع أزواج العملات الرئيسية.</string>
+    <string name="hist_pair_header">%1$s إلى %2$s</string>
+    <string name="hist_live_rate">سعر السوق المباشر</string>
+    <string name="hist_range_all">الكل</string>
+    <string name="hist_best">أفضل سعر على الإطلاق</string>
+    <string name="hist_achieved_on">تحقّق بتاريخ %1$s</string>
+    <string name="hist_from_history">من تاريخ السوق المسجّل</string>
+    <string name="hist_comparison">مقارنة</string>
+    <string name="hist_current">السعر الحالي</string>
+    <string name="hist_from_peak">%1$s عن القمة</string>
+    <string name="hist_high">أعلى مستوى تاريخي</string>
+    <string name="hist_top_percent">يقع أداء السعر الحالي ضمن أعلى %1$s%% من النطاق المحدد.</string>
+    <string name="hist_start_building">نفّذ عملية تبادل لتبدأ ببناء سجلّ دفترك.</string>
+    <string name="hist_for_pair">سجلّ هذا الزوج</string>
+    <string name="hist_view_all">عرض الكل</string>
+    <string name="hist_no_records">لا توجد سجلّات لهذا الزوج بعد</string>
+    <string name="hist_appear">تظهر عمليات التبادل التي تنفّذها هنا فوراً.</string>
+
+    <!-- ===== Onboarding ===== -->
+    <string name="onb_loading">جارٍ تحميل الأسواق…</string>
+    <string name="onb_change_anytime">يمكنك التغيير في أي وقت من الحساب ← تفضيلات السوق.</string>
+    <string name="onb_title">اختر أسواقك</string>
+    <string name="onb_desc">حدّد العملة التي تُقاس بها جميع الأسعار، ثم اختر الأسواق الثلاثة التي تتابعها لوحة معلوماتك. يمكنك تغييرها في أي وقت من الحساب.</string>
+    <string name="onb_base_note">تُقارَن جميع الأسعار في لوحة معلوماتك بهذه العملة.</string>
+    <string name="onb_market_slot">سوق</string>
+
+    <!-- ===== Account ===== -->
+    <string name="acct_badge_private">عميل خاص</string>
+    <string name="acct_badge_guest">عميل زائر</string>
+    <string name="acct_badge_verified">دفتر موثّق</string>
+    <string name="acct_edit_profile">تعديل الملف الشخصي</string>
+    <string name="acct_edit_profile_hint">اسم العرض في Sovereign</string>
+    <string name="acct_personal_info">المعلومات الشخصية</string>
+    <string name="acct_phone_label">رقم الهاتف</string>
+    <string name="acct_residence_label">محل الإقامة</string>
+    <string name="acct_residence_value">زيورخ، سويسرا</string>
+    <string name="acct_security_health">حالة الأمان</string>
+    <string name="acct_security_desc">خزنتك محمية بتشفير بدرجة عسكرية ومفاتيح أجهزة متعددة العوامل.</string>
+    <string name="acct_clearance">تصريح المستوى 3</string>
+    <string name="acct_clearance_score">75%</string>
+    <string name="acct_security_section">الأمان والمصادقة</string>
+    <string name="acct_change_password">تغيير كلمة المرور</string>
+    <string name="acct_biometric">الفتح بالبصمة الحيوية</string>
+    <string name="acct_local_data_section">البيانات المحلية</string>
+    <string name="acct_clear_ledger">مسح الدفتر المحلي</string>
+    <string name="acct_clear_title">مسح الدفتر المحلي؟</string>
+    <string name="acct_clear_message">ستتم إزالة جميع عمليات التبادل المسجّلة على هذا الجهاز.</string>
+    <string name="acct_clear_confirm">مسح</string>
+    <string name="acct_preferences">التفضيلات</string>
+    <string name="acct_push">الإشعارات الفورية</string>
+    <string name="acct_enabled">مفعّل</string>
+    <string name="acct_disabled">معطّل</string>
+    <string name="acct_language">اللغة</string>
+    <string name="acct_language_value">العربية</string>
+    <string name="acct_market_slot">سوق</string>
+    <string name="acct_market_section">تفضيلات السوق</string>
+    <string name="acct_market_pick">اختر العملة</string>
+    <string name="acct_base_currency">العملة الأساسية</string>
+    <string name="acct_base_pick">اختر العملة الأساسية</string>
+    <string name="acct_base_label">الأساس</string>
+    <string name="acct_remove_market_desc">إزالة السوق</string>
+    <string name="acct_add_market">إضافة سوق</string>
+    <string name="acct_appearance_section">المظهر</string>
+    <string name="acct_appearance_title">المظهر</string>
+    <string name="acct_appearance_desc">الوضع ولوحة الألوان</string>
+    <string name="acct_mode_system">النظام</string>
+    <string name="acct_mode_light">فاتح</string>
+    <string name="acct_mode_dark">داكن</string>
+    <string name="acct_palette_section">لوحة الألوان</string>
+    <string name="acct_chart_title">نمط الرسم البياني</string>
+    <string name="acct_chart_desc">تُعرض رسوم السجلّ البيانية كخط أو أعمدة</string>
+    <string name="acct_chart_line">خط</string>
+    <string name="acct_chart_bar">أعمدة</string>
+    <string name="acct_vault_section">إدارة الخزنة</string>
+    <string name="acct_log_out">تسجيل الخروج من الدفتر</string>
+    <string name="acct_delete_account">حذف الحساب نهائياً</string>
+    <string name="acct_support_section">الدعم والمعلومات</string>
+    <string name="acct_support_title">الدعم وقاعدة المعرفة</string>
+    <string name="acct_support_desc">اطلع على الأسئلة الشائعة، وتواصل مع الدعم، واستكشف موارد مفيدة.</string>
+    <string name="acct_support_cta">استكشاف مركز الدعم</string>
+    <string name="acct_login">تسجيل دخول Sovereign</string>
+    <string name="acct_coming_soon">قريباً</string>
+    <string name="acct_data_plan">خطة البيانات</string>
+    <string name="acct_data_plan_note">تحدّث خطة الزوار الأسعار كل ساعة، بينما يمنحك تسجيل الدخول إلى Sovereign البيانات الفورية.</string>
+    <string name="acct_data_plan_guest">أسعار كل ساعة · زائر</string>
+    <string name="acct_data_plan_sovereign">أسعار فورية · Sovereign</string>
+    <string name="acct_footer">عقدة DINARLY إصدار %1$s • آخر مزامنة: %2$s</string>
+    <string name="acct_title">Dinarly</string>
+    <string name="acct_sync_just_now">الآن</string>
+    <string name="acct_sync_never">أبداً</string>
+    <string name="acct_sync_minutes">قبل %1$d د</string>
+    <string name="acct_sync_hours">قبل %1$d س</string>
+    <string name="acct_sync_days">قبل %1$d ي</string>
+
+    <!-- ===== Widgets ===== -->
+    <string name="wg_title">الأدوات</string>
+    <string name="wg_header">أدوات الأسواق في شاشتك الرئيسية. أضف زوجاً من هنا أو اضغط مطولاً على الشاشة الرئيسية.</string>
+    <string name="wg_empty_title">لا توجد أدوات بعد</string>
+    <string name="wg_empty_message">أضف أداة سوق لمعرفة السعر المباشر بنظرة سريعة.</string>
+    <string name="wg_add">إضافة أداة سوق</string>
+    <string name="wg_add_confirm">إضافة أداة</string>
+    <string name="wg_your_markets">أسواقك</string>
+    <string name="wg_new_pair">زوج جديد</string>
+    <string name="wg_type">النوع</string>
+    <string name="wg_kind_card">سوق · بطاقة</string>
+    <string name="wg_kind_wave">سوق · موجة</string>
+    <string name="wg_kind_grid">أسواق · شبكة</string>
+    <string name="wg_kind_convert">تحويل سريع</string>
+    <string name="wg_kind_card_desc">زوج واحد على بطاقة مستديرة الحواف. مظهر كلاسيكي.</string>
+    <string name="wg_kind_wave_desc">زوج واحد داخل شكل موجة دائري.</string>
+    <string name="wg_kind_grid_desc">حتى ثلاثة أسواق من اختيارك.</string>
+    <string name="wg_kind_convert_desc">اكتب مبلغاً وشاهد القيمة المحوّلة.</string>
+    <string name="wg_not_placed">لم يُوضَع بعد</string>
+    <string name="wg_reconfigure">تغيير الزوج</string>
+    <string name="wg_forget">نسيان</string>
+    <string name="wg_forgotten">تمت إزالته من التطبيق — اضغط مطولاً على الأداة في الشاشة الرئيسية لحذفها نهائياً</string>
+    <string name="wg_refresh">تحديث الأدوات</string>
+    <string name="wg_ios_title">الإضافة من الشاشة الرئيسية</string>
+    <string name="wg_ios_message">اضغط مطولاً على شاشتك الرئيسية، ثم انقر على +، وابحث عن Dinarly واختر أداة السوق.</string>
+    <string name="wg_on_home_screen">على شاشتك الرئيسية</string>
+    <string name="wg_detected_note">يُكتشف من تحديثات الأدوات — لا يتيح iOS معرفة الأدوات الموضوعة.</string>
+    <string name="wg_realtime">أسعار فورية</string>
+    <string name="wg_realtime_desc">تحديثات أسرع للأدوات (كل 15 دقيقة + عند فتح التطبيق). يستهلك مزيداً من البطارية.</string>
+    <string name="wg_dialog_grid_title">تابِع أسواقك</string>
+    <string name="wg_dialog_grid_desc">يعكس الأسواق المحددة في حسابك.</string>
+    <string name="wg_dialog_pick_title">اختر الأزواج</string>
+    <string name="wg_dialog_pick_desc">اختر 2–3 أزواج لهذه الأداة فقط.</string>
+    <string name="wg_dialog_add_pair">إضافة زوج (%1$d/3)</string>
+    <string name="wg_dialog_max_pairs">الحد الأقصى 3 أزواج — انقر على أحد الأزواج لإزالته.</string>
+
+    <!-- ===== Rate alerts ===== -->
+    <string name="alerts_title">تنبيهات الأسعار</string>
+    <string name="alerts_header">اختر طريقة التسليم لكل تنبيه: الإشعار من الخادم (يعمل حتى عندما يكون التطبيق مغلقاً) أو الفحص على الجهاز.</string>
+    <string name="alerts_empty_title">لا توجد تنبيهات بعد</string>
+    <string name="alerts_empty_message">تابع زوجاً — إما بالإشعار من خوادمنا أو بالفحص على الجهاز، الاختيار لك.</string>
+    <string name="alerts_new">تنبيه جديد</string>
+    <string name="alerts_add">إضافة تنبيه</string>
+    <string name="alerts_pick_base">اختر العملة الأساسية</string>
+    <string name="alerts_pick_quote">اختر عملة التسعير</string>
+    <string name="alerts_delivery">التسليم عبر</string>
+    <string name="alerts_delivery_local">على الجهاز</string>
+    <string name="alerts_delivery_push">من الخادم</string>
+    <string name="alerts_server_section">إشعارات الخادم</string>
+    <string name="alerts_local_section">على الجهاز</string>
+    <string name="alerts_mode_section">نبّهني</string>
+    <string name="alerts_mode_hourly">كل ساعة</string>
+    <string name="alerts_mode_two_hours">كل ساعتين</string>
+    <string name="alerts_mode_on_move">عند التغيّر</string>
+    <string name="alerts_threshold">تغيّر ≥ %%</string>
+    <string name="alerts_threshold_hint">0.5</string>
+    <string name="alerts_usage">استخدمت %1$d من أصل %2$d تنبيه</string>
+    <string name="alerts_free_note">الخطة المجانية: تنبيه واحد بإشعار الخادم (يُفحص كل ساعتين) وما يصل إلى تنبيهين على الجهاز. وسيمنح تسجيل الدخول إلى Sovereign المزيد.</string>
+    <string name="alerts_guest_note">الخطة المجانية: تُفحص تنبيهات الخادم كل ساعتين — تنبيه واحد فقط.</string>
+    <string name="alerts_push_fallback">خدمة الإشعارات غير متاحة — تم حفظ التنبيه على الجهاز بدلاً من ذلك.</string>
+    <string name="alerts_moved_to_push">تم نقل %1$s → %2$s إلى إشعارات الخادم.</string>
+    <string name="alerts_move_to_push_desc">النقل إلى إشعارات الخادم</string>
+    <string name="alerts_move_to_push">نقل إلى الخادم</string>
+    <string name="alerts_server_deleted">تمت إزالة التنبيه من الخادم.</string>
+    <string name="alerts_local_deleted">تم حذف التنبيه.</string>
+    <string name="alerts_resumed">تم استئناف %1$s → %2$s.</string>
+    <string name="alerts_paused">تم إيقاف %1$s → %2$s مؤقتاً.</string>
+    <string name="alerts_local_hint">تصل تنبيهات الخادم حتى عندما يكون التطبيق مغلقاً — استخدم خيار «نقل إلى الخادم» أسفل أي تنبيه.</string>
+    <string name="alerts_pair">%1$s → %2$s</string>
+    <string name="alerts_every">كل %1$d س</string>
+    <string name="alerts_threshold_value">±%1$s%%</string>
+    <string name="alerts_last_rate">آخر سعر %1$s</string>
+    <string name="alerts_permission_banner">الإشعارات متوقفة لهذا التطبيق — فعّلها لتصلك تنبيهات الأسعار.</string>
+    <string name="alerts_permission_enable">تفعيل</string>
+    <string name="alerts_awaiting">في انتظار أول فحص في الخلفية</string>
+    <string name="alerts_notified_at">آخر إشعار %1$s</string>
+    <string name="alerts_at_cap">بلغتَ الحد الأقصى للتنبيهات — أزِل واحداً لتضيف آخر.</string>
+    <string name="alerts_add_for">إضافة تنبيه سعر لـ %1$s</string>
+    <string name="alerts_active_for">تنبيه سعر نشط لـ %1$s</string>
+
+    <!-- ===== FAQ ===== -->
+    <string name="faq_hero">كيف يمكننا مساعدتك؟</string>
+    <string name="faq_hero_desc">ابحث في قاعدة المعرفة لدينا أو تصفّح الفئات أدناه للحصول على إرشادات حول الأسعار والأمان وإدارة الحساب.</string>
+    <string name="faq_search_hint">ابحث في قاعدة المعرفة…</string>
+    <string name="faq_no_results">لا توجد نتائج</string>
+    <string name="faq_no_results_for">لا نتائج مطابقة لـ «%1$s». جرّب مصطلحاً آخر.</string>
+    <string name="faq_results_for">%1$d نتيجة عن «%2$s»</string>
+    <string name="faq_security">الأمان</string>
+    <string name="faq_sec_q1">كيف يتم تأمين بيانات مفتاحي الخاص؟</string>
+    <string name="faq_sec_a1">يستخدم Sovereign Ledger حساباً متعدد الأطراف (MPC) بمستوى مؤسسي موزّعاً عبر مناطق آمنة معزولة حول العالم. ولا يُبنى مفتاحك كاملاً أبداً، ما يجعل الاختراق من نقطة واحدة أمراً مستحيلاً من الناحية الرياضية.</string>
+    <string name="faq_sec_q2">إعداد المصادقة بالمفتاح المادي</string>
+    <string name="faq_sec_a2">اربط مفتاحك المادي من الأمان والمصادقة ← الفتح بالبصمة الحيوية. أدخل الجهاز، واستمر في الضغط على زره لخمس ثوانٍ، ثم أكّد رمز الاقتران الظاهر في دفترك.</string>
+    <string name="faq_sec_q3">ماذا أفعل إذا اختُرق جهازي الأساسي؟</string>
+    <string name="faq_sec_a3">جمّد الجلسة فوراً من أي جهاز ثانوي، ثم أبطِل المفتاح المُخترَق. ويمكن لعملاء Sovereign أيضاً طلب تبديل الجهاز بمساعدة فريق الكونسيرج خلال ساعة واحدة.</string>
+    <string name="faq_trading">التداول والأسواق</string>
+    <string name="faq_trading_t1">شرح انزلاق التنفيذ</string>
+    <string name="faq_trading_t2">فئات الوصول إلى البرك المظلمة</string>
+    <string name="faq_trading_t3">المدد الزمنية للتسوية (T+1)</string>
+    <string name="faq_account">إدارة الحساب</string>
+    <string name="faq_account_desc">كل ما يتعلق بترقيات الفئات، ووثائق الامتثال، واعتمادات التوقيع المتعدد.</string>
+    <string name="faq_acc_q1">الترقية إلى فئة Sovereign</string>
+    <string name="faq_acc_a1">تشمل المتطلبات أصولاً موثّقة تتجاوز مليون دولار ومراجعة امتثال أولية. وتُعالَج الترقيات خلال 48 ساعة.</string>
+    <string name="faq_acc_q2">إضافة موقّع مشترك</string>
+    <string name="faq_acc_a2">ابدأ إعداد التوقيع المتعدد عبر مركز الأمان. ويجب على الطرف الثاني إكمال التحقق من الهوية أيضاً.</string>
+    <string name="faq_acc_q3">إنشاء كشوف الضرائب</string>
+    <string name="faq_acc_a3">تُنشأ تقارير نهاية السنة تلقائياً في قسم سجلّات التدقيق بحلول 15 يناير.</string>
+    <string name="faq_acc_q4">القوائم البيضاء للتحويلات البنكية</string>
+    <string name="faq_acc_a4">يجب اعتماد جميع جهات التحويل الصادرة مسبقاً. وتتطلب التغييرات فترة تهدئة مدتها 48 ساعة.</string>
+    <string name="faq_cta_title">لا تزال بحاجة إلى المساعدة؟</string>
+    <string name="faq_cta_desc">فريق الكونسيرج المتخصص لدينا متاح على مدار الساعة طوال أيام الأسبوع لأعضاء فئة Sovereign.</string>
+    <string name="faq_cta_primary">التواصل مع الكونسيرج</string>
+    <string name="faq_cta_secondary">رسالة آمنة</string>
+
+    <!-- ===== Support hub ===== -->
+    <string name="sup_hero">كيف يمكننا المساعدة؟</string>
+    <string name="sup_search_hint">ابحث في المقالات والأدلة والسياسات…</string>
+    <string name="sup_faq">الأسئلة الشائعة</string>
+    <string name="sup_faq_desc">إجابات سريعة عن الأسئلة الشائعة.</string>
+    <string name="sup_contact">تواصل معنا</string>
+    <string name="sup_contact_desc">تحدث مع فريق الدعم المميز لدينا.</string>
+    <string name="sup_feedback">الملاحظات</string>
+    <string name="sup_feedback_desc">أرسل ملاحظاتك — وتحدث إلينا في الوقت الفعلي.</string>
+    <string name="sup_chat">الدردشة المباشرة</string>
+    <string name="sup_chat_soon">الدردشة المباشرة قريباً</string>
+    <string name="sup_chat_desc">جارٍ ربط دعم الدردشة. تواصل معنا عبر «تواصل معنا» أو «الملاحظات» في هذه الأثناء.</string>
+    <string name="sup_legal">الموارد والشؤون القانونية</string>
+    <string name="sup_about">حول Dinarly</string>
+    <string name="sup_rate">تقييم التطبيق</string>
+    <string name="sup_share">المشاركة مع الزملاء</string>
+    <string name="sup_version">الإصدار %1$s</string>
+    <string name="sup_results_for">%1$d نتيجة عن «%2$s»</string>
+    <string name="chatwoot_title">ملاحظات: DINARLY · الحساب ← الدعم</string>
+
+    <!-- ===== About ===== -->
+    <string name="about_tagline">أسعار صرف مباشرة ودفتر تحويلات خاص — بلا حساب ولا تتبع.</string>
+    <string name="about_rate_play">قيّم التطبيق على Google Play</string>
+    <string name="about_version_label">الإصدار</string>
+    <string name="about_version_note">تتبع أسماء الإصدارات وسوم الإصدار؛ وتعرض الإصدارات الداخلية أحدث وسم.</string>
+    <string name="about_powered_by">الأسعار من api.exchange.dev.adetify.com · استضافة ذاتية، بلا متتبعات</string>
+
+    <!-- ===== Contact / concierge ===== -->
+    <string name="ct_hero">دعم الكونسيرج</string>
+    <string name="ct_hero_desc">مساعدة سرية وذات أولوية لعملاء Sovereign. اختر قناتك المفضلة أدناه أو أرسل رسالة آمنة مباشرة إلى جهة الاتصال المخصصة لك.</string>
+    <string name="ct_live_chat">الدردشة المباشرة</string>
+    <string name="ct_premium">مميّز</string>
+    <string name="ct_live_chat_desc">محادثة نصية فورية مشفّرة مع مدير علاقات أول.</string>
+    <string name="ct_initiate">بدء الجلسة</string>
+    <string name="ct_phone">الكونسيرج الهاتفي</string>
+    <string name="ct_phone_desc">وصول عالمي على مدار الساعة عبر خطوط آمنة مشفّرة.</string>
+    <string name="ct_phone_value">+41 44 555 12 34</string>
+    <string name="ct_dispatch">الإرسال الآمن</string>
+    <string name="ct_dispatch_desc">إشعار استلام مضمون خلال ساعة واحدة.</string>
+    <string name="ct_dispatch_value">liaison@sovereign.vault</string>
+    <string name="ct_form_title">نموذج الرسالة الآمنة</string>
+    <string name="ct_subject_label">فئة الموضوع</string>
+    <string name="ct_subject_placeholder">اختر الموضوع…</string>
+    <string name="ct_topic_rates">الأسعار وبيانات السوق</string>
+    <string name="ct_topic_account">الحساب والتحقق</string>
+    <string name="ct_topic_security">مسألة تتعلق بالأمان</string>
+    <string name="ct_topic_feature">طلب ميزة</string>
+    <string name="ct_description_label">وصف تفصيلي</string>
+    <string name="ct_description_placeholder">يرجى تقديم تفاصيل محددة بشأن طلبك…</string>
+    <string name="ct_submit">إرسال الرسالة</string>
+    <string name="ct_success_title">تم إرسال الرسالة</string>
+    <string name="ct_success_desc">رسالتك الآمنة في طريقها إلى جهة الاتصال المخصصة لك. يُتوقع إشعار الاستلام خلال ساعة واحدة.</string>
+
+    <!-- ===== Feedback ===== -->
+    <string name="fb_hero">ساهم في صقل الأداة.</string>
+    <string name="fb_hero_desc">تشكّل ملاحظاتك بنية Sovereign Ledger. أخبرنا كيف يمكننا الارتقاء بتجربتك في الخدمات المصرفية الخاصة.</string>
+    <string name="fb_rating_label">التجربة الإجمالية</string>
+    <string name="fb_category_label">الفئة الرئيسية</string>
+    <string name="fb_cat_performance">الأداء</string>
+    <string name="fb_cat_feature">ميزة جديدة</string>
+    <string name="fb_cat_support">طلب دعم</string>
+    <string name="fb_cat_ui">تصميم الواجهة</string>
+    <string name="fb_suggestions_label">اقتراحات تفصيلية</string>
+    <string name="fb_optional">اختياري</string>
+    <string name="fb_suggestions_placeholder">صف تجربتك أو طلبك لميزة…</string>
+    <string name="fb_submit">إرسال الرؤى</string>
+    <string name="fb_success_title">تم استلام الرؤى</string>
+    <string name="fb_success_desc">شكراً لك — ملاحظاتك تصقل الأداة لكل عميل من عملاء Sovereign.</string>
+    <string name="fb_stars_desc">%1$d نجمة</string>
+</resources>

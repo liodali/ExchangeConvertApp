@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dinarly shared UI strings (Spanish — neutral Latin-American/international).
+     Translated from the English baseline in values/strings.xml.
+     Brand names (Dinarly, Sovereign, Gemini, Siri, ISO currency codes) stay untranslated.
+     NOTE: \' escapes apostrophes; %% escapes a literal percent sign. -->
+<resources>
+    <!-- ===== Navigation & common ===== -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_overview">Resumen</string>
+    <string name="nav_rates">Tasas</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_account">Cuenta</string>
+    <string name="nav_support">Soporte</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="back_desc">Atrás</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_continue">Continuar</string>
+    <string name="common_search">Buscar</string>
+    <string name="common_from">De</string>
+    <string name="common_to">A</string>
+    <string name="common_amount">Monto</string>
+    <string name="common_convert">Convertir</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="legal_terms">Términos &amp; Condiciones</string>
+    <string name="legal_privacy">Política de privacidad</string>
+
+    <!-- ===== Biometric lock (app shell) ===== -->
+    <string name="lock_verify">Debes verificar tu biometría para continuar</string>
+    <string name="lock_locked">Tu libro de cuentas está bloqueado</string>
+    <string name="lock_try_again">Intentar de nuevo</string>
+    <string name="lock_unlock">Desbloquear</string>
+    <string name="lock_not_setup">Biometría no configurada — toca para reintentar</string>
+
+    <!-- ===== Home ===== -->
+    <string name="home_refresh_desc">Actualizar tasas</string>
+    <string name="home_market_overview">Panorama del mercado</string>
+    <string name="home_loading_rates">Cargando tasas en vivo…</string>
+    <string name="home_live">EN VIVO</string>
+    <string name="home_just_now">AHORA MISMO</string>
+    <string name="home_greeting_morning">Buenos días</string>
+    <string name="home_greeting_afternoon">Buenas tardes</string>
+    <string name="home_greeting_evening">Buenas noches</string>
+    <string name="home_greeting_night">Buenas noches</string>
+    <string name="home_your_markets">Tus mercados</string>
+    <string name="home_day_low">Mínimo de 7 días</string>
+    <string name="home_day_high">Máximo de 7 días</string>
+    <string name="home_loading_7d">Cargando historial de 7 días…</string>
+    <string name="home_recent_activity">Actividad reciente</string>
+    <string name="home_history">Historial</string>
+    <string name="home_open_history_desc">Abrir historial</string>
+    <string name="home_no_exchanges">Aún no hay cambios — realiza una conversión para iniciar tu libro de cuentas.</string>
+    <string name="home_fee">Comisión (0.01%)</string>
+    <string name="home_fee_value">$0.10 USD</string>
+    <string name="home_execute_exchange">Ejecutar cambio</string>
+    <string name="home_open_full_converter">Abrir convertidor completo</string>
+    <string name="home_change">Cambiar</string>
+    <string name="home_select">Seleccionar…</string>
+    <string name="home_today">Hoy, %1$s</string>
+    <string name="home_yesterday">Ayer, %1$s</string>
+    <string name="home_from_currency">Moneda de origen</string>
+    <string name="home_to_currency">Moneda de destino</string>
+
+    <!-- ===== Quick exchange (Home card) ===== -->
+    <string name="quick_title">Cambio rápido</string>
+    <string name="quick_amount_placeholder">0.00</string>
+    <string name="quick_swap_desc">Intercambiar monedas</string>
+
+    <!-- ===== Converter screen ===== -->
+    <string name="conv_title">Tasas de cambio</string>
+    <string name="conv_live_base">Tasas en vivo basadas en la moneda base %1$s</string>
+    <string name="conv_quick_desc">Convierte monedas con tasas en vivo</string>
+    <string name="conv_full_converter">CONVERTIDOR COMPLETO</string>
+    <string name="conv_converted_amount">Monto convertido</string>
+    <string name="conv_price_history">Historial de precios</string>
+    <string name="conv_30d_trend">Tendencia de 30 días — de %1$s a %2$s</string>
+    <string name="conv_loading_history">Cargando historial de precios…</string>
+    <string name="conv_available_rates">Tasas disponibles</string>
+
+    <!-- ===== Full converter ===== -->
+    <string name="fconv_title">Convertidor de monedas</string>
+    <string name="fconv_desc">Realiza una conversión a la tasa de mercado en vivo</string>
+    <string name="fconv_amount_label">MONTO</string>
+    <string name="fconv_from_label">DE</string>
+    <string name="fconv_to_label">A</string>
+    <string name="fconv_rate_line">1 %1$s = %2$s %3$s</string>
+    <string name="fconv_execute">Ejecutar cambio</string>
+
+    <!-- ===== History screen ===== -->
+    <string name="hist_premium">BENEFICIO PREMIUM</string>
+    <string name="hist_zero_fees">Como miembro del nivel Sovereign, disfrutas de 0% de comisión en todos los pares de monedas principales.</string>
+    <string name="hist_pair_header">%1$s A %2$s</string>
+    <string name="hist_live_rate">Tasa de mercado en vivo</string>
+    <string name="hist_range_all">TODO</string>
+    <string name="hist_best">MEJOR TASA HISTÓRICA</string>
+    <string name="hist_achieved_on">Alcanzada el %1$s</string>
+    <string name="hist_from_history">Del historial de mercado registrado</string>
+    <string name="hist_comparison">COMPARACIÓN</string>
+    <string name="hist_current">Tasa actual</string>
+    <string name="hist_from_peak">%1$s desde el máximo</string>
+    <string name="hist_high">Máximo histórico</string>
+    <string name="hist_top_percent">La tasa actual se sitúa dentro del %1$s%% superior del rango seleccionado.</string>
+    <string name="hist_start_building">Ejecuta un cambio para comenzar a construir el historial de tu libro de cuentas.</string>
+    <string name="hist_for_pair">Historial de este par</string>
+    <string name="hist_view_all">VER TODO</string>
+    <string name="hist_no_records">Aún no hay registros de este par</string>
+    <string name="hist_appear">Los cambios que ejecutes aparecen aquí al instante.</string>
+
+    <!-- ===== Onboarding ===== -->
+    <string name="onb_loading">Cargando mercados…</string>
+    <string name="onb_change_anytime">Cámbialos cuando quieras en Cuenta → Preferencias de mercado.</string>
+    <string name="onb_title">Elige tus mercados</string>
+    <string name="onb_desc">Define la moneda contra la que se cotiza todo y elige los tres mercados que seguirá tu panel. Puedes cambiarlos cuando quieras en Cuenta.</string>
+    <string name="onb_base_note">Todas las tasas de tu panel se comparan con esta moneda.</string>
+    <string name="onb_market_slot">Mercado</string>
+
+    <!-- ===== Account ===== -->
+    <string name="acct_badge_private">CLIENTE PRIVADO</string>
+    <string name="acct_badge_guest">CLIENTE INVITADO</string>
+    <string name="acct_badge_verified">LIBRO VERIFICADO</string>
+    <string name="acct_edit_profile">Editar perfil</string>
+    <string name="acct_edit_profile_hint">Nombre para mostrar de Sovereign</string>
+    <string name="acct_personal_info">Información personal</string>
+    <string name="acct_phone_label">NÚMERO DE TELÉFONO</string>
+    <string name="acct_residence_label">RESIDENCIA DE IDENTIDAD</string>
+    <string name="acct_residence_value">Zúrich, Suiza</string>
+    <string name="acct_security_health">Estado de seguridad</string>
+    <string name="acct_security_desc">Tu bóveda está protegida con cifrado de grado militar y llaves de hardware multifactor.</string>
+    <string name="acct_clearance">Nivel de acceso 3</string>
+    <string name="acct_clearance_score">75%</string>
+    <string name="acct_security_section">SEGURIDAD &amp; AUTENTICACIÓN</string>
+    <string name="acct_change_password">Cambiar contraseña</string>
+    <string name="acct_biometric">Desbloqueo biométrico</string>
+    <string name="acct_local_data_section">DATOS LOCALES</string>
+    <string name="acct_clear_ledger">Borrar libro local</string>
+    <string name="acct_clear_title">¿Borrar el libro local?</string>
+    <string name="acct_clear_message">Se eliminarán todos los cambios registrados en este dispositivo.</string>
+    <string name="acct_clear_confirm">Borrar</string>
+    <string name="acct_preferences">PREFERENCIAS</string>
+    <string name="acct_push">Notificaciones push</string>
+    <string name="acct_enabled">Activado</string>
+    <string name="acct_disabled">Desactivado</string>
+    <string name="acct_language">Idioma</string>
+    <string name="acct_language_value">Español</string>
+    <string name="acct_market_slot">Mercado</string>
+    <string name="acct_market_section">PREFERENCIAS DE MERCADO</string>
+    <string name="acct_market_pick">Elegir moneda</string>
+    <string name="acct_base_currency">MONEDA BASE</string>
+    <string name="acct_base_pick">Elegir moneda base</string>
+    <string name="acct_base_label">Base</string>
+    <string name="acct_remove_market_desc">Quitar mercado</string>
+    <string name="acct_add_market">Agregar mercado</string>
+    <string name="acct_appearance_section">APARIENCIA</string>
+    <string name="acct_appearance_title">Apariencia</string>
+    <string name="acct_appearance_desc">Modo y paleta de colores</string>
+    <string name="acct_mode_system">Sistema</string>
+    <string name="acct_mode_light">Claro</string>
+    <string name="acct_mode_dark">Oscuro</string>
+    <string name="acct_palette_section">Paleta de colores</string>
+    <string name="acct_chart_title">Estilo de gráfico</string>
+    <string name="acct_chart_desc">Los gráficos de historial se muestran como línea o barras</string>
+    <string name="acct_chart_line">Línea</string>
+    <string name="acct_chart_bar">Barras</string>
+    <string name="acct_vault_section">GESTIÓN DE BÓVEDA</string>
+    <string name="acct_log_out">Cerrar sesión del libro</string>
+    <string name="acct_delete_account">Eliminar cuenta de forma permanente</string>
+    <string name="acct_support_section">SOPORTE &amp; INFORMACIÓN</string>
+    <string name="acct_support_title">Soporte &amp; base de conocimiento</string>
+    <string name="acct_support_desc">Accede a nuestras preguntas frecuentes, contacta a soporte y explora recursos útiles.</string>
+    <string name="acct_support_cta">Explorar centro de soporte</string>
+    <string name="acct_login">Inicio de sesión Sovereign</string>
+    <string name="acct_coming_soon">PRÓXIMAMENTE</string>
+    <string name="acct_data_plan">Plan de datos</string>
+    <string name="acct_data_plan_note">El plan de invitado actualiza las tasas cada hora. El inicio de sesión Sovereign desbloquea datos en tiempo real.</string>
+    <string name="acct_data_plan_guest">Tasas cada hora · Invitado</string>
+    <string name="acct_data_plan_sovereign">Tiempo real · Sovereign</string>
+    <string name="acct_footer">NODO DINARLY V%1$s • ÚLTIMA SINCRONIZACIÓN: %2$s</string>
+    <string name="acct_title">Dinarly</string>
+    <string name="acct_sync_just_now">AHORA MISMO</string>
+    <string name="acct_sync_never">NUNCA</string>
+    <string name="acct_sync_minutes">HACE %1$d MIN</string>
+    <string name="acct_sync_hours">HACE %1$d H</string>
+    <string name="acct_sync_days">HACE %1$d DÍAS</string>
+
+    <!-- ===== Widgets ===== -->
+    <string name="wg_title">Widgets</string>
+    <string name="wg_header">Tus widgets de mercado para la pantalla de inicio. Agrega un par aquí o mantén presionada la pantalla de inicio.</string>
+    <string name="wg_empty_title">Aún no hay widgets</string>
+    <string name="wg_empty_message">Agrega un widget de mercado para ver una tasa en vivo de un vistazo.</string>
+    <string name="wg_add">Agregar widget de mercado</string>
+    <string name="wg_add_confirm">Agregar widget</string>
+    <string name="wg_your_markets">TUS MERCADOS</string>
+    <string name="wg_new_pair">NUEVO PAR</string>
+    <string name="wg_type">TIPO</string>
+    <string name="wg_kind_card">Mercado · Tarjeta</string>
+    <string name="wg_kind_wave">Mercado · Onda</string>
+    <string name="wg_kind_grid">Mercados · Cuadrícula</string>
+    <string name="wg_kind_convert">Conversión rápida</string>
+    <string name="wg_kind_card_desc">Un par en una tarjeta redondeada. Estilo clásico.</string>
+    <string name="wg_kind_wave_desc">Un par dentro de una forma circular de onda.</string>
+    <string name="wg_kind_grid_desc">Hasta tres mercados de tu selección.</string>
+    <string name="wg_kind_convert_desc">Escribe un monto y mira el valor convertido.</string>
+    <string name="wg_not_placed">Aún no colocado</string>
+    <string name="wg_reconfigure">Cambiar par</string>
+    <string name="wg_forget">Olvidar</string>
+    <string name="wg_forgotten">Se quitó de la app — mantén presionado el widget en la pantalla de inicio para eliminarlo por completo</string>
+    <string name="wg_refresh">Actualizar widgets</string>
+    <string name="wg_ios_title">Agrega desde la pantalla de inicio</string>
+    <string name="wg_ios_message">Mantén presionada la pantalla de inicio, toca +, busca Dinarly y elige el widget de mercado.</string>
+    <string name="wg_on_home_screen">EN TU PANTALLA DE INICIO</string>
+    <string name="wg_detected_note">Se detecta a partir de las actualizaciones de los widgets — iOS no expone los widgets colocados.</string>
+    <string name="wg_realtime">Tasas en tiempo real</string>
+    <string name="wg_realtime_desc">Actualizaciones de widgets más rápidas (cada 15 min + al abrir la app). Usa más batería.</string>
+    <string name="wg_dialog_grid_title">Sigue tus mercados</string>
+    <string name="wg_dialog_grid_desc">Refleja los mercados seleccionados en tu Cuenta.</string>
+    <string name="wg_dialog_pick_title">Elige pares</string>
+    <string name="wg_dialog_pick_desc">Elige 2–3 pares solo para este widget.</string>
+    <string name="wg_dialog_add_pair">Agregar par (%1$d/3)</string>
+    <string name="wg_dialog_max_pairs">Máximo 3 pares — toca una ficha para quitarla.</string>
+
+    <!-- ===== Rate alerts ===== -->
+    <string name="alerts_title">Alertas de tasas</string>
+    <string name="alerts_header">Elige una entrega por alerta: push del servidor (funciona incluso con la app cerrada) o verificaciones en el dispositivo.</string>
+    <string name="alerts_empty_title">Aún no hay alertas</string>
+    <string name="alerts_empty_message">Sigue un par — con envío desde nuestros servidores o verificación en el dispositivo, tú eliges.</string>
+    <string name="alerts_new">Nueva alerta</string>
+    <string name="alerts_add">Agregar alerta</string>
+    <string name="alerts_pick_base">Elegir moneda base</string>
+    <string name="alerts_pick_quote">Elegir moneda de cotización</string>
+    <string name="alerts_delivery">Entregar mediante</string>
+    <string name="alerts_delivery_local">En el dispositivo</string>
+    <string name="alerts_delivery_push">Push</string>
+    <string name="alerts_server_section">PUSH DEL SERVIDOR</string>
+    <string name="alerts_local_section">EN EL DISPOSITIVO</string>
+    <string name="alerts_mode_section">Notificarme</string>
+    <string name="alerts_mode_hourly">Cada hora</string>
+    <string name="alerts_mode_two_hours">Cada 2 horas</string>
+    <string name="alerts_mode_on_move">Por movimiento</string>
+    <string name="alerts_threshold">Movimiento ≥ %%</string>
+    <string name="alerts_threshold_hint">0.5</string>
+    <string name="alerts_usage">%1$d de %2$d alertas en uso</string>
+    <string name="alerts_free_note">Plan gratuito: 1 alerta push (verificada cada 2 h) más hasta 2 alertas en el dispositivo. El inicio de sesión Sovereign desbloqueará más.</string>
+    <string name="alerts_guest_note">Plan gratuito: las alertas push se verifican cada 2 horas — una alerta push.</string>
+    <string name="alerts_push_fallback">Servicio push no disponible — alerta guardada en el dispositivo.</string>
+    <string name="alerts_moved_to_push">%1$s → %2$s pasó a push del servidor.</string>
+    <string name="alerts_move_to_push_desc">Mover a push del servidor</string>
+    <string name="alerts_move_to_push">Mover a push</string>
+    <string name="alerts_server_deleted">Alerta eliminada del servidor.</string>
+    <string name="alerts_local_deleted">Alerta eliminada.</string>
+    <string name="alerts_resumed">%1$s → %2$s reanudada.</string>
+    <string name="alerts_paused">%1$s → %2$s en pausa.</string>
+    <string name="alerts_local_hint">Las alertas push llegan incluso con la app cerrada — usa “Mover a push” bajo una alerta.</string>
+    <string name="alerts_pair">%1$s → %2$s</string>
+    <string name="alerts_every">Cada %1$d h</string>
+    <string name="alerts_threshold_value">±%1$s%%</string>
+    <string name="alerts_last_rate">Última tasa %1$s</string>
+    <string name="alerts_permission_banner">Las notificaciones están desactivadas para esta app — actívalas para recibir alertas de tasas.</string>
+    <string name="alerts_permission_enable">Activar</string>
+    <string name="alerts_awaiting">Esperando la primera verificación en segundo plano</string>
+    <string name="alerts_notified_at">Última notificación %1$s</string>
+    <string name="alerts_at_cap">Límite de alertas alcanzado — quita una para agregar otra.</string>
+    <string name="alerts_add_for">Agregar alerta de tasa para %1$s</string>
+    <string name="alerts_active_for">Alerta de tasa activa para %1$s</string>
+
+    <!-- ===== FAQ ===== -->
+    <string name="faq_hero">¿Cómo podemos ayudarte?</string>
+    <string name="faq_hero_desc">Busca en nuestra base de conocimiento o explora las categorías de abajo para orientarte sobre tasas, seguridad y gestión de cuenta.</string>
+    <string name="faq_search_hint">Busca en nuestra base de conocimiento…</string>
+    <string name="faq_no_results">Sin resultados</string>
+    <string name="faq_no_results_for">Nada coincide con “%1$s”. Prueba con otro término.</string>
+    <string name="faq_results_for">%1$d resultado(s) para “%2$s”</string>
+    <string name="faq_security">Seguridad</string>
+    <string name="faq_sec_q1">¿Cómo se protege el material de mi llave privada?</string>
+    <string name="faq_sec_a1">Sovereign Ledger utiliza computación multipartita (MPC) de grado institucional, distribuida en enclaves seguros aislados a nivel mundial. Tu llave nunca se construye por completo, lo que hace matemáticamente imposibles las brechas de un solo punto.</string>
+    <string name="faq_sec_q2">Configurar la autenticación con llave de hardware</string>
+    <string name="faq_sec_a2">Vincula tu llave de hardware desde Seguridad &amp; Autenticación → Desbloqueo biométrico. Inserta el dispositivo, mantén presionado su botón durante cinco segundos y confirma el código de vinculación que se muestra en tu libro.</string>
+    <string name="faq_sec_q3">¿Qué hacer si mi dispositivo principal se ve comprometido?</string>
+    <string name="faq_sec_a3">Congela la sesión al instante desde cualquier dispositivo secundario y luego revoca la llave comprometida. Los clientes Sovereign también pueden solicitar una rotación de dispositivo asistida por conserjería en un plazo de una hora.</string>
+    <string name="faq_trading">Operaciones &amp; mercados</string>
+    <string name="faq_trading_t1">Qué es el slippage de ejecución</string>
+    <string name="faq_trading_t2">Niveles de acceso a dark pools</string>
+    <string name="faq_trading_t3">Plazos de liquidación (T+1)</string>
+    <string name="faq_account">Gestión de cuenta</string>
+    <string name="faq_account_desc">Todo lo relacionado con mejoras de nivel, documentación de cumplimiento y aprobaciones multifirma.</string>
+    <string name="faq_acc_q1">Subir al nivel Sovereign</string>
+    <string name="faq_acc_a1">Los requisitos incluyen activos verificados por más de $1M y una revisión inicial de cumplimiento. Las mejoras se procesan en un plazo de 48 horas.</string>
+    <string name="faq_acc_q2">Agregar un cofirmante</string>
+    <string name="faq_acc_a2">Inicia la configuración multifirma desde el Centro de Seguridad. La segunda parte también debe completar la verificación de identidad.</string>
+    <string name="faq_acc_q3">Generar informes fiscales</string>
+    <string name="faq_acc_a3">Los informes de fin de año se generan automáticamente en la sección Registros de auditoría para el 15 de enero.</string>
+    <string name="faq_acc_q4">Listas blancas de transferencias</string>
+    <string name="faq_acc_a4">Todos los destinos de salida deben estar preaprobados. Los cambios requieren un período de espera de 48 horas.</string>
+    <string name="faq_cta_title">¿Aún necesitas ayuda?</string>
+    <string name="faq_cta_desc">Nuestro equipo de conserjería dedicado está disponible 24/7 para los miembros del nivel Sovereign.</string>
+    <string name="faq_cta_primary">Contactar conserjería</string>
+    <string name="faq_cta_secondary">Mensaje seguro</string>
+
+    <!-- ===== Support hub ===== -->
+    <string name="sup_hero">¿En qué podemos ayudarte?</string>
+    <string name="sup_search_hint">Busca artículos, guías y políticas…</string>
+    <string name="sup_faq">Preguntas frecuentes</string>
+    <string name="sup_faq_desc">Respuestas rápidas a preguntas comunes.</string>
+    <string name="sup_contact">Contáctanos</string>
+    <string name="sup_contact_desc">Chatea con nuestro equipo de soporte premium.</string>
+    <string name="sup_feedback">Comentarios</string>
+    <string name="sup_feedback_desc">Envía tus comentarios — chatea con nosotros en tiempo real.</string>
+    <string name="sup_chat">Chat en vivo</string>
+    <string name="sup_chat_soon">Chat en vivo próximamente</string>
+    <string name="sup_chat_desc">El soporte por chat se está conectando. Mientras tanto, escríbenos desde Contacto o Comentarios.</string>
+    <string name="sup_legal">Recursos &amp; legal</string>
+    <string name="sup_about">Acerca de Dinarly</string>
+    <string name="sup_rate">Calificar app</string>
+    <string name="sup_share">Compartir con colegas</string>
+    <string name="sup_version">V%1$s</string>
+    <string name="sup_results_for">%1$d resultado(s) para “%2$s”</string>
+    <string name="chatwoot_title">Comentarios: DINARLY · Cuenta → Soporte</string>
+
+    <!-- ===== About ===== -->
+    <string name="about_tagline">Tasas de cambio en vivo y un libro privado de conversiones — sin cuenta, sin rastreo.</string>
+    <string name="about_rate_play">Califica en Google Play</string>
+    <string name="about_version_label">VERSIÓN</string>
+    <string name="about_version_note">Los nombres de versión siguen las etiquetas de lanzamiento; las compilaciones internas muestran la etiqueta más reciente.</string>
+    <string name="about_powered_by">Tasas por api.exchange.dev.adetify.com · autoalojado, sin rastreadores</string>
+
+    <!-- ===== Contact / concierge ===== -->
+    <string name="ct_hero">Soporte de conserjería</string>
+    <string name="ct_hero_desc">Atención prioritaria y discreta para clientes Sovereign. Selecciona tu canal preferido abajo o envía un mensaje seguro directamente a tu interlocutor designado.</string>
+    <string name="ct_live_chat">Chat en vivo</string>
+    <string name="ct_premium">PREMIUM</string>
+    <string name="ct_live_chat_desc">Diálogo de texto inmediato y cifrado con un gestor de relaciones sénior.</string>
+    <string name="ct_initiate">Iniciar conversación</string>
+    <string name="ct_phone">Conserjería telefónica</string>
+    <string name="ct_phone_desc">Acceso global 24/7 mediante líneas cifradas y seguras.</string>
+    <string name="ct_phone_value">+41 44 555 12 34</string>
+    <string name="ct_dispatch">Envío seguro</string>
+    <string name="ct_dispatch_desc">Acuse de recibo garantizado en un plazo de 1 hora.</string>
+    <string name="ct_dispatch_value">liaison@sovereign.vault</string>
+    <string name="ct_form_title">Formulario de mensaje seguro</string>
+    <string name="ct_subject_label">Categoría del asunto</string>
+    <string name="ct_subject_placeholder">Selecciona un tema…</string>
+    <string name="ct_topic_rates">Tasas &amp; datos de mercado</string>
+    <string name="ct_topic_account">Cuenta &amp; verificación</string>
+    <string name="ct_topic_security">Problema de seguridad</string>
+    <string name="ct_topic_feature">Solicitud de función</string>
+    <string name="ct_description_label">Descripción detallada</string>
+    <string name="ct_description_placeholder">Proporciona detalles específicos sobre tu solicitud…</string>
+    <string name="ct_submit">Enviar mensaje</string>
+    <string name="ct_success_title">Mensaje enviado</string>
+    <string name="ct_success_desc">Tu mensaje seguro va en camino a tu interlocutor. Recibirás un acuse de recibo en un plazo de 1 hora.</string>
+
+    <!-- ===== Feedback ===== -->
+    <string name="fb_hero">Perfecciona el instrumento.</string>
+    <string name="fb_hero_desc">Tus aportes dan forma a la arquitectura de Sovereign Ledger. Cuéntanos cómo podemos elevar tu experiencia de banca privada.</string>
+    <string name="fb_rating_label">Experiencia general</string>
+    <string name="fb_category_label">Categoría principal</string>
+    <string name="fb_cat_performance">Rendimiento</string>
+    <string name="fb_cat_feature">Nueva función</string>
+    <string name="fb_cat_support">Solicitud de soporte</string>
+    <string name="fb_cat_ui">Diseño de interfaz</string>
+    <string name="fb_suggestions_label">Sugerencias detalladas</string>
+    <string name="fb_optional">Opcional</string>
+    <string name="fb_suggestions_placeholder">Describe tu experiencia o solicitud de función…</string>
+    <string name="fb_submit">Enviar inteligencia</string>
+    <string name="fb_success_title">Inteligencia recibida</string>
+    <string name="fb_success_desc">Gracias — tus aportes perfeccionan el instrumento para cada cliente Sovereign.</string>
+    <string name="fb_stars_desc">%1$d estrella(s)</string>
+</resources>
