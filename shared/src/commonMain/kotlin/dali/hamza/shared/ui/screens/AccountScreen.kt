@@ -91,6 +91,7 @@ import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
+import dali.hamza.shared.platform.openLanguageSettings
 import echangecurrencyapp.shared.generated.resources.Res
 import echangecurrencyapp.shared.generated.resources.acct_add_market
 import echangecurrencyapp.shared.generated.resources.acct_appearance_desc
@@ -644,6 +645,7 @@ fun AccountScreen(
                             label = stringResource(Res.string.acct_language),
                             icon = Icons.Outlined.Language,
                             value = stringResource(Res.string.acct_language_value),
+                            onClick = ::openLanguageSettings,
                         )
                     }
                 }
