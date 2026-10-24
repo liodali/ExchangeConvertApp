@@ -16,9 +16,8 @@ import platform.UIKit.UIViewController
  */
 fun MainViewController(
     serverURL: String,
-    accessKey: String,
 ): UIViewController {
-    val koin = initSharedKoin(serverURL = serverURL, accessKey = accessKey)
+    val koin = initSharedKoin(serverURL = serverURL)
     return ComposeUIViewController {
         val viewModel = remember { koin.get<SharedViewModel>() }
         ExchangeCurrencyApp(viewModel = viewModel)
