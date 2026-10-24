@@ -26,6 +26,8 @@
 		E10000000000000000000103 /* ExchangeWidgets.appex in CopyFiles */ = {isa = PBXBuildFile; fileRef = E10000000000000000000108 /* ExchangeWidgets.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		E10000000000000000000117 /* QuickConvertWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000115 /* QuickConvertWidget.swift */; };
 		E10000000000000000000118 /* MarketGridWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000116 /* MarketGridWidget.swift */; };
+		A1000020 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2000030 /* Localizable.xcstrings */; };
+		E10000000000000000000119 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E1000000000000000000011A /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +61,8 @@
 		A2000011 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		A2000012 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2000013 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000030 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		E1000000000000000000011A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A2000014 /* RateAlertsBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RateAlertsBackground.swift; sourceTree = "<group>"; };
 		A2000015 /* version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = version.xcconfig; path = ../version.xcconfig; sourceTree = SOURCE_ROOT; };
 		A2000016 /* ExchangeConvertApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExchangeConvertApp.entitlements; sourceTree = "<group>"; };
@@ -119,6 +123,7 @@
 				A2000013 /* Assets.xcassets */,
 				A2000014 /* RateAlertsBackground.swift */,
 				A2000016 /* ExchangeConvertApp.entitlements */,
+				A2000030 /* Localizable.xcstrings */,
 				A5000005 /* AppIntents */,
 			);
 			path = ExchangeConvertApp;
@@ -161,6 +166,7 @@
 				E10000000000000000000105 /* MarketRateWidget.swift */,
 				E10000000000000000000106 /* Info.plist */,
 				E10000000000000000000107 /* ExchangeWidgets.entitlements */,
+				E1000000000000000000011A /* Localizable.xcstrings */,
 			);
 			path = ExchangeWidgets;
 			sourceTree = "<group>";
@@ -236,6 +242,12 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				ar,
+				it,
+				es,
+				pt,
+				"pt-BR",
 			);
 			mainGroup = A5000001;
 			packageReferences = (
@@ -258,6 +270,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000013 /* Assets.xcassets in Resources */,
+				A1000020 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,6 +278,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E10000000000000000000119 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
