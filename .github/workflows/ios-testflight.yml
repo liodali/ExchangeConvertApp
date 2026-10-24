@@ -606,43 +606,6 @@ jobs:
               --wait --output json
           fi
 
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ExchangeConvertApp-${{ steps.ids.outputs.version }}-${{ steps.ids.outputs.build_number }}
-          path: |
-            .asc/artifacts/ExchangeConvertApp.ipa
-            .asc/artifacts/ExchangeConvertApp.xcarchive/dSYMs
-          if-no-files-found: error
-
-      - name: Publish IPA to S3 (presigned link)
-        # Same Garage S3 as the CI cache, different folder: artifacts/.
-        # Presigned GET lives 7 days (sigv4 max); link lands in the run
-        # summary next to the TestFlight upload.
-        if: vars.S3_CACHE_ENDPOINT != ''
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.S3_CACHE_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_CACHE_SECRET }}
-          AWS_ENDPOINT_URL: ${{ vars.S3_CACHE_ENDPOINT }}
-          AWS_DEFAULT_REGION: garage
-          S3_BUCKET: ${{ vars.S3_CACHE_BUCKET }}
-          IPA_VERSION: ${{ steps.ids.outputs.version }}-${{ steps.ids.outputs.build_number }}
-        run: |
-          set -euo pipefail
-          aws configure set default.s3.addressing_style path
-          DEST="s3://${S3_BUCKET}/artifacts/ios/${IPA_VERSION}"
-          aws s3 cp "$ARTIFACTS/ExchangeConvertApp.ipa" "$DEST/ExchangeConvertApp.ipa" >/dev/null
-          url=$(aws s3 presign "$DEST/ExchangeConvertApp.ipa" --expires-in 604800)
-          code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
-          size=$(du -h "$ARTIFACTS/ExchangeConvertApp.ipa" | cut -f1)
-          {
-            echo "### Build artifacts (S3, links expire in 7 days)"
-            echo "| File | Size | Link |"
-            echo "|---|---|---|"
-            echo "| \`ExchangeConvertApp.ipa\` | $size | [download]($url) (HTTP $code) |"
-            echo "_s3 path: ${DEST}_"
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Clean up CI signing resources
         if: always()
         run: |
@@ -679,7 +642,6 @@ jobs:
             echo "|---|---|"
             echo "| App | \`$BUNDLE_ID\` (id \`$APP_ID\`) |"
             echo "| Version | \`$VERSION\` build \`$BUILD_NUMBER\` |"
-            echo "| Artifact | Actions artifact \`ExchangeConvertApp-$VERSION-$BUILD_NUMBER\` |"
             echo ""
             echo "TestFlight: https://appstoreconnect.apple.com/apps/$APP_ID/testflight"
           } >> "$GITHUB_STEP_SUMMARY"
