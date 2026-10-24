@@ -68,6 +68,38 @@ class CurrencyRepositoryImpl(
             emit(MyResponse.Success(CurrenciesCatalog.currencies))
         }.flowOn(Dispatchers.Default)
 
+    /**
+     * Re-sync currency display names from the backend for [lang] (BCP-47 —
+     * server uses CLDR). Only rewrites rows that already exist (the app's
+     * catalog defines the supported set) and only when the name actually
+     * changed. Returns true when the caller should reload the list.
+     * Offline/unreachable: returns false, names stay as stored.
+     */
+    override suspend fun syncCurrencyNames(lang: String): Boolean =
+        withContext(Dispatchers.Default) {
+            if (lang.isBlank()) return@withContext false
+            val response = currencyApi.getCurrencies(lang).getOrNull()
+                ?: return@withContext false
+            val stored = database.currenciesQueries
+                .selectCurrencies()
+                .executeAsList()
+                .associate { it.name to it.fullCountryName }
+            var changed = false
+            database.currenciesQueries.transaction {
+                response.forEach { entry ->
+                    val code = entry.currency?.trim()?.uppercase() ?: return@forEach
+                    val displayName = entry.name?.trim()?.takeIf { it.isNotBlank() } ?: return@forEach
+                    // localize the supported set only — never grow the
+                    // catalog from the server's (larger) list
+                    if (code in stored && stored[code] != displayName) {
+                        database.currenciesQueries.insertCurrency(code, displayName)
+                        changed = true
+                    }
+                }
+            }
+            changed
+        }
+
     override suspend fun saveExchangeRatesOfCurrentCurrency() = withContext(Dispatchers.Default) {
         val currentCurrency = sessionStorage.getCurrency()
         val now = nowMillis()

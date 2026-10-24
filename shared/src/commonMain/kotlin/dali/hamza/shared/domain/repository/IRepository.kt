@@ -15,6 +15,12 @@ interface IRepository {
     suspend fun getListCurrencies(): MyResponse<List<Currency>>
 
     /**
+     * Re-sync localized currency display names for [lang] (BCP-47) from the
+     * backend (CLDR). True when names changed and the list should reload.
+     */
+    suspend fun syncCurrencyNames(lang: String): Boolean
+
+    /**
      * Save list of currencies to local database
      */
     suspend fun saveListCurrencies(): Flow<MyResponse<List<Currency>>>

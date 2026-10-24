@@ -4,6 +4,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
+ * One `/currencies` entry (our exchange-api backend):
+ * `currency` is the ISO code, `name` the (optionally localized) display name.
+ */
+@Serializable
+data class CurrencyNameDataAPI(
+    @SerialName("currency") val currency: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("type") val type: String? = null,
+)
+
+/**
  * DTOs for the exchangerate.host API (currencylayer-compatible endpoints):
  * GET /live?source=BASE, GET /convert, GET /historical?date=...
  * All requests require an `access_key` query parameter.
