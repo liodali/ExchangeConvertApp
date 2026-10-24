@@ -20,8 +20,12 @@ class IosSessionStorage : ISessionStorage {
     override fun getLastUpdate(): Long =
         defaults.doubleForKey(KEY_LAST_UPDATE).toLong()
 
-    override fun getUsername(): String =
-        defaults.stringForKey(KEY_USERNAME) ?: DEFAULT_USERNAME
+    override fun getUsername(): String {
+        // rebrand migration: "SOVEREIGN" was only ever the default — map
+        // persisted old-default installs onto the new one (real names pass through)
+        val stored = defaults.stringForKey(KEY_USERNAME) ?: return DEFAULT_USERNAME
+        return if (stored == LEGACY_DEFAULT_USERNAME) DEFAULT_USERNAME else stored
+    }
 
     override fun setUsername(value: String) {
         defaults.setObject(value, forKey = KEY_USERNAME)

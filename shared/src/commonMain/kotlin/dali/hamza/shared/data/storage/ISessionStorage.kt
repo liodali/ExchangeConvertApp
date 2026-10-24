@@ -23,7 +23,7 @@ interface ISessionStorage {
 
     /**
      * Profile display name shown in the top bar (design: the username,
-     * e.g. "SOVEREIGN"). Defaults to [DEFAULT_USERNAME] until accounts exist.
+     * e.g. "DINARLY"). Defaults to [DEFAULT_USERNAME] until accounts exist.
      */
     fun getUsername(): String = DEFAULT_USERNAME
 
@@ -138,5 +138,8 @@ interface ISessionStorage {
 }
 
 const val DEFAULT_CURRENCY = "USD"
-const val DEFAULT_USERNAME = "SOVEREIGN"
+const val DEFAULT_USERNAME = "DINARLY"
+
+/** Pre-rebrand default (Sovereign Ledger era) — read-migrated to [DEFAULT_USERNAME]. */
+const val LEGACY_DEFAULT_USERNAME = "SOVEREIGN"
 const val DEFAULT_PAIR = "EUR/USD"

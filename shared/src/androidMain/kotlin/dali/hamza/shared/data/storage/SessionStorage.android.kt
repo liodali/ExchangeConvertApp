@@ -20,8 +20,12 @@ class AndroidSessionStorage(context: Context) : ISessionStorage {
     override fun getLastUpdate(): Long =
         preferences.getLong(KEY_LAST_UPDATE, 0L)
 
-    override fun getUsername(): String =
-        preferences.getString(KEY_USERNAME, DEFAULT_USERNAME) ?: DEFAULT_USERNAME
+    override fun getUsername(): String {
+        // rebrand migration: "SOVEREIGN" was only ever the default — map
+        // persisted old-default installs onto the new one (real names pass through)
+        val stored = preferences.getString(KEY_USERNAME, null) ?: return DEFAULT_USERNAME
+        return if (stored == LEGACY_DEFAULT_USERNAME) DEFAULT_USERNAME else stored
+    }
 
     override fun setUsername(value: String) {
         preferences.edit().putString(KEY_USERNAME, value).apply()
