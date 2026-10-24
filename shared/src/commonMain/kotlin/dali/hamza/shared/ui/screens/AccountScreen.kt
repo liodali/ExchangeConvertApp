@@ -182,6 +182,7 @@ fun AccountScreen(
     baseCurrency: String? = null,
     onMarketPreferencesChanged: (List<String>) -> Unit = {},
     onBaseCurrencyChanged: (String) -> Unit = {},
+    onUsernameChanged: (String) -> Unit = {},
     onThemeModeChanged: (LedgerThemeMode) -> Unit = {},
     onColorPaletteChanged: (LedgerColorPalette) -> Unit = {},
     onChartStyleChanged: (LedgerChartStyle) -> Unit = {},
@@ -749,6 +750,7 @@ fun AccountScreen(
             onDismiss = { showEditDialog = false },
             onSave = { name ->
                 viewModel.rename(name)
+                onUsernameChanged(name)
                 showEditDialog = false
             },
         )

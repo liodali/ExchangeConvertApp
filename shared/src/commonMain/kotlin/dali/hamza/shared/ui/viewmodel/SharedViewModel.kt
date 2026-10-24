@@ -23,7 +23,7 @@ import kotlinx.coroutines.sync.withLock
  * UI state shared by the Converter and Rates screens.
  */
 data class SharedUiState(
-    val username: String = "SOVEREIGN",
+    val username: String = dali.hamza.shared.data.storage.DEFAULT_USERNAME,
     val currencies: List<Currency> = emptyList(),
     val rates: List<ExchangeRate> = emptyList(),
     /** ISO code the cached [rates] table is quoted against (the user's
@@ -72,6 +72,15 @@ class SharedViewModel(
                     ?.let { loadCurrencies() }
             }
         }
+    }
+
+    /**
+     * Push a display-name change into the UI state live — Account's Edit
+     * Profile persists via its own ViewModel; without this the Home top
+     * bar keeps the name captured at [load] until relaunch.
+     */
+    fun onUsernameChanged(name: String) {
+        _state.update { it.copy(username = name) }
     }
 
     private suspend fun loadCurrencies() {

@@ -376,6 +376,7 @@ fun ExchangeCurrencyApp(
                         baseCurrency = sharedState.marketBase.takeIf { it.isNotEmpty() },
                         onMarketPreferencesChanged = { marketPreferences = it },
                         onBaseCurrencyChanged = viewModel::selectMarketBase,
+                        onUsernameChanged = viewModel::onUsernameChanged,
                         onThemeModeChanged = { themeMode = it },
                         onColorPaletteChanged = { colorPalette = it },
                         onChartStyleChanged = { chartStyle = it },
