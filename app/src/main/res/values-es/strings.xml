@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="market_widget_label">Tipo de cambio</string>
+    <string name="market_widget_wave_label">Tipo de cambio · Onda</string>
+    <string name="market_widget_card_label">Tipo de cambio · Tarjeta</string>
+    <string name="market_grid_widget_label">Mercados · Cuadrícula</string>
+    <string name="quick_convert_widget_label">Conversión rápida</string>
+    <string name="market_widget_config_label">Elegir mercado</string>
+</resources>

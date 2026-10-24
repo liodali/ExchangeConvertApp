@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="market_widget_card_label">Cotação de mercado · Cartão</string>
+    <string name="market_grid_widget_label">Mercados · Grelha</string>
+</resources>

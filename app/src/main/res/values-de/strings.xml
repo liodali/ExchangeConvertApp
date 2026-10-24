@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="market_widget_label">Marktkurs</string>
+    <string name="market_widget_wave_label">Marktkurs · Welle</string>
+    <string name="market_widget_card_label">Marktkurs · Karte</string>
+    <string name="market_grid_widget_label">Märkte · Raster</string>
+    <string name="quick_convert_widget_label">Schnellumrechnung</string>
+    <string name="market_widget_config_label">Markt wählen</string>
+</resources>
