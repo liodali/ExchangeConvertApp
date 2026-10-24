@@ -41,9 +41,6 @@ val appModule = module {
     single(named("EXCHANGE_SERVER")) {
         androidContext().resources.getString(R.string.server)
     }
-    single(named("TOKEN")) {
-        androidContext().resources.getString(R.string.token)
-    }
     single<DataStore<Preferences>> {
         PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(
@@ -121,10 +118,6 @@ object AppModule {
     }
 
 //    @Provides
-//    @Named("token")
-//    fun provideTokenApp(application: Application) =
-//        application.getString(R.string.token)
-
 
     @Provides
     fun provideBaseUrl(application: Application) =

@@ -86,7 +86,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         // Kotlin exports init*-named functions with a "do" prefix to ObjC
         SharedKoinKt.doInitSharedKoin(
             serverURL: ExchangeSecrets.apiHost,
-            accessKey: ExchangeSecrets.apiToken
         )
         RateAlertsBackground.register()
         // Widgets (Phase 3): shared bridge exports market pairs to the App

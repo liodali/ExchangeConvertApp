@@ -6,6 +6,7 @@ import dali.hamza.shared.data.network.RateAlertsApi
 import dali.hamza.shared.data.network.createHttpClient
 import dali.hamza.shared.data.repository.CurrencyRepositoryImpl
 import dali.hamza.shared.data.session.PushSessionManager
+import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.data.widgets.WidgetSnapshotStore
 import dali.hamza.shared.data.widgets.WidgetsRepository
@@ -39,12 +40,14 @@ const val DEFAULT_HOST = "api.exchange.dev.adetify.com"
  */
 fun sharedModule(
     serverURL: String = DEFAULT_HOST,
-    accessKey: String = "",
 ) = module {
     single(named("SERVER")) { serverURL }
-    single(named("TOKEN")) { accessKey }
     single { createHttpClient(get(named("SERVER"))) }
-    single { CurrencyApi(httpClient = get(), accessKey = get(named("TOKEN"))) }
+    // Bearer = cached anonymous-session JWT (PushSessionManager mints it at
+    // launch); resolved lazily so CurrencyApi works before the session exists
+    single {
+        CurrencyApi(httpClient = get(), bearerProvider = { get<ISessionStorage>().getSessionToken() })
+    }
     // server-push alerts (Phase 2): same host/client as CurrencyApi
     single { RateAlertsApi(httpClient = get()) }
     single { PushSessionManager(alertsApi = get(), storage = get()) }
@@ -89,11 +92,10 @@ private var koinInstance: Koin? = null
  */
 fun initSharedKoin(
     serverURL: String = DEFAULT_HOST,
-    accessKey: String = "",
 ): Koin {
     koinInstance?.let { return it }
     val application = startKoin {
-        modules(sharedModule(serverURL, accessKey))
+        modules(sharedModule(serverURL))
     }
     koinInstance = application.koin
     return application.koin

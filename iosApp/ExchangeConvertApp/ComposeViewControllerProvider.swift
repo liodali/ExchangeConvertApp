@@ -11,7 +11,6 @@ struct ComposeViewControllerProvider: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
         let controller = MainViewControllerKt.MainViewController(
             serverURL: ExchangeSecrets.apiHost,
-            accessKey: ExchangeSecrets.apiToken
         )
         // Compose's first frame can take several seconds in Debug builds —
         // paint the Sovereign canvas (#0E0E0E) from the very first UIKit

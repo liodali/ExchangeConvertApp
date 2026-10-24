@@ -112,11 +112,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "token", properties.getOrDefault("token", "").toString())
             signingConfigs.findByName("release")?.let { signingConfig = it }
         }
         debug {
-            resValue("string", "token", properties.getOrDefault("token", "").toString())
             // No applicationIdSuffix: debug and release share
             // com.sovereignledger.app (one google-services.json, one Firebase
             // app entry with both SHA-1s). Debug builds are told apart by the

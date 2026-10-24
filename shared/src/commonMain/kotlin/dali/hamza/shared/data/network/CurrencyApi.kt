@@ -4,9 +4,12 @@ import dali.hamza.shared.data.network.models.LatestRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricSeriesDataAPI
 import dali.hamza.shared.data.network.models.LiveRatesDataAPI
+import dali.hamza.shared.data.network.models.CurrencyNameDataAPI
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.parameter
 
 /**
@@ -19,12 +22,25 @@ import io.ktor.client.request.parameter
  *   returned rate already includes it
  * - `historical?…` → Phase 4 (History cluster) — not migrated yet
  *
- * The backend needs no access key; the parameter is kept for compatibility.
+ * Auth: optional anonymous-session Bearer (see attachSession) — the old
+ * vestigial access_key query param was removed with the 0.12.1 app line.
  */
 class CurrencyApi(
     private val httpClient: HttpClient,
-    private val accessKey: String,
+    private val bearerProvider: () -> String? = { null },
 ) {
+    /**
+     * Anonymous session Bearer (PushSessionManager's cached JWT). Attached
+     * when present so the backend applies the per-install tier; requests
+     * before the launch loop mints the session simply go bare — fine while
+     * the server keeps REQUIRE_API_TOKEN off (soft launch until app 0.14.0).
+     */
+    private fun HttpRequestBuilder.attachSession() {
+        bearerProvider()?.takeIf { it.isNotBlank() }?.let { token ->
+            header("Authorization", "Bearer $token")
+        }
+    }
+
 
     /**
      * Current rates of [source] against all other currencies.
@@ -33,7 +49,7 @@ class CurrencyApi(
     suspend fun getLiveRates(source: String): Result<LatestRatesDataAPI> {
         return try {
             val response = httpClient.get("latest") {
-                parameter("access_key", accessKey)
+                attachSession()
                 parameter("base", source)
             }
             Result.success(response.body<LatestRatesDataAPI>())
@@ -53,7 +69,7 @@ class CurrencyApi(
     ): Result<Double?> {
         return try {
             val response = httpClient.get("latest") {
-                parameter("access_key", accessKey)
+                attachSession()
                 parameter("base", from)
                 parameter("symbol", to)
                 parameter("amount", amount)
@@ -77,7 +93,7 @@ class CurrencyApi(
     ): Result<HistoricSeriesDataAPI> {
         return try {
             val response = httpClient.get("historic") {
-                parameter("access_key", accessKey)
+                attachSession()
                 parameter("base", base)
                 parameter("symbol", symbol)
                 parameter("from", from)
@@ -98,11 +114,29 @@ class CurrencyApi(
     ): Result<HistoricRatesDataAPI> {
         return try {
             val response = httpClient.get("historical") {
-                parameter("access_key", accessKey)
+                attachSession()
                 parameter("date", date)
                 parameter("source", source)
             }
             Result.success(response.body<HistoricRatesDataAPI>())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Supported currencies with display names, localized server-side for
+     * [lang] (BCP-47) via the backend's CLDR names: `GET currencies?type=all&lang=…`.
+     * Unknown codes (BTC, XAU…) come back with their stored English name.
+     */
+    suspend fun getCurrencies(lang: String): Result<List<CurrencyNameDataAPI>> {
+        return try {
+            val response = httpClient.get("currencies") {
+                attachSession()
+                parameter("type", "all")
+                parameter("lang", lang)
+            }
+            Result.success(response.body<List<CurrencyNameDataAPI>>())
         } catch (e: Exception) {
             Result.failure(e)
         }
