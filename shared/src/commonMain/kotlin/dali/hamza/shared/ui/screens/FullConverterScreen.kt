@@ -47,6 +47,20 @@ import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.fconv_amount_label
+import echangecurrencyapp.shared.generated.resources.fconv_desc
+import echangecurrencyapp.shared.generated.resources.fconv_execute
+import echangecurrencyapp.shared.generated.resources.fconv_from_label
+import echangecurrencyapp.shared.generated.resources.fconv_rate_line
+import echangecurrencyapp.shared.generated.resources.fconv_title
+import echangecurrencyapp.shared.generated.resources.fconv_to_label
+import echangecurrencyapp.shared.generated.resources.home_execute_exchange
+import echangecurrencyapp.shared.generated.resources.home_from_currency
+import echangecurrencyapp.shared.generated.resources.home_to_currency
+import echangecurrencyapp.shared.generated.resources.quick_amount_placeholder
+import echangecurrencyapp.shared.generated.resources.quick_swap_desc
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Full converter (pushed route from the Exchange Rates page) — the focused,
@@ -77,13 +91,13 @@ fun FullConverterScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "Currency Converter",
+                text = stringResource(Res.string.fconv_title),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Execute a conversion at the live market rate",
+                text = stringResource(Res.string.fconv_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
@@ -94,8 +108,8 @@ fun FullConverterScreen(
                 LedgerInput(
                     value = state.amount,
                     onValueChange = viewModel::onAmountChange,
-                    label = "AMOUNT",
-                    placeholder = "0.00",
+                    label = stringResource(Res.string.fconv_amount_label),
+                    placeholder = stringResource(Res.string.quick_amount_placeholder),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
 
@@ -107,7 +121,7 @@ fun FullConverterScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     BigCurrencySelector(
-                        label = "FROM",
+                        label = stringResource(Res.string.fconv_from_label),
                         code = base?.name,
                         fullName = base?.fullCountryName,
                         modifier = Modifier.weight(1f),
@@ -116,13 +130,13 @@ fun FullConverterScreen(
                     IconButton(onClick = viewModel::swapCurrencies) {
                         Icon(
                             imageVector = Icons.Outlined.SwapHoriz,
-                            contentDescription = "Swap currencies",
+                            contentDescription = stringResource(Res.string.quick_swap_desc),
                             tint = LedgerColors.Blue,
                             modifier = Modifier.size(28.dp),
                         )
                     }
                     BigCurrencySelector(
-                        label = "TO",
+                        label = stringResource(Res.string.fconv_to_label),
                         code = quote?.name,
                         fullName = quote?.fullCountryName,
                         modifier = Modifier.weight(1f),
@@ -135,7 +149,7 @@ fun FullConverterScreen(
                 // ---- live rate line ---------------------------------------
                 if (rate != null && base != null && quote != null) {
                     Text(
-                        text = "1 ${base.name} = ${formatRateValue(rate)} ${quote.name}",
+                        text = stringResource(Res.string.fconv_rate_line, base.name, formatRateValue(rate), quote.name),
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                         color = LedgerColors.TextSecondary,
                         modifier = Modifier.fillMaxWidth(),
@@ -172,7 +186,7 @@ fun FullConverterScreen(
                 Spacer(Modifier.height(24.dp))
 
                 LedgerButton(
-                    text = "Execute Exchange",
+                    text = stringResource(Res.string.home_execute_exchange),
                     onClick = viewModel::convert,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = state.convertedAmount != null,
@@ -187,7 +201,7 @@ fun FullConverterScreen(
         CurrencyPickerSheet(
             visible = true,
             currencies = state.currencies,
-            title = if (pickingFrom) "From currency" else "To currency",
+            title = if (pickingFrom) stringResource(Res.string.home_from_currency) else stringResource(Res.string.home_to_currency),
             onDismiss = { pickerFor = null },
             onCurrencySelected = { currency ->
                 if (pickingFrom) viewModel.selectFromCurrency(currency)

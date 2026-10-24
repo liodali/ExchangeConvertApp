@@ -30,7 +30,15 @@ import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.about_powered_by
+import echangecurrencyapp.shared.generated.resources.about_rate_play
+import echangecurrencyapp.shared.generated.resources.about_tagline
+import echangecurrencyapp.shared.generated.resources.about_version_label
+import echangecurrencyapp.shared.generated.resources.about_version_note
+import echangecurrencyapp.shared.generated.resources.legal_privacy
+import echangecurrencyapp.shared.generated.resources.legal_terms
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * About Sovereign Ledger — identity, live version, legal pages (in-app)
@@ -48,7 +56,7 @@ fun AboutScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = LedgerStrings.APP_TITLE,
+            title = "DINARLY",
             onBack = onBack,
         )
 
@@ -68,7 +76,7 @@ fun AboutScreen(
                     color = LedgerColors.Gold,
                 )
                 Text(
-                    text = LedgerStrings.About.TAGLINE,
+                    text = stringResource(Res.string.about_tagline),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextSecondary,
                 )
@@ -78,7 +86,7 @@ fun AboutScreen(
 
             BentoCard {
                 Text(
-                    text = "VERSION",
+                    text = stringResource(Res.string.about_version_label),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = LedgerColors.TextSecondary,
                 )
@@ -90,13 +98,13 @@ fun AboutScreen(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = LedgerStrings.About.VERSION_NOTE,
+                    text = stringResource(Res.string.about_version_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = LedgerStrings.Support.COPYRIGHT,
+                    text = "© 2026 Adetify.",
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
@@ -106,13 +114,13 @@ fun AboutScreen(
 
             BentoCard {
                 LedgerListRow(
-                    label = LedgerStrings.About.TERMS,
+                    label = stringResource(Res.string.legal_terms),
                     icon = Icons.Outlined.Gavel,
                     onClick = onOpenTerms,
                 )
                 Spacer(Modifier.height(16.dp))
                 LedgerListRow(
-                    label = LedgerStrings.About.PRIVACY,
+                    label = stringResource(Res.string.legal_privacy),
                     icon = Icons.Outlined.Description,
                     onClick = onOpenPrivacy,
                 )
@@ -121,7 +129,7 @@ fun AboutScreen(
             Spacer(Modifier.height(24.dp))
 
             LedgerButton(
-                text = LedgerStrings.About.RATE,
+                text = stringResource(Res.string.about_rate_play),
                 onClick = { openUri(AppLinks.PLAY_URL) },
                 leadingIcon = Icons.Outlined.StarOutline,
                 modifier = Modifier.fillMaxWidth(),
@@ -129,7 +137,7 @@ fun AboutScreen(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = LedgerStrings.About.POWERED_BY,
+                text = stringResource(Res.string.about_powered_by),
                 style = MaterialTheme.typography.labelSmall,
                 color = LedgerColors.TextTertiary,
                 modifier = Modifier.align(Alignment.CenterHorizontally),

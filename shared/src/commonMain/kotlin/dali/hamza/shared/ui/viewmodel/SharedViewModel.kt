@@ -7,6 +7,7 @@ import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.MyResponse
 import dali.hamza.shared.domain.models.Transaction
 import dali.hamza.shared.domain.repository.IRepository
+import dali.hamza.shared.platform.currentLanguageTag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,6 +63,14 @@ class SharedViewModel(
             _state.update { it.copy(username = repository.getUsername(), marketBase = base) }
             loadCurrencies()
             loadRates()
+            // localized currency names follow the active language: sync in
+            // the background (backend CLDR via ?lang=) and refresh on change
+            viewModelScope.launch {
+                runCatching { repository.syncCurrencyNames(currentLanguageTag()) }
+                    .getOrNull()
+                    ?.takeIf { it }
+                    ?.let { loadCurrencies() }
+            }
         }
     }
 

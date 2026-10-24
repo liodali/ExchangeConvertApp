@@ -52,9 +52,33 @@ import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
+import dali.hamza.shared.ui.viewmodel.WidgetsEvent
 import dali.hamza.shared.ui.viewmodel.WidgetsViewModel
+import dali.hamza.shared.domain.models.WidgetType
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.wg_add
+import echangecurrencyapp.shared.generated.resources.wg_detected_note
+import echangecurrencyapp.shared.generated.resources.wg_empty_message
+import echangecurrencyapp.shared.generated.resources.wg_empty_title
+import echangecurrencyapp.shared.generated.resources.wg_forget
+import echangecurrencyapp.shared.generated.resources.wg_forgotten
+import echangecurrencyapp.shared.generated.resources.wg_header
+import echangecurrencyapp.shared.generated.resources.wg_ios_message
+import echangecurrencyapp.shared.generated.resources.wg_ios_title
+import echangecurrencyapp.shared.generated.resources.wg_kind_card
+import echangecurrencyapp.shared.generated.resources.wg_kind_convert
+import echangecurrencyapp.shared.generated.resources.wg_kind_grid
+import echangecurrencyapp.shared.generated.resources.wg_kind_wave
+import echangecurrencyapp.shared.generated.resources.wg_not_placed
+import echangecurrencyapp.shared.generated.resources.wg_on_home_screen
+import echangecurrencyapp.shared.generated.resources.wg_realtime
+import echangecurrencyapp.shared.generated.resources.wg_realtime_desc
+import echangecurrencyapp.shared.generated.resources.wg_reconfigure
+import echangecurrencyapp.shared.generated.resources.wg_refresh
+import echangecurrencyapp.shared.generated.resources.wg_title
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Account → Widgets (`plans/widgets.md`): manage the home-screen market
@@ -69,7 +93,12 @@ fun WidgetsScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(viewModel) {
-        viewModel.events.collect { snackbarHostState.showSnackbar(it) }
+        viewModel.events.collect { event ->
+            when (event) {
+                WidgetsEvent.Forgotten ->
+                    snackbarHostState.showSnackbar(getString(Res.string.wg_forgotten))
+            }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -79,14 +108,14 @@ fun WidgetsScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
             LedgerTopAppBar(
-                title = LedgerStrings.Widgets.TITLE,
+                title = stringResource(Res.string.wg_title),
                 onBack = onBack,
             )
 
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = LedgerStrings.Widgets.HEADER_NOTE,
+                    text = stringResource(Res.string.wg_header),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
@@ -95,8 +124,8 @@ fun WidgetsScreen(
                 if (viewModel.configs.isEmpty()) {
                     EmptyState(
                         icon = Icons.Outlined.Widgets,
-                        title = LedgerStrings.Widgets.EMPTY_TITLE,
-                        message = LedgerStrings.Widgets.EMPTY_MESSAGE,
+                        title = stringResource(Res.string.wg_empty_title),
+                        message = stringResource(Res.string.wg_empty_message),
                     )
                     Spacer(Modifier.height(24.dp))
                 }
@@ -110,7 +139,7 @@ fun WidgetsScreen(
                         BentoCard {
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
-                                    "ON YOUR HOME SCREEN",
+                                    stringResource(Res.string.wg_on_home_screen),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = LedgerColors.TextTertiary,
                                 )
@@ -123,7 +152,7 @@ fun WidgetsScreen(
                                     )
                                 }
                                 Text(
-                                    "Detected from widget refreshes — iOS doesn't expose placed widgets.",
+                                    stringResource(Res.string.wg_detected_note),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = LedgerColors.TextTertiary,
                                 )
@@ -138,7 +167,7 @@ fun WidgetsScreen(
 
                 if (viewModel.hostBridge.canPin) {
                     LedgerButton(
-                        text = LedgerStrings.Widgets.ADD,
+                        text = stringResource(Res.string.wg_add),
                         onClick = { showAddDialog = true },
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -148,7 +177,7 @@ fun WidgetsScreen(
                 // worker); iOS widgets self-schedule via WidgetKit budgets
                 if (viewModel.hostBridge.canManage) {
                     LedgerButton(
-                        text = LedgerStrings.Widgets.REFRESH,
+                        text = stringResource(Res.string.wg_refresh),
                         onClick = viewModel::refresh,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -163,13 +192,13 @@ fun WidgetsScreen(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        "Realtime rates",
+                                        stringResource(Res.string.wg_realtime),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = LedgerColors.TextPrimary,
                                     )
                                     Text(
-                                        "Faster widget updates (every 15 min + on app open). Uses more battery.",
+                                        stringResource(Res.string.wg_realtime_desc),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = LedgerColors.TextTertiary,
                                     )
@@ -265,7 +294,7 @@ private fun SwipeWidgetRow(
         ) {
             Icon(
                 Icons.Outlined.DeleteOutline,
-                contentDescription = LedgerStrings.Widgets.FORGET,
+                contentDescription = stringResource(Res.string.wg_forget),
                 tint = LedgerColors.Error,
                 modifier = Modifier
                     .padding(end = 20.dp)
@@ -294,7 +323,7 @@ private fun SwipeWidgetRow(
                         color = LedgerColors.TextPrimary,
                     )
                     Text(
-                        text = LedgerStrings.Widgets.typeLabel(config.type),
+                        text = typeLabel(config.type),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -314,7 +343,7 @@ private fun SwipeWidgetRow(
                     )
                 } else {
                     Text(
-                        text = LedgerStrings.Widgets.NOT_PLACED,
+                        text = stringResource(Res.string.wg_not_placed),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -323,7 +352,7 @@ private fun SwipeWidgetRow(
             IconButton(onClick = onReconfigure) {
                 Icon(
                     Icons.Outlined.Edit,
-                    contentDescription = LedgerStrings.Widgets.RECONFIGURE,
+                    contentDescription = stringResource(Res.string.wg_reconfigure),
                     tint = LedgerColors.TextSecondary,
                     modifier = Modifier.size(20.dp),
                 )
@@ -336,16 +365,25 @@ private fun SwipeWidgetRow(
 private fun IosGuideCard() {
     BentoCard {
         Text(
-            LedgerStrings.Widgets.IOS_GUIDE_TITLE,
+            stringResource(Res.string.wg_ios_title),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = LedgerColors.TextPrimary,
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            LedgerStrings.Widgets.IOS_GUIDE_MESSAGE,
+            stringResource(Res.string.wg_ios_message),
             style = MaterialTheme.typography.bodySmall,
             color = LedgerColors.TextSecondary,
         )
     }
+}
+
+/** Localized widget-type label (was LedgerStrings.Widgets.typeLabel). */
+@Composable
+private fun typeLabel(type: WidgetType): String = when (type) {
+    WidgetType.MARKET_CARD -> stringResource(Res.string.wg_kind_card)
+    WidgetType.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave)
+    WidgetType.MARKET_GRID -> stringResource(Res.string.wg_kind_grid)
+    WidgetType.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert)
 }

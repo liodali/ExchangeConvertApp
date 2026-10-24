@@ -18,6 +18,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
+/** One-shot widget-management feedback — resolved to text by the screen. */
+sealed interface WidgetsEvent {
+    /** Config forgotten in the app; the placed instance shows its dead state. */
+    data object Forgotten : WidgetsEvent
+}
+
 /**
  * Account → Widgets state (`plans/widgets.md`). Listing/forgetting hits the
  * shared store; adding delegates to the platform [WidgetsHostBridge] (pin
@@ -54,7 +60,7 @@ class WidgetsViewModel(
     val hostBridge: WidgetsHostBridge get() = bridge
 
     /** One-shot UI messages (forget confirmation). */
-    val events = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    val events = MutableSharedFlow<WidgetsEvent>(extraBufferCapacity = 4)
 
     /** Pairs the platform detected on the home screen (iOS render reports). */
     var activePairs by mutableStateOf<List<Pair<String, String>>>(emptyList())
@@ -125,7 +131,7 @@ class WidgetsViewModel(
         repository.forgetConfig(config.id)
         reload()
         viewModelScope.launch {
-            events.emit(dali.hamza.shared.ui.theme.LedgerStrings.Widgets.FORGOTTEN)
+            events.emit(WidgetsEvent.Forgotten)
             runCatching { bridge.refreshAll() }
         }
     }

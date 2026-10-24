@@ -42,8 +42,32 @@ import dali.hamza.shared.ui.components.LedgerButtonVariant
 import dali.hamza.shared.ui.components.LedgerTextArea
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
-import dali.hamza.shared.ui.theme.LedgerStrings.Feedback
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.fb_cat_feature
+import echangecurrencyapp.shared.generated.resources.fb_cat_performance
+import echangecurrencyapp.shared.generated.resources.fb_cat_support
+import echangecurrencyapp.shared.generated.resources.fb_cat_ui
+import echangecurrencyapp.shared.generated.resources.fb_category_label
+import echangecurrencyapp.shared.generated.resources.fb_hero
+import echangecurrencyapp.shared.generated.resources.fb_hero_desc
+import echangecurrencyapp.shared.generated.resources.fb_optional
+import echangecurrencyapp.shared.generated.resources.fb_rating_label
+import echangecurrencyapp.shared.generated.resources.fb_stars_desc
+import echangecurrencyapp.shared.generated.resources.fb_submit
+import echangecurrencyapp.shared.generated.resources.fb_success_desc
+import echangecurrencyapp.shared.generated.resources.fb_success_title
+import echangecurrencyapp.shared.generated.resources.fb_suggestions_label
+import echangecurrencyapp.shared.generated.resources.fb_suggestions_placeholder
+import org.jetbrains.compose.resources.stringResource
+
+/** Localized feedback categories (index-stable across locales). */
+@Composable
+private fun feedbackCategories(): List<String> = listOf(
+    stringResource(Res.string.fb_cat_performance),
+    stringResource(Res.string.fb_cat_feature),
+    stringResource(Res.string.fb_cat_support),
+    stringResource(Res.string.fb_cat_ui),
+)
 
 /**
  * User Feedback (design frame `gbbrU`) — pushed route.
@@ -57,7 +81,8 @@ fun FeedbackScreen(
     onBack: () -> Unit,
 ) {
     var rating by remember { mutableIntStateOf(0) }
-    var category by remember { mutableStateOf<String?>(Feedback.categories.last()) }
+    // index into feedbackCategories() — display strings change per locale
+    var categoryIndex by remember { mutableStateOf(3) }
     var suggestions by remember { mutableStateOf("") }
     var submitted by remember { mutableStateOf(false) }
 
@@ -67,7 +92,7 @@ fun FeedbackScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = LedgerStrings.APP_TITLE,
+            title = "DINARLY",
             onBack = onBack,
         )
 
@@ -76,13 +101,13 @@ fun FeedbackScreen(
 
             // ============ Editorial intro ==================================
             Text(
-                text = Feedback.HERO_TITLE,
+                text = stringResource(Res.string.fb_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = Feedback.HERO_DESC,
+                text = stringResource(Res.string.fb_hero_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
@@ -93,15 +118,15 @@ fun FeedbackScreen(
             BentoCard {
                 if (submitted) {
                     EmptyState(
-                        title = Feedback.SUCCESS_TITLE,
-                        message = Feedback.SUCCESS_DESC,
+                        title = stringResource(Res.string.fb_success_title),
+                        message = stringResource(Res.string.fb_success_desc),
                         icon = Icons.Outlined.ThumbUp,
                         iconTint = LedgerColors.Gold,
                     )
                 } else {
                     // ---- overall experience (gold stars) -------------------
                     Text(
-                        text = Feedback.RATING_LABEL,
+                        text = stringResource(Res.string.fb_rating_label),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.TextPrimary,
                     )
@@ -112,7 +137,7 @@ fun FeedbackScreen(
                             IconButton(onClick = { rating = star }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Star,
-                                    contentDescription = "$star star${if (star > 1) "s" else ""}",
+                                    contentDescription = stringResource(Res.string.fb_stars_desc, star),
                                     tint = if (star <= rating) {
                                         LedgerColors.Gold
                                     } else {
@@ -128,14 +153,15 @@ fun FeedbackScreen(
 
                     // ---- primary category (segmented tags) -----------------
                     Text(
-                        text = Feedback.CATEGORY_LABEL,
+                        text = stringResource(Res.string.fb_category_label),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.TextPrimary,
                     )
                     Spacer(Modifier.height(16.dp))
                     CategoryTags(
-                        selected = category,
-                        onSelect = { category = it },
+                        categories = feedbackCategories(),
+                        selected = categoryIndex,
+                        onSelect = { categoryIndex = it },
                     )
 
                     Spacer(Modifier.height(40.dp))
@@ -147,12 +173,12 @@ fun FeedbackScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = Feedback.SUGGESTIONS_LABEL,
+                            text = stringResource(Res.string.fb_suggestions_label),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = LedgerColors.TextPrimary,
                         )
                         Text(
-                            text = Feedback.OPTIONAL,
+                            text = stringResource(Res.string.fb_optional),
                             style = MaterialTheme.typography.labelSmall,
                             color = LedgerColors.TextTertiary.copy(alpha = 0.60f),
                         )
@@ -161,17 +187,17 @@ fun FeedbackScreen(
                     LedgerTextArea(
                         value = suggestions,
                         onValueChange = { suggestions = it },
-                        placeholder = Feedback.SUGGESTIONS_PLACEHOLDER,
+                        placeholder = stringResource(Res.string.fb_suggestions_placeholder),
                     )
 
                     Spacer(Modifier.height(40.dp))
 
                     LedgerButton(
-                        text = Feedback.SUBMIT,
+                        text = stringResource(Res.string.fb_submit),
                         onClick = { submitted = true },
                         variant = LedgerButtonVariant.PREMIUM,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = rating > 0 && category != null,
+                        enabled = rating > 0,
                     )
                 }
             }
@@ -185,15 +211,16 @@ fun FeedbackScreen(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CategoryTags(
-    selected: String?,
-    onSelect: (String) -> Unit,
+    categories: List<String>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
 ) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Feedback.categories.forEach { tag ->
-            val isSelected = tag == selected
+        categories.forEachIndexed { index, tag ->
+            val isSelected = index == selected
             Text(
                 text = tag,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
@@ -202,7 +229,7 @@ private fun CategoryTags(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (isSelected) LedgerColors.CardHigh else LedgerColors.SurfaceRaised)
-                    .clickable { onSelect(tag) }
+                    .clickable { onSelect(index) }
                     .padding(horizontal = 20.dp, vertical = 10.dp),
             )
         }

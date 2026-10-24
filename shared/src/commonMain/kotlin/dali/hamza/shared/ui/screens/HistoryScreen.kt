@@ -57,6 +57,27 @@ import dali.hamza.shared.ui.viewmodel.AssetBalance
 import dali.hamza.shared.ui.viewmodel.HistoryRange
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.acct_title
+import echangecurrencyapp.shared.generated.resources.hist_achieved_on
+import echangecurrencyapp.shared.generated.resources.hist_best
+import echangecurrencyapp.shared.generated.resources.hist_comparison
+import echangecurrencyapp.shared.generated.resources.hist_current
+import echangecurrencyapp.shared.generated.resources.hist_for_pair
+import echangecurrencyapp.shared.generated.resources.hist_from_history
+import echangecurrencyapp.shared.generated.resources.hist_from_peak
+import echangecurrencyapp.shared.generated.resources.hist_high
+import echangecurrencyapp.shared.generated.resources.hist_live_rate
+import echangecurrencyapp.shared.generated.resources.hist_no_records
+import echangecurrencyapp.shared.generated.resources.hist_appear
+import echangecurrencyapp.shared.generated.resources.hist_pair_header
+import echangecurrencyapp.shared.generated.resources.hist_premium
+import echangecurrencyapp.shared.generated.resources.hist_range_all
+import echangecurrencyapp.shared.generated.resources.hist_start_building
+import echangecurrencyapp.shared.generated.resources.hist_top_percent
+import echangecurrencyapp.shared.generated.resources.hist_view_all
+import echangecurrencyapp.shared.generated.resources.hist_zero_fees
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Asset Performance & Records (design frame `72Xe2`) — History tab.
@@ -98,7 +119,7 @@ fun HistoryScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "Dinarly",
+            title = stringResource(Res.string.acct_title),
             leading = { LedgerLogoMark() },
             avatarInitials = username,
         )
@@ -128,14 +149,14 @@ fun HistoryScreen(
                         modifier = Modifier.size(20.dp),
                     )
                     Text(
-                        text = "PREMIUM BENEFIT",
+                        text = stringResource(Res.string.hist_premium),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.Gold,
                     )
                 }
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    text = "As a Sovereign tier member, you enjoy 0% exchange fees on all major currency pairs.",
+                    text = stringResource(Res.string.hist_zero_fees),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextSecondary,
                 )
@@ -156,7 +177,7 @@ fun HistoryScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
-                            text = "${state.base ?: "—"} TO ${state.quote ?: "—"}",
+                            text = stringResource(Res.string.hist_pair_header, state.base ?: "—", state.quote ?: "—"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = LedgerColors.TextSecondary,
                         )
@@ -191,7 +212,7 @@ fun HistoryScreen(
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Live market rate" + (state.lastUpdatedLabel?.let { " • $it" } ?: ""),
+                        text = stringResource(Res.string.hist_live_rate) + (state.lastUpdatedLabel?.let { " • $it" } ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
@@ -209,7 +230,11 @@ fun HistoryScreen(
                         HistoryRange.entries.forEach { range ->
                             val selected = state.range == range
                             Text(
-                                text = range.label,
+                                text = if (range == HistoryRange.ALL) {
+                                    stringResource(Res.string.hist_range_all)
+                                } else {
+                                    range.label
+                                },
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                                 // accent pairing on both modes (white text was
                                 // unreadable on the light chip)
@@ -267,7 +292,7 @@ fun HistoryScreen(
                             modifier = Modifier.size(18.dp),
                         )
                         Text(
-                            text = "ALL-TIME BEST RATE",
+                            text = stringResource(Res.string.hist_best),
                             style = MaterialTheme.typography.labelMedium,
                             color = LedgerColors.TextSecondary,
                         )
@@ -295,8 +320,8 @@ fun HistoryScreen(
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = state.bestTimestamp?.let {
-                            "Achieved on ${DateUtils.formatDateTime(it)}"
-                        } ?: "From the recorded market history",
+                            stringResource(Res.string.hist_achieved_on, DateUtils.formatDateTime(it))
+                        } ?: stringResource(Res.string.hist_from_history),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
@@ -313,13 +338,13 @@ fun HistoryScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
-                            text = "COMPARISON",
+                            text = stringResource(Res.string.hist_comparison),
                             style = MaterialTheme.typography.labelSmall,
                             color = LedgerColors.TextSecondary,
                         )
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Current Rate",
+                                text = stringResource(Res.string.hist_current),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = LedgerColors.TextSecondary,
                             )
@@ -354,7 +379,10 @@ fun HistoryScreen(
                         }
                         Row(modifier = Modifier.fillMaxWidth()) {
                             val fromPeak = if (current != null && best != null && best > 0.0) {
-                                signed((current - best) / best * 100.0, 2, "%") + " from Peak"
+                                stringResource(
+                                    Res.string.hist_from_peak,
+                                    signed((current - best) / best * 100.0, 2, "%"),
+                                )
                             } else {
                                 "—"
                             }
@@ -365,7 +393,7 @@ fun HistoryScreen(
                             )
                             Spacer(Modifier.weight(1f))
                             Text(
-                                text = "Historical High",
+                                text = stringResource(Res.string.hist_high),
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = LedgerColors.Green,
                             )
@@ -391,8 +419,8 @@ fun HistoryScreen(
                         )
                         Text(
                             text = state.topPercentile?.let { top ->
-                                "The current rate is performing within the top $top% of the selected range."
-                            } ?: "Execute an exchange to start building your ledger history.",
+                                stringResource(Res.string.hist_top_percent, top)
+                            } ?: stringResource(Res.string.hist_start_building),
                             style = MaterialTheme.typography.bodySmall,
                             color = LedgerColors.TextSecondary,
                         )
@@ -410,7 +438,7 @@ fun HistoryScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "History for this Pair",
+                    text = stringResource(Res.string.hist_for_pair),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
@@ -419,7 +447,7 @@ fun HistoryScreen(
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = "VIEW ALL",
+                    text = stringResource(Res.string.hist_view_all),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = LedgerColors.Blue,
                 )
@@ -514,12 +542,12 @@ private fun EmptyLedger() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "No records for this pair yet",
+            text = stringResource(Res.string.hist_no_records),
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.TextPrimary,
         )
         Text(
-            text = "Exchanges you execute appear here instantly.",
+            text = stringResource(Res.string.hist_appear),
             style = MaterialTheme.typography.bodySmall,
             color = LedgerColors.TextSecondary,
         )

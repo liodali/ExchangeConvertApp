@@ -1,9 +1,16 @@
 package dali.hamza.shared.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +38,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.nav_account
+import echangecurrencyapp.shared.generated.resources.nav_history
+import echangecurrencyapp.shared.generated.resources.nav_overview
+import echangecurrencyapp.shared.generated.resources.nav_rates
+import echangecurrencyapp.shared.generated.resources.nav_settings
+import echangecurrencyapp.shared.generated.resources.nav_support
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.platform.isIos
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Rail destinations for the tablet/iPad shell (plans/tablet-ui.md) —
@@ -39,12 +55,22 @@ import dali.hamza.shared.ui.theme.LedgerColors
  * Rates maps to the app's converter surface until the dedicated Rates
  * screen ships (tablet plan Phase 3).
  */
-enum class LedgerRailDestination(val label: String, val icon: ImageVector) {
-    OVERVIEW("Overview", Icons.Outlined.QueryStats),
-    RATES("Rates", Icons.Outlined.SwapHoriz),
-    HISTORY("History", Icons.Outlined.History),
-    ACCOUNT("Account", Icons.Outlined.Person),
-    SUPPORT("Support", Icons.Outlined.HelpOutline),
+enum class LedgerRailDestination(val icon: ImageVector) {
+    OVERVIEW(Icons.Outlined.QueryStats),
+    RATES(Icons.Outlined.SwapHoriz),
+    HISTORY(Icons.Outlined.History),
+    ACCOUNT(Icons.Outlined.Person),
+    SUPPORT(Icons.Outlined.HelpOutline),
+}
+
+/** Localized rail label (enum constructors cannot be composable). */
+@Composable
+fun LedgerRailDestination.label(): String = when (this) {
+    LedgerRailDestination.OVERVIEW -> stringResource(Res.string.nav_overview)
+    LedgerRailDestination.RATES -> stringResource(Res.string.nav_rates)
+    LedgerRailDestination.HISTORY -> stringResource(Res.string.nav_history)
+    LedgerRailDestination.ACCOUNT -> stringResource(Res.string.nav_account)
+    LedgerRailDestination.SUPPORT -> stringResource(Res.string.nav_support)
 }
 
 /**
@@ -69,6 +95,11 @@ fun LedgerNavRail(
             .width(72.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(LedgerColors.Canvas)
+            .then(if (isIos()) Modifier else Modifier.windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical)
+            ))
+            // A phone in landscape can use the rail with little height.
+            .then(if (isIos()) Modifier else Modifier.verticalScroll(rememberScrollState()))
             .padding(horizontal = 8.dp, vertical = 15.dp),
     ) {
         // brand mark — 38dp accent tile with the Dinarly "D"
@@ -94,6 +125,7 @@ fun LedgerNavRail(
         ) {
             LedgerRailDestination.entries.forEach { destination ->
                 val isSelected = destination == selected
+                val label = destination.label()
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
@@ -109,12 +141,12 @@ fun LedgerNavRail(
                 ) {
                     Icon(
                         imageVector = destination.icon,
-                        contentDescription = destination.label,
+                        contentDescription = label,
                         tint = if (isSelected) LedgerColors.Green else LedgerColors.TextMuted,
                         modifier = Modifier.size(19.dp),
                     )
                     Text(
-                        text = destination.label,
+                        text = label,
                         fontSize = 10.sp,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         color = if (isSelected) LedgerColors.Green else LedgerColors.TextMuted,
@@ -130,7 +162,7 @@ fun LedgerNavRail(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Settings,
-                contentDescription = "Settings",
+                contentDescription = stringResource(Res.string.nav_settings),
                 tint = LedgerColors.TextMuted,
                 modifier = Modifier
                     .size(19.dp)

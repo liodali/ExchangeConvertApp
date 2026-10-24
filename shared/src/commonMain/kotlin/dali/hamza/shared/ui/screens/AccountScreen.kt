@@ -7,6 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,10 +88,80 @@ import dali.hamza.shared.ui.theme.LedgerColorPalette
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.theme.LedgerThemeMode
-import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.DataTier
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.acct_add_market
+import echangecurrencyapp.shared.generated.resources.acct_appearance_desc
+import echangecurrencyapp.shared.generated.resources.acct_appearance_section
+import echangecurrencyapp.shared.generated.resources.acct_appearance_title
+import echangecurrencyapp.shared.generated.resources.acct_badge_guest
+import echangecurrencyapp.shared.generated.resources.acct_badge_private
+import echangecurrencyapp.shared.generated.resources.acct_badge_verified
+import echangecurrencyapp.shared.generated.resources.acct_base_label
+import echangecurrencyapp.shared.generated.resources.acct_base_pick
+import echangecurrencyapp.shared.generated.resources.acct_biometric
+import echangecurrencyapp.shared.generated.resources.acct_change_password
+import echangecurrencyapp.shared.generated.resources.acct_chart_bar
+import echangecurrencyapp.shared.generated.resources.acct_chart_desc
+import echangecurrencyapp.shared.generated.resources.acct_chart_line
+import echangecurrencyapp.shared.generated.resources.acct_chart_title
+import echangecurrencyapp.shared.generated.resources.acct_clear_confirm
+import echangecurrencyapp.shared.generated.resources.acct_clear_ledger
+import echangecurrencyapp.shared.generated.resources.acct_clear_message
+import echangecurrencyapp.shared.generated.resources.acct_clear_title
+import echangecurrencyapp.shared.generated.resources.acct_clearance
+import echangecurrencyapp.shared.generated.resources.acct_clearance_score
+import echangecurrencyapp.shared.generated.resources.acct_coming_soon
+import echangecurrencyapp.shared.generated.resources.acct_data_plan
+import echangecurrencyapp.shared.generated.resources.acct_data_plan_guest
+import echangecurrencyapp.shared.generated.resources.acct_data_plan_note
+import echangecurrencyapp.shared.generated.resources.acct_data_plan_sovereign
+import echangecurrencyapp.shared.generated.resources.acct_delete_account
+import echangecurrencyapp.shared.generated.resources.acct_disabled
+import echangecurrencyapp.shared.generated.resources.acct_edit_profile
+import echangecurrencyapp.shared.generated.resources.acct_edit_profile_hint
+import echangecurrencyapp.shared.generated.resources.acct_enabled
+import echangecurrencyapp.shared.generated.resources.acct_footer
+import echangecurrencyapp.shared.generated.resources.acct_language
+import echangecurrencyapp.shared.generated.resources.acct_language_value
+import echangecurrencyapp.shared.generated.resources.acct_local_data_section
+import echangecurrencyapp.shared.generated.resources.acct_log_out
+import echangecurrencyapp.shared.generated.resources.acct_login
+import echangecurrencyapp.shared.generated.resources.acct_market_pick
+import echangecurrencyapp.shared.generated.resources.acct_market_section
+import echangecurrencyapp.shared.generated.resources.acct_market_slot
+import echangecurrencyapp.shared.generated.resources.acct_mode_dark
+import echangecurrencyapp.shared.generated.resources.acct_mode_light
+import echangecurrencyapp.shared.generated.resources.acct_mode_system
+import echangecurrencyapp.shared.generated.resources.acct_palette_section
+import echangecurrencyapp.shared.generated.resources.acct_personal_info
+import echangecurrencyapp.shared.generated.resources.acct_phone_label
+import echangecurrencyapp.shared.generated.resources.acct_preferences
+import echangecurrencyapp.shared.generated.resources.acct_push
+import echangecurrencyapp.shared.generated.resources.acct_remove_market_desc
+import echangecurrencyapp.shared.generated.resources.acct_residence_label
+import echangecurrencyapp.shared.generated.resources.acct_residence_value
+import echangecurrencyapp.shared.generated.resources.acct_security_desc
+import echangecurrencyapp.shared.generated.resources.acct_security_health
+import echangecurrencyapp.shared.generated.resources.acct_security_section
+import echangecurrencyapp.shared.generated.resources.acct_support_cta
+import echangecurrencyapp.shared.generated.resources.acct_support_desc
+import echangecurrencyapp.shared.generated.resources.acct_support_section
+import echangecurrencyapp.shared.generated.resources.acct_support_title
+import echangecurrencyapp.shared.generated.resources.acct_sync_days
+import echangecurrencyapp.shared.generated.resources.acct_sync_hours
+import echangecurrencyapp.shared.generated.resources.acct_sync_just_now
+import echangecurrencyapp.shared.generated.resources.acct_sync_minutes
+import echangecurrencyapp.shared.generated.resources.acct_sync_never
+import echangecurrencyapp.shared.generated.resources.acct_title
+import echangecurrencyapp.shared.generated.resources.acct_vault_section
+import echangecurrencyapp.shared.generated.resources.alerts_title
+import echangecurrencyapp.shared.generated.resources.common_cancel
+import echangecurrencyapp.shared.generated.resources.common_save
+import echangecurrencyapp.shared.generated.resources.wg_title
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Profile & Settings (design frame `qDCZE`) — Account tab.
@@ -129,14 +204,14 @@ fun AccountScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = "Dinarly",
+            title = stringResource(Res.string.acct_title),
             avatarInitials = viewModel.username,
             trailing = {
                 // Bell opens the local rate alerts.
                 IconButton(onClick = onOpenRateAlerts) {
                     Icon(
                         imageVector = Icons.Outlined.Notifications,
-                        contentDescription = LedgerStrings.RateAlerts.TITLE,
+                        contentDescription = stringResource(Res.string.alerts_title),
                         tint = LedgerColors.TextMuted,
                     )
                 }
@@ -168,11 +243,11 @@ fun AccountScreen(
                 // login ships later — guests only manage their display name
                 BentoCard(modifier = Modifier.weight(1f)) {
                     LedgerListRow(
-                        label = LedgerStrings.Account.LOGIN,
+                        label = stringResource(Res.string.acct_login),
                         icon = Icons.Outlined.ManageAccounts,
                         trailing = {
                             LedgerChip(
-                                text = LedgerStrings.Account.COMING_SOON,
+                                text = stringResource(Res.string.acct_coming_soon),
                                 tint = LedgerColors.Gold,
                                 cornerRadius = 4.dp,
                             )
@@ -180,7 +255,7 @@ fun AccountScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     LedgerListRow(
-                        label = LedgerStrings.Account.DATA_PLAN,
+                        label = stringResource(Res.string.acct_data_plan),
                         icon = Icons.Outlined.Star,
                         iconTint = if (viewModel.dataTier == DataTier.SOVEREIGN) {
                             LedgerColors.Green
@@ -188,14 +263,14 @@ fun AccountScreen(
                             LedgerColors.TextTertiary
                         },
                         value = if (viewModel.dataTier == DataTier.SOVEREIGN) {
-                            LedgerStrings.Account.dataPlanSovereign()
+                            stringResource(Res.string.acct_data_plan_sovereign)
                         } else {
-                            LedgerStrings.Account.dataPlanGuest()
+                            stringResource(Res.string.acct_data_plan_guest)
                         },
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = LedgerStrings.Account.DATA_PLAN_NOTE,
+                        text = stringResource(Res.string.acct_data_plan_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -206,18 +281,18 @@ fun AccountScreen(
                 if (isSovereign) {
                     BentoCard(modifier = Modifier.weight(1f)) {
                     SectionHeader(
-                        title = LedgerStrings.Account.PERSONAL_INFO,
+                        title = stringResource(Res.string.acct_personal_info),
                         icon = Icons.Outlined.PersonOutline,
                     )
                     Spacer(Modifier.height(24.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
                         LedgerInfoField(
-                            label = LedgerStrings.Account.PHONE_LABEL,
-                            value = LedgerStrings.Account.PHONE_VALUE,
+                            label = stringResource(Res.string.acct_phone_label),
+                            value = "+41 44 212 7700",
                         )
                         LedgerInfoField(
-                            label = LedgerStrings.Account.RESIDENCE_LABEL,
-                            value = LedgerStrings.Account.RESIDENCE_VALUE,
+                            label = stringResource(Res.string.acct_residence_label),
+                            value = stringResource(Res.string.acct_residence_value),
                         )
                     }
                     }
@@ -226,14 +301,14 @@ fun AccountScreen(
                 // ============ Security health ==================================
                 BentoCard(modifier = Modifier.weight(1f)) {
                     SectionHeader(
-                        title = LedgerStrings.Account.SECURITY_HEALTH,
+                        title = stringResource(Res.string.acct_security_health),
                         icon = Icons.Outlined.SupportAgent,
                         iconTint = LedgerColors.Green,
                         titleColor = LedgerColors.Green,
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = LedgerStrings.Account.SECURITY_HEALTH_DESC,
+                        text = stringResource(Res.string.acct_security_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
@@ -244,17 +319,17 @@ fun AccountScreen(
                 // ============ Security & authentication =======================
                 // guests have no password — that row waits for Sovereign login
                 BentoCard(modifier = Modifier.weight(1f)) {
-                    SectionLabel(LedgerStrings.Account.SECURITY_SECTION)
+                    SectionLabel(stringResource(Res.string.acct_security_section))
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         if (isSovereign) {
                             LedgerListRow(
-                                label = LedgerStrings.Account.CHANGE_PASSWORD,
+                                label = stringResource(Res.string.acct_change_password),
                                 icon = Icons.Outlined.Password,
                             )
                         }
                         LedgerListRow(
-                            label = LedgerStrings.Account.BIOMETRIC_UNLOCK,
+                            label = stringResource(Res.string.acct_biometric),
                             icon = Icons.Outlined.Fingerprint,
                             trailing = {
                                 Switch(
@@ -282,14 +357,14 @@ fun AccountScreen(
 
                 // ============ Market preferences (dashboard cards) ============
                 BentoCard(modifier = Modifier.weight(1f)) {
-                    SectionLabel(LedgerStrings.Account.MARKET_SECTION)
+                    SectionLabel(stringResource(Res.string.acct_market_section))
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         LedgerListRow(
-                            label = "${LedgerStrings.Account.BASE_LABEL} · ${
+                            label = stringResource(Res.string.acct_base_label) + " · " + (
                                 currencies.firstOrNull { it.name == baseCurrency }?.fullCountryName
                                     ?: "Currency"
-                            }",
+                                ),
                             value = baseCurrency ?: "—",
                             onClick = { pickingBase = true },
                         )
@@ -339,7 +414,7 @@ fun AccountScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Outlined.DeleteOutline,
-                                            contentDescription = "Remove market",
+                                            contentDescription = stringResource(Res.string.acct_remove_market_desc),
                                             tint = LedgerColors.Error,
                                             modifier = Modifier.size(22.dp),
                                         )
@@ -347,7 +422,7 @@ fun AccountScreen(
                                 },
                             ) {
                                 LedgerListRow(
-                                    label = "${LedgerStrings.Account.MARKET_SLOT_PREFIX} 0${slot + 1}" +
+                                    label = stringResource(Res.string.acct_market_slot) + " 0${slot + 1}" +
                                         (name?.let { " · $it" } ?: ""),
                                     value = code,
                                     onClick = { marketSlot = slot },
@@ -360,7 +435,7 @@ fun AccountScreen(
                         // same full-width button style as the Widgets screen
                         if (viewModel.marketPreferences.size < 3) {
                             LedgerButton(
-                                text = "Add market",
+                                text = stringResource(Res.string.acct_add_market),
                                 onClick = { addingMarket = true },
                                 modifier = Modifier.fillMaxWidth(),
                             )
@@ -370,7 +445,7 @@ fun AccountScreen(
 
                 // ============ Appearance (mode + palette, design qDCZE) =======
                 BentoCard(modifier = Modifier.weight(1f)) {
-                    SectionLabel(LedgerStrings.Account.APPEARANCE_SECTION)
+                    SectionLabel(stringResource(Res.string.acct_appearance_section))
                     Spacer(Modifier.height(16.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -378,12 +453,12 @@ fun AccountScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = LedgerStrings.Account.APPEARANCE_TITLE,
+                                text = stringResource(Res.string.acct_appearance_title),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                 color = LedgerColors.TextPrimary,
                             )
                             Text(
-                                text = LedgerStrings.Account.APPEARANCE_DESC,
+                                text = stringResource(Res.string.acct_appearance_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
                             )
@@ -400,9 +475,9 @@ fun AccountScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         listOf(
-                            LedgerStrings.Account.MODE_SYSTEM to LedgerThemeMode.SYSTEM,
-                            LedgerStrings.Account.MODE_LIGHT to LedgerThemeMode.LIGHT,
-                            LedgerStrings.Account.MODE_DARK to LedgerThemeMode.DARK,
+                            stringResource(Res.string.acct_mode_system) to LedgerThemeMode.SYSTEM,
+                            stringResource(Res.string.acct_mode_light) to LedgerThemeMode.LIGHT,
+                            stringResource(Res.string.acct_mode_dark) to LedgerThemeMode.DARK,
                         ).forEach { (label, mode) ->
                             val selected = viewModel.themeMode == mode
                             Text(
@@ -429,7 +504,7 @@ fun AccountScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            text = LedgerStrings.Account.PALETTE_SECTION,
+                            text = stringResource(Res.string.acct_palette_section),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = LedgerColors.TextPrimary,
                             modifier = Modifier.weight(1f),
@@ -488,12 +563,12 @@ fun AccountScreen(
                     Spacer(Modifier.height(20.dp))
                     // chart style: line vs bar historical graph (design `ATVsN`)
                     Text(
-                        text = LedgerStrings.Account.CHART_STYLE_TITLE,
+                        text = stringResource(Res.string.acct_chart_title),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.TextPrimary,
                     )
                     Text(
-                        text = LedgerStrings.Account.CHART_STYLE_DESC,
+                        text = stringResource(Res.string.acct_chart_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -507,8 +582,8 @@ fun AccountScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         listOf(
-                            LedgerStrings.Account.CHART_STYLE_LINE to LedgerChartStyle.LINE,
-                            LedgerStrings.Account.CHART_STYLE_BAR to LedgerChartStyle.BAR,
+                            stringResource(Res.string.acct_chart_line) to LedgerChartStyle.LINE,
+                            stringResource(Res.string.acct_chart_bar) to LedgerChartStyle.BAR,
                         ).forEach { (label, style) ->
                             val selected = viewModel.chartStyle == style
                             Text(
@@ -532,19 +607,19 @@ fun AccountScreen(
 
                 // ============ Preferences =====================================
                 BentoCard(modifier = Modifier.weight(1f)) {
-                    SectionLabel(LedgerStrings.Account.PREFERENCES)
+                    SectionLabel(stringResource(Res.string.acct_preferences))
                     Spacer(Modifier.height(16.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         LedgerListRow(
-                            label = LedgerStrings.Account.PUSH_NOTIFICATIONS,
+                            label = stringResource(Res.string.acct_push),
                             icon = Icons.Outlined.Notifications,
                             onClick = viewModel::toggleNotifications,
                             trailing = {
                                 LedgerChip(
                                     text = if (viewModel.notificationsEnabled) {
-                                        LedgerStrings.Account.ENABLED
+                                        stringResource(Res.string.acct_enabled)
                                     } else {
-                                        LedgerStrings.Account.DISABLED
+                                        stringResource(Res.string.acct_disabled)
                                     },
                                     tint = if (viewModel.notificationsEnabled) {
                                         LedgerColors.Green
@@ -556,19 +631,19 @@ fun AccountScreen(
                             },
                         )
                         LedgerListRow(
-                            label = LedgerStrings.RateAlerts.TITLE,
+                            label = stringResource(Res.string.alerts_title),
                             icon = Icons.Outlined.NotificationsActive,
                             onClick = onOpenRateAlerts,
                         )
                         LedgerListRow(
-                            label = LedgerStrings.Widgets.TITLE,
+                            label = stringResource(Res.string.wg_title),
                             icon = Icons.Outlined.Widgets,
                             onClick = onOpenWidgets,
                         )
                         LedgerListRow(
-                            label = LedgerStrings.Account.LANGUAGE,
+                            label = stringResource(Res.string.acct_language),
                             icon = Icons.Outlined.Language,
-                            value = LedgerStrings.Account.LANGUAGE_VALUE,
+                            value = stringResource(Res.string.acct_language_value),
                         )
                     }
                 }
@@ -576,16 +651,16 @@ fun AccountScreen(
                 // ============ Vault management / local data ===================
                 if (isSovereign) {
                     BentoCard(modifier = Modifier.weight(1f)) {
-                        SectionLabel(LedgerStrings.Account.VAULT_SECTION)
+                        SectionLabel(stringResource(Res.string.acct_vault_section))
                         Spacer(Modifier.height(16.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             LedgerListRow(
-                                label = LedgerStrings.Account.LOG_OUT,
+                                label = stringResource(Res.string.acct_log_out),
                                 icon = Icons.AutoMirrored.Outlined.Logout,
                                 emphasize = true,
                             )
                             LedgerListRow(
-                                label = LedgerStrings.Account.DELETE_ACCOUNT,
+                                label = stringResource(Res.string.acct_delete_account),
                                 icon = Icons.Outlined.DeleteOutline,
                                 emphasize = true,
                             )
@@ -594,10 +669,10 @@ fun AccountScreen(
                 } else {
                     // guests have no session to log out of — local data instead
                     BentoCard(modifier = Modifier.weight(1f)) {
-                        SectionLabel(LedgerStrings.Account.LOCAL_DATA_SECTION)
+                        SectionLabel(stringResource(Res.string.acct_local_data_section))
                         Spacer(Modifier.height(16.dp))
                         LedgerListRow(
-                            label = LedgerStrings.Account.CLEAR_LEDGER,
+                            label = stringResource(Res.string.acct_clear_ledger),
                             icon = Icons.Outlined.DeleteOutline,
                             iconTint = LedgerColors.Error,
                             onClick = { showClearDialog = true },
@@ -608,7 +683,7 @@ fun AccountScreen(
 
                 if (showSupportEntry) {
                     Column(modifier = Modifier.weight(1f)) {
-                        SectionLabel(LedgerStrings.Account.SUPPORT_SECTION)
+                        SectionLabel(stringResource(Res.string.acct_support_section))
                         Spacer(Modifier.height(16.dp))
                         BentoCard(modifier = Modifier.fillMaxWidth()) {
                             Row(
@@ -622,7 +697,7 @@ fun AccountScreen(
                                 )
                                 Column {
                                     Text(
-                                        text = LedgerStrings.Account.SUPPORT_CARD_TITLE,
+                                        text = stringResource(Res.string.acct_support_title),
                                         style = MaterialTheme.typography.titleMedium.copy(
                                             fontWeight = FontWeight.Bold,
                                         ),
@@ -630,7 +705,7 @@ fun AccountScreen(
                                     )
                                     Spacer(Modifier.height(8.dp))
                                     Text(
-                                        text = LedgerStrings.Account.SUPPORT_CARD_DESC,
+                                        text = stringResource(Res.string.acct_support_desc),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = LedgerColors.TextSecondary,
                                     )
@@ -638,7 +713,7 @@ fun AccountScreen(
                             }
                             Spacer(Modifier.height(24.dp))
                             LedgerButton(
-                                text = LedgerStrings.Account.SUPPORT_CARD_CTA,
+                                text = stringResource(Res.string.acct_support_cta),
                                 onClick = onOpenSupport,
                                 modifier = Modifier.fillMaxWidth(),
                             )
@@ -650,7 +725,11 @@ fun AccountScreen(
 
             // ============ Node footer =====================================
             Text(
-                text = LedgerStrings.Account.footer(viewModel.lastSyncLabel()),
+                text = stringResource(
+                    Res.string.acct_footer,
+                    dali.hamza.shared.platform.appVersionName(),
+                    lastSyncLabel(viewModel.lastSyncMinutes()),
+                ),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontFamily = FontFamily.Monospace,
                 ),
@@ -677,7 +756,7 @@ fun AccountScreen(
         CurrencyPickerSheet(
             visible = true,
             currencies = currencies,
-            title = LedgerStrings.Account.BASE_PICK_TITLE,
+            title = stringResource(Res.string.acct_base_pick),
             onDismiss = { pickingBase = false },
             onCurrencySelected = { currency ->
                 pickingBase = false
@@ -710,7 +789,7 @@ fun AccountScreen(
             currencies = currencies.filter {
                 it.name != baseCurrency && it.name !in others
             },
-            title = LedgerStrings.Account.MARKET_PICK_TITLE,
+            title = stringResource(Res.string.acct_market_pick),
             onDismiss = { marketSlot = null },
             onCurrencySelected = { currency ->
                 viewModel.updateMarketPreference(slot, currency.name)
@@ -725,7 +804,7 @@ fun AccountScreen(
             currencies = currencies.filter {
                 it.name != baseCurrency && it.name !in viewModel.marketPreferences
             },
-            title = LedgerStrings.Account.MARKET_PICK_TITLE,
+            title = stringResource(Res.string.acct_market_pick),
             onDismiss = { addingMarket = false },
             onCurrencySelected = { currency ->
                 viewModel.addMarketPreference(currency.name)
@@ -816,7 +895,7 @@ private fun ProfileHero(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PhotoCamera,
-                    contentDescription = LedgerStrings.Account.EDIT_PROFILE,
+                    contentDescription = stringResource(Res.string.acct_edit_profile),
                     tint = LedgerColors.NavyPanel,
                     modifier = Modifier.size(18.dp),
                 )
@@ -842,21 +921,21 @@ private fun ProfileHero(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 LedgerChip(
                     text = if (isSovereign) {
-                        LedgerStrings.Account.BADGE_PRIVATE
+                        stringResource(Res.string.acct_badge_private)
                     } else {
-                        LedgerStrings.Account.GUEST_CLIENT
+                        stringResource(Res.string.acct_badge_guest)
                     },
                     tint = LedgerColors.Gold,
                 )
                 LedgerChip(
-                    text = LedgerStrings.Account.BADGE_VERIFIED,
+                    text = stringResource(Res.string.acct_badge_verified),
                     tint = LedgerColors.Green,
                 )
             }
         }
 
         LedgerButton(
-            text = LedgerStrings.Account.EDIT_PROFILE,
+            text = stringResource(Res.string.acct_edit_profile),
             onClick = onEdit,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -902,13 +981,13 @@ private fun ClearanceRow() {
                 )
             }
             Text(
-                text = LedgerStrings.Account.CLEARANCE_SCORE,
+                text = stringResource(Res.string.acct_clearance_score),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = LedgerColors.Green,
             )
         }
         Text(
-            text = LedgerStrings.Account.CLEARANCE,
+            text = stringResource(Res.string.acct_clearance),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -930,29 +1009,32 @@ private fun ClearLedgerConfirmSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .then(if (dali.hamza.shared.platform.isIos()) Modifier else Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                )),
         ) {
             Text(
-                text = LedgerStrings.Account.CLEAR_LEDGER_TITLE,
+                text = stringResource(Res.string.acct_clear_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = LedgerStrings.Account.CLEAR_LEDGER_MESSAGE,
+                text = stringResource(Res.string.acct_clear_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextSecondary,
             )
             Spacer(Modifier.height(24.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LedgerButton(
-                    text = LedgerStrings.Account.DIALOG_CANCEL,
+                    text = stringResource(Res.string.common_cancel),
                     onClick = onDismiss,
                     variant = LedgerButtonVariant.TONAL,
                     modifier = Modifier.weight(1f),
                 )
                 LedgerButton(
-                    text = LedgerStrings.Account.CONFIRM_CLEAR,
+                    text = stringResource(Res.string.acct_clear_confirm),
                     onClick = onConfirm,
                     modifier = Modifier.weight(1f),
                 )
@@ -976,10 +1058,13 @@ private fun EditNameDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .then(if (dali.hamza.shared.platform.isIos()) Modifier else Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                )),
         ) {
             Text(
-                text = LedgerStrings.Account.EDIT_PROFILE_TITLE,
+                text = stringResource(Res.string.acct_edit_profile),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
@@ -987,18 +1072,18 @@ private fun EditNameDialog(
             LedgerInput(
                 value = name,
                 onValueChange = { name = it },
-                label = LedgerStrings.Account.EDIT_PROFILE_HINT,
+                label = stringResource(Res.string.acct_edit_profile_hint),
             )
             Spacer(Modifier.height(24.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LedgerButton(
-                    text = LedgerStrings.Account.DIALOG_CANCEL,
+                    text = stringResource(Res.string.common_cancel),
                     onClick = onDismiss,
                     variant = LedgerButtonVariant.TONAL,
                     modifier = Modifier.weight(1f),
                 )
                 LedgerButton(
-                    text = LedgerStrings.Account.DIALOG_SAVE,
+                    text = stringResource(Res.string.common_save),
                     onClick = { onSave(name) },
                     modifier = Modifier.weight(1f),
                     enabled = name.isNotBlank(),
@@ -1013,6 +1098,16 @@ private fun EditNameDialog(
 private fun fallbackMarketMajor(exclude: List<String>): String =
     listOf("EUR", "GBP", "MAD", "JPY", "CHF", "CAD").firstOrNull { it !in exclude }
         ?: "EUR"
+
+/** Localized "JUST NOW" / "4M AGO" footer label (was VM-formatted copy). */
+@Composable
+private fun lastSyncLabel(minutes: Int?): String = when {
+    minutes == null -> stringResource(Res.string.acct_sync_never)
+    minutes <= 0 -> stringResource(Res.string.acct_sync_just_now)
+    minutes < 60 -> stringResource(Res.string.acct_sync_minutes, minutes)
+    minutes < 24 * 60 -> stringResource(Res.string.acct_sync_hours, minutes / 60)
+    else -> stringResource(Res.string.acct_sync_days, minutes / (24 * 60))
+}
 
 /** Palette preview swatches (design `qDCZE` Color Palette Choices; forest
  *  triad from the `theme-forest-*` variables). */

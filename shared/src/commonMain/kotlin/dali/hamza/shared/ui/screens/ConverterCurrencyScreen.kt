@@ -54,6 +54,24 @@ import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.HistoryRange
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.common_amount
+import echangecurrencyapp.shared.generated.resources.common_convert
+import echangecurrencyapp.shared.generated.resources.conv_30d_trend
+import echangecurrencyapp.shared.generated.resources.conv_available_rates
+import echangecurrencyapp.shared.generated.resources.conv_converted_amount
+import echangecurrencyapp.shared.generated.resources.conv_full_converter
+import echangecurrencyapp.shared.generated.resources.conv_loading_history
+import echangecurrencyapp.shared.generated.resources.conv_live_base
+import echangecurrencyapp.shared.generated.resources.conv_price_history
+import echangecurrencyapp.shared.generated.resources.conv_quick_desc
+import echangecurrencyapp.shared.generated.resources.conv_title
+import echangecurrencyapp.shared.generated.resources.home_from_currency
+import echangecurrencyapp.shared.generated.resources.home_to_currency
+import echangecurrencyapp.shared.generated.resources.quick_amount_placeholder
+import echangecurrencyapp.shared.generated.resources.quick_swap_desc
+import echangecurrencyapp.shared.generated.resources.quick_title
+import org.jetbrains.compose.resources.stringResource
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 
 /**
@@ -109,13 +127,13 @@ fun ConverterCurrencyScreen(
 
             // ============ Header ===========================================
             Text(
-                text = "Exchange Rates",
+                text = stringResource(Res.string.conv_title),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Live rates based on ${base ?: "—"} base currency",
+                text = stringResource(Res.string.conv_live_base, base ?: "—"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
@@ -138,7 +156,7 @@ fun ConverterCurrencyScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Quick Exchange",
+                                text = stringResource(Res.string.quick_title),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 20.sp,
@@ -147,13 +165,13 @@ fun ConverterCurrencyScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Convert currencies using live rates",
+                                text = stringResource(Res.string.conv_quick_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
                             )
                         }
                         Text(
-                            text = "FULL CONVERTER",
+                            text = stringResource(Res.string.conv_full_converter),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = LedgerColors.Blue,
                             modifier = Modifier.clickable(onClick = onOpenFullConverter),
@@ -168,7 +186,7 @@ fun ConverterCurrencyScreen(
                     ) {
                         // ---- amount -----------------------------------------------
                         Text(
-                            text = "Amount",
+                            text = stringResource(Res.string.common_amount),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                             color = LedgerColors.TextTertiary,
                         )
@@ -193,7 +211,7 @@ fun ConverterCurrencyScreen(
                             IconButton(onClick = viewModel::swapCurrencies) {
                                 Icon(
                                     imageVector = Icons.Outlined.SwapHoriz,
-                                    contentDescription = "Swap currencies",
+                                    contentDescription = stringResource(Res.string.quick_swap_desc),
                                     tint = LedgerColors.Blue,
                                     modifier = Modifier.size(28.dp),
                                 )
@@ -216,7 +234,7 @@ fun ConverterCurrencyScreen(
                                 .padding(16.dp),
                         ) {
                             Text(
-                                text = "Converted Amount",
+                                text = stringResource(Res.string.conv_converted_amount),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
                             )
@@ -241,7 +259,7 @@ fun ConverterCurrencyScreen(
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
-                                text = "Convert",
+                                text = stringResource(Res.string.common_convert),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = LedgerColors.Green,
                             )
@@ -252,13 +270,13 @@ fun ConverterCurrencyScreen(
                 // ============ Price history ===============================
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Price History",
+                        text = stringResource(Res.string.conv_price_history),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         color = LedgerColors.TextPrimary,
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "30 day trend — ${base ?: "—"} to ${quote ?: "—"}",
+                        text = stringResource(Res.string.conv_30d_trend, base ?: "—", quote ?: "—"),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -287,7 +305,7 @@ fun ConverterCurrencyScreen(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
-                                    text = "Loading price history…",
+                                    text = stringResource(Res.string.conv_loading_history),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = LedgerColors.TextTertiary,
                                 )
@@ -316,7 +334,7 @@ fun ConverterCurrencyScreen(
 
             // ============ Available rates ================================
             Text(
-                text = "Available Rates",
+                text = stringResource(Res.string.conv_available_rates),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                 color = LedgerColors.TextPrimary,
                 modifier = Modifier.padding(horizontal = 4.dp),
@@ -350,7 +368,7 @@ fun ConverterCurrencyScreen(
         CurrencyPickerSheet(
             visible = true,
             currencies = state.currencies,
-            title = if (pickingFrom) "From currency" else "To currency",
+            title = if (pickingFrom) stringResource(Res.string.home_from_currency) else stringResource(Res.string.home_to_currency),
             onDismiss = { pickerFor = null },
             onCurrencySelected = { currency ->
                 if (pickingFrom) viewModel.selectFromCurrency(currency)

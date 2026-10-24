@@ -4,6 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,7 +38,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.back_desc
 import dali.hamza.shared.ui.theme.LedgerColors
+import dali.hamza.shared.platform.isIos
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Ledger top app bar — faithful to the pen `Header - TopAppBar Shared Component`:
@@ -70,7 +79,9 @@ fun LedgerTopAppBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
+                .then(if (isIos()) Modifier.statusBarsPadding() else Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                ))
                 .height(64.dp)
                 .padding(horizontal = 24.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -87,7 +98,7 @@ fun LedgerTopAppBar(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(Res.string.back_desc),
                             tint = LedgerColors.Blue,
                         )
                     }

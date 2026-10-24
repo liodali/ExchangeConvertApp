@@ -5,9 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import dali.hamza.shared.platform.WidgetExtras
 import dali.hamza.shared.platform.WidgetKind
 import dali.hamza.shared.platform.WidgetsHostBridge
-import dali.hamza.shared.ui.theme.LedgerStrings
 
 /**
  * Android [WidgetsHostBridge]: pin via `requestPinAppWidget` (pair travels
@@ -40,8 +40,8 @@ class WidgetsHostBridgeAndroid(
             },
         )
         val extras = Bundle().apply {
-            putString(LedgerStrings.Widgets.PREFILL_BASE, base)
-            putString(LedgerStrings.Widgets.PREFILL_QUOTE, quote)
+            putString(WidgetExtras.PREFILL_BASE, base)
+            putString(WidgetExtras.PREFILL_QUOTE, quote)
         }
         appWidgetManager.requestPinAppWidget(provider, extras, null)
     }

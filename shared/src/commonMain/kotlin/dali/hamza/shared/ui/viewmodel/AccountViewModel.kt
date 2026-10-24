@@ -156,16 +156,14 @@ class AccountViewModel(
         }
     }
 
-    /** Footer copy: "JUST NOW" / "4M AGO" / "2H AGO" (design: "2M AGO"). */
-    fun lastSyncLabel(): String {
+    /**
+     * Relative age of the last sync in whole minutes (null = never
+     * synced). The screen formats it into localized copy ("JUST NOW" /
+     * "4M AGO" …) — VMs cannot call stringResource.
+     */
+    fun lastSyncMinutes(): Int? {
         val last = storage.getLastUpdate()
-        if (last <= 0L) return "NEVER"
-        val minutes = ((currentEpochMillis() - last) / 60_000L).toInt()
-        return when {
-            minutes <= 0 -> "JUST NOW"
-            minutes < 60 -> "${minutes}M AGO"
-            minutes < 24 * 60 -> "${minutes / 60}H AGO"
-            else -> "${minutes / (24 * 60)}D AGO"
-        }
+        if (last <= 0L) return null
+        return ((currentEpochMillis() - last) / 60_000L).toInt()
     }
 }

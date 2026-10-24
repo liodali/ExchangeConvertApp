@@ -38,17 +38,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.nav_account
+import echangecurrencyapp.shared.generated.resources.nav_history
+import echangecurrencyapp.shared.generated.resources.nav_home
 import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.theme.LedgerColors
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Top-level destinations of the Sovereign Ledger app — 3 tabs matching the
  * design's bottom navigation (Home · History · Account).
  */
-enum class LedgerDestination(val label: String, val icon: ImageVector) {
-    HOME("Home", Icons.Outlined.Home),
-    HISTORY("History", Icons.Outlined.History),
-    ACCOUNT("Account", Icons.Outlined.Person),
+enum class LedgerDestination(val icon: ImageVector) {
+    HOME(Icons.Outlined.Home),
+    HISTORY(Icons.Outlined.History),
+    ACCOUNT(Icons.Outlined.Person),
+}
+
+/** Localized tab label (enum constructors cannot be composable). */
+@Composable
+fun LedgerDestination.label(): String = when (this) {
+    LedgerDestination.HOME -> stringResource(Res.string.nav_home)
+    LedgerDestination.HISTORY -> stringResource(Res.string.nav_history)
+    LedgerDestination.ACCOUNT -> stringResource(Res.string.nav_account)
 }
 
 // ---- iOS: floating liquid-glass capsule ----
@@ -232,14 +245,15 @@ private fun LedgerNavItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
     ) {
+        val label = destination.label()
         Icon(
             imageVector = destination.icon,
-            contentDescription = destination.label,
+            contentDescription = label,
             tint = contentColor,
             modifier = Modifier.size(20.dp),
         )
         Text(
-            text = destination.label,
+            text = label,
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
         )

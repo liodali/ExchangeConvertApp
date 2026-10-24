@@ -12,12 +12,33 @@ import dali.hamza.shared.domain.models.RateAlertMode
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.LocalNotifier
 import dali.hamza.shared.platform.RateAlertScheduler
-import dali.hamza.shared.ui.theme.LedgerStrings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+
+/**
+ * Transient action feedback — resolved to localized text by the screen
+ * (ViewModels cannot call stringResource).
+ */
+sealed interface RateAlertsMessage {
+    /** Push service unreachable — alert saved on device instead. */
+    data object PushFallback : RateAlertsMessage
+
+    /** Confirmation when a local alert moved to server push. */
+    data class MovedToPush(val base: String, val quote: String) : RateAlertsMessage
+
+    /** Raw failure text from an exception (not localizable). */
+    data class Failure(val text: String) : RateAlertsMessage
+}
+
+/** One-shot toggle confirmation (enable/disable switch). */
+data class RateAlertToggled(
+    val base: String,
+    val quote: String,
+    val enabled: Boolean,
+)
 
 /**
  * Rate Alerts cluster state — KMP-safe, no platform ViewModel base
@@ -68,7 +89,7 @@ class RateAlertsViewModel(
         private set
 
     /** Transient action feedback (limit reached, duplicate pair…). */
-    var message by mutableStateOf<String?>(null)
+    var message by mutableStateOf<RateAlertsMessage?>(null)
         private set
 
     /** True when [message] is informational (gold) rather than an error (red). */
@@ -129,7 +150,7 @@ class RateAlertsViewModel(
                 )
                 AlertSource.LOCAL -> addLocal(base, quote, mode, intervalMinutes, thresholdPercent)
             }
-            var note: String? = null
+            var note: RateAlertsMessage? = null
             val failure = if (
                 source == AlertSource.SERVER &&
                 result.exceptionOrNull() is AlertServiceUnavailableException
@@ -137,7 +158,7 @@ class RateAlertsViewModel(
                 // push unreachable → same alert on device, say so
                 val fallback = addLocal(base, quote, mode, intervalMinutes, thresholdPercent)
                 if (fallback.isSuccess) {
-                    note = LedgerStrings.RateAlerts.PUSH_FALLBACK_NOTE
+                    note = RateAlertsMessage.PushFallback
                     null
                 } else {
                     fallback.exceptionOrNull()
@@ -146,7 +167,7 @@ class RateAlertsViewModel(
                 result.exceptionOrNull()
             }
             messageIsPositive = failure == null && note != null
-            message = failure?.message ?: note
+            message = failure?.let { RateAlertsMessage.Failure(it.message ?: "") } ?: note
             localAlerts = repository.getRateAlerts()
             serverAlerts = repository.getServerRateAlerts()
             scheduler.update(localAlerts.any { it.enabled })
@@ -200,24 +221,24 @@ class RateAlertsViewModel(
                 onSuccess = {
                     repository.removeRateAlert(alert.id) // exactly one place
                     messageIsPositive = true
-                    message = LedgerStrings.RateAlerts.movedToPush(alert.base, alert.quote)
+                    message = RateAlertsMessage.MovedToPush(alert.base, alert.quote)
                     localAlerts = repository.getRateAlerts()
                     serverAlerts = repository.getServerRateAlerts()
                     scheduler.update(localAlerts.any { it.enabled })
                 },
                 onFailure = { failure ->
                     messageIsPositive = false
-                    message = failure.message
+                    message = RateAlertsMessage.Failure(failure.message ?: "")
                 },
             )
         }
     }
 
-    /** One-shot confirmation for snackbar display ("Alert deleted"). */
-    val deleteEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    /** One-shot confirmation for snackbar display (which engine's row was deleted). */
+    val deleteEvents = MutableSharedFlow<AlertSource>(extraBufferCapacity = 1)
 
     /** One-shot confirmation for the enable/disable switch. */
-    val toggleEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val toggleEvents = MutableSharedFlow<RateAlertToggled>(extraBufferCapacity = 1)
 
     /** Composite key of the row currently being deleted (spinner state). */
     var deletingKey by mutableStateOf<String?>(null)
@@ -243,12 +264,7 @@ class RateAlertsViewModel(
             localAlerts = repository.getRateAlerts()
             serverAlerts = repository.getServerRateAlerts()
             scheduler.update(localAlerts.any { it.enabled })
-            deleteEvents.emit(
-                when (alert.source) {
-                    AlertSource.SERVER -> LedgerStrings.RateAlerts.SERVER_ALERT_DELETED
-                    AlertSource.LOCAL -> LedgerStrings.RateAlerts.LOCAL_ALERT_DELETED
-                }
-            )
+            deleteEvents.emit(alert.source)
         }
     }
 
@@ -262,7 +278,7 @@ class RateAlertsViewModel(
             serverAlerts = repository.getServerRateAlerts()
             scheduler.update(localAlerts.any { it.enabled })
             toggleEvents.emit(
-                LedgerStrings.RateAlerts.alertToggled(alert.base, alert.quote, enabled)
+                RateAlertToggled(alert.base, alert.quote, enabled)
             )
         }
     }

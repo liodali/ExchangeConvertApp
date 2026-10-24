@@ -4,6 +4,15 @@ package dali.hamza.shared.platform
 enum class WidgetKind { MARKET_CARD, MARKET_WAVE, MARKET_GRID, QUICK_CONVERT }
 
 /**
+ * Intent/launch-extra keys for the widget pin handoff (was
+ * `LedgerStrings.Widgets.PREFILL_*` — constants, not localized copy).
+ */
+object WidgetExtras {
+    const val PREFILL_BASE = "widget.extra.BASE"
+    const val PREFILL_QUOTE = "widget.extra.QUOTE"
+}
+
+/**
  * Platform capabilities for widget management (Account → Widgets screen,
  * `plans/widgets.md`). The screen degrades gracefully when the host can't
  * do something:

@@ -50,8 +50,39 @@ import dali.hamza.shared.ui.components.LedgerChip
 import dali.hamza.shared.ui.components.LedgerTextArea
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
-import dali.hamza.shared.ui.theme.LedgerStrings.Contact
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.ct_description_label
+import echangecurrencyapp.shared.generated.resources.ct_description_placeholder
+import echangecurrencyapp.shared.generated.resources.ct_dispatch
+import echangecurrencyapp.shared.generated.resources.ct_dispatch_desc
+import echangecurrencyapp.shared.generated.resources.ct_form_title
+import echangecurrencyapp.shared.generated.resources.ct_hero
+import echangecurrencyapp.shared.generated.resources.ct_hero_desc
+import echangecurrencyapp.shared.generated.resources.ct_initiate
+import echangecurrencyapp.shared.generated.resources.ct_live_chat
+import echangecurrencyapp.shared.generated.resources.ct_live_chat_desc
+import echangecurrencyapp.shared.generated.resources.ct_phone
+import echangecurrencyapp.shared.generated.resources.ct_phone_desc
+import echangecurrencyapp.shared.generated.resources.ct_premium
+import echangecurrencyapp.shared.generated.resources.ct_subject_label
+import echangecurrencyapp.shared.generated.resources.ct_subject_placeholder
+import echangecurrencyapp.shared.generated.resources.ct_submit
+import echangecurrencyapp.shared.generated.resources.ct_success_desc
+import echangecurrencyapp.shared.generated.resources.ct_success_title
+import echangecurrencyapp.shared.generated.resources.ct_topic_account
+import echangecurrencyapp.shared.generated.resources.ct_topic_feature
+import echangecurrencyapp.shared.generated.resources.ct_topic_rates
+import echangecurrencyapp.shared.generated.resources.ct_topic_security
+import org.jetbrains.compose.resources.stringResource
+
+/** Localized contact topics (index-stable across locales). */
+@Composable
+private fun contactTopics(): List<String> = listOf(
+    stringResource(Res.string.ct_topic_rates),
+    stringResource(Res.string.ct_topic_account),
+    stringResource(Res.string.ct_topic_security),
+    stringResource(Res.string.ct_topic_feature),
+)
 
 /**
  * Contact Support (design frame `0ZYbh`) — pushed route.
@@ -64,10 +95,12 @@ import dali.hamza.shared.ui.theme.LedgerStrings.Contact
 fun ContactSupportScreen(
     onBack: () -> Unit,
 ) {
-    var topic by remember { mutableStateOf<String?>(null) }
+    // index into contactTopics() — display strings change per locale
+    var topicIndex by remember { mutableStateOf<Int?>(null) }
     var description by remember { mutableStateOf("") }
     var dispatched by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
+    val topics = contactTopics()
 
     Column(
         modifier = Modifier
@@ -75,7 +108,7 @@ fun ContactSupportScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = LedgerStrings.APP_TITLE,
+            title = "DINARLY",
             onBack = onBack,
         )
 
@@ -84,13 +117,13 @@ fun ContactSupportScreen(
 
             // ============ Hero =============================================
             Text(
-                text = Contact.HERO_TITLE,
+                text = stringResource(Res.string.ct_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = Contact.HERO_DESC,
+                text = stringResource(Res.string.ct_hero_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextSecondary,
             )
@@ -99,30 +132,37 @@ fun ContactSupportScreen(
 
             // ============ Contact options ==================================
             ContactOptionCard(
-                title = Contact.LIVE_CHAT,
-                description = Contact.LIVE_CHAT_DESC,
+                title = stringResource(Res.string.ct_live_chat),
+                description = stringResource(Res.string.ct_live_chat_desc),
                 icon = Icons.AutoMirrored.Outlined.Chat,
                 tint = LedgerColors.Gold,
-                badge = { LedgerChip(text = Contact.PREMIUM, tint = LedgerColors.Gold, cornerRadius = 4.dp, fontSize = 9.sp) },
+                badge = {
+                    LedgerChip(
+                        text = stringResource(Res.string.ct_premium),
+                        tint = LedgerColors.Gold,
+                        cornerRadius = 4.dp,
+                        fontSize = 9.sp,
+                    )
+                },
                 footer = {
-                    FooterLink(text = Contact.INITIATE, tint = LedgerColors.Gold)
+                    FooterLink(text = stringResource(Res.string.ct_initiate), tint = LedgerColors.Gold)
                 },
             )
             Spacer(Modifier.height(16.dp))
             ContactOptionCard(
-                title = Contact.PHONE,
-                description = Contact.PHONE_DESC,
+                title = stringResource(Res.string.ct_phone),
+                description = stringResource(Res.string.ct_phone_desc),
                 icon = Icons.Outlined.Call,
                 tint = LedgerColors.Blue,
-                footer = { FooterValue(text = Contact.PHONE_VALUE) },
+                footer = { FooterValue(text = "+41 44 555 12 34") },
             )
             Spacer(Modifier.height(16.dp))
             ContactOptionCard(
-                title = Contact.DISPATCH,
-                description = Contact.DISPATCH_DESC,
+                title = stringResource(Res.string.ct_dispatch),
+                description = stringResource(Res.string.ct_dispatch_desc),
                 icon = Icons.Outlined.MailOutline,
                 tint = LedgerColors.Blue,
-                footer = { FooterValue(text = Contact.DISPATCH_VALUE) },
+                footer = { FooterValue(text = "liaison@sovereign.vault") },
             )
 
             Spacer(Modifier.height(32.dp))
@@ -131,8 +171,8 @@ fun ContactSupportScreen(
             BentoCard(fill = LedgerColors.SurfaceRaised, cornerRadius = 16.dp) {
                 if (dispatched) {
                     EmptyState(
-                        title = Contact.SUCCESS_TITLE,
-                        message = Contact.SUCCESS_DESC,
+                        title = stringResource(Res.string.ct_success_title),
+                        message = stringResource(Res.string.ct_success_desc),
                         icon = Icons.Outlined.MarkEmailRead,
                         iconTint = LedgerColors.Green,
                     )
@@ -147,7 +187,7 @@ fun ContactSupportScreen(
                             tint = LedgerColors.TextTertiary,
                         )
                         Text(
-                            text = Contact.FORM_TITLE,
+                            text = stringResource(Res.string.ct_form_title),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = LedgerColors.TextPrimary,
                         )
@@ -157,7 +197,7 @@ fun ContactSupportScreen(
 
                     // ---- subject category (design select) -----------------
                     Text(
-                        text = Contact.SUBJECT_LABEL,
+                        text = stringResource(Res.string.ct_subject_label),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         color = LedgerColors.TextSecondary,
                     )
@@ -174,9 +214,10 @@ fun ContactSupportScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = topic ?: Contact.SUBJECT_PLACEHOLDER,
+                                text = topicIndex?.let { topics[it] }
+                                    ?: stringResource(Res.string.ct_subject_placeholder),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = if (topic != null) {
+                                color = if (topicIndex != null) {
                                     LedgerColors.TextPrimary
                                 } else {
                                     LedgerColors.TextTertiary
@@ -193,7 +234,7 @@ fun ContactSupportScreen(
                             expanded = menuOpen,
                             onDismissRequest = { menuOpen = false },
                         ) {
-                            Contact.topics.forEach { option ->
+                            topics.forEachIndexed { index, option ->
                                 DropdownMenuItem(
                                     text = {
                                         Text(
@@ -202,7 +243,7 @@ fun ContactSupportScreen(
                                         )
                                     },
                                     onClick = {
-                                        topic = option
+                                        topicIndex = index
                                         menuOpen = false
                                     },
                                 )
@@ -214,7 +255,7 @@ fun ContactSupportScreen(
 
                     // ---- detailed description -----------------------------
                     Text(
-                        text = Contact.DESCRIPTION_LABEL,
+                        text = stringResource(Res.string.ct_description_label),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         color = LedgerColors.TextSecondary,
                     )
@@ -222,18 +263,18 @@ fun ContactSupportScreen(
                     LedgerTextArea(
                         value = description,
                         onValueChange = { description = it },
-                        placeholder = Contact.DESCRIPTION_PLACEHOLDER,
+                        placeholder = stringResource(Res.string.ct_description_placeholder),
                         minHeight = 200.dp,
                     )
 
                     Spacer(Modifier.height(24.dp))
 
                     LedgerButton(
-                        text = Contact.SUBMIT,
+                        text = stringResource(Res.string.ct_submit),
                         onClick = { dispatched = true },
                         trailingIcon = Icons.Outlined.Send,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = topic != null && description.isNotBlank(),
+                        enabled = topicIndex != null && description.isNotBlank(),
                     )
                 }
             }

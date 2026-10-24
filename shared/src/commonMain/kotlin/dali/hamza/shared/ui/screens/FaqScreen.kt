@@ -48,8 +48,22 @@ import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerSearchField
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
-import dali.hamza.shared.ui.theme.LedgerStrings.Faq
+import dali.hamza.shared.ui.content.FaqEntry
+import dali.hamza.shared.ui.content.faqAccountEntries
+import dali.hamza.shared.ui.content.faqSecurityEntries
+import dali.hamza.shared.ui.content.faqTradingLinks
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.faq_account
+import echangecurrencyapp.shared.generated.resources.faq_account_desc
+import echangecurrencyapp.shared.generated.resources.faq_hero
+import echangecurrencyapp.shared.generated.resources.faq_hero_desc
+import echangecurrencyapp.shared.generated.resources.faq_no_results
+import echangecurrencyapp.shared.generated.resources.faq_no_results_for
+import echangecurrencyapp.shared.generated.resources.faq_results_for
+import echangecurrencyapp.shared.generated.resources.faq_search_hint
+import echangecurrencyapp.shared.generated.resources.faq_security
+import echangecurrencyapp.shared.generated.resources.faq_trading
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Frequently Asked Questions (design frame `MegbU`) — pushed route.
@@ -73,7 +87,7 @@ fun FaqScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = LedgerStrings.APP_TITLE,
+            title = "DINARLY",
             onBack = onBack,
         )
 
@@ -82,13 +96,13 @@ fun FaqScreen(
 
             // ============ Hero =============================================
             Text(
-                text = Faq.HERO_TITLE,
+                text = stringResource(Res.string.faq_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = Faq.HERO_DESC,
+                text = stringResource(Res.string.faq_hero_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
@@ -99,23 +113,25 @@ fun FaqScreen(
             LedgerSearchField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = Faq.SEARCH_HINT,
+                placeholder = stringResource(Res.string.faq_search_hint),
             )
 
             Spacer(Modifier.height(32.dp))
 
+            val securityEntries = faqSecurityEntries()
+            val accountEntries = faqAccountEntries()
             val normalized = query.trim()
             if (normalized.isEmpty()) {
                 // ============ Security (accordion) =========================
                 BentoCard {
                     CategoryHeader(
-                        title = Faq.SECURITY_TITLE,
+                        title = stringResource(Res.string.faq_security),
                         icon = Icons.Outlined.Security,
                         iconTint = LedgerColors.Green,
                     )
                     Spacer(Modifier.height(24.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Faq.security.forEachIndexed { index, entry ->
+                        securityEntries.forEachIndexed { index, entry ->
                             AccordionRow(
                                 question = entry.question,
                                 answer = entry.answer,
@@ -138,14 +154,14 @@ fun FaqScreen(
                 // ============ Trading & Markets (links) ====================
                 BentoCard(fill = LedgerColors.Canvas, cornerRadius = 16.dp) {
                     CategoryHeader(
-                        title = Faq.TRADING_TITLE,
+                        title = stringResource(Res.string.faq_trading),
                         icon = Icons.Outlined.QueryStats,
                         iconTint = LedgerColors.Blue,
                         iconTileRadius = 12.dp,
                     )
                     Spacer(Modifier.height(24.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Faq.trading.forEach { link ->
+                        faqTradingLinks().forEach { link ->
                             LedgerListRow(
                                 label = link,
                                 onClick = {},
@@ -159,20 +175,20 @@ fun FaqScreen(
                 // ============ Account Management (QA cards) ================
                 BentoCard(cornerRadius = 16.dp) {
                     CategoryHeader(
-                        title = Faq.ACCOUNT_TITLE,
+                        title = stringResource(Res.string.faq_account),
                         icon = Icons.Outlined.Settings,
                         iconTint = LedgerColors.Blue,
                         iconTileRadius = 8.dp,
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = Faq.ACCOUNT_DESC,
+                        text = stringResource(Res.string.faq_account_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
                     )
                     Spacer(Modifier.height(24.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Faq.account.forEachIndexed { index, entry ->
+                        accountEntries.forEachIndexed { index, entry ->
                             CompactQaCard(
                                 title = entry.question,
                                 body = entry.answer,
@@ -188,19 +204,19 @@ fun FaqScreen(
                 Spacer(Modifier.height(24.dp))
             } else {
                 // ============ Search results =================================
-                val results = (Faq.security + Faq.account).filter {
+                val results = (securityEntries + accountEntries).filter {
                     it.question.contains(normalized, ignoreCase = true) ||
                         it.answer.contains(normalized, ignoreCase = true)
                 }
                 if (results.isEmpty()) {
                     EmptyState(
-                        title = Faq.NO_RESULTS_TITLE,
-                        message = Faq.noResults(normalized),
+                        title = stringResource(Res.string.faq_no_results),
+                        message = stringResource(Res.string.faq_no_results_for, normalized),
                     )
                 } else {
                     BentoCard {
                         Text(
-                            text = "${results.size} result(s) for \"$normalized\"",
+                            text = stringResource(Res.string.faq_results_for, results.size, normalized),
                             style = MaterialTheme.typography.labelMedium,
                             color = LedgerColors.TextSecondary,
                         )

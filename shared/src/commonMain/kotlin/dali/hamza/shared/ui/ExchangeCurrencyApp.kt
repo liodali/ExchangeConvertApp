@@ -17,6 +17,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +85,15 @@ import dali.hamza.shared.ui.theme.LedgerAppearance
 import dali.hamza.shared.ui.theme.LedgerColorPalette
 import dali.hamza.shared.ui.theme.LedgerThemeMode
 import dali.hamza.shared.ui.theme.LedgerColors
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.legal_privacy
+import echangecurrencyapp.shared.generated.resources.legal_terms
+import echangecurrencyapp.shared.generated.resources.lock_locked
+import echangecurrencyapp.shared.generated.resources.lock_not_setup
+import echangecurrencyapp.shared.generated.resources.lock_try_again
+import echangecurrencyapp.shared.generated.resources.lock_unlock
+import echangecurrencyapp.shared.generated.resources.lock_verify
+import org.jetbrains.compose.resources.stringResource
 import dali.hamza.shared.ui.theme.LocalLedgerAppearance
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
@@ -241,7 +256,14 @@ fun ExchangeCurrencyApp(
         // Canvas for BOTH branches: the onboarding branch has no app
         // container (Scaffold/Box below), so without this the raw light
         // window background bleeds through behind onboarding.
-        Box(modifier = Modifier.fillMaxSize().background(LedgerColors.Canvas)) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(LedgerColors.Canvas)
+                // Protect the whole shell, including the rail, from landscape
+                // cutouts and side navigation bars. Keep the canvas full bleed.
+                .then(if (isIos()) Modifier else Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+                )),
+        ) {
         if (!onboarded) {
             OnboardingScreen(
                 currencies = sharedState.currencies,
@@ -457,7 +479,7 @@ fun ExchangeCurrencyApp(
                 composable(Routes.TERMS) {
                     PageCanvas {
                     LegalScreen(
-                        title = "Terms & Conditions",
+                        title = stringResource(Res.string.legal_terms),
                         url = dali.hamza.shared.platform.AppLinks.TERMS_URL,
                         onBack = { navController.popBackStack() },
                     )
@@ -466,7 +488,7 @@ fun ExchangeCurrencyApp(
                 composable(Routes.PRIVACY) {
                     PageCanvas {
                     LegalScreen(
-                        title = "Privacy Policy",
+                        title = stringResource(Res.string.legal_privacy),
                         url = dali.hamza.shared.platform.AppLinks.PRIVACY_URL,
                         onBack = { navController.popBackStack() },
                     )
@@ -583,9 +605,9 @@ fun ExchangeCurrencyApp(
             }
         } else {
             Scaffold(
-                // full-bleed canvas — hosts opt into system-bar insets where
-                // the design needs them (original Android behaviour).
-                contentWindowInsets = WindowInsets(0.dp),
+                // Headers own the top inset. Scaffold protects detail screens
+                // without a bottom bar and uses the bar height when present.
+                contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom),
                 modifier = modifier
                     .fillMaxSize()
                     .background(LedgerColors.Canvas)
@@ -604,6 +626,8 @@ fun ExchangeCurrencyApp(
                     Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding)
+                        .imePadding()
                         .then(keyboardSink),
                     mode,
                 )
@@ -695,16 +719,16 @@ private fun LockScreen(
             LedgerLogoMark(size = 72.dp)
             Spacer(Modifier.height(24.dp))
             Text(
-                text = "Sovereign Ledger",
+                text = "Dinarly",
                 style = MaterialTheme.typography.headlineMedium,
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 text = if (cancelled) {
-                    "You need to verify your biometrics to continue"
+                    stringResource(Res.string.lock_verify)
                 } else {
-                    "Your ledger is locked"
+                    stringResource(Res.string.lock_locked)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (cancelled) LedgerColors.Gold else LedgerColors.TextTertiary,
@@ -713,9 +737,9 @@ private fun LockScreen(
             Spacer(Modifier.height(32.dp))
             LedgerButton(
                 text = when {
-                    cancelled -> "Try again"
-                    canPrompt -> "Unlock"
-                    else -> "Biometric not set up — tap to retry"
+                    cancelled -> stringResource(Res.string.lock_try_again)
+                    canPrompt -> stringResource(Res.string.lock_unlock)
+                    else -> stringResource(Res.string.lock_not_setup)
                 },
                 onClick = onPrompt,
             )

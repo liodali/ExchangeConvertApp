@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -71,6 +77,7 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         appWidgetId = intent?.extras?.getInt(
             AppWidgetManager.EXTRA_APPWIDGET_ID,
             AppWidgetManager.INVALID_APPWIDGET_ID,
@@ -102,8 +109,8 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
         val existing = repository.configs().firstOrNull { it.id == appWidgetId.toString() }
         // keep the widget's kind on reconfigure (set at self-configuration)
         val existingType = existing?.type ?: WidgetType.MARKET_CARD
-        val prefillBase = intent?.extras?.getString(dali.hamza.shared.ui.theme.LedgerStrings.Widgets.PREFILL_BASE)
-        val prefillQuote = intent?.extras?.getString(dali.hamza.shared.ui.theme.LedgerStrings.Widgets.PREFILL_QUOTE)
+        val prefillBase = intent?.extras?.getString(dali.hamza.shared.platform.WidgetExtras.PREFILL_BASE)
+        val prefillQuote = intent?.extras?.getString(dali.hamza.shared.platform.WidgetExtras.PREFILL_QUOTE)
         val pending = runCatching { repository.takePendingPair() }.getOrNull()
         val fallbackBase = storage.getCurrency().ifBlank { "USD" }
         val defaultBase = existing?.base ?: prefillBase ?: pending?.first ?: fallbackBase
@@ -176,6 +183,9 @@ private fun ConfigScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xB3000000))
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+            ))
             .clickable(interactionSource = sheetInteraction, indication = null) { onCancel() },
     ) {
         Column(

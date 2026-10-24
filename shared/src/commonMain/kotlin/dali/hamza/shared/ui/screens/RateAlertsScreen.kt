@@ -69,10 +69,44 @@ import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
+import dali.hamza.shared.ui.viewmodel.RateAlertToggled
+import dali.hamza.shared.ui.viewmodel.RateAlertsMessage
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.alerts_add
+import echangecurrencyapp.shared.generated.resources.alerts_awaiting
+import echangecurrencyapp.shared.generated.resources.alerts_every
+import echangecurrencyapp.shared.generated.resources.alerts_free_note
+import echangecurrencyapp.shared.generated.resources.alerts_header
+import echangecurrencyapp.shared.generated.resources.alerts_last_rate
+import echangecurrencyapp.shared.generated.resources.alerts_local_deleted
+import echangecurrencyapp.shared.generated.resources.alerts_local_hint
+import echangecurrencyapp.shared.generated.resources.alerts_local_section
+import echangecurrencyapp.shared.generated.resources.alerts_moved_to_push
+import echangecurrencyapp.shared.generated.resources.alerts_move_to_push
+import echangecurrencyapp.shared.generated.resources.alerts_new
+import echangecurrencyapp.shared.generated.resources.alerts_notified_at
+import echangecurrencyapp.shared.generated.resources.alerts_pair
+import echangecurrencyapp.shared.generated.resources.alerts_paused
+import echangecurrencyapp.shared.generated.resources.alerts_permission_banner
+import echangecurrencyapp.shared.generated.resources.alerts_permission_enable
+import echangecurrencyapp.shared.generated.resources.alerts_push_fallback
+import echangecurrencyapp.shared.generated.resources.alerts_resumed
+import echangecurrencyapp.shared.generated.resources.alerts_server_deleted
+import echangecurrencyapp.shared.generated.resources.alerts_server_section
+import echangecurrencyapp.shared.generated.resources.alerts_threshold_value
+import echangecurrencyapp.shared.generated.resources.alerts_title
+import echangecurrencyapp.shared.generated.resources.alerts_usage
+import echangecurrencyapp.shared.generated.resources.alerts_empty_message
+import echangecurrencyapp.shared.generated.resources.alerts_empty_title
+import echangecurrencyapp.shared.generated.resources.common_delete
+import dali.hamza.shared.common.DateUtils
+import dali.hamza.shared.data.alerts.formatPercent
+import dali.hamza.shared.data.alerts.formatRate
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Rate Alerts (pushed route from Account) — manage the tier-capped
@@ -95,10 +129,27 @@ fun RateAlertsScreen(
     // round-trip — the row's button already showed a spinner meanwhile)
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(viewModel) {
-        viewModel.deleteEvents.collect { snackbarHostState.showSnackbar(it) }
+        viewModel.deleteEvents.collect { source ->
+            snackbarHostState.showSnackbar(
+                getString(
+                    when (source) {
+                        AlertSource.SERVER -> Res.string.alerts_server_deleted
+                        AlertSource.LOCAL -> Res.string.alerts_local_deleted
+                    }
+                )
+            )
+        }
     }
     LaunchedEffect(viewModel) {
-        viewModel.toggleEvents.collect { snackbarHostState.showSnackbar(it) }
+        viewModel.toggleEvents.collect { event ->
+            snackbarHostState.showSnackbar(
+                getString(
+                    if (event.enabled) Res.string.alerts_resumed else Res.string.alerts_paused,
+                    event.base,
+                    event.quote,
+                )
+            )
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -108,14 +159,14 @@ fun RateAlertsScreen(
                 .verticalScroll(rememberScrollState()),
         ) {
         LedgerTopAppBar(
-            title = LedgerStrings.RateAlerts.TITLE,
+            title = stringResource(Res.string.alerts_title),
             onBack = onBack,
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(16.dp))
             Text(
-                text = LedgerStrings.RateAlerts.HEADER_NOTE,
+                text = stringResource(Res.string.alerts_header),
                 style = MaterialTheme.typography.bodySmall,
                 color = LedgerColors.TextTertiary,
             )
@@ -127,8 +178,17 @@ fun RateAlertsScreen(
             }
 
             viewModel.message?.let { message ->
+                val messageText = when (message) {
+                    is RateAlertsMessage.PushFallback -> stringResource(Res.string.alerts_push_fallback)
+                    is RateAlertsMessage.MovedToPush -> stringResource(
+                        Res.string.alerts_moved_to_push,
+                        message.base,
+                        message.quote,
+                    )
+                    is RateAlertsMessage.Failure -> message.text
+                }
                 Text(
-                    text = message,
+                    text = messageText,
                     style = MaterialTheme.typography.bodySmall,
                     color = if (viewModel.messageIsPositive) {
                         LedgerColors.Gold
@@ -141,19 +201,20 @@ fun RateAlertsScreen(
 
             if (viewModel.alerts.isEmpty()) {
                 EmptyState(
-                    title = LedgerStrings.RateAlerts.EMPTY_TITLE,
-                    message = LedgerStrings.RateAlerts.EMPTY_MESSAGE,
+                    title = stringResource(Res.string.alerts_empty_title),
+                    message = stringResource(Res.string.alerts_empty_message),
                     icon = Icons.Outlined.NotificationsActive,
                     iconTint = LedgerColors.Blue,
-                    actionLabel = LedgerStrings.RateAlerts.NEW_ALERT,
+                    actionLabel = stringResource(Res.string.alerts_new),
                     onAction = { showAddDialog = true },
                 )
             } else {
                 // two engines, two sections — an alert lives in exactly one
                 if (viewModel.serverAlerts.isNotEmpty()) {
                     SectionHeader(
-                        title = LedgerStrings.RateAlerts.SERVER_SECTION_TITLE,
-                        usage = LedgerStrings.RateAlerts.usage(
+                        title = stringResource(Res.string.alerts_server_section),
+                        usage = stringResource(
+                            Res.string.alerts_usage,
                             viewModel.serverAlerts.size,
                             viewModel.maxServerAlerts,
                         ),
@@ -178,8 +239,9 @@ fun RateAlertsScreen(
                 }
                 if (viewModel.localAlerts.isNotEmpty()) {
                     SectionHeader(
-                        title = LedgerStrings.RateAlerts.LOCAL_SECTION_TITLE,
-                        usage = LedgerStrings.RateAlerts.usage(
+                        title = stringResource(Res.string.alerts_local_section),
+                        usage = stringResource(
+                            Res.string.alerts_usage,
                             viewModel.localAlerts.size,
                             viewModel.maxLocalAlerts,
                         ),
@@ -190,7 +252,7 @@ fun RateAlertsScreen(
                     if (viewModel.serverAlerts.isEmpty() && !serverAtCap) {
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            text = LedgerStrings.RateAlerts.LOCAL_TO_PUSH_HINT,
+                            text = stringResource(Res.string.alerts_local_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = LedgerColors.TextTertiary,
                         )
@@ -219,7 +281,7 @@ fun RateAlertsScreen(
                 }
 
                 Text(
-                    text = LedgerStrings.RateAlerts.FREE_PLAN_NOTE,
+                    text = stringResource(Res.string.alerts_free_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
@@ -228,7 +290,7 @@ fun RateAlertsScreen(
                 // the dialog owns the per-delivery cap UX — the button only
                 // locks when BOTH lists are full
                 LedgerButton(
-                    text = LedgerStrings.RateAlerts.NEW_ALERT,
+                    text = stringResource(Res.string.alerts_new),
                     onClick = { showAddDialog = true },
                     leadingIcon = Icons.Outlined.Add,
                     enabled = !(serverAtCap && localAtCap),
@@ -299,13 +361,13 @@ private fun PermissionBanner(onEnable: () -> Unit) {
             .padding(16.dp),
     ) {
         Text(
-            text = LedgerStrings.RateAlerts.PERMISSION_BANNER,
+            text = stringResource(Res.string.alerts_permission_banner),
             style = MaterialTheme.typography.bodySmall,
             color = LedgerColors.Gold,
             modifier = Modifier.weight(1f),
         )
         LedgerButton(
-            text = LedgerStrings.RateAlerts.PERMISSION_ACTION,
+            text = stringResource(Res.string.alerts_permission_enable),
             onClick = onEnable,
             variant = LedgerButtonVariant.TONAL,
         )
@@ -380,7 +442,7 @@ private fun AlertRow(
                 } else {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
-                        contentDescription = LedgerStrings.RateAlerts.DELETE_ALERT_LABEL,
+                        contentDescription = stringResource(Res.string.common_delete),
                         tint = LedgerColors.Canvas,
                     )
                 }
@@ -424,18 +486,18 @@ private fun AlertRow(
                     cornerRadius = 6.dp,
                 )
                 Text(
-                    text = LedgerStrings.RateAlerts.pairTitle(alert.base, alert.quote),
+                    text = stringResource(Res.string.alerts_pair, alert.base, alert.quote),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = LedgerColors.TextPrimary,
                 )
                 alert.lastRate?.let { rate ->
                     Text(
-                        text = LedgerStrings.RateAlerts.lastRateLabel(rate),
+                        text = stringResource(Res.string.alerts_last_rate, formatRate(rate)),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextSecondary,
                     )
                 } ?: Text(
-                    text = LedgerStrings.RateAlerts.AWAITING_CHECK,
+                    text = stringResource(Res.string.alerts_awaiting),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
@@ -443,7 +505,10 @@ private fun AlertRow(
                 // alerts wait a full interval) — only real firings are shown
                 if (alert.lastNotifiedAt > alert.createdAt) {
                     Text(
-                        text = LedgerStrings.RateAlerts.notifiedAt(alert.lastNotifiedAt),
+                        text = stringResource(
+                            Res.string.alerts_notified_at,
+                            DateUtils.formatDateTime(alert.lastNotifiedAt),
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -466,7 +531,7 @@ private fun AlertRow(
                             modifier = Modifier.size(16.dp),
                         )
                         Text(
-                            text = LedgerStrings.RateAlerts.CONVERT_TO_PUSH,
+                            text = stringResource(Res.string.alerts_move_to_push),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = LedgerColors.Blue,
                         )
@@ -485,8 +550,15 @@ private fun AlertRow(
     }
 }
 
+@Composable
 private fun modeChipLabel(alert: RateAlert): String = when (alert.mode) {
-    RateAlertMode.PERIODIC -> LedgerStrings.RateAlerts.modeLabel(alert.intervalMinutes)
-    RateAlertMode.THRESHOLD -> LedgerStrings.RateAlerts.thresholdLabel(alert.thresholdPercent)
+    RateAlertMode.PERIODIC -> stringResource(
+        Res.string.alerts_every,
+        alert.intervalMinutes / 60,
+    )
+    RateAlertMode.THRESHOLD -> stringResource(
+        Res.string.alerts_threshold_value,
+        formatPercent(alert.thresholdPercent),
+    )
 }
 

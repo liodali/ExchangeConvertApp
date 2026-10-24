@@ -29,7 +29,50 @@ import androidx.compose.ui.window.Dialog
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.platform.WidgetKind
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.alerts_pick_base
+import echangecurrencyapp.shared.generated.resources.alerts_pick_quote
+import echangecurrencyapp.shared.generated.resources.common_cancel
+import echangecurrencyapp.shared.generated.resources.common_from
+import echangecurrencyapp.shared.generated.resources.common_to
+import echangecurrencyapp.shared.generated.resources.wg_add
+import echangecurrencyapp.shared.generated.resources.wg_add_confirm
+import echangecurrencyapp.shared.generated.resources.wg_dialog_add_pair
+import echangecurrencyapp.shared.generated.resources.wg_dialog_grid_desc
+import echangecurrencyapp.shared.generated.resources.wg_dialog_grid_title
+import echangecurrencyapp.shared.generated.resources.wg_dialog_max_pairs
+import echangecurrencyapp.shared.generated.resources.wg_dialog_pick_desc
+import echangecurrencyapp.shared.generated.resources.wg_dialog_pick_title
+import echangecurrencyapp.shared.generated.resources.wg_kind_card
+import echangecurrencyapp.shared.generated.resources.wg_kind_card_desc
+import echangecurrencyapp.shared.generated.resources.wg_kind_convert
+import echangecurrencyapp.shared.generated.resources.wg_kind_convert_desc
+import echangecurrencyapp.shared.generated.resources.wg_kind_grid
+import echangecurrencyapp.shared.generated.resources.wg_kind_grid_desc
+import echangecurrencyapp.shared.generated.resources.wg_kind_wave
+import echangecurrencyapp.shared.generated.resources.wg_kind_wave_desc
+import echangecurrencyapp.shared.generated.resources.wg_new_pair
+import echangecurrencyapp.shared.generated.resources.wg_type
+import echangecurrencyapp.shared.generated.resources.wg_your_markets
+import org.jetbrains.compose.resources.stringResource
+
+/** Localized widget-kind title (was LedgerStrings.Widgets.kindTitle). */
+@Composable
+private fun kindTitle(kind: WidgetKind): String = when (kind) {
+    WidgetKind.MARKET_CARD -> stringResource(Res.string.wg_kind_card)
+    WidgetKind.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave)
+    WidgetKind.MARKET_GRID -> stringResource(Res.string.wg_kind_grid)
+    WidgetKind.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert)
+}
+
+/** Localized widget-kind description (was LedgerStrings.Widgets.kindDescription). */
+@Composable
+private fun kindDescription(kind: WidgetKind): String = when (kind) {
+    WidgetKind.MARKET_CARD -> stringResource(Res.string.wg_kind_card_desc)
+    WidgetKind.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave_desc)
+    WidgetKind.MARKET_GRID -> stringResource(Res.string.wg_kind_grid_desc)
+    WidgetKind.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert_desc)
+}
 
 /**
  * Add-widget dialog (Account → Widgets): pick a widget TYPE (card market /
@@ -68,7 +111,7 @@ fun AddWidgetPairDialog(
                     .verticalScroll(rememberScrollState()),
             ) {
                 Text(
-                    LedgerStrings.Widgets.ADD,
+                    stringResource(Res.string.wg_add),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = LedgerColors.TextPrimary,
@@ -76,7 +119,7 @@ fun AddWidgetPairDialog(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    LedgerStrings.Widgets.TYPE,
+                    stringResource(Res.string.wg_type),
                     style = MaterialTheme.typography.labelSmall,
                     color = LedgerColors.TextTertiary,
                 )
@@ -84,8 +127,8 @@ fun AddWidgetPairDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     WidgetKind.entries.forEach { option ->
                         KindCard(
-                            title = LedgerStrings.Widgets.kindTitle(option),
-                            description = LedgerStrings.Widgets.kindDescription(option),
+                            title = kindTitle(option),
+                            description = kindDescription(option),
                             selected = kind == option,
                             onClick = { kind = option },
                         )
@@ -96,7 +139,7 @@ fun AddWidgetPairDialog(
                     if (suggestedPairs.isNotEmpty()) {
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            LedgerStrings.Widgets.YOUR_MARKETS,
+                            stringResource(Res.string.wg_your_markets),
                             style = MaterialTheme.typography.labelSmall,
                             color = LedgerColors.TextTertiary,
                         )
@@ -112,20 +155,20 @@ fun AddWidgetPairDialog(
                     }
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        LedgerStrings.Widgets.NEW_PAIR,
+                        stringResource(Res.string.wg_new_pair),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         PairField(
-                            label = LedgerStrings.RateAlerts.BASE_LABEL,
+                            label = stringResource(Res.string.common_from),
                             code = base,
                             modifier = Modifier.weight(1f),
                             onClick = { pickingBase = true },
                         )
                         PairField(
-                            label = LedgerStrings.RateAlerts.QUOTE_LABEL,
+                            label = stringResource(Res.string.common_to),
                             code = quote,
                             modifier = Modifier.weight(1f),
                             onClick = { pickingQuote = true },
@@ -136,14 +179,14 @@ fun AddWidgetPairDialog(
                     Spacer(Modifier.height(12.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         KindCard(
-                            title = "Follow your markets",
-                            description = "Mirrors the markets selected in your Account.",
+                            title = stringResource(Res.string.wg_dialog_grid_title),
+                            description = stringResource(Res.string.wg_dialog_grid_desc),
                             selected = gridFollowDefault,
                             onClick = { gridFollowDefault = true },
                         )
                         KindCard(
-                            title = "Choose pairs",
-                            description = "Pick 2–3 pairs just for this widget.",
+                            title = stringResource(Res.string.wg_dialog_pick_title),
+                            description = stringResource(Res.string.wg_dialog_pick_desc),
                             selected = !gridFollowDefault,
                             onClick = { gridFollowDefault = false },
                         )
@@ -163,13 +206,13 @@ fun AddWidgetPairDialog(
                         if (gridPairs.size < 3) {
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 PairField(
-                                    label = LedgerStrings.RateAlerts.BASE_LABEL,
+                                    label = stringResource(Res.string.common_from),
                                     code = base,
                                     modifier = Modifier.weight(1f),
                                     onClick = { pickingBase = true },
                                 )
                                 PairField(
-                                    label = LedgerStrings.RateAlerts.QUOTE_LABEL,
+                                    label = stringResource(Res.string.common_to),
                                     code = quote,
                                     modifier = Modifier.weight(1f),
                                     onClick = { pickingQuote = true },
@@ -177,7 +220,7 @@ fun AddWidgetPairDialog(
                             }
                             Spacer(Modifier.height(8.dp))
                             LedgerButton(
-                                text = "Add pair (${gridPairs.size}/3)",
+                                text = stringResource(Res.string.wg_dialog_add_pair, gridPairs.size),
                                 onClick = {
                                     if (base != quote) gridPairs = gridPairs + (base to quote)
                                 },
@@ -186,7 +229,7 @@ fun AddWidgetPairDialog(
                             )
                         } else {
                             Text(
-                                "Maximum 3 pairs — tap a chip to remove one.",
+                                stringResource(Res.string.wg_dialog_max_pairs),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
                             )
@@ -196,7 +239,7 @@ fun AddWidgetPairDialog(
 
                 Spacer(Modifier.height(24.dp))
                 LedgerButton(
-                    text = LedgerStrings.Widgets.ADD_CONFIRM,
+                    text = stringResource(Res.string.wg_add_confirm),
                     onClick = { onAdd(kind, base, quote, if (gridCustom) gridPairs else emptyList()) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = gridValid && (!needsPair || base != quote),
@@ -204,7 +247,7 @@ fun AddWidgetPairDialog(
                 TextButton(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
-                ) { Text(LedgerStrings.RateAlerts.CANCEL, color = LedgerColors.TextTertiary) }
+                ) { Text(stringResource(Res.string.common_cancel), color = LedgerColors.TextTertiary) }
             }
         }
     }
@@ -212,7 +255,7 @@ fun AddWidgetPairDialog(
     CurrencyPickerSheet(
         visible = pickingBase,
         currencies = currencies,
-        title = LedgerStrings.RateAlerts.PICK_BASE_TITLE,
+        title = stringResource(Res.string.alerts_pick_base),
         onDismiss = { pickingBase = false },
         onCurrencySelected = { c ->
             if (c.name == quote) quote = base
@@ -223,7 +266,7 @@ fun AddWidgetPairDialog(
     CurrencyPickerSheet(
         visible = pickingQuote,
         currencies = currencies,
-        title = LedgerStrings.RateAlerts.PICK_QUOTE_TITLE,
+        title = stringResource(Res.string.alerts_pick_quote),
         onDismiss = { pickingQuote = false },
         onCurrencySelected = { c ->
             if (c.name == base) base = quote

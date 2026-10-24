@@ -49,9 +49,27 @@ import dali.hamza.shared.ui.components.LedgerSearchField
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
-import dali.hamza.shared.ui.theme.LedgerStrings.Faq
-import dali.hamza.shared.ui.theme.LedgerStrings.Support
+import dali.hamza.shared.ui.content.faqAccountEntries
+import dali.hamza.shared.ui.content.faqSecurityEntries
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.faq_no_results
+import echangecurrencyapp.shared.generated.resources.faq_no_results_for
+import echangecurrencyapp.shared.generated.resources.faq_results_for
+import echangecurrencyapp.shared.generated.resources.legal_privacy
+import echangecurrencyapp.shared.generated.resources.legal_terms
+import echangecurrencyapp.shared.generated.resources.sup_about
+import echangecurrencyapp.shared.generated.resources.sup_faq
+import echangecurrencyapp.shared.generated.resources.sup_faq_desc
+import echangecurrencyapp.shared.generated.resources.sup_feedback
+import echangecurrencyapp.shared.generated.resources.sup_feedback_desc
+import echangecurrencyapp.shared.generated.resources.sup_hero
+import echangecurrencyapp.shared.generated.resources.sup_legal
+import echangecurrencyapp.shared.generated.resources.sup_rate
+import echangecurrencyapp.shared.generated.resources.sup_results_for
+import echangecurrencyapp.shared.generated.resources.sup_search_hint
+import echangecurrencyapp.shared.generated.resources.sup_share
+import echangecurrencyapp.shared.generated.resources.sup_version
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Support & Information hub (design frame `9vaMD`) — pushed on compact
@@ -78,7 +96,7 @@ fun SupportScreen(
             .verticalScroll(rememberScrollState()),
     ) {
         LedgerTopAppBar(
-            title = LedgerStrings.APP_TITLE,
+            title = "DINARLY",
             onBack = onBack,
         )
 
@@ -87,7 +105,7 @@ fun SupportScreen(
 
             // ============ Hero =============================================
             Text(
-                text = Support.HERO_TITLE,
+                text = stringResource(Res.string.sup_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
@@ -97,7 +115,7 @@ fun SupportScreen(
             LedgerSearchField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = Support.SEARCH_HINT,
+                placeholder = stringResource(Res.string.sup_search_hint),
                 cornerRadius = 12,
             )
 
@@ -113,8 +131,8 @@ fun SupportScreen(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
                             HelpCategoryCard(
-                                title = Support.FAQ_TITLE,
-                                description = Support.FAQ_DESC,
+                                title = stringResource(Res.string.sup_faq),
+                                description = stringResource(Res.string.sup_faq_desc),
                                 icon = Icons.Outlined.HelpOutline,
                                 tint = LedgerColors.Blue,
                                 onClick = onOpenFaq,
@@ -123,8 +141,8 @@ fun SupportScreen(
                             // Feedback (Chatwoot live chat) is the support
                             // channel; Contact remains reachable by deep link.
                             HelpCategoryCard(
-                                title = Support.FEEDBACK_TITLE,
-                                description = Support.FEEDBACK_DESC,
+                                title = stringResource(Res.string.sup_feedback),
+                                description = stringResource(Res.string.sup_feedback_desc),
                                 icon = Icons.Outlined.Reviews,
                                 tint = LedgerColors.Gold,
                                 onClick = onOpenFeedback,
@@ -137,15 +155,15 @@ fun SupportScreen(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
                             HelpCategoryCard(
-                                title = Support.FAQ_TITLE,
-                                description = Support.FAQ_DESC,
+                                title = stringResource(Res.string.sup_faq),
+                                description = stringResource(Res.string.sup_faq_desc),
                                 icon = Icons.Outlined.HelpOutline,
                                 tint = LedgerColors.Blue,
                                 onClick = onOpenFaq,
                             )
                             HelpCategoryCard(
-                                title = Support.FEEDBACK_TITLE,
-                                description = Support.FEEDBACK_DESC,
+                                title = stringResource(Res.string.sup_feedback),
+                                description = stringResource(Res.string.sup_feedback_desc),
                                 icon = Icons.Outlined.Reviews,
                                 tint = LedgerColors.Gold,
                                 onClick = onOpenFeedback,
@@ -162,7 +180,7 @@ fun SupportScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
-                        text = Support.LEGAL_TITLE,
+                        text = stringResource(Res.string.sup_legal),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = LedgerColors.TextPrimary,
                     )
@@ -176,29 +194,29 @@ fun SupportScreen(
                 }
                 Spacer(Modifier.height(16.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LegalRow(Support.legal[0], Icons.Outlined.Gavel, LedgerColors.TextTertiary, onOpenTerms)
-                    LegalRow(Support.legal[1], Icons.Outlined.Description, LedgerColors.TextTertiary, onOpenPrivacy)
-                    LegalRow(Support.legal[2], Icons.Outlined.HelpOutline, LedgerColors.TextTertiary, onOpenAbout)
-                    LegalRow(Support.legal[3], Icons.Outlined.StarOutline, LedgerColors.Gold) {
+                    LegalRow(stringResource(Res.string.legal_terms), Icons.Outlined.Gavel, LedgerColors.TextTertiary, onOpenTerms)
+                    LegalRow(stringResource(Res.string.legal_privacy), Icons.Outlined.Description, LedgerColors.TextTertiary, onOpenPrivacy)
+                    LegalRow(stringResource(Res.string.sup_about), Icons.Outlined.HelpOutline, LedgerColors.TextTertiary, onOpenAbout)
+                    LegalRow(stringResource(Res.string.sup_rate), Icons.Outlined.StarOutline, LedgerColors.Gold) {
                         dali.hamza.shared.platform.openUri(dali.hamza.shared.platform.AppLinks.PLAY_URL)
                     }
-                    LegalRow(Support.legal[4], Icons.Outlined.Share, LedgerColors.Blue)
+                    LegalRow(stringResource(Res.string.sup_share), Icons.Outlined.Share, LedgerColors.Blue)
                 }
             } else {
                 // ============ Search results ================================
-                val results = (Faq.security + Faq.account).filter {
+                val results = (faqSecurityEntries() + faqAccountEntries()).filter {
                     it.question.contains(normalized, ignoreCase = true) ||
                         it.answer.contains(normalized, ignoreCase = true)
                 }
                 if (results.isEmpty()) {
                     EmptyState(
-                        title = Faq.NO_RESULTS_TITLE,
-                        message = Faq.noResults(normalized),
+                        title = stringResource(Res.string.faq_no_results),
+                        message = stringResource(Res.string.faq_no_results_for, normalized),
                     )
                 } else {
                     BentoCard {
                         Text(
-                            text = "${results.size} result(s) for \"$normalized\"",
+                            text = stringResource(Res.string.sup_results_for, results.size, normalized),
                             style = MaterialTheme.typography.labelMedium,
                             color = LedgerColors.TextSecondary,
                         )
@@ -229,7 +247,7 @@ fun SupportScreen(
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
                     Text(
-                        text = "V${dali.hamza.shared.platform.appVersionName()}",
+                        text = stringResource(Res.string.sup_version, dali.hamza.shared.platform.appVersionName()),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontFamily = FontFamily.Monospace,
                         ),
@@ -238,7 +256,7 @@ fun SupportScreen(
                 }
             }
             Text(
-                text = Support.COPYRIGHT,
+                text = "© 2026 Adetify.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextMutedAlt,
             )

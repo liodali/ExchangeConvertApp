@@ -24,8 +24,13 @@ import dali.hamza.shared.platform.chatwootHtml
 import dali.hamza.shared.ui.components.EmptyState
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.theme.LocalLedgerAppearance
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.chatwoot_title
+import echangecurrencyapp.shared.generated.resources.sup_chat
+import echangecurrencyapp.shared.generated.resources.sup_chat_desc
+import echangecurrencyapp.shared.generated.resources.sup_chat_soon
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Live chat / feedback — the Chatwoot inbox's full-page chat in a
@@ -45,7 +50,7 @@ fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         LedgerTopAppBar(
-            title = LedgerStrings.Support.CHAT_TITLE,
+            title = stringResource(Res.string.sup_chat),
             onBack = onBack,
         )
         if (configured) {
@@ -71,13 +76,13 @@ fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     EmptyState(
-                        title = LedgerStrings.Support.CHAT_UNAVAILABLE,
-                        message = LedgerStrings.Support.CHAT_UNAVAILABLE_DESC,
+                        title = stringResource(Res.string.sup_chat_soon),
+                        message = stringResource(Res.string.sup_chat_desc),
                         icon = Icons.Outlined.Forum,
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Feedback: ${LedgerStrings.APP_TITLE} · Account → Support",
+                        text = stringResource(Res.string.chatwoot_title),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,
                     )

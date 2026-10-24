@@ -2,6 +2,11 @@ package dali.hamza.shared.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.common_search
 import dali.hamza.shared.domain.models.Currency
+import dali.hamza.shared.platform.isIos
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Searchable currency picker, hosted in a modal bottom sheet
@@ -57,7 +66,11 @@ fun CurrencyPickerSheet(
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column {
+        Column(
+            modifier = if (isIos()) Modifier else Modifier.windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+            ),
+        ) {
             Text(
                 text = title,
                 fontSize = 18.sp,
@@ -68,7 +81,7 @@ fun CurrencyPickerSheet(
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("Search") },
+                label = { Text(stringResource(Res.string.common_search)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()

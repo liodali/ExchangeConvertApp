@@ -81,11 +81,46 @@ import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
-import dali.hamza.shared.ui.theme.LedgerStrings
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.viewmodel.PairCardData
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
+import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.alerts_active_for
+import echangecurrencyapp.shared.generated.resources.alerts_add_for
+import echangecurrencyapp.shared.generated.resources.common_amount
+import echangecurrencyapp.shared.generated.resources.common_from
+import echangecurrencyapp.shared.generated.resources.common_to
+import echangecurrencyapp.shared.generated.resources.home_day_high
+import echangecurrencyapp.shared.generated.resources.home_day_low
+import echangecurrencyapp.shared.generated.resources.home_change
+import echangecurrencyapp.shared.generated.resources.home_execute_exchange
+import echangecurrencyapp.shared.generated.resources.home_fee
+import echangecurrencyapp.shared.generated.resources.home_fee_value
+import echangecurrencyapp.shared.generated.resources.home_from_currency
+import echangecurrencyapp.shared.generated.resources.home_greeting_afternoon
+import echangecurrencyapp.shared.generated.resources.home_greeting_evening
+import echangecurrencyapp.shared.generated.resources.home_greeting_morning
+import echangecurrencyapp.shared.generated.resources.home_greeting_night
+import echangecurrencyapp.shared.generated.resources.home_history
+import echangecurrencyapp.shared.generated.resources.home_live
+import echangecurrencyapp.shared.generated.resources.home_loading_7d
+import echangecurrencyapp.shared.generated.resources.home_loading_rates
+import echangecurrencyapp.shared.generated.resources.home_market_overview
+import echangecurrencyapp.shared.generated.resources.home_no_exchanges
+import echangecurrencyapp.shared.generated.resources.home_open_full_converter
+import echangecurrencyapp.shared.generated.resources.home_open_history_desc
+import echangecurrencyapp.shared.generated.resources.home_recent_activity
+import echangecurrencyapp.shared.generated.resources.home_refresh_desc
+import echangecurrencyapp.shared.generated.resources.home_select
+import echangecurrencyapp.shared.generated.resources.home_to_currency
+import echangecurrencyapp.shared.generated.resources.home_today
+import echangecurrencyapp.shared.generated.resources.home_yesterday
+import echangecurrencyapp.shared.generated.resources.home_your_markets
+import echangecurrencyapp.shared.generated.resources.quick_amount_placeholder
+import echangecurrencyapp.shared.generated.resources.quick_swap_desc
+import echangecurrencyapp.shared.generated.resources.quick_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.mp.KoinPlatform
 
 /**
@@ -159,13 +194,13 @@ fun HomeScreen(
         LedgerTopAppBar(
             title = state.username,
             leading = { LedgerLogoMark() },
-            greeting = remember { greetingForHour(currentHourOfDay()) },
+            greeting = greetingForHour(currentHourOfDay()),
             avatarInitials = state.username,
             trailing = {
                 IconButton(onClick = viewModel::refresh) {
                     Icon(
                         Icons.Outlined.Sync,
-                        contentDescription = "Refresh rates",
+                        contentDescription = stringResource(Res.string.home_refresh_desc),
                         tint = LedgerColors.Blue,
                     )
                 }
@@ -293,7 +328,7 @@ fun HomeScreen(
         CurrencyPickerSheet(
             visible = true,
             currencies = state.currencies,
-            title = if (pickingFrom) "From currency" else "To currency",
+            title = if (pickingFrom) stringResource(Res.string.home_from_currency) else stringResource(Res.string.home_to_currency),
             onDismiss = { pickerFor = null },
             onCurrencySelected = { currency ->
                 if (pickingFrom) viewModel.selectFromCurrency(currency)
@@ -355,7 +390,7 @@ private fun MarketOverviewSection(
         modifier = Modifier.fillMaxWidth(),
     ) {
         SectionHeader(
-            title = "Market Overview",
+            title = stringResource(Res.string.home_market_overview),
             icon = Icons.Outlined.CurrencyExchange,
             modifier = Modifier.weight(1f),
         )
@@ -366,7 +401,7 @@ private fun MarketOverviewSection(
     if (pairCards.isEmpty()) {
         BentoCard(fill = LedgerColors.Card) {
             Text(
-                text = "Loading live rates…",
+                text = stringResource(Res.string.home_loading_rates),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextTertiary,
             )
@@ -530,9 +565,9 @@ private fun AlertBell(
                 Icons.Outlined.NotificationsNone
             },
             contentDescription = if (hasAlert) {
-                LedgerStrings.RateAlerts.alertActiveFor(pair)
+                stringResource(Res.string.alerts_active_for, pair)
             } else {
-                LedgerStrings.RateAlerts.addAlertFor(pair)
+                stringResource(Res.string.alerts_add_for, pair)
             },
             tint = if (hasAlert) LedgerColors.Gold else LedgerColors.TextTertiary,
             modifier = Modifier.size(18.dp),
@@ -599,7 +634,7 @@ private fun LiveChip() {
         )
         Spacer(Modifier.width(6.dp))
         Text(
-            text = "LIVE",
+            text = stringResource(Res.string.home_live),
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.Green,
         )
@@ -623,20 +658,20 @@ private fun QuickExchangeSection(
     onExecute: () -> Unit,
     onOpenConverter: () -> Unit,
 ) {
-    SectionHeader(title = "Quick Exchange", icon = Icons.Outlined.SwapHoriz)
+    SectionHeader(title = stringResource(Res.string.quick_title), icon = Icons.Outlined.SwapHoriz)
     Spacer(Modifier.height(16.dp))
 
     BentoCard(fill = LedgerColors.NavyPanel) {
         LedgerInput(
             value = amount,
             onValueChange = onAmountChange,
-            label = "Amount",
-            placeholder = "0.00",
+            label = stringResource(Res.string.common_amount),
+            placeholder = stringResource(Res.string.quick_amount_placeholder),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
         Spacer(Modifier.height(16.dp))
 
-        CurrencyRow(label = "From", currency = from, onClick = onPickFrom)
+        CurrencyRow(label = stringResource(Res.string.common_from), currency = from, onClick = onPickFrom)
 
         // swap ⇄ — centered between the two currency rows, compact
         Box(
@@ -655,14 +690,14 @@ private fun QuickExchangeSection(
             ) {
                 Icon(
                     Icons.Outlined.SwapHoriz,
-                    contentDescription = "Swap currencies",
+                    contentDescription = stringResource(Res.string.quick_swap_desc),
                     tint = LedgerColors.Green,
                     modifier = Modifier.size(20.dp),
                 )
             }
         }
 
-        CurrencyRow(label = "To", currency = to, onClick = onPickTo)
+        CurrencyRow(label = stringResource(Res.string.common_to), currency = to, onClick = onPickTo)
 
         Spacer(Modifier.height(12.dp))
 
@@ -695,12 +730,12 @@ private fun QuickExchangeSection(
         // design fee row: "Fee (0.01%)  $0.10 USD"
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Fee (0.01%)",
+                text = stringResource(Res.string.home_fee),
                 style = MaterialTheme.typography.labelMedium,
                 color = LedgerColors.TextMuted,
             )
             Text(
-                text = "\$0.10 USD",
+                text = stringResource(Res.string.home_fee_value),
                 style = MaterialTheme.typography.labelMedium,
                 color = LedgerColors.TextSecondary,
                 textAlign = TextAlign.End,
@@ -710,14 +745,14 @@ private fun QuickExchangeSection(
         Spacer(Modifier.height(12.dp))
 
         LedgerButton(
-            text = "Execute Exchange",
+            text = stringResource(Res.string.home_execute_exchange),
             onClick = onExecute,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
         )
         Spacer(Modifier.height(8.dp))
         LedgerButton(
-            text = "Open full converter",
+            text = stringResource(Res.string.home_open_full_converter),
             onClick = onOpenConverter,
             modifier = Modifier.fillMaxWidth(),
             variant = LedgerButtonVariant.GHOST,
@@ -749,7 +784,7 @@ private fun CurrencyRow(
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = currency?.name ?: "Select…",
+                text = currency?.name ?: stringResource(Res.string.home_select),
                 style = MaterialTheme.typography.titleMedium,
                 color = LedgerColors.TextPrimary,
             )
@@ -762,7 +797,7 @@ private fun CurrencyRow(
             }
         }
         Text(
-            text = "Change",
+            text = stringResource(Res.string.home_change),
             style = MaterialTheme.typography.labelSmall,
             color = LedgerColors.BlueSoft,
         )
@@ -783,7 +818,7 @@ private fun RecentActivitySection(
             .padding(horizontal = 4.dp),
     ) {
         Text(
-            text = "Recent Activity",
+            text = stringResource(Res.string.home_recent_activity),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -797,13 +832,13 @@ private fun RecentActivitySection(
             modifier = Modifier.clickable(onClick = onOpenHistory),
         ) {
             Text(
-                text = "History",
+                text = stringResource(Res.string.home_history),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = LedgerColors.Blue,
             )
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowRightAlt,
-                contentDescription = "Open history",
+                contentDescription = stringResource(Res.string.home_open_history_desc),
                 tint = LedgerColors.Blue,
                 modifier = Modifier.size(12.dp),
             )
@@ -832,7 +867,7 @@ private fun RecentActivitySection(
                     )
                 }
                 Text(
-                    text = "No exchanges yet — execute a conversion to start your ledger.",
+                    text = stringResource(Res.string.home_no_exchanges),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextSecondary,
                 )
@@ -895,14 +930,15 @@ private fun ActivityRow(tx: Transaction, tint: androidx.compose.ui.graphics.Colo
 }
 
 /** "Today, 15:30" / "Yesterday, 08:15" / "Oct 12, 09:05" style labels. */
+@Composable
 private fun activityTimeLabel(timestamp: Long): String {
     val now = dali.hamza.shared.common.nowMillis()
     val today = dali.hamza.shared.common.DateUtils.epochDayOf(now)
     val day = dali.hamza.shared.common.DateUtils.epochDayOf(timestamp)
     val time = DateUtils.formatDateTime(timestamp).substringAfter(' ')
     return when (today - day) {
-        0L -> "Today, $time"
-        1L -> "Yesterday, $time"
+        0L -> stringResource(Res.string.home_today, time)
+        1L -> stringResource(Res.string.home_yesterday, time)
         else -> DateUtils.formatDateTime(timestamp).let {
             it.substring(5, 10).replace('-', '/') + ", " + time
         }
@@ -915,11 +951,12 @@ private fun activityTimeLabel(timestamp: Long): String {
  * Time-based greeting shown above the username — used until a login /
  * guest profile exists (Account phase).
  */
+@Composable
 internal fun greetingForHour(hour: Int): String = when (hour) {
-    in 5..11 -> "Good Morning"
-    in 12..16 -> "Good Afternoon"
-    in 17..21 -> "Good Evening"
-    else -> "Good Night"
+    in 5..11 -> stringResource(Res.string.home_greeting_morning)
+    in 12..16 -> stringResource(Res.string.home_greeting_afternoon)
+    in 17..21 -> stringResource(Res.string.home_greeting_evening)
+    else -> stringResource(Res.string.home_greeting_night)
 }
 
 /**
@@ -1036,7 +1073,7 @@ private fun SelectedMarketPanel(
                     modifier = Modifier.fillMaxWidth().height(120.dp),
                 ) {
                     Text(
-                        text = "Loading 7-day history…",
+                        text = stringResource(Res.string.home_loading_7d),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
@@ -1066,7 +1103,7 @@ private fun FavoritesPanel(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                text = "Your markets",
+                text = stringResource(Res.string.home_your_markets),
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
@@ -1106,7 +1143,7 @@ private fun FavoritesPanel(
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "7-day low",
+                                text = stringResource(Res.string.home_day_low),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LedgerColors.TextTertiary,
                             )
@@ -1118,7 +1155,7 @@ private fun FavoritesPanel(
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "7-day high",
+                                text = stringResource(Res.string.home_day_high),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = LedgerColors.TextTertiary,
                             )
