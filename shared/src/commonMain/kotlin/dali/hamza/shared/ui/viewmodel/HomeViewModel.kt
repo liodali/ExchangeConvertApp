@@ -47,6 +47,9 @@ class HomeViewModel(
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
+    /** Cards already loaded for this base/symbols/day — tab returns skip refetch. */
+    private var loadedCardsKey: String? = null
+
     /** Reload pair cards (7-day series) for the session base + top rates. */
     fun load(base: String?, topRates: List<ExchangeRate>) {
         cardsJob?.cancel()
@@ -55,6 +58,23 @@ class HomeViewModel(
             return
         }
         val symbols = topRates.take(3).map { it.name }
+        // Same base/markets/day already loaded (e.g. returning from another
+        // tab): keep the sparklines + deltas, only refresh the live rates.
+        val key = "$base|${symbols.joinToString(",")}|${DateUtils.toIsoDate(DateUtils.epochDayOf(nowMillis()))}"
+        if (key == loadedCardsKey && _state.value.pairCards.isNotEmpty()) {
+            _state.update { current ->
+                current.copy(
+                    pairCards = current.pairCards.map { card ->
+                        topRates.firstOrNull { it.name == card.quote }
+                            ?.let { card.copy(rate = it.rate) }
+                            ?: card
+                    },
+                    isLoading = false,
+                )
+            }
+            return
+        }
+        loadedCardsKey = key
         _state.update { it.copy(isLoading = true) }
         cardsJob = viewModelScope.launch {
             val cards = topRates.take(3).map { rate ->
