@@ -221,11 +221,12 @@ class CurrencyRepositoryImpl(
     // ---- historic-rate local cache (read-through) ------------------------
     // Historic daily rates are immutable: rows live in the HistoricRate
     // table (time = epoch-day) and only the missing date tail is fetched.
-    // Per-process "attempted through" guard: provider gaps (e.g. metal
-    // weekends) must not refetch the same window on every call.
+    // Per-process attempted-window set: a provider window that yielded
+    // nothing new (e.g. metal weekends) must not refetch the IDENTICAL
+    // window — but a wider range (1W → 3M) is a new window and fetches.
 
-    /** "base:symbol" (single) / "base:*" (multi) → epoch-day attempted. */
-    private val historyFetchedThrough = mutableMapOf<String, Long>()
+    /** ("base:symbol", fetchFrom-day, to-day) windows already attempted. */
+    private val attemptedHistoryWindows = mutableSetOf<Triple<String, Long, Long>>()
 
     /** Stored series for [base]: symbol → (epoch-day → rate). */
     private fun storedHistory(base: String): Map<String, Map<Long, Double>> =
@@ -258,16 +259,17 @@ class CurrencyRepositoryImpl(
         }
         val stored = storedHistory(base)[symbol].orEmpty()
         val fetchKey = "$base:$symbol"
-        val fetchedThrough = historyFetchedThrough[fetchKey] ?: Long.MIN_VALUE
         val missingFrom = (fromDay..toDay).firstOrNull { it !in stored }
-        if (missingFrom != null && toDay > fetchedThrough) {
-            val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
+        // fetch exactly the missing window; skip only an identical retry
+        if (missingFrom != null &&
+            attemptedHistoryWindows.add(Triple(fetchKey, missingFrom, toDay))
+        ) {
             val started = kotlin.time.TimeSource.Monotonic.markNow()
             val response = currencyApi
                 .getHistoricalSeries(
                     base,
                     symbol,
-                    DateUtils.toIsoDate(fetchFrom),
+                    DateUtils.toIsoDate(missingFrom),
                     DateUtils.toIsoDate(toDay),
                 )
             reportHttpTelemetry(
@@ -276,8 +278,8 @@ class CurrencyRepositoryImpl(
                     detail = "$base/$symbol ${DateUtils.toIsoDate(fromDay)}..${DateUtils.toIsoDate(toDay)}",
                     durationMs = started.elapsedNow().inWholeMilliseconds,
                     ok = response.isSuccess,
-                    cachedDays = (fetchFrom - fromDay).coerceAtLeast(0),
-                    fetchedDays = toDay - fetchFrom + 1,
+                    cachedDays = (missingFrom - fromDay).coerceAtLeast(0),
+                    fetchedDays = toDay - missingFrom + 1,
                 ),
             )
             response
@@ -293,7 +295,6 @@ class CurrencyRepositoryImpl(
                         }
                     }
                 }
-            historyFetchedThrough[fetchKey] = toDay
         }
         // re-read (merged) — offline failures simply serve the stored tail
         val merged = storedHistory(base)[symbol].orEmpty()
@@ -318,20 +319,21 @@ class CurrencyRepositoryImpl(
         }
         val stored = storedHistory(base)
         val fetchKey = "$base:*"
-        val fetchedThrough = historyFetchedThrough[fetchKey] ?: Long.MIN_VALUE
         val missingFrom = symbols
             .mapNotNull { symbol ->
                 (fromDay..toDay).firstOrNull { it !in (stored[symbol] ?: emptyMap()) }
             }
             .minOrNull()
-        if (missingFrom != null && toDay > fetchedThrough) {
-            val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
+        // fetch exactly the missing window; skip only an identical retry
+        if (missingFrom != null &&
+            attemptedHistoryWindows.add(Triple(fetchKey, missingFrom, toDay))
+        ) {
             val started = kotlin.time.TimeSource.Monotonic.markNow()
             val response = currencyApi
                 .getHistoricalSeries(
                     base,
                     symbols.joinToString(","),
-                    DateUtils.toIsoDate(fetchFrom),
+                    DateUtils.toIsoDate(missingFrom),
                     DateUtils.toIsoDate(toDay),
                 )
             reportHttpTelemetry(
@@ -340,8 +342,8 @@ class CurrencyRepositoryImpl(
                     detail = "$base/${symbols.joinToString(",")} ${DateUtils.toIsoDate(fromDay)}..${DateUtils.toIsoDate(toDay)}",
                     durationMs = started.elapsedNow().inWholeMilliseconds,
                     ok = response.isSuccess,
-                    cachedDays = (fetchFrom - fromDay).coerceAtLeast(0),
-                    fetchedDays = toDay - fetchFrom + 1,
+                    cachedDays = (missingFrom - fromDay).coerceAtLeast(0),
+                    fetchedDays = toDay - missingFrom + 1,
                 ),
             )
             response
@@ -361,7 +363,6 @@ class CurrencyRepositoryImpl(
                         }
                     }
                 }
-            historyFetchedThrough[fetchKey] = toDay
         }
         val merged = storedHistory(base)
         val series = symbols.mapNotNull { symbol ->
