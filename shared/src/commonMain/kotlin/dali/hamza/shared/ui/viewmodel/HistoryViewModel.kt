@@ -58,6 +58,9 @@ class HistoryViewModel(
 
     private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    /** Cancels the in-flight series load so range switches can't race. */
+    private var seriesJob: kotlinx.coroutines.Job? = null
+
     private val _state = MutableStateFlow(HistoryUiState())
     val state: StateFlow<HistoryUiState> = _state.asStateFlow()
 
@@ -80,7 +83,9 @@ class HistoryViewModel(
         val base = _state.value.base ?: return
         val quote = _state.value.quote ?: return
         _state.update { it.copy(range = range) }
-        viewModelScope.launch { loadSeries(base, quote, range) }
+        // cancel any slower in-flight range — last tap must win
+        seriesJob?.cancel()
+        seriesJob = viewModelScope.launch { loadSeries(base, quote, range) }
     }
 
     /**
