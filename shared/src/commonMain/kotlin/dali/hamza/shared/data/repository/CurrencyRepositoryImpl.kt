@@ -1,6 +1,7 @@
 package dali.hamza.shared.data.repository
 
 import dali.hamza.shared.common.nowMillis
+import dali.hamza.shared.common.DateUtils
 import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.data.network.AlertsApiError
 import dali.hamza.shared.data.network.CurrencyApi
@@ -196,30 +197,79 @@ class CurrencyRepositoryImpl(
         saveExchangeRatesOfCurrentCurrency()
     }
 
+    // ---- historic-rate local cache (read-through) ------------------------
+    // Historic daily rates are immutable: rows live in the HistoricRate
+    // table (time = epoch-day) and only the missing date tail is fetched.
+    // Per-process "attempted through" guard: provider gaps (e.g. metal
+    // weekends) must not refetch the same window on every call.
+
+    /** "base:symbol" (single) / "base:*" (multi) → epoch-day attempted. */
+    private val historyFetchedThrough = mutableMapOf<String, Long>()
+
+    /** Stored series for [base]: symbol → (epoch-day → rate). */
+    private fun storedHistory(base: String): Map<String, Map<Long, Double>> =
+        database.currenciesQueries
+            .selectHistoricRates(base)
+            .executeAsList()
+            .groupBy({ it.name }, { it.time to it.rate })
+            .mapValues { (_, points) -> points.toMap() }
+
+    private fun seriesOf(
+        stored: Map<Long, Double>,
+        fromDay: Long,
+        toDay: Long,
+    ): List<HistoricalRate> = stored
+        .filterKeys { it in fromDay..toDay }
+        .entries
+        .sortedBy { it.key }
+        .map { (day, rate) -> HistoricalRate(DateUtils.toIsoDate(day), rate) }
+
     override suspend fun getHistoricalRates(
         base: String,
         symbol: String,
         from: String,
         to: String,
     ): MyResponse<List<HistoricalRate>> = withContext(Dispatchers.Default) {
-        currencyApi.getHistoricalSeries(base, symbol, from, to)
-            .fold(
-                onSuccess = { dto ->
-                    val series = dto.rates
-                        ?.mapNotNull { (date, symbols) ->
+        val fromDay = DateUtils.epochDayOf(from)
+        val toDay = DateUtils.epochDayOf(to)
+        if (fromDay == null || toDay == null || fromDay > toDay) {
+            return@withContext MyResponse.Error("Invalid history range")
+        }
+        val stored = storedHistory(base)[symbol].orEmpty()
+        val fetchKey = "$base:$symbol"
+        val fetchedThrough = historyFetchedThrough[fetchKey] ?: Long.MIN_VALUE
+        val missingFrom = (fromDay..toDay).firstOrNull { it !in stored }
+        if (missingFrom != null && toDay > fetchedThrough) {
+            val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
+            currencyApi
+                .getHistoricalSeries(
+                    base,
+                    symbol,
+                    DateUtils.toIsoDate(fetchFrom),
+                    DateUtils.toIsoDate(toDay),
+                )
+                .onSuccess { dto ->
+                    database.currenciesQueries.transaction {
+                        dto.rates?.forEach { (date, symbols) ->
                             val rate = symbols[symbol]
-                            if (rate != null) HistoricalRate(date, rate) else null
+                            val day = DateUtils.epochDayOf(date)
+                            if (rate != null && day != null && day !in stored) {
+                                database.currenciesQueries
+                                    .insertHistoricRate(symbol, rate, day, base, 0.0)
+                            }
                         }
-                        ?.sortedBy { it.date }
-                        .orEmpty()
-                    if (series.isEmpty()) {
-                        MyResponse.Error("No historical rates for $base/$symbol")
-                    } else {
-                        MyResponse.Success(series)
                     }
-                },
-                onFailure = { MyResponse.Error(it.message ?: "Historical rates unavailable") },
-            )
+                }
+            historyFetchedThrough[fetchKey] = toDay
+        }
+        // re-read (merged) — offline failures simply serve the stored tail
+        val merged = storedHistory(base)[symbol].orEmpty()
+        val series = seriesOf(merged, fromDay, toDay)
+        if (series.isEmpty()) {
+            MyResponse.Error("No historical rates for $base/$symbol")
+        } else {
+            MyResponse.Success(series)
+        }
     }
 
     override suspend fun getHistoricalRates(
@@ -228,23 +278,57 @@ class CurrencyRepositoryImpl(
         from: String,
         to: String,
     ): MyResponse<Map<String, List<HistoricalRate>>> = withContext(Dispatchers.Default) {
-        currencyApi.getHistoricalSeries(base, symbols.joinToString(","), from, to)
-            .fold(
-                onSuccess = { dto ->
-                    val series = dto.rates.orEmpty()
-                        .flatMap { (date, values) ->
-                            values.map { (symbol, rate) -> symbol to HistoricalRate(date, rate) }
+        val fromDay = DateUtils.epochDayOf(from)
+        val toDay = DateUtils.epochDayOf(to)
+        if (fromDay == null || toDay == null || fromDay > toDay) {
+            return@withContext MyResponse.Error("Invalid history range")
+        }
+        val stored = storedHistory(base)
+        val fetchKey = "$base:*"
+        val fetchedThrough = historyFetchedThrough[fetchKey] ?: Long.MIN_VALUE
+        val missingFrom = symbols
+            .mapNotNull { symbol ->
+                (fromDay..toDay).firstOrNull { it !in (stored[symbol] ?: emptyMap()) }
+            }
+            .minOrNull()
+        if (missingFrom != null && toDay > fetchedThrough) {
+            val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
+            currencyApi
+                .getHistoricalSeries(
+                    base,
+                    symbols.joinToString(","),
+                    DateUtils.toIsoDate(fetchFrom),
+                    DateUtils.toIsoDate(toDay),
+                )
+                .onSuccess { dto ->
+                    database.currenciesQueries.transaction {
+                        dto.rates?.forEach { (date, values) ->
+                            val day = DateUtils.epochDayOf(date)
+                            if (day != null) {
+                                symbols.forEach { symbol ->
+                                    val rate = values[symbol]
+                                    if (rate != null && day !in (stored[symbol] ?: emptyMap())) {
+                                        database.currenciesQueries
+                                            .insertHistoricRate(symbol, rate, day, base, 0.0)
+                                    }
+                                }
+                            }
                         }
-                        .groupBy({ it.first }, { it.second })
-                        .mapValues { (_, points) -> points.sortedBy { it.date } }
-                    if (series.isEmpty()) {
-                        MyResponse.Error("No historical rates for $base")
-                    } else {
-                        MyResponse.Success(series)
                     }
-                },
-                onFailure = { MyResponse.Error(it.message ?: "Historical rates unavailable") },
-            )
+                }
+            historyFetchedThrough[fetchKey] = toDay
+        }
+        val merged = storedHistory(base)
+        val series = symbols.mapNotNull { symbol ->
+            merged[symbol]?.takeIf { it.isNotEmpty() }?.let { storedRates ->
+                symbol to seriesOf(storedRates, fromDay, toDay)
+            }
+        }.toMap()
+        if (series.isEmpty()) {
+            MyResponse.Error("No historical rates for $base")
+        } else {
+            MyResponse.Success(series)
+        }
     }
 
     override suspend fun getTransactions(): List<Transaction> =
