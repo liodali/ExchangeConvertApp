@@ -70,8 +70,8 @@ class CurrencyRepositoryImpl(
 
     /**
      * Re-sync currency display names from the backend for [lang] (BCP-47 —
-     * server uses CLDR). Only rewrites rows that already exist (the app's
-     * catalog defines the supported set) and only when the name actually
+     * server uses CLDR). Seeds the bundled catalog first on a fresh install
+     * (the table starts empty), then only rewrites rows whose name actually
      * changed. Returns true when the caller should reload the list.
      * Offline/unreachable: returns false, names stay as stored.
      */
@@ -83,7 +83,22 @@ class CurrencyRepositoryImpl(
             val stored = database.currenciesQueries
                 .selectCurrencies()
                 .executeAsList()
-                .associate { it.name to it.fullCountryName }
+                .map { it.name to it.fullCountryName }
+                .toMap()
+                .ifEmpty {
+                    // fresh install (nothing seeds the table today): write
+                    // the supported set from the bundled catalog so the
+                    // localized names have rows to land on
+                    database.currenciesQueries.transaction {
+                        CurrenciesCatalog.currencies.forEach { currency ->
+                            database.currenciesQueries.insertCurrency(
+                                currency.name,
+                                currency.fullCountryName,
+                            )
+                        }
+                    }
+                    CurrenciesCatalog.currencies.associate { it.name to it.fullCountryName }
+                }
             var changed = false
             database.currenciesQueries.transaction {
                 response.forEach { entry ->
