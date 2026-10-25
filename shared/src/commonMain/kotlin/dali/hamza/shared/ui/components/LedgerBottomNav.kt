@@ -162,9 +162,9 @@ fun LedgerBottomNav(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // 86dp content + ~16dp gesture inset ≈ 102dp total
-                    // (design refresh: down from the original 117dp total)
-                    .height(86.dp),
+                    // 71dp content + ~16dp gesture inset ≈ 87dp total
+                    // (compact refresh: −15dp from the 86dp content bar)
+                    .height(71.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(
