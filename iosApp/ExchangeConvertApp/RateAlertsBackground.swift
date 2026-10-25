@@ -83,6 +83,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
                 options.dsn = ExchangeSecrets.glitchTipDSN
             }
         }
+        // Shared HTTP timing → GlitchTip breadcrumbs (slow/failed → events)
+        TelemetryKt.installHttpTelemetry(sink: GlitchTipHttpTelemetry())
         // Kotlin exports init*-named functions with a "do" prefix to ObjC
         SharedKoinKt.doInitSharedKoin(
             serverURL: ExchangeSecrets.apiHost,
@@ -144,5 +146,35 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         completionHandler()
+    }
+}
+
+// MARK: - HTTP telemetry → GlitchTip
+
+/// Shared-module timing events (historic/latest calls, cached-vs-fetched
+/// days) as GlitchTip breadcrumbs; slow (>1.5s) or failed calls become
+/// events so they surface in the GlitchTip UI.
+final class GlitchTipHttpTelemetry: HttpTelemetrySink {
+    private let slowMs: Int64 = 1_500
+
+    func report(event p0: HttpTelemetryEvent) {
+        let message = "HTTP \(p0.operation) \(p0.detail) \(p0.durationMs)ms"
+            + (p0.ok ? "" : " FAILED")
+        var data: [String: Any] = [
+            "operation": p0.operation,
+            "durationMs": p0.durationMs,
+            "ok": p0.ok,
+        ]
+        if p0.cachedDays > 0 || p0.fetchedDays > 0 {
+            data["cachedDays"] = p0.cachedDays
+            data["fetchedDays"] = p0.fetchedDays
+        }
+        let crumb = Breadcrumb(level: .info, category: "http")
+        crumb.message = message
+        crumb.data = data
+        SentrySDK.addBreadcrumb(crumb)
+        if !p0.ok || p0.durationMs > slowMs {
+            SentrySDK.capture(message: message)
+        }
     }
 }

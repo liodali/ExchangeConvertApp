@@ -2,6 +2,8 @@ package dali.hamza.shared.data.repository
 
 import dali.hamza.shared.common.nowMillis
 import dali.hamza.shared.common.DateUtils
+import dali.hamza.shared.platform.HttpTelemetryEvent
+import dali.hamza.shared.platform.reportHttpTelemetry
 import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.data.network.AlertsApiError
 import dali.hamza.shared.data.network.CurrencyApi
@@ -123,9 +125,18 @@ class CurrencyRepositoryImpl(
         if (lastUpdate != 0L && now - lastUpdate < refreshIntervalMs(sessionStorage.getDataTier())) {
             return@withContext
         }
+        val started = kotlin.time.TimeSource.Monotonic.markNow()
         currencyApi.getLiveRates(currentCurrency)
             .fold(
                 onSuccess = { data ->
+                    reportHttpTelemetry(
+                        HttpTelemetryEvent(
+                            operation = "latest",
+                            detail = currentCurrency,
+                            durationMs = started.elapsedNow().inWholeMilliseconds,
+                            ok = true,
+                        ),
+                    )
                     // exchange-api shape: rates keyed by quote code {"EUR": 0.88}
                     val rates = data.rates
                     if (rates != null) {
@@ -144,7 +155,17 @@ class CurrencyRepositoryImpl(
                         sessionStorage.setLastUpdate(now)
                     }
                 },
-                onFailure = { /* keep previously stored rates when the API is unreachable */ }
+                onFailure = {
+                    reportHttpTelemetry(
+                        HttpTelemetryEvent(
+                            operation = "latest",
+                            detail = currentCurrency,
+                            durationMs = started.elapsedNow().inWholeMilliseconds,
+                            ok = false,
+                        ),
+                    )
+                    /* keep previously stored rates when the API is unreachable */
+                }
             )
         Unit
     }
@@ -241,13 +262,25 @@ class CurrencyRepositoryImpl(
         val missingFrom = (fromDay..toDay).firstOrNull { it !in stored }
         if (missingFrom != null && toDay > fetchedThrough) {
             val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
-            currencyApi
+            val started = kotlin.time.TimeSource.Monotonic.markNow()
+            val response = currencyApi
                 .getHistoricalSeries(
                     base,
                     symbol,
                     DateUtils.toIsoDate(fetchFrom),
                     DateUtils.toIsoDate(toDay),
                 )
+            reportHttpTelemetry(
+                HttpTelemetryEvent(
+                    operation = "historic",
+                    detail = "$base/$symbol ${DateUtils.toIsoDate(fromDay)}..${DateUtils.toIsoDate(toDay)}",
+                    durationMs = started.elapsedNow().inWholeMilliseconds,
+                    ok = response.isSuccess,
+                    cachedDays = (fetchFrom - fromDay).coerceAtLeast(0),
+                    fetchedDays = toDay - fetchFrom + 1,
+                ),
+            )
+            response
                 .onSuccess { dto ->
                     database.currenciesQueries.transaction {
                         dto.rates?.forEach { (date, symbols) ->
@@ -293,13 +326,25 @@ class CurrencyRepositoryImpl(
             .minOrNull()
         if (missingFrom != null && toDay > fetchedThrough) {
             val fetchFrom = maxOf(missingFrom, fetchedThrough + 1)
-            currencyApi
+            val started = kotlin.time.TimeSource.Monotonic.markNow()
+            val response = currencyApi
                 .getHistoricalSeries(
                     base,
                     symbols.joinToString(","),
                     DateUtils.toIsoDate(fetchFrom),
                     DateUtils.toIsoDate(toDay),
                 )
+            reportHttpTelemetry(
+                HttpTelemetryEvent(
+                    operation = "historic",
+                    detail = "$base/${symbols.joinToString(",")} ${DateUtils.toIsoDate(fromDay)}..${DateUtils.toIsoDate(toDay)}",
+                    durationMs = started.elapsedNow().inWholeMilliseconds,
+                    ok = response.isSuccess,
+                    cachedDays = (fetchFrom - fromDay).coerceAtLeast(0),
+                    fetchedDays = toDay - fetchFrom + 1,
+                ),
+            )
+            response
                 .onSuccess { dto ->
                     database.currenciesQueries.transaction {
                         dto.rates?.forEach { (date, values) ->

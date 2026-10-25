@@ -46,10 +46,16 @@ class ExchangeApplication : Application() {
             }
         }
 
+        // shared HTTP timing → GlitchTip breadcrumbs (slow/failed → events)
+        dali.hamza.shared.platform.installHttpTelemetry(
+            dali.hamza.echangecurrencyapp.telemetry.SentryHttpTelemetry(),
+        )
+
         startKoin {
             // Reference Android context
             androidContext(this@ExchangeApplication)
             // Load modules
+
             modules(appModule)
         }
         // shared module rides on the same Koin instance. Backend host:
