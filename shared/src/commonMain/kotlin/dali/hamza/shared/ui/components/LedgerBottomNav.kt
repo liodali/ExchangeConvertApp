@@ -145,6 +145,13 @@ fun LedgerBottomNav(
             }
         }
     } else {
+        // Button navigation has a system bar below us — give the in-app
+        // bar a bit more height; gestures (Vivo/iOS-style) keep it slim.
+        val barHeight = if (remember { dali.hamza.shared.platform.usesButtonNavigation() }) {
+            86.dp
+        } else {
+            71.dp
+        }
         Column(
             modifier = modifier
                 .fillMaxWidth()
@@ -162,9 +169,8 @@ fun LedgerBottomNav(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // 71dp content + ~16dp gesture inset ≈ 87dp total
-                    // (compact refresh: −15dp from the 86dp content bar)
-                    .height(71.dp),
+                    // gesture nav ≈ 87dp total; button nav ≈ 102dp total
+                    .height(barHeight),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(
