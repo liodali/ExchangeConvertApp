@@ -26,6 +26,9 @@ iosApp/ExchangeConvertApp/Secrets.swift
 .kilo/
 .kilocode/
 
+# Local-only planning docs (kept on disk, out of VCS)
+plans/
+
 # Design assets
 design/*
 !design/logo.svg
