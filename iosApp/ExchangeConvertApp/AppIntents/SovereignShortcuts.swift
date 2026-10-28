@@ -23,6 +23,16 @@ struct SovereignShortcuts: AppShortcutsProvider {
             systemImageName: "chart.line.uptrend.xyaxis"
         )
         AppShortcut(
+            intent: GetExchangeRateIntent(),
+            phrases: [
+                "Exchange rates in \(.applicationName)",
+                "\(.applicationName) exchange rate",
+                "Get the exchange rate in \(.applicationName)",
+            ],
+            shortTitle: "Exchange Rate",
+            systemImageName: "banknote"
+        )
+        AppShortcut(
             intent: AddRateAlertIntent(),
             phrases: ["Add a rate alert in \(.applicationName)"],
             shortTitle: "Add Alert",
