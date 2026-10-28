@@ -28,6 +28,10 @@ on:
         description: "Build & export only — do not upload to ASC"
         type: boolean
         default: false
+      wait_for_testflight:
+        description: "Wait for ASC processing + TestFlight availability (slower; off by default)"
+        type: boolean
+        default: false
   push:
     tags: ["ios-v*"]
 
@@ -591,19 +595,23 @@ jobs:
         if: ${{ inputs.skip_upload != true }}
         env:
           APP_ID: ${{ steps.ids.outputs.app_id }}
+          # Tag builds upload and return — ASC processing (which gates
+          # TestFlight availability) continues server-side. Opt in to the
+          # blocking wait only on manual workflow_dispatch runs.
+          WAIT_FLAG: ${{ inputs.wait_for_testflight == true && '--wait' || '' }}
         run: |
           if [ -n "$TESTFLIGHT_GROUP" ]; then
-            echo "Publishing to TestFlight group: $TESTFLIGHT_GROUP"
+            echo "Publishing to TestFlight group: $TESTFLIGHT_GROUP (wait flag: ${WAIT_FLAG:-none})"
             asc publish testflight \
               --app "$APP_ID" \
               --ipa "$ARTIFACTS/ExchangeConvertApp.ipa" \
               --group "$TESTFLIGHT_GROUP" \
-              --wait --output json
+              $WAIT_FLAG --output json
           else
             asc builds upload \
               --app "$APP_ID" \
               --ipa "$ARTIFACTS/ExchangeConvertApp.ipa" \
-              --wait --output json
+              $WAIT_FLAG --output json
           fi
 
       - name: Clean up CI signing resources
@@ -644,4 +652,6 @@ jobs:
             echo "| Version | \`$VERSION\` build \`$BUILD_NUMBER\` |"
             echo ""
             echo "TestFlight: https://appstoreconnect.apple.com/apps/$APP_ID/testflight"
+            echo ""
+            echo "When the upload did not wait, the build may still be _processing_ — it appears in TestFlight automatically once ASC finishes."
           } >> "$GITHUB_STEP_SUMMARY"
