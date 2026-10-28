@@ -741,7 +741,9 @@ fun AccountScreen(
                 }
             }
 
-            // ============ Node footer =====================================
+            Spacer(Modifier.height(12.dp))
+
+            // ============ Version footer ==================================
             Text(
                 text = stringResource(
                     Res.string.acct_footer,

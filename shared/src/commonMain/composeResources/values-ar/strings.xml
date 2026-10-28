@@ -178,7 +178,7 @@
     <string name="acct_data_plan_note">تحدّث خطة الزوار الأسعار كل ساعة، بينما يمنحك تسجيل الدخول إلى Dinarly البيانات الفورية.</string>
     <string name="acct_data_plan_guest">أسعار كل ساعة · زائر</string>
     <string name="acct_data_plan_sovereign">أسعار فورية · Dinarly</string>
-    <string name="acct_footer">عقدة DINARLY إصدار %1$s • آخر مزامنة: %2$s</string>
+    <string name="acct_footer">DINARLY إصدار %1$s • آخر مزامنة: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">الآن</string>
     <string name="acct_sync_never">أبداً</string>

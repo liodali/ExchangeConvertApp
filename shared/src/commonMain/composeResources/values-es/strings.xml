@@ -178,7 +178,7 @@
     <string name="acct_data_plan_note">El plan de invitado actualiza las tasas cada hora. El inicio de sesión Dinarly desbloquea datos en tiempo real.</string>
     <string name="acct_data_plan_guest">Tasas cada hora · Invitado</string>
     <string name="acct_data_plan_sovereign">Tiempo real · Dinarly</string>
-    <string name="acct_footer">NODO DINARLY V%1$s • ÚLTIMA SINCRONIZACIÓN: %2$s</string>
+    <string name="acct_footer">DINARLY V%1$s • ÚLTIMA SINCRONIZACIÓN: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">AHORA MISMO</string>
     <string name="acct_sync_never">NUNCA</string>

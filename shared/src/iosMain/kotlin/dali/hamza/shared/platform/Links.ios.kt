@@ -3,7 +3,6 @@ package dali.hamza.shared.platform
 import platform.Foundation.NSBundle
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
-import platform.UIKit.UIDevice
 
 actual fun openUri(url: String) {
     val nsUrl = NSURL.URLWithString(url) ?: return
@@ -11,7 +10,9 @@ actual fun openUri(url: String) {
 }
 
 actual fun appVersionName(): String {
-    val version = NSBundle.bundleForClass(UIDevice).infoDictionary
+    // mainBundle = the app — bundleForClass(UIDevice) would return the
+    // system UIKit bundle and report ITS version (shows "1.0" in the UI).
+    val version = NSBundle.mainBundle.infoDictionary
         ?.get("CFBundleShortVersionString") as? String
     return version ?: "—"
 }

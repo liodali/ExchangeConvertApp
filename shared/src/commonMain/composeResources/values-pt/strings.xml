@@ -178,7 +178,7 @@
     <string name="acct_data_plan_note">O plano de convidado atualiza as cotações a cada hora. O login Dinarly desbloqueia dados em tempo real.</string>
     <string name="acct_data_plan_guest">Cotações por hora · Convidado</string>
     <string name="acct_data_plan_sovereign">Tempo real · Dinarly</string>
-    <string name="acct_footer">NÓ DINARLY V%1$s • ÚLTIMA SINCRONIZAÇÃO: %2$s</string>
+    <string name="acct_footer">DINARLY V%1$s • ÚLTIMA SINCRONIZAÇÃO: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">AGORA</string>
     <string name="acct_sync_never">NUNCA</string>

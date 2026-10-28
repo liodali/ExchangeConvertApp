@@ -179,7 +179,7 @@
     <string name="acct_data_plan_note">Guest plan refreshes rates hourly. Dinarly login unlocks realtime data.</string>
     <string name="acct_data_plan_guest">Hourly rates · Guest</string>
     <string name="acct_data_plan_sovereign">Realtime · Dinarly</string>
-    <string name="acct_footer">DINARLY NODE V%1$s • LAST SYNC: %2$s</string>
+    <string name="acct_footer">DINARLY V%1$s • LAST SYNC: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">JUST NOW</string>
     <string name="acct_sync_never">NEVER</string>

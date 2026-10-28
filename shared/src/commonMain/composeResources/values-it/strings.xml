@@ -177,7 +177,7 @@
     <string name="acct_data_plan_note">Il piano ospite aggiorna i tassi ogni ora. L\'accesso Dinarly sblocca i dati in tempo reale.</string>
     <string name="acct_data_plan_guest">Tassi orari · Ospite</string>
     <string name="acct_data_plan_sovereign">Tempo reale · Dinarly</string>
-    <string name="acct_footer">NODO DINARLY V%1$s • ULTIMA SINC.: %2$s</string>
+    <string name="acct_footer">DINARLY V%1$s • ULTIMA SINC.: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">ADESSO</string>
     <string name="acct_sync_never">MAI</string>

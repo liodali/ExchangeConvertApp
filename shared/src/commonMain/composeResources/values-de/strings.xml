@@ -178,7 +178,7 @@
     <string name="acct_data_plan_note">Im Gastplan werden Kurse stündlich aktualisiert. Der Dinarly-Login schaltet Echtzeitdaten frei.</string>
     <string name="acct_data_plan_guest">Stündliche Kurse · Gast</string>
     <string name="acct_data_plan_sovereign">Echtzeit · Dinarly</string>
-    <string name="acct_footer">DINARLY NODE V%1$s • SYNC: %2$s</string>
+    <string name="acct_footer">DINARLY V%1$s • SYNC: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">GERADE EBEN</string>
     <string name="acct_sync_never">NIE</string>
