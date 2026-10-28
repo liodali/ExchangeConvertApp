@@ -101,18 +101,15 @@ fun SupportScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Hero =============================================
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.sup_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
 
-            Spacer(Modifier.height(16.dp))
-
             LedgerSearchField(
+                modifier = Modifier.padding(top = 16.dp),
                 value = query,
                 onValueChange = { query = it },
                 placeholder = stringResource(Res.string.sup_search_hint),
@@ -172,10 +169,8 @@ fun SupportScreen(
                     }
                 }
 
-                Spacer(Modifier.height(32.dp))
-
-                // ============ Resources & legal ============================
                 Row(
+                    modifier = Modifier.padding(top = 32.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
@@ -305,8 +300,8 @@ private fun HelpCategoryCard(
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = LedgerColors.TextPrimary,
                 )
-                Spacer(Modifier.height(4.dp))
                 Text(
+                    modifier = Modifier.padding(top = 4.dp),
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextMutedAlt,

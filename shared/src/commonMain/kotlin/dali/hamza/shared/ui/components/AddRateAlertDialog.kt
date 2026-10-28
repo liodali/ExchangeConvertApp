@@ -166,22 +166,20 @@ fun AddRateAlertDialog(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(20.dp))
             LedgerListRow(
+                modifier = Modifier.padding(top = 20.dp),
                 label = stringResource(Res.string.common_from),
                 value = base,
                 onClick = { picking = 1 },
             )
-            Spacer(Modifier.height(8.dp))
             LedgerListRow(
+                modifier = Modifier.padding(top = 8.dp),
                 label = stringResource(Res.string.common_to),
                 value = quote,
                 onClick = { picking = 2 },
             )
-            Spacer(Modifier.height(20.dp))
-
-            // delivery toggle — on device (as it was) vs server push
             Text(
+                modifier = Modifier.padding(top = 20.dp),
                 text = stringResource(Res.string.alerts_delivery),
                 style = MaterialTheme.typography.labelMedium,
                 color = LedgerColors.TextSecondary,
@@ -196,30 +194,29 @@ fun AddRateAlertDialog(
                 onSelect = { source = it },
             )
 
-            Spacer(Modifier.height(20.dp))
             Text(
+                modifier = Modifier.padding(top = 20.dp),
                 text = stringResource(Res.string.alerts_mode_section),
                 style = MaterialTheme.typography.labelMedium,
                 color = LedgerColors.TextSecondary,
             )
             Spacer(Modifier.height(12.dp))
-            // segmented preset control (same recipe as Appearance mode)
             SegmentedRow(
                 options = presets.map { it.label() to it },
                 selected = preset,
                 onSelect = { preset = it },
             )
             if (source == AlertSource.SERVER && tier == DataTier.GUEST) {
-                Spacer(Modifier.height(12.dp))
                 Text(
+                    modifier = Modifier.padding(top = 12.dp),
                     text = stringResource(Res.string.alerts_guest_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
             }
             if (preset == AlertPreset.ON_MOVE) {
-                Spacer(Modifier.height(16.dp))
                 LedgerInput(
+                    modifier = Modifier.padding(top = 16.dp),
                     value = thresholdText,
                     onValueChange = { input ->
                         thresholdText = input.filter { it.isDigit() || it == '.' }
@@ -228,15 +225,15 @@ fun AddRateAlertDialog(
                 )
             }
             if (atCap) {
-                Spacer(Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.padding(top = 16.dp),
                     text = stringResource(Res.string.alerts_at_cap),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.Gold,
                 )
             }
-            Spacer(Modifier.height(24.dp))
             Row(
+                modifier = Modifier.padding(top = 24.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {

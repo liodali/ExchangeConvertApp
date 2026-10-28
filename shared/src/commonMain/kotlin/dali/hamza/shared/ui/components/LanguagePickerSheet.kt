@@ -70,7 +70,6 @@ fun LanguagePickerSheet(
                 color = LedgerColors.TextPrimary,
             )
             Spacer(Modifier.height(16.dp))
-
             LanguageRow(
                 label = stringResource(Res.string.acct_language_phone),
                 icon = Icons.Outlined.Smartphone,

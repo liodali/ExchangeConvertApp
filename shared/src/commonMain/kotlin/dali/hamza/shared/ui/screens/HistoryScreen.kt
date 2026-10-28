@@ -155,18 +155,16 @@ fun HistoryScreen(
                         color = LedgerColors.Gold,
                     )
                 }
-                Spacer(Modifier.height(14.dp))
                 Text(
+                    modifier = Modifier.padding(top = 14.dp),
                     text = stringResource(Res.string.hist_zero_fees),
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextSecondary,
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
-
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                 maxItemsInEachRow = if (isExpanded) 2 else 1,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -189,8 +187,8 @@ fun HistoryScreen(
                             )
                         }
                     }
-                    Spacer(Modifier.height(12.dp))
                     Row(
+                        modifier = Modifier.padding(top = 12.dp),
                         verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
@@ -211,8 +209,8 @@ fun HistoryScreen(
                             )
                         }
                     }
-                    Spacer(Modifier.height(4.dp))
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = stringResource(Res.string.hist_live_rate) + (state.lastUpdatedLabel?.let { " • $it" } ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
@@ -261,9 +259,8 @@ fun HistoryScreen(
                             .fillMaxWidth()
                             .height(180.dp),
                     )
-                    Spacer(Modifier.height(8.dp))
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         state.series.firstOrNull()?.let {
@@ -300,8 +297,8 @@ fun HistoryScreen(
                             color = LedgerColors.TextSecondary,
                         )
                     }
-                    Spacer(Modifier.height(16.dp))
                     Row(
+                        modifier = Modifier.padding(top = 16.dp),
                         verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
@@ -320,8 +317,8 @@ fun HistoryScreen(
                             modifier = Modifier.padding(bottom = 8.dp),
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = state.bestTimestamp?.let {
                             stringResource(Res.string.hist_achieved_on, DateUtils.formatDateTime(it))
                         } ?: stringResource(Res.string.hist_from_history),

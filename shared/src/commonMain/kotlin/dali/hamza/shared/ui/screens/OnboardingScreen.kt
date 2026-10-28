@@ -180,19 +180,17 @@ fun OnboardingScreen(
                         nameFor = nameFor,
                         onPickSlot = { marketSlot = it },
                     )
-                    Spacer(Modifier.height(32.dp))
                     LedgerButton(
                         text = if (currencies.isEmpty()) stringResource(Res.string.onb_loading) else stringResource(Res.string.common_continue),
                         onClick = { onDone(baseCode, selections.toList(), name.trim()) },
                         enabled = currencies.isNotEmpty(),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 32.dp).fillMaxWidth(),
                     )
-                    Spacer(Modifier.height(16.dp))
                     Text(
                         text = stringResource(Res.string.onb_change_anytime),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.padding(top = 16.dp).align(Alignment.CenterHorizontally),
                     )
                     Spacer(Modifier.height(48.dp))
                 }
@@ -247,8 +245,8 @@ private fun OnboardingBranding(centered: Boolean) {
         horizontalAlignment = if (centered) Alignment.CenterHorizontally else Alignment.Start,
     ) {
         LedgerLogoMark()
-        Spacer(Modifier.height(12.dp))
         Text(
+            modifier = Modifier.padding(top = 12.dp),
             text = "DINARLY",
             style = MaterialTheme.typography.labelMedium,
             letterSpacing = 3.sp,
@@ -264,8 +262,8 @@ private fun OnboardingTitle() {
         style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
         color = LedgerColors.TextPrimary,
     )
-    Spacer(Modifier.height(12.dp))
     Text(
+        modifier = Modifier.padding(top = 12.dp),
         text = stringResource(Res.string.onb_desc),
         style = MaterialTheme.typography.bodyMedium,
         color = LedgerColors.TextSecondary,
@@ -284,8 +282,8 @@ private fun OnboardingNameCard(
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.TextSecondary,
         )
-        Spacer(Modifier.height(16.dp))
         LedgerInput(
+            modifier = Modifier.padding(top = 16.dp),
             value = name,
             onValueChange = { onNameChange(it.take(24)) },
             placeholder = stringResource(Res.string.onb_name_note),
@@ -305,14 +303,14 @@ private fun OnboardingBaseCard(
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.TextSecondary,
         )
-        Spacer(Modifier.height(16.dp))
         LedgerListRow(
+            modifier = Modifier.padding(top = 16.dp),
             label = nameFor(baseCode),
             value = baseCode,
             onClick = onPick,
         )
-        Spacer(Modifier.height(12.dp))
         Text(
+            modifier = Modifier.padding(top = 12.dp),
             text = stringResource(Res.string.onb_base_note),
             style = MaterialTheme.typography.bodySmall,
             color = LedgerColors.TextTertiary,
@@ -332,11 +330,8 @@ private fun OnboardingMarketsCard(
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.TextSecondary,
         )
-        Spacer(Modifier.height(16.dp))
-        // long-press drag to reorder the slots — the "Market 01/02/03"
-        // labels renumber live, and the order carries into the dashboard
-        // and Account after Continue
         ReorderableColumn(
+            modifier = Modifier.padding(top = 16.dp),
             items = selections,
             key = { it },
             onMove = { from, to ->

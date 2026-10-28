@@ -92,25 +92,21 @@ fun FaqScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Hero =============================================
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.faq_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(Res.string.faq_hero_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
 
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Search ===========================================
             LedgerSearchField(
+                modifier = Modifier.padding(top = 24.dp),
                 value = query,
                 onValueChange = { query = it },
                 placeholder = stringResource(Res.string.faq_search_hint),
@@ -180,8 +176,8 @@ fun FaqScreen(
                         iconTint = LedgerColors.Blue,
                         iconTileRadius = 8.dp,
                     )
-                    Spacer(Modifier.height(16.dp))
                     Text(
+                        modifier = Modifier.padding(top = 16.dp),
                         text = stringResource(Res.string.faq_account_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
@@ -300,8 +296,8 @@ private fun CompactQaCard(
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.TextPrimary,
         )
-        Spacer(Modifier.height(8.dp))
         Text(
+            modifier = Modifier.padding(top = 8.dp),
             text = body,
             style = MaterialTheme.typography.bodySmall,
             color = LedgerColors.TextSecondary,

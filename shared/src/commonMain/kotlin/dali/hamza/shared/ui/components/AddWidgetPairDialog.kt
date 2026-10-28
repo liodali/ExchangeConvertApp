@@ -218,13 +218,12 @@ fun AddWidgetPairDialog(
                                     onClick = { pickingQuote = true },
                                 )
                             }
-                            Spacer(Modifier.height(8.dp))
                             LedgerButton(
                                 text = stringResource(Res.string.wg_dialog_add_pair, gridPairs.size),
                                 onClick = {
                                     if (base != quote) gridPairs = gridPairs + (base to quote)
                                 },
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
                                 enabled = base != quote,
                             )
                         } else {
@@ -237,11 +236,10 @@ fun AddWidgetPairDialog(
                     }
                 }
 
-                Spacer(Modifier.height(24.dp))
                 LedgerButton(
                     text = stringResource(Res.string.wg_add_confirm),
                     onClick = { onAdd(kind, base, quote, if (gridCustom) gridPairs else emptyList()) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                     enabled = gridValid && (!needsPair || base != quote),
                 )
                 TextButton(

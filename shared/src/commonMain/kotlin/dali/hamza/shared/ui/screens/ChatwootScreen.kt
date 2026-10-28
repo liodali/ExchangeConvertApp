@@ -80,8 +80,8 @@ fun ChatwootScreen(onBack: () -> Unit, userName: String? = null) {
                         message = stringResource(Res.string.sup_chat_desc),
                         icon = Icons.Outlined.Forum,
                     )
-                    Spacer(Modifier.height(12.dp))
                     Text(
+                        modifier = Modifier.padding(top = 12.dp),
                         text = stringResource(Res.string.chatwoot_title),
                         style = MaterialTheme.typography.labelSmall,
                         color = LedgerColors.TextTertiary,

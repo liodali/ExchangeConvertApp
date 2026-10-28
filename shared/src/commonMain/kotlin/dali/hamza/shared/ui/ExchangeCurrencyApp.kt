@@ -725,14 +725,14 @@ private fun LockScreen(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             LedgerLogoMark(size = 72.dp)
-            Spacer(Modifier.height(24.dp))
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = "Dinarly",
                 style = MaterialTheme.typography.headlineMedium,
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(8.dp))
             Text(
+                modifier = Modifier.padding(top = 8.dp),
                 text = if (cancelled) {
                     stringResource(Res.string.lock_verify)
                 } else {
@@ -742,8 +742,8 @@ private fun LockScreen(
                 color = if (cancelled) LedgerColors.Gold else LedgerColors.TextTertiary,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
-            Spacer(Modifier.height(32.dp))
             LedgerButton(
+                modifier = Modifier.padding(top = 32.dp),
                 text = when {
                     cancelled -> stringResource(Res.string.lock_try_again)
                     canPrompt -> stringResource(Res.string.lock_unlock)

@@ -293,8 +293,6 @@ fun HomeScreen(
                 )
 
                 Spacer(Modifier.height(32.dp))
-
-                // ============ 2. Quick Exchange =================================
                 QuickExchangeSection(
                     amount = state.amount,
                     onAmountChange = viewModel::onAmountChange,
@@ -311,8 +309,6 @@ fun HomeScreen(
                 )
 
                 Spacer(Modifier.height(32.dp))
-
-                // ============ 3. Recent Activity (minimized) ====================
                 RecentActivitySection(
                     transactions = homeState.recentTransactions,
                     onOpenHistory = onOpenHistory,
@@ -515,8 +511,8 @@ private fun PairCard(
             Spacer(Modifier.width(12.dp))
             AlertBell(pair = pairTitle, hasAlert = hasAlert, onAlert = onAlert)
         }
-        Spacer(Modifier.height(16.dp))
         Text(
+            modifier = Modifier.padding(top = 16.dp),
             text = formatRateDigits(card.rate, 4),
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
@@ -632,8 +628,8 @@ private fun LiveChip() {
                 .clip(CircleShape)
                 .background(LedgerColors.Green)
         )
-        Spacer(Modifier.width(6.dp))
         Text(
+            modifier = Modifier.padding(start = 6.dp),
             text = stringResource(Res.string.home_live),
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = LedgerColors.Green,
@@ -742,19 +738,16 @@ private fun QuickExchangeSection(
                 modifier = Modifier.weight(1f),
             )
         }
-        Spacer(Modifier.height(12.dp))
-
         LedgerButton(
             text = stringResource(Res.string.home_execute_exchange),
             onClick = onExecute,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(top = 12.dp).fillMaxWidth(),
             enabled = !isLoading,
         )
-        Spacer(Modifier.height(8.dp))
         LedgerButton(
             text = stringResource(Res.string.home_open_full_converter),
             onClick = onOpenConverter,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
             variant = LedgerButtonVariant.GHOST,
             trailingIcon = Icons.AutoMirrored.Outlined.ArrowRightAlt,
         )

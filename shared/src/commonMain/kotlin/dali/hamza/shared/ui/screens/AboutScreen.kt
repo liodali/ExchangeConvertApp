@@ -61,12 +61,10 @@ fun AboutScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(40.dp))
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(top = 40.dp).fillMaxWidth(),
             ) {
                 LedgerLogoMark(size = 36.dp)
                 Text(
@@ -90,20 +88,20 @@ fun AboutScreen(
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = LedgerColors.TextSecondary,
                 )
-                Spacer(Modifier.height(12.dp))
                 Text(
+                    modifier = Modifier.padding(top = 12.dp),
                     text = appVersionName(),
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                     color = LedgerColors.TextOnColor,
                 )
-                Spacer(Modifier.height(8.dp))
                 Text(
+                    modifier = Modifier.padding(top = 8.dp),
                     text = stringResource(Res.string.about_version_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
                 )
-                Spacer(Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.padding(top = 16.dp),
                     text = "© 2026 Adetify.",
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,
@@ -118,29 +116,26 @@ fun AboutScreen(
                     icon = Icons.Outlined.Gavel,
                     onClick = onOpenTerms,
                 )
-                Spacer(Modifier.height(16.dp))
                 LedgerListRow(
+                    modifier = Modifier.padding(top = 16.dp),
                     label = stringResource(Res.string.legal_privacy),
                     icon = Icons.Outlined.Description,
                     onClick = onOpenPrivacy,
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
-
             LedgerButton(
                 text = stringResource(Res.string.about_rate_play),
                 onClick = { openUri(AppLinks.STORE_REVIEW_URL) },
                 leadingIcon = Icons.Outlined.StarOutline,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
             )
 
-            Spacer(Modifier.height(16.dp))
             Text(
                 text = stringResource(Res.string.about_powered_by),
                 style = MaterialTheme.typography.labelSmall,
                 color = LedgerColors.TextTertiary,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier.padding(top = 16.dp).align(Alignment.CenterHorizontally),
             )
 
             Spacer(Modifier.height(48.dp))

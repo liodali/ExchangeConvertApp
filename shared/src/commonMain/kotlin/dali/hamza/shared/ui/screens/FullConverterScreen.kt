@@ -88,15 +88,14 @@ fun FullConverterScreen(
         LedgerTopAppBar(title = "DINARLY", onBack = onBack)
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.fconv_title),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(8.dp))
             Text(
+                modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(Res.string.fconv_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
@@ -113,10 +112,8 @@ fun FullConverterScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
 
-                Spacer(Modifier.height(24.dp))
-
-                // ---- from / swap / to -------------------------------------
                 Row(
+                    modifier = Modifier.padding(top = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -183,12 +180,10 @@ fun FullConverterScreen(
                     )
                 }
 
-                Spacer(Modifier.height(24.dp))
-
                 LedgerButton(
                     text = stringResource(Res.string.home_execute_exchange),
                     onClick = viewModel::convert,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                     enabled = state.convertedAmount != null,
                 )
             }

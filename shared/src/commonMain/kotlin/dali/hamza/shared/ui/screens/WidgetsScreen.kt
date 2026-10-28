@@ -113,8 +113,8 @@ fun WidgetsScreen(
             )
 
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-                Spacer(Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.padding(top = 16.dp),
                     text = stringResource(Res.string.wg_header),
                     style = MaterialTheme.typography.bodySmall,
                     color = LedgerColors.TextTertiary,

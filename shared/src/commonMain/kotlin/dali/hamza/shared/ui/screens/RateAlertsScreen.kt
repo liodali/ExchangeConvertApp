@@ -164,8 +164,8 @@ fun RateAlertsScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(Res.string.alerts_header),
                 style = MaterialTheme.typography.bodySmall,
                 color = LedgerColors.TextTertiary,
@@ -250,8 +250,8 @@ fun RateAlertsScreen(
                     // exactly the "locals but nothing pushed" case: nudge
                     // the upgrade the tier still has room for
                     if (viewModel.serverAlerts.isEmpty() && !serverAtCap) {
-                        Spacer(Modifier.height(6.dp))
                         Text(
+                            modifier = Modifier.padding(top = 6.dp),
                             text = stringResource(Res.string.alerts_local_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = LedgerColors.TextTertiary,
@@ -286,15 +286,12 @@ fun RateAlertsScreen(
                     color = LedgerColors.TextTertiary,
                 )
 
-                Spacer(Modifier.height(16.dp))
-                // the dialog owns the per-delivery cap UX — the button only
-                // locks when BOTH lists are full
                 LedgerButton(
                     text = stringResource(Res.string.alerts_new),
                     onClick = { showAddDialog = true },
                     leadingIcon = Icons.Outlined.Add,
                     enabled = !(serverAtCap && localAtCap),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                 )
             }
 

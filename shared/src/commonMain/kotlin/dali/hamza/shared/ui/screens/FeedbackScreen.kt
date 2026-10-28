@@ -97,16 +97,14 @@ fun FeedbackScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Editorial intro ==================================
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.fb_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(Res.string.fb_hero_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
@@ -149,10 +147,8 @@ fun FeedbackScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(40.dp))
-
-                    // ---- primary category (segmented tags) -----------------
                     Text(
+                        modifier = Modifier.padding(top = 40.dp),
                         text = stringResource(Res.string.fb_category_label),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.TextPrimary,
@@ -164,11 +160,8 @@ fun FeedbackScreen(
                         onSelect = { categoryIndex = it },
                     )
 
-                    Spacer(Modifier.height(40.dp))
-
-                    // ---- detailed suggestions (optional) -------------------
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 40.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -183,20 +176,18 @@ fun FeedbackScreen(
                             color = LedgerColors.TextTertiary.copy(alpha = 0.60f),
                         )
                     }
-                    Spacer(Modifier.height(16.dp))
                     LedgerTextArea(
+                        modifier = Modifier.padding(top = 16.dp),
                         value = suggestions,
                         onValueChange = { suggestions = it },
                         placeholder = stringResource(Res.string.fb_suggestions_placeholder),
                     )
 
-                    Spacer(Modifier.height(40.dp))
-
                     LedgerButton(
                         text = stringResource(Res.string.fb_submit),
                         onClick = { submitted = true },
                         variant = LedgerButtonVariant.PREMIUM,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 40.dp).fillMaxWidth(),
                         enabled = rating > 0,
                     )
                 }

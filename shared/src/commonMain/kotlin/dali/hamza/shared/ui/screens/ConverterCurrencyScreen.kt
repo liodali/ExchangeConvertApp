@@ -123,25 +123,21 @@ fun ConverterCurrencyScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Header ===========================================
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.conv_title),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(Res.string.conv_live_base, base ?: "—"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = LedgerColors.TextSecondary,
             )
 
-            Spacer(Modifier.height(24.dp))
-
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                 maxItemsInEachRow = if (isExpanded) 2 else 1,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -163,8 +159,8 @@ fun ConverterCurrencyScreen(
                                 ),
                                 color = LedgerColors.TextPrimary,
                             )
-                            Spacer(Modifier.height(8.dp))
                             Text(
+                                modifier = Modifier.padding(top = 8.dp),
                                 text = stringResource(Res.string.conv_quick_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
@@ -177,10 +173,8 @@ fun ConverterCurrencyScreen(
                             modifier = Modifier.clickable(onClick = onOpenFullConverter),
                         )
                     }
-                    Spacer(Modifier.height(16.dp))
-
                     BentoCard(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                         fill = LedgerColors.SurfaceElevated,
                         cornerRadius = 16.dp,
                     ) {
@@ -196,10 +190,8 @@ fun ConverterCurrencyScreen(
                             onValueChange = viewModel::onAmountChange,
                         )
 
-                        Spacer(Modifier.height(20.dp))
-
-                        // ---- from / to selectors ---------------------------------
                         Row(
+                            modifier = Modifier.padding(top = 20.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -238,8 +230,8 @@ fun ConverterCurrencyScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = LedgerColors.TextTertiary,
                             )
-                            Spacer(Modifier.height(4.dp))
                             Text(
+                                modifier = Modifier.padding(top = 4.dp),
                                 text = state.convertedAmount?.let { fixed(it, 2) } ?: "0.00",
                                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                                 color = LedgerColors.TextPrimary,
@@ -274,15 +266,14 @@ fun ConverterCurrencyScreen(
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 20.sp),
                         color = LedgerColors.TextPrimary,
                     )
-                    Spacer(Modifier.height(4.dp))
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = stringResource(Res.string.conv_30d_trend, base ?: "—", quote ?: "—"),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
                     )
-                    Spacer(Modifier.height(16.dp))
                     BentoCard(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                         fill = LedgerColors.SurfaceElevated,
                         cornerRadius = 16.dp,
                     ) {
@@ -339,9 +330,8 @@ fun ConverterCurrencyScreen(
                 color = LedgerColors.TextPrimary,
                 modifier = Modifier.padding(horizontal = 4.dp),
             )
-            Spacer(Modifier.height(16.dp))
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                 maxItemsInEachRow = if (isExpanded) 3 else 1,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -479,8 +469,8 @@ private fun RateGridCard(
                     color = LedgerColors.TextPrimary,
                 )
                 if (currencyName.isNotBlank()) {
-                    Spacer(Modifier.height(4.dp))
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = currencyName,
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
@@ -497,8 +487,8 @@ private fun RateGridCard(
                     color = LedgerColors.TextPrimary,
                 )
                 if (deltaPercent != null) {
-                    Spacer(Modifier.height(4.dp))
                     Text(
+                        modifier = Modifier.padding(top = 4.dp),
                         text = signedPercent(deltaPercent),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = if (deltaPercent >= 0) LedgerColors.Green else LedgerColors.Error,

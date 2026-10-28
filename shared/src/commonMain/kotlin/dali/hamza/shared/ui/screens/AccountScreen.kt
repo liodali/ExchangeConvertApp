@@ -226,8 +226,6 @@ fun AccountScreen(
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(24.dp))
-
-            // ============ Profile hero =====================================
             ProfileHero(
                 username = viewModel.username,
                 email = viewModel.email,
@@ -259,8 +257,8 @@ fun AccountScreen(
                             )
                         },
                     )
-                    Spacer(Modifier.height(16.dp))
                     LedgerListRow(
+                        modifier = Modifier.padding(top = 16.dp),
                         label = stringResource(Res.string.acct_data_plan),
                         icon = Icons.Outlined.Star,
                         iconTint = if (viewModel.dataTier == DataTier.SOVEREIGN) {
@@ -280,8 +278,8 @@ fun AccountScreen(
                             )
                         },
                     )
-                    Spacer(Modifier.height(12.dp))
                     Text(
+                        modifier = Modifier.padding(top = 12.dp),
                         text = stringResource(Res.string.acct_data_plan_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = LedgerColors.TextTertiary,
@@ -318,8 +316,8 @@ fun AccountScreen(
                         iconTint = LedgerColors.Green,
                         titleColor = LedgerColors.Green,
                     )
-                    Spacer(Modifier.height(16.dp))
                     Text(
+                        modifier = Modifier.padding(top = 16.dp),
                         text = stringResource(Res.string.acct_security_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = LedgerColors.TextSecondary,
@@ -458,10 +456,9 @@ fun AccountScreen(
                 // ============ Appearance (mode + palette, design qDCZE) =======
                 BentoCard(modifier = Modifier.weight(1f)) {
                     SectionLabel(stringResource(Res.string.acct_appearance_section))
-                    Spacer(Modifier.height(16.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -511,11 +508,9 @@ fun AccountScreen(
                             )
                         }
                     }
-                    Spacer(Modifier.height(20.dp))
-                    // palette choices (design swatches)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 20.dp).fillMaxWidth(),
                     ) {
                         Text(
                             text = stringResource(Res.string.acct_palette_section),
@@ -529,10 +524,9 @@ fun AccountScreen(
                             color = LedgerColors.Green,
                         )
                     }
-                    Spacer(Modifier.height(12.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 12.dp).fillMaxWidth(),
                     ) {
                         paletteSwatches.forEach { (palette, swatches) ->
                             val selected = viewModel.colorPalette == palette
@@ -565,8 +559,8 @@ fun AccountScreen(
                                         )
                                     }
                                 }
-                                Spacer(Modifier.height(8.dp))
                                 Text(
+                                    modifier = Modifier.padding(top = 8.dp),
                                     text = palette.label,
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                                     color = if (selected) LedgerColors.Green else LedgerColors.TextSecondary,
@@ -574,9 +568,8 @@ fun AccountScreen(
                             }
                         }
                     }
-                    Spacer(Modifier.height(20.dp))
-                    // chart style: line vs bar historical graph (design `ATVsN`)
                     Text(
+                        modifier = Modifier.padding(top = 20.dp),
                         text = stringResource(Res.string.acct_chart_title),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = LedgerColors.TextPrimary,
@@ -688,8 +681,8 @@ fun AccountScreen(
                     // guests have no session to log out of — local data instead
                     BentoCard(modifier = Modifier.weight(1f)) {
                         SectionLabel(stringResource(Res.string.acct_local_data_section))
-                        Spacer(Modifier.height(16.dp))
                         LedgerListRow(
+                            modifier = Modifier.padding(top = 16.dp),
                             label = stringResource(Res.string.acct_clear_ledger),
                             icon = Icons.Outlined.DeleteOutline,
                             iconTint = LedgerColors.Error,
@@ -721,19 +714,18 @@ fun AccountScreen(
                                         ),
                                         color = MaterialTheme.colorScheme.onBackground,
                                     )
-                                    Spacer(Modifier.height(8.dp))
                                     Text(
+                                        modifier = Modifier.padding(top = 8.dp),
                                         text = stringResource(Res.string.acct_support_desc),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = LedgerColors.TextSecondary,
                                     )
                                 }
                             }
-                            Spacer(Modifier.height(24.dp))
                             LedgerButton(
                                 text = stringResource(Res.string.acct_support_cta),
                                 onClick = onOpenSupport,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                             )
                         }
                     }
@@ -741,10 +733,8 @@ fun AccountScreen(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            // ============ Version footer ==================================
             Text(
+                modifier = Modifier.padding(top = 12.dp),
                 text = stringResource(
                     Res.string.acct_footer,
                     dali.hamza.shared.platform.appVersionName(),
@@ -945,8 +935,8 @@ private fun ProfileHero(
                 color = LedgerColors.TextPrimary,
             )
             if (isSovereign) {
-                Spacer(Modifier.height(4.dp))
                 Text(
+                    modifier = Modifier.padding(top = 4.dp),
                     text = email,
                     style = MaterialTheme.typography.bodyLarge,
                     color = LedgerColors.TextSecondary,
@@ -1054,8 +1044,8 @@ private fun ClearLedgerConfirmSheet(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(12.dp))
             Text(
+                modifier = Modifier.padding(top = 12.dp),
                 text = stringResource(Res.string.acct_clear_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextSecondary,
@@ -1103,8 +1093,8 @@ private fun EditNameDialog(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(16.dp))
             LedgerInput(
+                modifier = Modifier.padding(top = 16.dp),
                 value = name,
                 onValueChange = { name = it },
                 label = stringResource(Res.string.acct_edit_profile_hint),

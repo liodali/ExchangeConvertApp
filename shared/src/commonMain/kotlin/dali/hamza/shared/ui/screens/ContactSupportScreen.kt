@@ -114,24 +114,20 @@ fun ContactSupportScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
-            Spacer(Modifier.height(24.dp))
-
-            // ============ Hero =============================================
             Text(
+                modifier = Modifier.padding(top = 24.dp),
                 text = stringResource(Res.string.ct_hero),
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.TextPrimary,
             )
-            Spacer(Modifier.height(16.dp))
             Text(
+                modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(Res.string.ct_hero_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextSecondary,
             )
 
             Spacer(Modifier.height(32.dp))
-
-            // ============ Contact options ==================================
             ContactOptionCard(
                 title = stringResource(Res.string.ct_live_chat),
                 description = stringResource(Res.string.ct_live_chat_desc),
@@ -194,10 +190,8 @@ fun ContactSupportScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(32.dp))
-
-                    // ---- subject category (design select) -----------------
                     Text(
+                        modifier = Modifier.padding(top = 32.dp),
                         text = stringResource(Res.string.ct_subject_label),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         color = LedgerColors.TextSecondary,
@@ -252,29 +246,25 @@ fun ContactSupportScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(24.dp))
-
-                    // ---- detailed description -----------------------------
                     Text(
+                        modifier = Modifier.padding(top = 24.dp),
                         text = stringResource(Res.string.ct_description_label),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         color = LedgerColors.TextSecondary,
                     )
-                    Spacer(Modifier.height(8.dp))
                     LedgerTextArea(
+                        modifier = Modifier.padding(top = 8.dp),
                         value = description,
                         onValueChange = { description = it },
                         placeholder = stringResource(Res.string.ct_description_placeholder),
                         minHeight = 200.dp,
                     )
 
-                    Spacer(Modifier.height(24.dp))
-
                     LedgerButton(
                         text = stringResource(Res.string.ct_submit),
                         onClick = { dispatched = true },
                         trailingIcon = Icons.Outlined.Send,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
                         enabled = topicIndex != null && description.isNotBlank(),
                     )
                 }
@@ -328,8 +318,8 @@ private fun ContactOptionCard(
                         badge()
                     }
                 }
-                Spacer(Modifier.height(4.dp))
                 Text(
+                    modifier = Modifier.padding(top = 4.dp),
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = LedgerColors.TextSecondary,
