@@ -251,7 +251,7 @@ fun AccountScreen(
                     LedgerListRow(
                         label = stringResource(Res.string.acct_login),
                         icon = Icons.Outlined.ManageAccounts,
-                        trailing = {
+                        subtitle = {
                             LedgerChip(
                                 text = stringResource(Res.string.acct_coming_soon),
                                 tint = LedgerColors.Gold,
@@ -268,10 +268,16 @@ fun AccountScreen(
                         } else {
                             LedgerColors.TextTertiary
                         },
-                        value = if (viewModel.dataTier == DataTier.SOVEREIGN) {
-                            stringResource(Res.string.acct_data_plan_sovereign)
-                        } else {
-                            stringResource(Res.string.acct_data_plan_guest)
+                        subtitle = {
+                            Text(
+                                text = if (viewModel.dataTier == DataTier.SOVEREIGN) {
+                                    stringResource(Res.string.acct_data_plan_sovereign)
+                                } else {
+                                    stringResource(Res.string.acct_data_plan_guest)
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = LedgerColors.TextSecondary,
+                            )
                         },
                     )
                     Spacer(Modifier.height(12.dp))

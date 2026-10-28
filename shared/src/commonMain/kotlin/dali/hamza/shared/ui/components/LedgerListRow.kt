@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -40,6 +41,7 @@ fun LedgerListRow(
     icon: ImageVector? = null,
     iconTint: Color = LedgerColors.TextTertiary,
     value: String? = null,
+    subtitle: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     emphasize: Boolean = false,
@@ -64,18 +66,23 @@ fun LedgerListRow(
                 modifier = Modifier.size(20.dp),
             )
         }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = if (emphasize) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
-            // settings rows wrap at most once (e.g. German compounds keep a
-            // second line instead of truncating) but never grow past two
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = if (emphasize) FontWeight.SemiBold else FontWeight.Medium,
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                // settings rows wrap at most once (e.g. German compounds keep a
+                // second line instead of truncating) but never grow past two
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (subtitle != null) {
+                Spacer(Modifier.height(4.dp))
+                subtitle()
+            }
+        }
         if (value != null) {
             Text(
                 text = value,
