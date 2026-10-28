@@ -55,6 +55,7 @@ import echangecurrencyapp.shared.generated.resources.ct_description_label
 import echangecurrencyapp.shared.generated.resources.ct_description_placeholder
 import echangecurrencyapp.shared.generated.resources.ct_dispatch
 import echangecurrencyapp.shared.generated.resources.ct_dispatch_desc
+import echangecurrencyapp.shared.generated.resources.ct_dispatch_value
 import echangecurrencyapp.shared.generated.resources.ct_form_title
 import echangecurrencyapp.shared.generated.resources.ct_hero
 import echangecurrencyapp.shared.generated.resources.ct_hero_desc
@@ -162,7 +163,7 @@ fun ContactSupportScreen(
                 description = stringResource(Res.string.ct_dispatch_desc),
                 icon = Icons.Outlined.MailOutline,
                 tint = LedgerColors.Blue,
-                footer = { FooterValue(text = "liaison@sovereign.vault") },
+                footer = { FooterValue(text = stringResource(Res.string.ct_dispatch_value)) },
             )
 
             Spacer(Modifier.height(32.dp))

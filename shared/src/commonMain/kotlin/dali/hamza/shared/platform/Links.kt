@@ -4,6 +4,8 @@ package dali.hamza.shared.platform
 object AppLinks {
     const val TERMS_URL = "https://exchange.dev.adetify.com/terms"
     const val PRIVACY_URL = "https://exchange.dev.adetify.com/privacy"
+    // Store listing id = applicationId in app/build.gradle.kts (NOT the Android
+    // namespace, dali.hamza.echangecurrencyapp — that id has no Play listing).
     const val PLAY_URL = "https://play.google.com/store/apps/details?id=com.sovereignledger.app"
 }
 

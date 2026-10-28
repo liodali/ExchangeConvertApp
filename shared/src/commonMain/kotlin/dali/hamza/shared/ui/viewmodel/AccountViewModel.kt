@@ -124,7 +124,7 @@ class AccountViewModel(
 
     /** Design persona email, derived from the username. */
     val email: String
-        get() = "${username.lowercase().filter { it.isLetterOrDigit() }}@sovereign.vault"
+        get() = "${username.lowercase().filter { it.isLetterOrDigit() }}@dinarly.app"
 
     fun toggleNotifications() {
         notificationsEnabled = !notificationsEnabled

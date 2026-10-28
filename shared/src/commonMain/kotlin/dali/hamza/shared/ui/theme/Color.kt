@@ -34,7 +34,7 @@ enum class LedgerThemeMode(val stored: String) {
 
 /** Dark-mode color palette selected in Account → Appearance. */
 enum class LedgerColorPalette(val stored: String, val label: String) {
-    SOVEREIGN("sovereign", "Sovereign"),
+    SOVEREIGN("sovereign", "Dinarly"),
     SUMMER("summer", "Summer"),
     ORCHID("orchid", "Orchid"),
     FOREST("forest", "Forest");

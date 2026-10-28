@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Dinarly shared UI strings — Arabic translation (Modern Standard Arabic, فصحى).
      Translated from the English baseline in values/strings.xml; keys and order are identical.
-     Brand names (Dinarly, Sovereign, Gemini, Siri, ISO currency codes) stay untranslated.
+     Brand names (Dinarly, Gemini, Siri, ISO currency codes) stay untranslated.
      NOTE: \' escapes apostrophes; %% escapes a literal percent sign. -->
 <resources>
     <!-- ===== Navigation & common ===== -->
@@ -88,7 +88,7 @@
 
     <!-- ===== History screen ===== -->
     <string name="hist_premium">ميزة بريميوم</string>
-    <string name="hist_zero_fees">بصفتك عضواً في فئة Sovereign، تستمتع بعمولة تبادل 0% على جميع أزواج العملات الرئيسية.</string>
+    <string name="hist_zero_fees">بصفتك عضواً في فئة Dinarly، تستمتع بعمولة تبادل 0% على جميع أزواج العملات الرئيسية.</string>
     <string name="hist_pair_header">%1$s إلى %2$s</string>
     <string name="hist_live_rate">سعر السوق المباشر</string>
     <string name="hist_range_all">الكل</string>
@@ -119,7 +119,7 @@
     <string name="acct_badge_guest">عميل زائر</string>
     <string name="acct_badge_verified">دفتر موثّق</string>
     <string name="acct_edit_profile">تعديل الملف الشخصي</string>
-    <string name="acct_edit_profile_hint">اسم العرض في Sovereign</string>
+    <string name="acct_edit_profile_hint">اسم العرض في Dinarly</string>
     <string name="acct_personal_info">المعلومات الشخصية</string>
     <string name="acct_phone_label">رقم الهاتف</string>
     <string name="acct_residence_label">محل الإقامة</string>
@@ -175,9 +175,9 @@
     <string name="acct_login">تسجيل الدخول إلى Dinarly</string>
     <string name="acct_coming_soon">قريباً</string>
     <string name="acct_data_plan">خطة البيانات</string>
-    <string name="acct_data_plan_note">تحدّث خطة الزوار الأسعار كل ساعة، بينما يمنحك تسجيل الدخول إلى Sovereign البيانات الفورية.</string>
+    <string name="acct_data_plan_note">تحدّث خطة الزوار الأسعار كل ساعة، بينما يمنحك تسجيل الدخول إلى Dinarly البيانات الفورية.</string>
     <string name="acct_data_plan_guest">أسعار كل ساعة · زائر</string>
-    <string name="acct_data_plan_sovereign">أسعار فورية · Sovereign</string>
+    <string name="acct_data_plan_sovereign">أسعار فورية · Dinarly</string>
     <string name="acct_footer">عقدة DINARLY إصدار %1$s • آخر مزامنة: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">الآن</string>
@@ -243,7 +243,7 @@
     <string name="alerts_threshold">تغيّر ≥ %%</string>
     <string name="alerts_threshold_hint">0.5</string>
     <string name="alerts_usage">استخدمت %1$d من أصل %2$d تنبيه</string>
-    <string name="alerts_free_note">الخطة المجانية: تنبيه واحد بإشعار الخادم (يُفحص كل ساعتين) وما يصل إلى تنبيهين على الجهاز. وسيمنح تسجيل الدخول إلى Sovereign المزيد.</string>
+    <string name="alerts_free_note">الخطة المجانية: تنبيه واحد بإشعار الخادم (يُفحص كل ساعتين) وما يصل إلى تنبيهين على الجهاز. وسيمنح تسجيل الدخول إلى Dinarly المزيد.</string>
     <string name="alerts_guest_note">الخطة المجانية: تُفحص تنبيهات الخادم كل ساعتين — تنبيه واحد فقط.</string>
     <string name="alerts_push_fallback">خدمة الإشعارات غير متاحة — تم حفظ التنبيه على الجهاز بدلاً من ذلك.</string>
     <string name="alerts_moved_to_push">تم نقل %1$s → %2$s إلى إشعارات الخادم.</string>
@@ -275,18 +275,18 @@
     <string name="faq_results_for">%1$d نتيجة عن «%2$s»</string>
     <string name="faq_security">الأمان</string>
     <string name="faq_sec_q1">كيف يتم تأمين بيانات مفتاحي الخاص؟</string>
-    <string name="faq_sec_a1">يستخدم Sovereign Ledger حساباً متعدد الأطراف (MPC) بمستوى مؤسسي موزّعاً عبر مناطق آمنة معزولة حول العالم. ولا يُبنى مفتاحك كاملاً أبداً، ما يجعل الاختراق من نقطة واحدة أمراً مستحيلاً من الناحية الرياضية.</string>
+    <string name="faq_sec_a1">يستخدم Dinarly حساباً متعدد الأطراف (MPC) بمستوى مؤسسي موزّعاً عبر مناطق آمنة معزولة حول العالم. ولا يُبنى مفتاحك كاملاً أبداً، ما يجعل الاختراق من نقطة واحدة أمراً مستحيلاً من الناحية الرياضية.</string>
     <string name="faq_sec_q2">إعداد المصادقة بالمفتاح المادي</string>
     <string name="faq_sec_a2">اربط مفتاحك المادي من الأمان والمصادقة ← الفتح بالبصمة الحيوية. أدخل الجهاز، واستمر في الضغط على زره لخمس ثوانٍ، ثم أكّد رمز الاقتران الظاهر في دفترك.</string>
     <string name="faq_sec_q3">ماذا أفعل إذا اختُرق جهازي الأساسي؟</string>
-    <string name="faq_sec_a3">جمّد الجلسة فوراً من أي جهاز ثانوي، ثم أبطِل المفتاح المُخترَق. ويمكن لعملاء Sovereign أيضاً طلب تبديل الجهاز بمساعدة فريق الكونسيرج خلال ساعة واحدة.</string>
+    <string name="faq_sec_a3">جمّد الجلسة فوراً من أي جهاز ثانوي، ثم أبطِل المفتاح المُخترَق. ويمكن لعملاء Dinarly أيضاً طلب تبديل الجهاز بمساعدة فريق الكونسيرج خلال ساعة واحدة.</string>
     <string name="faq_trading">التداول والأسواق</string>
     <string name="faq_trading_t1">شرح انزلاق التنفيذ</string>
     <string name="faq_trading_t2">فئات الوصول إلى البرك المظلمة</string>
     <string name="faq_trading_t3">المدد الزمنية للتسوية (T+1)</string>
     <string name="faq_account">إدارة الحساب</string>
     <string name="faq_account_desc">كل ما يتعلق بترقيات الفئات، ووثائق الامتثال، واعتمادات التوقيع المتعدد.</string>
-    <string name="faq_acc_q1">الترقية إلى فئة Sovereign</string>
+    <string name="faq_acc_q1">الترقية إلى فئة Dinarly</string>
     <string name="faq_acc_a1">تشمل المتطلبات أصولاً موثّقة تتجاوز مليون دولار ومراجعة امتثال أولية. وتُعالَج الترقيات خلال 48 ساعة.</string>
     <string name="faq_acc_q2">إضافة موقّع مشترك</string>
     <string name="faq_acc_a2">ابدأ إعداد التوقيع المتعدد عبر مركز الأمان. ويجب على الطرف الثاني إكمال التحقق من الهوية أيضاً.</string>
@@ -295,7 +295,7 @@
     <string name="faq_acc_q4">القوائم البيضاء للتحويلات البنكية</string>
     <string name="faq_acc_a4">يجب اعتماد جميع جهات التحويل الصادرة مسبقاً. وتتطلب التغييرات فترة تهدئة مدتها 48 ساعة.</string>
     <string name="faq_cta_title">لا تزال بحاجة إلى المساعدة؟</string>
-    <string name="faq_cta_desc">فريق الكونسيرج المتخصص لدينا متاح على مدار الساعة طوال أيام الأسبوع لأعضاء فئة Sovereign.</string>
+    <string name="faq_cta_desc">فريق الكونسيرج المتخصص لدينا متاح على مدار الساعة طوال أيام الأسبوع لأعضاء فئة Dinarly.</string>
     <string name="faq_cta_primary">التواصل مع الكونسيرج</string>
     <string name="faq_cta_secondary">رسالة آمنة</string>
 
@@ -328,7 +328,7 @@
 
     <!-- ===== Contact / concierge ===== -->
     <string name="ct_hero">دعم الكونسيرج</string>
-    <string name="ct_hero_desc">مساعدة سرية وذات أولوية لعملاء Sovereign. اختر قناتك المفضلة أدناه أو أرسل رسالة آمنة مباشرة إلى جهة الاتصال المخصصة لك.</string>
+    <string name="ct_hero_desc">مساعدة سرية وذات أولوية لعملاء Dinarly. اختر قناتك المفضلة أدناه أو أرسل رسالة آمنة مباشرة إلى جهة الاتصال المخصصة لك.</string>
     <string name="ct_live_chat">الدردشة المباشرة</string>
     <string name="ct_premium">مميّز</string>
     <string name="ct_live_chat_desc">محادثة نصية فورية مشفّرة مع مدير علاقات أول.</string>
@@ -338,7 +338,7 @@
     <string name="ct_phone_value">+41 44 555 12 34</string>
     <string name="ct_dispatch">الإرسال الآمن</string>
     <string name="ct_dispatch_desc">إشعار استلام مضمون خلال ساعة واحدة.</string>
-    <string name="ct_dispatch_value">liaison@sovereign.vault</string>
+    <string name="ct_dispatch_value">liaison@dinarly.app</string>
     <string name="ct_form_title">نموذج الرسالة الآمنة</string>
     <string name="ct_subject_label">فئة الموضوع</string>
     <string name="ct_subject_placeholder">اختر الموضوع…</string>
@@ -354,7 +354,7 @@
 
     <!-- ===== Feedback ===== -->
     <string name="fb_hero">ساهم في صقل الأداة.</string>
-    <string name="fb_hero_desc">تشكّل ملاحظاتك بنية Sovereign Ledger. أخبرنا كيف يمكننا الارتقاء بتجربتك في الخدمات المصرفية الخاصة.</string>
+    <string name="fb_hero_desc">تشكّل ملاحظاتك بنية Dinarly. أخبرنا كيف يمكننا الارتقاء بتجربتك في الخدمات المصرفية الخاصة.</string>
     <string name="fb_rating_label">التجربة الإجمالية</string>
     <string name="fb_category_label">الفئة الرئيسية</string>
     <string name="fb_cat_performance">الأداء</string>
@@ -366,6 +366,8 @@
     <string name="fb_suggestions_placeholder">صف تجربتك أو طلبك لميزة…</string>
     <string name="fb_submit">إرسال الرؤى</string>
     <string name="fb_success_title">تم استلام الرؤى</string>
-    <string name="fb_success_desc">شكراً لك — ملاحظاتك تصقل الأداة لكل عميل من عملاء Sovereign.</string>
+    <string name="fb_success_desc">شكراً لك — ملاحظاتك تصقل الأداة لكل عميل من عملاء Dinarly.</string>
     <string name="fb_stars_desc">%1$d نجمة</string>
+    <string name="onb_name_title">اسمك</string>
+    <string name="onb_name_note">مثال: علي — يظهر في حسابك</string>
 </resources>

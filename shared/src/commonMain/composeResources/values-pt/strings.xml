@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Dinarly shared UI strings — Brazilian Portuguese (pt-BR base).
      Base translation for all Portuguese variants; European overrides live in values-pt-rPT.
-     Brand names (Dinarly, Sovereign, Gemini, Siri, ISO currency codes) stay untranslated.
+     Brand names (Dinarly, Gemini, Siri, ISO currency codes) stay untranslated.
      NOTE: \' escapes apostrophes; %% escapes a literal percent sign. -->
 <resources>
     <!-- ===== Navigation & common ===== -->
@@ -88,7 +88,7 @@
 
     <!-- ===== History screen ===== -->
     <string name="hist_premium">BENEFÍCIO PREMIUM</string>
-    <string name="hist_zero_fees">Como membro do nível Sovereign, você tem 0% de tarifas de câmbio em todos os principais pares de moedas.</string>
+    <string name="hist_zero_fees">Como membro do nível Dinarly, você tem 0% de tarifas de câmbio em todos os principais pares de moedas.</string>
     <string name="hist_pair_header">%1$s PARA %2$s</string>
     <string name="hist_live_rate">Cotação de mercado ao vivo</string>
     <string name="hist_range_all">TUDO</string>
@@ -119,7 +119,7 @@
     <string name="acct_badge_guest">CLIENTE CONVIDADO</string>
     <string name="acct_badge_verified">REGISTRO VERIFICADO</string>
     <string name="acct_edit_profile">Editar Perfil</string>
-    <string name="acct_edit_profile_hint">Nome de exibição Sovereign</string>
+    <string name="acct_edit_profile_hint">Nome de exibição Dinarly</string>
     <string name="acct_personal_info">Informações Pessoais</string>
     <string name="acct_phone_label">NÚMERO DE TELEFONE</string>
     <string name="acct_residence_label">RESIDÊNCIA DE IDENTIDADE</string>
@@ -175,9 +175,9 @@
     <string name="acct_login">Entrar no Dinarly</string>
     <string name="acct_coming_soon">EM BREVE</string>
     <string name="acct_data_plan">Plano de Dados</string>
-    <string name="acct_data_plan_note">O plano de convidado atualiza as cotações a cada hora. O login Sovereign desbloqueia dados em tempo real.</string>
+    <string name="acct_data_plan_note">O plano de convidado atualiza as cotações a cada hora. O login Dinarly desbloqueia dados em tempo real.</string>
     <string name="acct_data_plan_guest">Cotações por hora · Convidado</string>
-    <string name="acct_data_plan_sovereign">Tempo real · Sovereign</string>
+    <string name="acct_data_plan_sovereign">Tempo real · Dinarly</string>
     <string name="acct_footer">NÓ DINARLY V%1$s • ÚLTIMA SINCRONIZAÇÃO: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">AGORA</string>
@@ -243,7 +243,7 @@
     <string name="alerts_threshold">Variação ≥ %%</string>
     <string name="alerts_threshold_hint">0.5</string>
     <string name="alerts_usage">%1$d de %2$d alertas usados</string>
-    <string name="alerts_free_note">Plano gratuito: 1 alerta push (verificado a cada 2h) e até 2 alertas no dispositivo. O login Sovereign liberará mais.</string>
+    <string name="alerts_free_note">Plano gratuito: 1 alerta push (verificado a cada 2h) e até 2 alertas no dispositivo. O login Dinarly liberará mais.</string>
     <string name="alerts_guest_note">Plano gratuito: alertas push verificados a cada 2 horas — um alerta push.</string>
     <string name="alerts_push_fallback">Serviço de push inacessível — alerta salvo no dispositivo.</string>
     <string name="alerts_moved_to_push">%1$s → %2$s movido para o push do servidor.</string>
@@ -275,18 +275,18 @@
     <string name="faq_results_for">%1$d resultado(s) para “%2$s”</string>
     <string name="faq_security">Segurança</string>
     <string name="faq_sec_q1">Como meu material de chave privada é protegido?</string>
-    <string name="faq_sec_a1">O Sovereign Ledger utiliza Computação Multi-Partidária (MPC) de nível institucional, distribuída por enclaves seguros isolados globalmente. Sua chave nunca é construída na íntegra, o que torna violações de ponto único matematicamente impossíveis.</string>
+    <string name="faq_sec_a1">O Dinarly utiliza Computação Multi-Partidária (MPC) de nível institucional, distribuída por enclaves seguros isolados globalmente. Sua chave nunca é construída na íntegra, o que torna violações de ponto único matematicamente impossíveis.</string>
     <string name="faq_sec_q2">Configurando autenticação por chave de hardware</string>
     <string name="faq_sec_a2">Pareie sua chave de hardware em Segurança &amp; Autenticação → Desbloqueio Biométrico. Insira o dispositivo, mantenha o botão pressionado por cinco segundos e confirme o código de pareamento exibido no seu registro.</string>
     <string name="faq_sec_q3">O que fazer se meu dispositivo principal for comprometido?</string>
-    <string name="faq_sec_a3">Congele a sessão instantaneamente em qualquer dispositivo secundário e revogue a chave comprometida. Clientes Sovereign também podem solicitar uma rotação de dispositivo assistida pelo concierge em até uma hora.</string>
+    <string name="faq_sec_a3">Congele a sessão instantaneamente em qualquer dispositivo secundário e revogue a chave comprometida. Clientes Dinarly também podem solicitar uma rotação de dispositivo assistida pelo concierge em até uma hora.</string>
     <string name="faq_trading">Negociações &amp; Mercados</string>
     <string name="faq_trading_t1">Entendendo o Slippage de Execução</string>
     <string name="faq_trading_t2">Níveis de Acesso ao Dark Pool</string>
     <string name="faq_trading_t3">Prazos de Liquidação (T+1)</string>
     <string name="faq_account">Gerenciamento de Conta</string>
     <string name="faq_account_desc">Tudo relacionado a upgrades de nível, documentação de conformidade e aprovações com múltiplas assinaturas.</string>
-    <string name="faq_acc_q1">Upgrade para o Nível Sovereign</string>
+    <string name="faq_acc_q1">Upgrade para o Nível Dinarly</string>
     <string name="faq_acc_a1">Os requisitos incluem ativos comprovados acima de US$ 1 milhão e uma análise de conformidade inicial. Os upgrades são processados em até 48 horas.</string>
     <string name="faq_acc_q2">Adicionando um Cossignatário</string>
     <string name="faq_acc_a2">Inicie a configuração multi-sig pelo Centro de Segurança. A outra parte também deve concluir a verificação de identidade.</string>
@@ -295,7 +295,7 @@
     <string name="faq_acc_q4">Whitelists de Transferência</string>
     <string name="faq_acc_a4">Todos os destinos de saída devem ser pré-aprovados. Alterações exigem um período de espera de 48 horas.</string>
     <string name="faq_cta_title">Ainda precisa de assistência?</string>
-    <string name="faq_cta_desc">Nossa equipe de concierge dedicada está disponível 24/7 para membros do nível Sovereign.</string>
+    <string name="faq_cta_desc">Nossa equipe de concierge dedicada está disponível 24/7 para membros do nível Dinarly.</string>
     <string name="faq_cta_primary">Falar com o Concierge</string>
     <string name="faq_cta_secondary">Mensagem Segura</string>
 
@@ -328,7 +328,7 @@
 
     <!-- ===== Contact / concierge ===== -->
     <string name="ct_hero">Suporte Concierge</string>
-    <string name="ct_hero_desc">Assistência discreta e prioritária para clientes Sovereign. Selecione o canal de sua preferência abaixo ou envie uma mensagem segura diretamente ao seu representante designado.</string>
+    <string name="ct_hero_desc">Assistência discreta e prioritária para clientes Dinarly. Selecione o canal de sua preferência abaixo ou envie uma mensagem segura diretamente ao seu representante designado.</string>
     <string name="ct_live_chat">Chat ao Vivo</string>
     <string name="ct_premium">PREMIUM</string>
     <string name="ct_live_chat_desc">Diálogo de texto imediato e criptografado com um gerente de relacionamento sênior.</string>
@@ -338,7 +338,7 @@
     <string name="ct_phone_value">+41 44 555 12 34</string>
     <string name="ct_dispatch">Envio Seguro</string>
     <string name="ct_dispatch_desc">Confirmação de recebimento garantida em até 1 hora.</string>
-    <string name="ct_dispatch_value">liaison@sovereign.vault</string>
+    <string name="ct_dispatch_value">liaison@dinarly.app</string>
     <string name="ct_form_title">Formulário de Mensagem Segura</string>
     <string name="ct_subject_label">Categoria do Assunto</string>
     <string name="ct_subject_placeholder">Selecione o tópico…</string>
@@ -354,7 +354,7 @@
 
     <!-- ===== Feedback ===== -->
     <string name="fb_hero">Aperfeiçoe o Instrumento.</string>
-    <string name="fb_hero_desc">Suas percepções moldam a arquitetura do Sovereign Ledger. Conte-nos como podemos elevar sua experiência de banco privado.</string>
+    <string name="fb_hero_desc">Suas percepções moldam a arquitetura do Dinarly. Conte-nos como podemos elevar sua experiência de banco privado.</string>
     <string name="fb_rating_label">Experiência Geral</string>
     <string name="fb_category_label">Categoria Principal</string>
     <string name="fb_cat_performance">Desempenho</string>
@@ -366,6 +366,8 @@
     <string name="fb_suggestions_placeholder">Descreva sua experiência ou solicitação de recurso…</string>
     <string name="fb_submit">Enviar Inteligência</string>
     <string name="fb_success_title">Inteligência Recebida</string>
-    <string name="fb_success_desc">Obrigado — suas percepções aprimoram o instrumento para cada cliente Sovereign.</string>
+    <string name="fb_success_desc">Obrigado — suas percepções aprimoram o instrumento para cada cliente Dinarly.</string>
     <string name="fb_stars_desc">%1$d estrela(s)</string>
+    <string name="onb_name_title">Seu nome</string>
+    <string name="onb_name_note">ex.: Alex — aparece na sua conta</string>
 </resources>

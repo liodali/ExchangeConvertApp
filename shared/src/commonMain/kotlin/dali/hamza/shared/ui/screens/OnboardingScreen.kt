@@ -38,6 +38,7 @@ import dali.hamza.shared.platform.isIos
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
+import dali.hamza.shared.ui.components.LedgerInput
 import dali.hamza.shared.ui.components.LedgerListRow
 import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerWindowMode
@@ -54,6 +55,8 @@ import echangecurrencyapp.shared.generated.resources.onb_change_anytime
 import echangecurrencyapp.shared.generated.resources.onb_desc
 import echangecurrencyapp.shared.generated.resources.onb_loading
 import echangecurrencyapp.shared.generated.resources.onb_market_slot
+import echangecurrencyapp.shared.generated.resources.onb_name_note
+import echangecurrencyapp.shared.generated.resources.onb_name_title
 import echangecurrencyapp.shared.generated.resources.onb_title
 import dali.hamza.shared.ui.theme.LedgerColors
 import org.jetbrains.compose.resources.stringResource
@@ -72,10 +75,12 @@ import org.jetbrains.compose.resources.stringResource
 fun OnboardingScreen(
     currencies: List<Currency>,
     base: String?,
-    onDone: (base: String, markets: List<String>) -> Unit,
+    initialName: String = "",
+    onDone: (base: String, markets: List<String>, name: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var baseCode by remember { mutableStateOf(base ?: "USD") }
+    var name by remember { mutableStateOf(initialName) }
     // preselected majors (design TOP_PAIRS); the user can swap each slot
     val selections = remember { mutableStateListOf("EUR", "GBP", "MAD") }
     var pickingBase by remember { mutableStateOf(false) }
@@ -118,6 +123,10 @@ fun OnboardingScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                     ) {
+                        OnboardingNameCard(
+                            name = name,
+                            onNameChange = { name = it },
+                        )
                         OnboardingBaseCard(
                             baseCode = baseCode,
                             nameFor = nameFor,
@@ -130,7 +139,7 @@ fun OnboardingScreen(
                         )
                         LedgerButton(
                             text = if (currencies.isEmpty()) stringResource(Res.string.onb_loading) else stringResource(Res.string.common_continue),
-                            onClick = { onDone(baseCode, selections.toList()) },
+                            onClick = { onDone(baseCode, selections.toList(), name.trim()) },
                             enabled = currencies.isNotEmpty(),
                             modifier = Modifier.fillMaxWidth(),
                         )
@@ -155,6 +164,11 @@ fun OnboardingScreen(
                     Spacer(Modifier.height(40.dp))
                     OnboardingTitle()
                     Spacer(Modifier.height(32.dp))
+                    OnboardingNameCard(
+                        name = name,
+                        onNameChange = { name = it },
+                    )
+                    Spacer(Modifier.height(24.dp))
                     OnboardingBaseCard(
                         baseCode = baseCode,
                         nameFor = nameFor,
@@ -169,7 +183,7 @@ fun OnboardingScreen(
                     Spacer(Modifier.height(32.dp))
                     LedgerButton(
                         text = if (currencies.isEmpty()) stringResource(Res.string.onb_loading) else stringResource(Res.string.common_continue),
-                        onClick = { onDone(baseCode, selections.toList()) },
+                        onClick = { onDone(baseCode, selections.toList(), name.trim()) },
                         enabled = currencies.isNotEmpty(),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -256,6 +270,27 @@ private fun OnboardingTitle() {
         style = MaterialTheme.typography.bodyMedium,
         color = LedgerColors.TextSecondary,
     )
+}
+
+/** Display-name step — the guest identity shown on Account and Home. */
+@Composable
+private fun OnboardingNameCard(
+    name: String,
+    onNameChange: (String) -> Unit,
+) {
+    BentoCard {
+        Text(
+            text = stringResource(Res.string.onb_name_title),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = LedgerColors.TextSecondary,
+        )
+        Spacer(Modifier.height(16.dp))
+        LedgerInput(
+            value = name,
+            onValueChange = { onNameChange(it.take(24)) },
+            placeholder = stringResource(Res.string.onb_name_note),
+        )
+    }
 }
 
 @Composable

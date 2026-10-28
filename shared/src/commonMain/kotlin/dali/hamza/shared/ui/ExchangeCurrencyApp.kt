@@ -268,7 +268,14 @@ fun ExchangeCurrencyApp(
             OnboardingScreen(
                 currencies = sharedState.currencies,
                 base = sharedState.marketBase.takeIf { it.isNotEmpty() },
-                onDone = { baseCode, codes ->
+                initialName = accountViewModel.username,
+                onDone = { baseCode, codes, name ->
+                    // Persist the display name picked during onboarding (same
+                    // path as Account → edit name; blank keeps the default).
+                    if (name.isNotBlank()) {
+                        accountViewModel.rename(name)
+                        viewModel.onUsernameChanged(name)
+                    }
                     // Persist AND refresh the AccountViewModel snapshot: it is
                     // created at first composition — before onboarding runs —
                     // so its cached marketPreferences would otherwise stay

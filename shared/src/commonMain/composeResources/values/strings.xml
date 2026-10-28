@@ -89,7 +89,7 @@
 
     <!-- ===== History screen ===== -->
     <string name="hist_premium">PREMIUM BENEFIT</string>
-    <string name="hist_zero_fees">As a Sovereign tier member, you enjoy 0% exchange fees on all major currency pairs.</string>
+    <string name="hist_zero_fees">As a Dinarly tier member, you enjoy 0% exchange fees on all major currency pairs.</string>
     <string name="hist_pair_header">%1$s TO %2$s</string>
     <string name="hist_live_rate">Live market rate</string>
     <string name="hist_range_all">ALL</string>
@@ -120,7 +120,7 @@
     <string name="acct_badge_guest">GUEST CLIENT</string>
     <string name="acct_badge_verified">VERIFIED LEDGER</string>
     <string name="acct_edit_profile">Edit Profile</string>
-    <string name="acct_edit_profile_hint">Sovereign display name</string>
+    <string name="acct_edit_profile_hint">Dinarly display name</string>
     <string name="acct_personal_info">Personal Information</string>
     <string name="acct_phone_label">PHONE NUMBER</string>
     <string name="acct_residence_label">IDENTITY RESIDENCE</string>
@@ -176,9 +176,9 @@
     <string name="acct_login">Dinarly Login</string>
     <string name="acct_coming_soon">COMING SOON</string>
     <string name="acct_data_plan">Data Plan</string>
-    <string name="acct_data_plan_note">Guest plan refreshes rates hourly. Sovereign login unlocks realtime data.</string>
+    <string name="acct_data_plan_note">Guest plan refreshes rates hourly. Dinarly login unlocks realtime data.</string>
     <string name="acct_data_plan_guest">Hourly rates · Guest</string>
-    <string name="acct_data_plan_sovereign">Realtime · Sovereign</string>
+    <string name="acct_data_plan_sovereign">Realtime · Dinarly</string>
     <string name="acct_footer">DINARLY NODE V%1$s • LAST SYNC: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">JUST NOW</string>
@@ -244,7 +244,7 @@
     <string name="alerts_threshold">Move ≥ %%</string>
     <string name="alerts_threshold_hint">0.5</string>
     <string name="alerts_usage">%1$d of %2$d alerts used</string>
-    <string name="alerts_free_note">Free plan: 1 pushed alert (checked every 2h) plus up to 2 on-device alerts. Sovereign login will unlock more.</string>
+    <string name="alerts_free_note">Free plan: 1 pushed alert (checked every 2h) plus up to 2 on-device alerts. Dinarly login will unlock more.</string>
     <string name="alerts_guest_note">Free plan: pushed alerts are checked every 2 hours — one pushed alert.</string>
     <string name="alerts_push_fallback">Push service unreachable — alert saved on device instead.</string>
     <string name="alerts_moved_to_push">%1$s → %2$s moved to server push.</string>
@@ -276,18 +276,18 @@
     <string name="faq_results_for">%1$d result(s) for “%2$s”</string>
     <string name="faq_security">Security</string>
     <string name="faq_sec_q1">How is my private key material secured?</string>
-    <string name="faq_sec_a1">Sovereign Ledger utilizes institutional-grade Multi-Party Computation (MPC) distributed across globally isolated secure enclaves. Your key is never constructed in whole, rendering single-point breaches mathematically impossible.</string>
+    <string name="faq_sec_a1">Dinarly utilizes institutional-grade Multi-Party Computation (MPC) distributed across globally isolated secure enclaves. Your key is never constructed in whole, rendering single-point breaches mathematically impossible.</string>
     <string name="faq_sec_q2">Setting up Hardware Key Authentication</string>
     <string name="faq_sec_a2">Pair your hardware key from Security &amp; Authentication → Biometric Unlock. Insert the device, hold its button for five seconds, and confirm the pairing code shown in your ledger.</string>
     <string name="faq_sec_q3">What to do if my primary device is compromised?</string>
-    <string name="faq_sec_a3">Freeze the session instantly from any secondary device, then revoke the compromised key. Sovereign clients may also request a concierge-assisted device rotation within one hour.</string>
+    <string name="faq_sec_a3">Freeze the session instantly from any secondary device, then revoke the compromised key. Dinarly clients may also request a concierge-assisted device rotation within one hour.</string>
     <string name="faq_trading">Trading &amp; Markets</string>
     <string name="faq_trading_t1">Execution Slippage Explained</string>
     <string name="faq_trading_t2">Dark Pool Access Tiers</string>
     <string name="faq_trading_t3">Settlement Timeframes (T+1)</string>
     <string name="faq_account">Account Management</string>
     <string name="faq_account_desc">Everything related to tier upgrades, compliance documentation, and multi-signature approvals.</string>
-    <string name="faq_acc_q1">Upgrading to Sovereign Tier</string>
+    <string name="faq_acc_q1">Upgrading to Dinarly Tier</string>
     <string name="faq_acc_a1">Requirements include verified assets over $1M and an initial compliance review. Upgrades are processed within 48 hours.</string>
     <string name="faq_acc_q2">Adding a Co-Signatory</string>
     <string name="faq_acc_a2">Initiate multi-sig setup via the Security Center. The secondary party must also complete identity verification.</string>
@@ -296,7 +296,7 @@
     <string name="faq_acc_q4">Wire Transfer Whitelists</string>
     <string name="faq_acc_a4">All outbound destinations must be pre-approved. Changes require a 48-hour cooling period.</string>
     <string name="faq_cta_title">Still require assistance?</string>
-    <string name="faq_cta_desc">Our dedicated concierge team is available 24/7 for Sovereign Tier members.</string>
+    <string name="faq_cta_desc">Our dedicated concierge team is available 24/7 for Dinarly Tier members.</string>
     <string name="faq_cta_primary">Contact Concierge</string>
     <string name="faq_cta_secondary">Secure Message</string>
 
@@ -329,7 +329,7 @@
 
     <!-- ===== Contact / concierge ===== -->
     <string name="ct_hero">Concierge Support</string>
-    <string name="ct_hero_desc">Discreet, priority assistance for Sovereign clients. Select your preferred channel below or dispatch a secure message directly to your designated liaison.</string>
+    <string name="ct_hero_desc">Discreet, priority assistance for Dinarly clients. Select your preferred channel below or dispatch a secure message directly to your designated liaison.</string>
     <string name="ct_live_chat">Live Chat</string>
     <string name="ct_premium">PREMIUM</string>
     <string name="ct_live_chat_desc">Immediate, encrypted text dialogue with a senior relationship manager.</string>
@@ -339,7 +339,7 @@
     <string name="ct_phone_value">+41 44 555 12 34</string>
     <string name="ct_dispatch">Secure Dispatch</string>
     <string name="ct_dispatch_desc">Guaranteed acknowledgement within 1 hour.</string>
-    <string name="ct_dispatch_value">liaison@sovereign.vault</string>
+    <string name="ct_dispatch_value">liaison@dinarly.app</string>
     <string name="ct_form_title">Secure Message Form</string>
     <string name="ct_subject_label">Subject Category</string>
     <string name="ct_subject_placeholder">Select topic…</string>
@@ -355,7 +355,7 @@
 
     <!-- ===== Feedback ===== -->
     <string name="fb_hero">Refine the Instrument.</string>
-    <string name="fb_hero_desc">Your insights shape the architecture of the Sovereign Ledger. Tell us how we can elevate your private banking experience.</string>
+    <string name="fb_hero_desc">Your insights shape the architecture of the Dinarly. Tell us how we can elevate your private banking experience.</string>
     <string name="fb_rating_label">Overall Experience</string>
     <string name="fb_category_label">Primary Category</string>
     <string name="fb_cat_performance">Performance</string>
@@ -367,6 +367,8 @@
     <string name="fb_suggestions_placeholder">Describe your experience or feature request…</string>
     <string name="fb_submit">Submit Intelligence</string>
     <string name="fb_success_title">Intelligence Received</string>
-    <string name="fb_success_desc">Thank you — your insights refine the instrument for every Sovereign client.</string>
+    <string name="fb_success_desc">Thank you — your insights refine the instrument for every Dinarly client.</string>
     <string name="fb_stars_desc">%1$d star(s)</string>
+    <string name="onb_name_title">Your name</string>
+    <string name="onb_name_note">e.g. Alex — shown on your account</string>
 </resources>
