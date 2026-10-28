@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dali.hamza.shared.ui.theme.LedgerColors
 
@@ -70,12 +71,18 @@ fun LedgerListRow(
             ),
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
+            // settings rows wrap at most once (e.g. German compounds keep a
+            // second line instead of truncating) but never grow past two
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
         if (value != null) {
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
                 color = LedgerColors.TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
         if (trailing != null) {

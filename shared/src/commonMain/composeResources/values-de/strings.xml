@@ -91,7 +91,7 @@
     <string name="hist_zero_fees">Als Mitglied der Sovereign-Stufe genießen Sie 0 % Wechselgebühren auf alle wichtigen Währungspaare.</string>
     <string name="hist_pair_header">%1$s ZU %2$s</string>
     <string name="hist_live_rate">Live-Marktkurs</string>
-    <string name="hist_range_all">GESAMT</string>
+    <string name="hist_range_all">ALLE</string>
     <string name="hist_best">ALLZEIT-BESTKURS</string>
     <string name="hist_achieved_on">Erreicht am %1$s</string>
     <string name="hist_from_history">Aus der aufgezeichneten Markthistorie</string>
@@ -130,14 +130,14 @@
     <string name="acct_clearance_score">75 %</string>
     <string name="acct_security_section">SICHERHEIT &amp; AUTHENTIFIZIERUNG</string>
     <string name="acct_change_password">Passwort ändern</string>
-    <string name="acct_biometric">Biometrisches Entsperren</string>
+    <string name="acct_biometric">Biometrie</string>
     <string name="acct_local_data_section">LOKALE DATEN</string>
     <string name="acct_clear_ledger">Lokales Ledger leeren</string>
     <string name="acct_clear_title">Lokales Ledger leeren?</string>
     <string name="acct_clear_message">Alle auf diesem Gerät aufgezeichneten Umsätze werden entfernt.</string>
     <string name="acct_clear_confirm">Leeren</string>
     <string name="acct_preferences">EINSTELLUNGEN</string>
-    <string name="acct_push">Push-Benachrichtigungen</string>
+    <string name="acct_push">Mitteilungen</string>
     <string name="acct_enabled">Aktiviert</string>
     <string name="acct_disabled">Deaktiviert</string>
     <string name="acct_language">Sprache</string>
@@ -169,7 +169,7 @@
     <string name="acct_log_out">Vom Ledger abmelden</string>
     <string name="acct_delete_account">Konto dauerhaft löschen</string>
     <string name="acct_support_section">SUPPORT &amp; INFORMATIONEN</string>
-    <string name="acct_support_title">Support &amp; Wissensdatenbank</string>
+    <string name="acct_support_title">Support &amp; Hilfe</string>
     <string name="acct_support_desc">Greifen Sie auf unsere FAQ zu, kontaktieren Sie den Support und entdecken Sie hilfreiche Ressourcen.</string>
     <string name="acct_support_cta">Support-Hub entdecken</string>
     <string name="acct_login">Dinarly-Login</string>
@@ -178,7 +178,7 @@
     <string name="acct_data_plan_note">Im Gastplan werden Kurse stündlich aktualisiert. Der Sovereign-Login schaltet Echtzeitdaten frei.</string>
     <string name="acct_data_plan_guest">Stündliche Kurse · Gast</string>
     <string name="acct_data_plan_sovereign">Echtzeit · Sovereign</string>
-    <string name="acct_footer">DINARLY NODE V%1$s • LETZTE SYNCHRONISIERUNG: %2$s</string>
+    <string name="acct_footer">DINARLY NODE V%1$s • SYNC: %2$s</string>
     <string name="acct_title">Dinarly</string>
     <string name="acct_sync_just_now">GERADE EBEN</string>
     <string name="acct_sync_never">NIE</string>
