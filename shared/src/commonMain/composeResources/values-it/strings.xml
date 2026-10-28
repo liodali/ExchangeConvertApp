@@ -320,7 +320,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">Tassi di cambio in tempo reale e un registro privato delle conversioni — senza account, senza tracciamento.</string>
-    <string name="about_rate_play">Valuta su Google Play</string>
+    <string name="about_rate_play">Valuta Dinarly</string>
     <string name="about_version_label">VERSIONE</string>
     <string name="about_version_note">I nomi di versione seguono i tag di rilascio; le build interne mostrano il tag più recente.</string>
     <string name="about_powered_by">Tassi da api.exchange.dev.adetify.com · self-hosted, nessun tracker</string>

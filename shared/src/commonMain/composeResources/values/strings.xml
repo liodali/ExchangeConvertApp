@@ -322,7 +322,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">Live exchange rates and a private conversion ledger — no account, no tracking.</string>
-    <string name="about_rate_play">Rate on Google Play</string>
+    <string name="about_rate_play">Rate Dinarly</string>
     <string name="about_version_label">VERSION</string>
     <string name="about_version_note">Version names follow the release tags; internal builds show the newest tag.</string>
     <string name="about_powered_by">Rates by api.exchange.dev.adetify.com · self-hosted, no trackers</string>

@@ -321,7 +321,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">Live-Wechselkurse und ein privates Umrechnungs-Ledger — ohne Konto, ohne Tracking.</string>
-    <string name="about_rate_play">Auf Google Play bewerten</string>
+    <string name="about_rate_play">Dinarly bewerten</string>
     <string name="about_version_label">VERSION</string>
     <string name="about_version_note">Versionsnamen folgen den Release-Tags; interne Builds zeigen den neuesten Tag.</string>
     <string name="about_powered_by">Kurse von api.exchange.dev.adetify.com · selbst gehostet, keine Tracker</string>

@@ -198,7 +198,7 @@ fun SupportScreen(
                     LegalRow(stringResource(Res.string.legal_privacy), Icons.Outlined.Description, LedgerColors.TextTertiary, onOpenPrivacy)
                     LegalRow(stringResource(Res.string.sup_about), Icons.Outlined.HelpOutline, LedgerColors.TextTertiary, onOpenAbout)
                     LegalRow(stringResource(Res.string.sup_rate), Icons.Outlined.StarOutline, LedgerColors.Gold) {
-                        dali.hamza.shared.platform.openUri(dali.hamza.shared.platform.AppLinks.PLAY_URL)
+                        dali.hamza.shared.platform.openUri(dali.hamza.shared.platform.AppLinks.STORE_REVIEW_URL)
                     }
                     LegalRow(stringResource(Res.string.sup_share), Icons.Outlined.Share, LedgerColors.Blue)
                 }

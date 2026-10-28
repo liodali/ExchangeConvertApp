@@ -321,7 +321,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">أسعار صرف مباشرة ودفتر تحويلات خاص — بلا حساب ولا تتبع.</string>
-    <string name="about_rate_play">قيّم التطبيق على Google Play</string>
+    <string name="about_rate_play">قيّم Dinarly</string>
     <string name="about_version_label">الإصدار</string>
     <string name="about_version_note">تتبع أسماء الإصدارات وسوم الإصدار؛ وتعرض الإصدارات الداخلية أحدث وسم.</string>
     <string name="about_powered_by">الأسعار من api.exchange.dev.adetify.com · استضافة ذاتية، بلا متتبعات</string>

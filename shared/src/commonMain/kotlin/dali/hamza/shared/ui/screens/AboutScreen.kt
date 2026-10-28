@@ -42,7 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * About Sovereign Ledger — identity, live version, legal pages (in-app)
- * and the Play rating entry. Internal page (Resources & Legal).
+ * and the store rating entry (Play on Android, App Store on iOS). Internal page (Resources & Legal).
  */
 @Composable
 fun AboutScreen(
@@ -130,7 +130,7 @@ fun AboutScreen(
 
             LedgerButton(
                 text = stringResource(Res.string.about_rate_play),
-                onClick = { openUri(AppLinks.PLAY_URL) },
+                onClick = { openUri(AppLinks.STORE_REVIEW_URL) },
                 leadingIcon = Icons.Outlined.StarOutline,
                 modifier = Modifier.fillMaxWidth(),
             )

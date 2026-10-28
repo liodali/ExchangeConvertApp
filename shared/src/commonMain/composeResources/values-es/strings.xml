@@ -321,7 +321,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">Tasas de cambio en vivo y un libro privado de conversiones — sin cuenta, sin rastreo.</string>
-    <string name="about_rate_play">Califica en Google Play</string>
+    <string name="about_rate_play">Valora Dinarly</string>
     <string name="about_version_label">VERSIÓN</string>
     <string name="about_version_note">Los nombres de versión siguen las etiquetas de lanzamiento; las compilaciones internas muestran la etiqueta más reciente.</string>
     <string name="about_powered_by">Tasas por api.exchange.dev.adetify.com · autoalojado, sin rastreadores</string>

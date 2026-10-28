@@ -321,7 +321,7 @@
 
     <!-- ===== About ===== -->
     <string name="about_tagline">Cotações de câmbio ao vivo e um registro privado de conversões — sem conta, sem rastreamento.</string>
-    <string name="about_rate_play">Avalie no Google Play</string>
+    <string name="about_rate_play">Avaliar o Dinarly</string>
     <string name="about_version_label">VERSÃO</string>
     <string name="about_version_note">Os nomes de versão seguem as tags de lançamento; builds internas mostram a tag mais recente.</string>
     <string name="about_powered_by">Cotações por api.exchange.dev.adetify.com · auto-hospedado, sem rastreadores</string>
