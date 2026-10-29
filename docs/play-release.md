@@ -98,6 +98,19 @@ testing; promote internal → closed → production from the Console when ready.
 - App icon: the adaptive + Material You monochrome icon ships with the app
 - Phone screenshots: capture from the device during the QA pass (min 2, 16:9/9:16)
 
+## What's new — languages
+
+- **en-US always comes from the git tag message** (first 500 chars — Play's
+  hard cap).
+- **Localized** What's-new is injected from the committed
+  [`whatsnew-static/`](../whatsnew-static) directory: one file per Play
+  listing language (`de-DE`, `it-IT`, `es-419`, `pt-BR`, `pt-PT`, `ar`, …),
+  ≤ 500 chars (mind multibyte scripts — keep ≤ 500 **bytes**), rewritten per
+  release in the release commit. `es-ES` exists there too for manual Console
+  pastes — prune it (or any other language) if it is **not** configured in
+  the Console listing, or the upload fails.
+- Rules and caveats: [`whatsnew-static/README.md`](../whatsnew-static/README.md).
+
 ## Notes
 
 - Debug builds install as `com.sovereignledger.app.debug` (separate from release).

@@ -122,8 +122,18 @@ jobs:
         # subject line + body. It feeds both the GitHub release body and
         # the Play "What's new" (en-US, hard 500-char limit).
         # Manual runs: no tag message, so the fallback text below applies.
+        # Localized What's-new: committed whatsnew-static/<lang> files are
+        # injected per store-listing language (see whatsnew-static/README.md;
+        # en-US stays tag-message-only, and languages absent from the Console
+        # listing must be pruned or the upload fails).
         run: |
           mkdir -p whatsnew
+          for file in whatsnew-static/*; do
+            [ -f "$file" ] || continue
+            code=$(basename "$file")
+            [ "$code" = "en-US" ] && continue
+            head -c 500 "$file" | sed -e 's/[[:space:]]*$//' > "whatsnew/$code"
+          done
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
             git tag -l --format='%(contents)' "$GITHUB_REF_NAME" | sed -e '/^-----BEGIN PGP SIGNATURE-----/,$d' > release-notes.md
           fi
@@ -132,6 +142,7 @@ jobs:
           [ -s whatsnew/en-US ] || printf 'Internal testing build.' > whatsnew/en-US
           echo "--- release notes (Play en-US, $(wc -c < whatsnew/en-US) chars) ---"
           cat whatsnew/en-US
+          echo "--- localized what's-new injected: $(ls whatsnew | grep -v en-US | tr '\n' ' ')"
 
       - name: Upload to Play
         # A rejected upload or rollout must fail the job. Track comes from
