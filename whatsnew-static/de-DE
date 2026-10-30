@@ -1,6 +1,3 @@
-Dinarly 0.13.1 — Feinschliff.
-• Personalisierung: Lege einen Anzeigenamen während des Onboarding fest — er begrüßt dich auf der Startseite. Jederzeit änderbar unter „Konto“.
-• Kontoeinträge verbinden jetzt Titel und Beschreibung.
-• Der Bewerten-Button öffnet den Play-Store-Dialog.
-• Layoutkorrekturen für Deutsch und flüssigere Abstände.
+Dinarly 0.13.2 — Update-Korrektur.
+• Der Hinweis „Update verfügbar“ erscheint nicht mehr erneut, während das Update bereits im Hintergrund lädt.
 Derselbe schnelle, private Umrechner.

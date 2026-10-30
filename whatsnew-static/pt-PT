@@ -1,6 +1,3 @@
-Dinarly 0.13.1 — ronda de afinação.
-• Personalização: define um nome na configuração inicial — ele apresenta-se no ecrã inicial. Mude quando quiser em Conta.
-• As linhas da conta passam a unir título e descrição.
-• Os botões de avaliar abrem o diálogo da Play Store.
-• Correções de disposição do alemão e espaçamentos mais fluidos.
+Dinarly 0.13.2 — correção de atualização.
+• O aviso "Atualização disponível" já não reaparece enquanto a atualização já está a descarregar em segundo plano.
 O mesmo conversor rápido e privado.

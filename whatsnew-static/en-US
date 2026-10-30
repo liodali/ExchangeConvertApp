@@ -1,6 +1,3 @@
-Dinarly 0.13.1 — polish round.
-• Personalization: set a display name during onboarding — it greets you on Home. Renaming any time in Account.
-• Account rows now pair a title with a description.
-• Rate buttons open the Play Store review dialog.
-• German layout fixes and smoother spacing throughout.
+Dinarly 0.13.2 — update fix.
+• The "Update available" prompt no longer reappears while the update is already downloading in the background.
 The same fast, private converter under the hood.
