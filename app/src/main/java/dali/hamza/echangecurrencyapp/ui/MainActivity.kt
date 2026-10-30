@@ -1,5 +1,6 @@
 package dali.hamza.echangecurrencyapp.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
@@ -80,6 +81,20 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         dali.hamza.shared.platform.NotificationPermissionBridge
             .handleResult(requestCode, grantResults)
+    }
+
+    /**
+     * Result of Play's in-app update consent sheet: acceptance keeps the
+     * background download going (the checker's listener takes over);
+     * cancellation is treated as a decline so the prompt doesn't re-appear
+     * on the next resume.
+     */
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (::updateChecker.isInitialized) {
+            updateChecker.onFlowResult(requestCode, resultCode)
+        }
     }
 
     /**

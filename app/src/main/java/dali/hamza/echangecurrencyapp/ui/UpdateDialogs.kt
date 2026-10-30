@@ -51,6 +51,9 @@ fun UpdateDialogs(
             },
         )
 
+        // Play's consent sheet / background download owns the surface — nothing to render.
+        AppUpdateChecker.UiState.Updating -> Unit
+
         AppUpdateChecker.UiState.Downloaded -> AlertDialog(
             onDismissRequest = onDecline,
             containerColor = canvas,
