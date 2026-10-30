@@ -39,3 +39,10 @@ keystores/
 ui-design.pen
 __pycache__
 iosApp/build
+
+# Play "What's new" — local-only, never committed. Play Console
+# multi-language format (<en-US>…</en-US> …); becomes the app-v* tag
+# message via `git tag -a <tag> -F whatsnew.xml`. CI parses the tag
+# message with script/whatsnew.py. whatsnew/ is its generated output.
+/whatsnew.xml
+/whatsnew/

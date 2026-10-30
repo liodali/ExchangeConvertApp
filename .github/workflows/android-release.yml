@@ -118,31 +118,23 @@ jobs:
             -Pserver.host="${{ vars.EXCHANGE_SERVER_HOST }}"
 
       - name: Prepare release notes (whatsnew)
-        # Tag runs: the annotated tag's message IS the release notes —
-        # subject line + body. It feeds both the GitHub release body and
-        # the Play "What's new" (en-US, hard 500-char limit).
-        # Manual runs: no tag message, so the fallback text below applies.
-        # Localized What's-new: committed whatsnew-static/<lang> files are
-        # injected per store-listing language (see whatsnew-static/README.md;
-        # en-US stays tag-message-only, and languages absent from the Console
-        # listing must be pruned or the upload fails).
+        # Notes live locally in the git-ignored whatsnew.xml (Play Console
+        # multi-language format: <en-US>…</en-US> <de-DE>…</de-DE> …) and
+        # become the tag message — nothing is committed per release:
+        #   git tag -a app-vX.Y.Z+N -F whatsnew.xml
+        # script/whatsnew.py splits the tag message into one file per
+        # language (500-byte cap, UTF-8-safe). The full en-US block feeds
+        # the GitHub release body. Legacy plain-text tag messages still
+        # work (→ en-US only). Manual runs → fallback text.
+        # Only languages configured in the Play Console listing may appear
+        # in the blocks — unlisted languages fail the upload.
         run: |
-          mkdir -p whatsnew
-          for file in whatsnew-static/*; do
-            [ -f "$file" ] || continue
-            code=$(basename "$file")
-            [ "$code" = "en-US" ] && continue
-            head -c 500 "$file" | sed -e 's/[[:space:]]*$//' > "whatsnew/$code"
-          done
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
             git tag -l --format='%(contents)' "$GITHUB_REF_NAME" | sed -e '/^-----BEGIN PGP SIGNATURE-----/,$d' > release-notes.md
+          else
+            : > release-notes.md
           fi
-          # Play: first 500 chars, trailing whitespace trimmed, never empty
-          head -c 500 release-notes.md 2>/dev/null | sed -e 's/[[:space:]]*$//' > whatsnew/en-US
-          [ -s whatsnew/en-US ] || printf 'Internal testing build.' > whatsnew/en-US
-          echo "--- release notes (Play en-US, $(wc -c < whatsnew/en-US) chars) ---"
-          cat whatsnew/en-US
-          echo "--- localized what's-new injected: $(ls whatsnew | grep -v en-US | tr '\n' ' ')"
+          python3 script/whatsnew.py release-notes.md --out whatsnew --github-body github-release-notes.md
 
       - name: Upload to Play
         # A rejected upload or rollout must fail the job. Track comes from
@@ -169,7 +161,7 @@ jobs:
           gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" && exit 0
           gh release create "$GITHUB_REF_NAME" \
             --title "Sovereign Ledger $VERSION_NAME (build $VERSION_CODE)" \
-            --notes-file release-notes.md \
+            --notes-file github-release-notes.md \
             --verify-tag \
             app/build/outputs/bundle/release/app-release.aab \
             app/build/outputs/mapping/release/mapping.txt

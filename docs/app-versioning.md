@@ -34,11 +34,13 @@ python3 script/app-version.py
 ## Releases
 
 1. Edit `version.xcconfig` (for example, version `0.7.3`, build `54`).
-2. Commit the file with the release changes.
-3. Run either workflow manually, or create the matching platform tags on that commit:
+2. Write the Play "What's new" in the local, git-ignored `whatsnew.xml`
+   (Play Console multi-language format — see [Play release](play-release.md)).
+3. Commit the file with the release changes.
+4. Run either workflow manually, or create the matching platform tags on that commit:
 
 ```bash
-git tag -a app-v0.7.3+54 -m "Sovereign Ledger 0.7.3 (build 54)"
+git tag -a app-v0.7.3+54 -F whatsnew.xml
 git tag -a ios-v0.7.3+54 -m "Sovereign Ledger 0.7.3 (build 54)"
 git push origin app-v0.7.3+54 ios-v0.7.3+54
 ```

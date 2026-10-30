@@ -78,10 +78,11 @@ MARKETING_VERSION = 0.7.3
 CURRENT_PROJECT_VERSION = 54
 ```
 
-Commit that file, then run the workflow manually or create a matching tag:
+Commit that file, then run the workflow manually or create a matching tag
+(the tag message is the release notes — see "What's new" below):
 
 ```bash
-git tag -a app-v0.7.3+54 -m "Sovereign Ledger 0.7.3 (build 54)"
+git tag -a app-v0.7.3+54 -F whatsnew.xml
 git push origin app-v0.7.3+54
 ```
 
@@ -100,16 +101,31 @@ testing; promote internal → closed → production from the Console when ready.
 
 ## What's new — languages
 
-- **en-US always comes from the git tag message** (first 500 chars — Play's
-  hard cap).
-- **Localized** What's-new is injected from the committed
-  [`whatsnew-static/`](../whatsnew-static) directory: one file per Play
-  listing language (`de-DE`, `it-IT`, `es-419`, `pt-BR`, `pt-PT`, `ar`, …),
-  ≤ 500 chars (mind multibyte scripts — keep ≤ 500 **bytes**), rewritten per
-  release in the release commit. `es-ES` exists there too for manual Console
-  pastes — prune it (or any other language) if it is **not** configured in
-  the Console listing, or the upload fails.
-- Rules and caveats: [`whatsnew-static/README.md`](../whatsnew-static/README.md).
+- One local file: [`whatsnew.xml`](../whatsnew.xml) at the repo root —
+  **git-ignored**, never committed. Play Console multi-language format:
+
+  ```xml
+  <en-US>
+  English release notes …
+  </en-US>
+  <de-DE>
+  Deutsche Hinweise …
+  </de-DE>
+  ```
+
+- Make it the tag message (`git tag -a app-vX.Y.Z+N -F whatsnew.xml`).
+  CI parses the blocks with [`script/whatsnew.py`](../script/whatsnew.py)
+  into one file per language, capped at Play's 500 **bytes** (UTF-8-safe
+  truncation, over-cap blocks warn in the log). The full en-US block also
+  becomes the GitHub release body.
+- Only include languages configured in the Console listing (`de-DE`,
+  `it-IT`, `es-419`, `pt-BR`, `pt-PT`, `ar`, …) — unlisted languages fail
+  the upload. `es-ES` vs `es-419`: keep only what the Console lists; the
+  other is for manual Console pastes.
+- Legacy plain-text tag messages still work (→ en-US only). Manual
+  workflow runs fall back to "Internal testing build."
+- Preview/validate locally before tagging:
+  `python3 script/whatsnew.py whatsnew.xml --out whatsnew`
 
 ## Notes
 
