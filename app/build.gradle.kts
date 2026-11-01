@@ -107,6 +107,11 @@ android {
 
     buildTypes {
         release {
+            // Embed available native symbols in the AAB for Play crash/ANR reports.
+            // FULL preserves function names, source files, and line numbers.
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

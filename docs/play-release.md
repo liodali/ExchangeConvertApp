@@ -127,6 +127,29 @@ testing; promote internal → closed → production from the Console when ready.
 - Preview/validate locally before tagging:
   `python3 script/whatsnew.py whatsnew.xml --out whatsnew`
 
+## Native crash symbols
+
+Release builds set `ndk.debugSymbolLevel = "FULL"` in `app/build.gradle.kts`.
+AGP embeds available native debug metadata in the AAB, so the existing Play
+upload also uploads symbols; no separate CI upload is needed.
+
+Build with `./gradlew :app:bundleRelease --info`. To check the resulting bundle:
+
+```bash
+unzip -l app/build/outputs/bundle/release/app-release.aab | grep debugsymbols
+```
+
+Only use symbols from the exact build uploaded to Play. This does not replace
+the R8 `mapping.txt` used for Java/Kotlin stack traces.
+
+Some dependencies ship stripped native libraries: AGP cannot reconstruct their
+symbols. Local verification extracted DataStore's `libdatastore_shared_counter.so`
+symbols for all four ABIs, but reported `libsentry.so`, `libsentry-android.so`,
+and `libandroidx.graphics.path.so` as already stripped. Full symbolication for
+those libraries requires matching symbols from their providers; enabling FULL
+does not recover them. Do not disable native library stripping just to hide the
+Play warning.
+
 ## Notes
 
 - Debug builds install as `com.sovereignledger.app.debug` (separate from release).
