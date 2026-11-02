@@ -40,6 +40,13 @@ enum RateAlertsBackground {
         RateAlertsBridgeKt.runRateAlertsCheckNow(onDone: { _ in })
     }
 
+    /// Launch-time anonymous-session warm-up (independent of APNs — rates
+    /// and history must not depend on push availability). Kotlin default
+    /// arguments don't cross the ObjC bridge — onDone is explicit.
+    static func warmAnonymousSession() {
+        PushRegistrationBridgeKt.warmAnonymousSession(onDone: { _ in })
+    }
+
     /// APNs token → shared registration loop (Phase 3). Kotlin default
     /// arguments don't cross the ObjC bridge — onDone is explicit.
     static func registerPushToken(tokenHex: String, bundleId: String) {
@@ -89,6 +96,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         SharedKoinKt.doInitSharedKoin(
             serverURL: ExchangeSecrets.apiHost,
         )
+        // Anonymous backend session first — independent of APNs below
+        RateAlertsBackground.warmAnonymousSession()
         RateAlertsBackground.register()
         // Widgets (Phase 3): shared bridge exports market pairs to the App
         // Group; the WidgetKit reload rides this Swift relay (the Kotlin

@@ -6,7 +6,6 @@ import dali.hamza.shared.data.network.RateAlertsApi
 import dali.hamza.shared.data.network.createHttpClient
 import dali.hamza.shared.data.repository.CurrencyRepositoryImpl
 import dali.hamza.shared.data.session.PushSessionManager
-import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.data.widgets.WidgetSnapshotStore
 import dali.hamza.shared.data.widgets.WidgetsRepository
@@ -43,10 +42,19 @@ fun sharedModule(
 ) = module {
     single(named("SERVER")) { serverURL }
     single { createHttpClient(get(named("SERVER"))) }
-    // Bearer = cached anonymous-session JWT (PushSessionManager mints it at
-    // launch); resolved lazily so CurrencyApi works before the session exists
+    // Anonymous session rides every data call. Resolved ON DEMAND and
+    // lazily (Koin resolves PushSessionManager at request time — it is
+    // declared later in this module), so CurrencyApi can mint a session
+    // even before the push-registration callback runs, and can force one
+    // re-mint when the backend rejects the cached JWT.
     single {
-        CurrencyApi(httpClient = get(), bearerProvider = { get<ISessionStorage>().getSessionToken() })
+        CurrencyApi(
+            httpClient = get(),
+            bearerProvider = { forceRefresh ->
+                val sessions = get<PushSessionManager>()
+                if (forceRefresh) sessions.refreshSession() else sessions.ensureSession()
+            },
+        )
     }
     // server-push alerts (Phase 2): same host/client as CurrencyApi
     single { RateAlertsApi(httpClient = get()) }

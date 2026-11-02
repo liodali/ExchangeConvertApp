@@ -13,16 +13,17 @@ import dali.hamza.shared.data.network.models.UpdateAlertRequest
 import dali.hamza.shared.domain.models.RateAlertMode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 
 /**
@@ -78,7 +79,7 @@ class RateAlertsApi(
                     appVersion = appVersion,
                 )
             )
-        }.body<SessionResponse>()
+        }.ensureSuccess().body<SessionResponse>()
     }
 
     /**
@@ -104,7 +105,7 @@ class RateAlertsApi(
                     appVersion = appVersion,
                 )
             )
-        }
+        }.ensureSuccess()
         Unit
     }
 
@@ -119,7 +120,7 @@ class RateAlertsApi(
             bearerAuth(bearerToken)
             contentType(ContentType.Application.Json)
             setBody(DeviceRemovalRequest(token = token))
-        }
+        }.ensureSuccess()
         Unit
     }
 
@@ -127,7 +128,7 @@ class RateAlertsApi(
     suspend fun listDevices(bearerToken: String): Result<List<DeviceDataAPI>> = call {
         httpClient.get("alerts/devices") {
             bearerAuth(bearerToken)
-        }.body<List<DeviceDataAPI>>()
+        }.ensureSuccess().body<List<DeviceDataAPI>>()
     }
 
     /**
@@ -144,14 +145,14 @@ class RateAlertsApi(
             bearerAuth(bearerToken)
             contentType(ContentType.Application.Json)
             setBody(DevicePauseRequest(pausedUntil = pausedUntil))
-        }
+        }.ensureSuccess()
         Unit
     }
 
     suspend fun listAlerts(bearerToken: String): Result<List<AlertDataAPI>> = call {
         httpClient.get("alerts") {
             bearerAuth(bearerToken)
-        }.body<List<AlertDataAPI>>()
+        }.ensureSuccess().body<List<AlertDataAPI>>()
     }
 
     suspend fun createAlert(
@@ -174,7 +175,7 @@ class RateAlertsApi(
                     intervalMinutes = intervalMinutes,
                 )
             )
-        }.body<AlertDataAPI>()
+        }.ensureSuccess().body<AlertDataAPI>()
     }
 
     suspend fun updateAlert(
@@ -194,38 +195,50 @@ class RateAlertsApi(
                     intervalMinutes = intervalMinutes,
                 )
             )
-        }.body<AlertDataAPI>()
+        }.ensureSuccess().body<AlertDataAPI>()
     }
 
     suspend fun deleteAlert(bearerToken: String, id: Long): Result<Unit> = call {
         httpClient.delete("alerts/$id") {
             bearerAuth(bearerToken)
-        }
+        }.ensureSuccess()
         Unit
     }
 
     // ------------------------------------------------------------- helpers
 
     /**
-     * Uniform error surface: non-2xx responses (Ktor's default validation
-     * throws) are converted to [AlertsApiError] with the server's
-     * `errorCode`/`message` when parseable.
+     * Uniform error surface: non-2xx responses are checked BEFORE body
+     * deserialization (an error body shaped like `ErrorResponse` would
+     * otherwise fail to parse as the success DTO and hide the status), then
+     * converted to [AlertsApiError] with the server's `errorCode`/`message`
+     * when parseable.
      */
     private suspend fun <T> call(block: suspend () -> T): Result<T> = try {
         Result.success(block())
-    } catch (e: ResponseException) {
-        val status = e.response.status.value
+    } catch (e: HttpErrorStatusException) {
         val error = runCatching {
-            lenientJson.decodeFromString(AlertsErrorResponse.serializer(), e.response.bodyAsText())
+            lenientJson.decodeFromString(AlertsErrorResponse.serializer(), e.bodyText)
         }.getOrNull()
         Result.failure(
             AlertsApiError(
                 errorCode = error?.errorCode,
-                message = error?.message ?: "Alert service error ($status)",
-                status = status,
+                message = error?.message ?: "Alert service error (${e.status})",
+                status = e.status,
             )
         )
     } catch (e: Exception) {
         Result.failure(e)
+    }
+
+    /** Non-success response with its status and raw body attached. */
+    private class HttpErrorStatusException(
+        val status: Int,
+        val bodyText: String,
+    ) : Exception("HTTP $status")
+
+    private suspend fun HttpResponse.ensureSuccess(): HttpResponse {
+        if (!status.isSuccess()) throw HttpErrorStatusException(status.value, bodyAsText())
+        return this
     }
 }

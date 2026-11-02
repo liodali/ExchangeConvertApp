@@ -3,7 +3,6 @@ package dali.hamza.shared.data.network
 import dali.hamza.shared.data.network.models.LatestRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricRatesDataAPI
 import dali.hamza.shared.data.network.models.HistoricSeriesDataAPI
-import dali.hamza.shared.data.network.models.LiveRatesDataAPI
 import dali.hamza.shared.data.network.models.CurrencyNameDataAPI
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -11,6 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.parameter
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.isSuccess
 
 /**
  * Ktor client for our exchange-api backend
@@ -22,41 +23,83 @@ import io.ktor.client.request.parameter
  *   returned rate already includes it
  * - `historical?…` → Phase 4 (History cluster) — not migrated yet
  *
- * Auth: optional anonymous-session Bearer (see attachSession) — the old
- * vestigial access_key query param was removed with the 0.12.1 app line.
+ * Auth: the anonymous-session Bearer is resolved ON DEMAND through
+ * [bearerProvider] (PushSessionManager's cached/minted JWT), so data calls
+ * never depend on the push-registration callback having run first. While
+ * the server keeps `require-api-token` off, a missing session simply sends
+ * the request bare (soft-launch tokenless tier).
  */
 class CurrencyApi(
     private val httpClient: HttpClient,
-    private val bearerProvider: () -> String? = { null },
+    private val bearerProvider: suspend (forceRefresh: Boolean) -> String? = { null },
 ) {
     /**
-     * Anonymous session Bearer (PushSessionManager's cached JWT). Attached
-     * when present so the backend applies the per-install tier; requests
-     * before the launch loop mints the session simply go bare — fine while
-     * the server keeps REQUIRE_API_TOKEN off (soft launch until app 0.14.0).
+     * Execute one data request under the anonymous session, healing a
+     * stale cached JWT exactly once (plans/anonymous-session-lifecycle.md §3):
+     * `401`, or the hard gate's `404` when a Bearer was sent, re-mints with
+     * the SAME installId and retries the original request once. A second
+     * rejection wins — no loop, and the anonymous identity never changes.
+     *
+     * @param retryOnNotFound false for endpoints outside the auth gate
+     *   (a plain 404 there is an ordinary failure)
      */
-    private fun HttpRequestBuilder.attachSession() {
-        bearerProvider()?.takeIf { it.isNotBlank() }?.let { token ->
+    private suspend fun <T> callWithSession(
+        retryOnNotFound: Boolean = true,
+        block: suspend (bearer: String?) -> T,
+    ): Result<T> {
+        val bearer = bearerProvider(false)?.takeIf { it.isNotBlank() }
+        val first = attempt(bearer, block)
+        if (!first.isAuthRejection(bearer, retryOnNotFound)) return first
+        val refreshed = bearerProvider(true)?.takeIf { it.isNotBlank() } ?: return first
+        return attempt(refreshed, block)
+    }
+
+    private suspend fun <T> attempt(
+        bearer: String?,
+        block: suspend (bearer: String?) -> T,
+    ): Result<T> = try {
+        Result.success(block(bearer))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** `401` anywhere, or the hard auth gate's `404` while Bearer was sent. */
+    private fun <T> Result<T>.isAuthRejection(bearer: String?, retryOnNotFound: Boolean): Boolean {
+        if (bearer == null) return false
+        val status = (exceptionOrNull() as? HttpStatusException)?.status ?: return false
+        return status == 401 || (status == 404 && retryOnNotFound)
+    }
+
+    /**
+     * Non-success response carrying its status. Checked BEFORE body
+     * deserialization — an auth-gate 401/404 error body must not be parsed
+     * as a successful data DTO and hide the failure.
+     */
+    private class HttpStatusException(val status: Int) : Exception("HTTP $status")
+
+    private fun HttpResponse.ensureSuccess(): HttpResponse {
+        if (!status.isSuccess()) throw HttpStatusException(status.value)
+        return this
+    }
+
+    /** Attach the anonymous-session Bearer when one could be established. */
+    private fun HttpRequestBuilder.attachSession(bearer: String?) {
+        bearer?.takeIf { it.isNotBlank() }?.let { token ->
             header("Authorization", "Bearer $token")
         }
     }
-
 
     /**
      * Current rates of [source] against all other currencies.
      * Response: `{base, time, rates: {"EUR": 0.88, ...}}`
      */
-    suspend fun getLiveRates(source: String): Result<LatestRatesDataAPI> {
-        return try {
-            val response = httpClient.get("latest") {
-                attachSession()
+    suspend fun getLiveRates(source: String): Result<LatestRatesDataAPI> =
+        callWithSession { bearer ->
+            httpClient.get("latest") {
+                attachSession(bearer)
                 parameter("base", source)
-            }
-            Result.success(response.body<LatestRatesDataAPI>())
-        } catch (e: Exception) {
-            Result.failure(e)
+            }.ensureSuccess().body<LatestRatesDataAPI>()
         }
-    }
 
     /**
      * Convert [amount] from [from] to [to]: the backend returns the pair's
@@ -66,18 +109,13 @@ class CurrencyApi(
         from: String,
         to: String,
         amount: Double,
-    ): Result<Double?> {
-        return try {
-            val response = httpClient.get("latest") {
-                attachSession()
-                parameter("base", from)
-                parameter("symbol", to)
-                parameter("amount", amount)
-            }
-            Result.success(response.body<LatestRatesDataAPI>().rates?.get(to))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    ): Result<Double?> = callWithSession { bearer ->
+        httpClient.get("latest") {
+            attachSession(bearer)
+            parameter("base", from)
+            parameter("symbol", to)
+            parameter("amount", amount)
+        }.ensureSuccess().body<LatestRatesDataAPI>().rates?.get(to)
     }
 
     /**
@@ -90,38 +128,30 @@ class CurrencyApi(
         symbol: String,
         from: String,
         to: String,
-    ): Result<HistoricSeriesDataAPI> {
-        return try {
-            val response = httpClient.get("historic") {
-                attachSession()
-                parameter("base", base)
-                parameter("symbol", symbol)
-                parameter("from", from)
-                parameter("to", to)
-            }
-            Result.success(response.body<HistoricSeriesDataAPI>())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    ): Result<HistoricSeriesDataAPI> = callWithSession { bearer ->
+        httpClient.get("historic") {
+            attachSession(bearer)
+            parameter("base", base)
+            parameter("symbol", symbol)
+            parameter("from", from)
+            parameter("to", to)
+        }.ensureSuccess().body<HistoricSeriesDataAPI>()
     }
 
     /**
-     * Rates of [source] for [date] (format: `yyyy-MM-dd`).
+     * Rates of [source] for [date] (format: `yyyy-MM-dd`). Legacy
+     * `historical` endpoint — outside the auth gate, so a 404 is never
+     * treated as a stale-session signal.
      */
     suspend fun getHistoricRates(
         date: String,
         source: String,
-    ): Result<HistoricRatesDataAPI> {
-        return try {
-            val response = httpClient.get("historical") {
-                attachSession()
-                parameter("date", date)
-                parameter("source", source)
-            }
-            Result.success(response.body<HistoricRatesDataAPI>())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    ): Result<HistoricRatesDataAPI> = callWithSession(retryOnNotFound = false) { bearer ->
+        httpClient.get("historical") {
+            attachSession(bearer)
+            parameter("date", date)
+            parameter("source", source)
+        }.ensureSuccess().body<HistoricRatesDataAPI>()
     }
 
     /**
@@ -129,16 +159,12 @@ class CurrencyApi(
      * [lang] (BCP-47) via the backend's CLDR names: `GET currencies?type=all&lang=…`.
      * Unknown codes (BTC, XAU…) come back with their stored English name.
      */
-    suspend fun getCurrencies(lang: String): Result<List<CurrencyNameDataAPI>> {
-        return try {
-            val response = httpClient.get("currencies") {
-                attachSession()
+    suspend fun getCurrencies(lang: String): Result<List<CurrencyNameDataAPI>> =
+        callWithSession { bearer ->
+            httpClient.get("currencies") {
+                attachSession(bearer)
                 parameter("type", "all")
                 parameter("lang", lang)
-            }
-            Result.success(response.body<List<CurrencyNameDataAPI>>())
-        } catch (e: Exception) {
-            Result.failure(e)
+            }.ensureSuccess().body<List<CurrencyNameDataAPI>>()
         }
-    }
 }

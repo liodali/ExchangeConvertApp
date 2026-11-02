@@ -6,6 +6,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import dali.hamza.echangecurrencyapp.di.appModule
 import dali.hamza.echangecurrencyapp.push.PushRegistration
 import dali.hamza.shared.AndroidAppContext
+import dali.hamza.shared.data.session.PushSessionManager
 import dali.hamza.shared.data.widgets.WidgetSnapshotStore
 import dali.hamza.shared.di.DEFAULT_HOST
 import dali.hamza.shared.di.sharedModule
@@ -64,6 +65,19 @@ class ExchangeApplication : Application() {
         loadKoinModules(
             sharedModule(serverURL = BuildConfig.SERVER_HOST.ifBlank { DEFAULT_HOST })
         )
+
+        // Anonymous backend session (plans/anonymous-session-lifecycle.md §2):
+        // warm it on EVERY launch, independent of Firebase/FCM — rates and
+        // history must never depend on push registration. Push registration
+        // below reuses the same session; failure is best-effort (CurrencyApi
+        // also resolves the session on demand per request).
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            runCatching {
+                GlobalContext.get().get<PushSessionManager>().ensureSession()
+            }.onFailure { error ->
+                Napier.w(tag = SESSION_TAG, throwable = error) { "anonymous session warm-up failed" }
+            }
+        }
 
         // Rate alerts: align the WorkManager job with the stored alert
         // state (an immediate check runs when any alert is enabled).
@@ -125,5 +139,6 @@ class ExchangeApplication : Application() {
 
     private companion object {
         const val FCM_TAG = "SovereignFCM"
+        const val SESSION_TAG = "AnonymousSession"
     }
 }

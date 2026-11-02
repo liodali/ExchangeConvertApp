@@ -84,6 +84,8 @@ class RateAlertsEngineTest {
         override suspend fun saveListCurrencies(): Flow<MyResponse<List<Currency>>> =
             flow { emit(MyResponse.Success(emptyList())) }
 
+        override suspend fun syncCurrencyNames(lang: String): Boolean = false
+
         override suspend fun saveExchangeRatesOfCurrentCurrency() = Unit
 
         override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> =
@@ -323,7 +325,6 @@ class RateAlertsEngineTest {
         // never used at runtime — the engine takes the scripted fetchRates
         private val dummyApi = CurrencyApi(
             httpClient = io.ktor.client.HttpClient(),
-            accessKey = "",
         )
     }
 }

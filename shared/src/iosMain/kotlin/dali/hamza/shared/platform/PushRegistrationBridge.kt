@@ -18,6 +18,32 @@ import org.koin.mp.KoinPlatform
  * `POST /alerts/devices` (platform IOS, bundleId as the APNs topic —
  * `.debug` builds register their own bundle id).
  */
+/**
+ * Swift entry point for the launch-time anonymous-session warm-up
+ * (plans/anonymous-session-lifecycle.md §2). Independent of APNs: rates
+ * and history must work when push is unavailable (simulator, missing
+ * entitlement, registration failure).
+ */
+fun warmAnonymousSession(onDone: (Boolean) -> Unit = {}) {
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    scope.launch {
+        val manager = runCatching {
+            KoinPlatform.getKoin()?.get<PushSessionManager>()
+        }.getOrNull()
+        if (manager == null) {
+            Napier.w(tag = TAG) { "PushSessionManager not in Koin — session warm-up skipped" }
+            onDone(false)
+            return@launch
+        }
+        val warmed = runCatching { manager.ensureSession() != null }
+            .onFailure { error ->
+                Napier.w(tag = TAG, throwable = error) { "anonymous session warm-up failed" }
+            }
+            .getOrDefault(false)
+        onDone(warmed)
+    }
+}
+
 fun registerPushToken(tokenHex: String, bundleId: String, onDone: (Boolean) -> Unit = {}) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     scope.launch {

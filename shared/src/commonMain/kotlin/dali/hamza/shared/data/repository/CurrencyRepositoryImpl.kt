@@ -479,8 +479,7 @@ class CurrencyRepositoryImpl(
 
     override suspend fun getServerRateAlerts(): List<RateAlert> =
         withContext(Dispatchers.Default) {
-            val bearer = sessionManager.ensureSession() ?: return@withContext emptyList()
-            alertsApi.listAlerts(bearer)
+            sessionManager.withSession { bearer -> alertsApi.listAlerts(bearer) }
                 .fold(
                     onSuccess = { list -> list.map(::toRateAlert) },
                     onFailure = { error ->
@@ -492,8 +491,6 @@ class CurrencyRepositoryImpl(
 
     override suspend fun addServerRateAlert(alert: RateAlert): Result<RateAlert> =
         withContext(Dispatchers.Default) {
-            val bearer = sessionManager.ensureSession()
-                ?: return@withContext Result.failure(AlertServiceUnavailableException())
             val serverAlerts = getServerRateAlerts()
             if (serverAlerts.any { it.base == alert.base && it.quote == alert.quote }) {
                 return@withContext Result.failure(IllegalStateException(RateAlert.DUPLICATE_MESSAGE))
@@ -501,14 +498,16 @@ class CurrencyRepositoryImpl(
             if (serverAlerts.size >= RateAlert.maxServerAlertsForTier(sessionStorage.getDataTier())) {
                 return@withContext Result.failure(IllegalStateException(RateAlert.SERVER_LIMIT_MESSAGE))
             }
-            alertsApi.createAlert(
-                bearerToken = bearer,
-                base = alert.base,
-                quote = alert.quote,
-                mode = alert.mode,
-                intervalMinutes = alert.intervalMinutes,
-                thresholdPercent = alert.thresholdPercent,
-            ).mapCatching { dto -> toRateAlert(dto) }.recoverCatching { error ->
+            sessionManager.withSession { bearer ->
+                alertsApi.createAlert(
+                    bearerToken = bearer,
+                    base = alert.base,
+                    quote = alert.quote,
+                    mode = alert.mode,
+                    intervalMinutes = alert.intervalMinutes,
+                    thresholdPercent = alert.thresholdPercent,
+                )
+            }.mapCatching { dto -> toRateAlert(dto) }.recoverCatching { error ->
                 throw when (error) {
                     is AlertsApiError -> IllegalStateException(
                         when (error.errorCode) {
@@ -517,8 +516,9 @@ class CurrencyRepositoryImpl(
                             else -> error.message
                         }
                     )
-                    // transport-level failure (offline, DNS, timeout) — lets
-                    // callers fall back to a local alert instead of dead-ending
+                    // transport-level failure (offline, DNS, timeout, no
+                    // session) — lets callers fall back to a local alert
+                    // instead of dead-ending
                     else -> AlertServiceUnavailableException()
                 }
             }
@@ -526,19 +526,19 @@ class CurrencyRepositoryImpl(
 
     override suspend fun removeServerRateAlert(id: Long): Unit =
         withContext(Dispatchers.Default) {
-            val bearer = sessionManager.ensureSession() ?: return@withContext
-            alertsApi.deleteAlert(bearer, id).onFailure { error ->
-                Napier.w(tag = TAG, throwable = error) { "server alert delete failed (id=$id)" }
-            }
+            sessionManager.withSession { bearer -> alertsApi.deleteAlert(bearer, id) }
+                .onFailure { error ->
+                    Napier.w(tag = TAG, throwable = error) { "server alert delete failed (id=$id)" }
+                }
             Unit
         }
 
     override suspend fun setServerRateAlertEnabled(id: Long, enabled: Boolean): Unit =
         withContext(Dispatchers.Default) {
-            val bearer = sessionManager.ensureSession() ?: return@withContext
-            alertsApi.updateAlert(bearer, id, enabled = enabled).onFailure { error ->
-                Napier.w(tag = TAG, throwable = error) { "server alert toggle failed (id=$id)" }
-            }
+            sessionManager.withSession { bearer -> alertsApi.updateAlert(bearer, id, enabled = enabled) }
+                .onFailure { error ->
+                    Napier.w(tag = TAG, throwable = error) { "server alert toggle failed (id=$id)" }
+                }
             Unit
         }
 

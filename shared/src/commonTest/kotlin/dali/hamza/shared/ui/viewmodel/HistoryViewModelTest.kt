@@ -46,6 +46,8 @@ internal class FakeRepository : IRepository {
     override suspend fun saveListCurrencies(): Flow<MyResponse<List<Currency>>> =
         flow { emit(MyResponse.Success(emptyList())) }
 
+    override suspend fun syncCurrencyNames(lang: String): Boolean = false
+
     override suspend fun saveExchangeRatesOfCurrentCurrency() = Unit
 
     override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> =
