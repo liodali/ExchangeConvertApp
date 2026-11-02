@@ -127,6 +127,27 @@ one Play listing — the same applicationId means installing the staging build
 overwrites the production/internal build on that test device (same app,
 same signer).
 
+### Staging links in the workflow summary
+
+Staging runs add a **Staging distribution** block to the workflow run summary
+with:
+
+- the stable internal-testing opt-in link:
+  `https://play.google.com/apps/testing/com.sovereignledger.app`
+- the direct **internal app sharing** link when the repo variable
+  `PLAY_APP_SHARING_URL` is set.
+
+Internal testing and internal app sharing are separate Play channels. Upload
+the AAB in **Play Console → Release → Internal app sharing** to get the
+latter link, then set it (not a secret — anyone with the URL can share it):
+
+```bash
+gh variable set PLAY_APP_SHARING_URL --body '<link-from-play-console>' \
+  -R liodali/ExchangeConvertApp
+```
+
+Production/release runs never write this block.
+
 ## Listing assets (ready in `qa/store/`)
 
 - Store icon `app-icon-512.png` ✅ (512×512 full-bleed, Play masks corners)

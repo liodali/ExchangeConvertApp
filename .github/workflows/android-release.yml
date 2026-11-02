@@ -175,6 +175,28 @@ jobs:
           inAppUpdatePriority: ${{ env.PLAY_UPDATE_PRIORITY }}
           whatsNewDirectory: whatsnew
 
+      - name: Write staging distribution links
+        # Staging only. Internal testing and internal app sharing are separate
+        # Play channels: the former is a stable opt-in URL; the latter's
+        # download URL is issued by Play Console when an AAB is uploaded.
+        if: env.APP_VARIANT == 'staging'
+        env:
+          APP_SHARING_URL: ${{ vars.PLAY_APP_SHARING_URL }}
+        run: |
+          {
+            echo "## Staging distribution"
+            echo
+            echo "- **Internal testing (join/install):** https://play.google.com/apps/testing/com.sovereignledger.app"
+            if [[ -n "$APP_SHARING_URL" ]]; then
+              echo "- **Internal app sharing (direct test build):** $APP_SHARING_URL"
+            else
+              echo "- **Internal app sharing:** not configured yet."
+              echo "  Upload this AAB in Play Console → Internal app sharing, then save its returned link as the \`PLAY_APP_SHARING_URL\` repo variable to show it here."
+            fi
+            echo
+            echo "Backend: exchange-api-staging.op.dev.kahuna.adetify.com"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish GitHub release (tag message + AAB)
         # Publish only after all preceding steps have succeeded.
         if: startsWith(github.ref, 'refs/tags/') && success()
