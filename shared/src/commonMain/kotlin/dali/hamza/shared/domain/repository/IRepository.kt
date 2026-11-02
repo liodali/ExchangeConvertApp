@@ -38,6 +38,12 @@ interface IRepository {
     suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>>
 
     /**
+     * Live rates for an explicit [base] (not the stored session base).
+     * Detail screens use this when the viewed pair differs from Home.
+     */
+    suspend fun getRatesForBase(base: String): MyResponse<List<ExchangeRate>>
+
+    /**
      * Get current selected currency (ISO code)
      */
     suspend fun getCurrentCurrency(): String

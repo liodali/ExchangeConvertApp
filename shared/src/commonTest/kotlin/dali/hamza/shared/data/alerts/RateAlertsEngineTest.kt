@@ -91,6 +91,9 @@ class RateAlertsEngineTest {
         override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> =
             MyResponse.Success(emptyList())
 
+        override suspend fun getRatesForBase(base: String): MyResponse<List<ExchangeRate>> =
+            MyResponse.Success(emptyList())
+
         override suspend fun getCurrentCurrency(): String = "USD"
 
         override suspend fun setCurrentCurrency(value: String) = Unit

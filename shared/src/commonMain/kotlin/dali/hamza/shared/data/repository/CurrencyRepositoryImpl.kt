@@ -218,6 +218,28 @@ class CurrencyRepositoryImpl(
         saveExchangeRatesOfCurrentCurrency()
     }
 
+    /**
+     * Live rates for an EXPLICIT base (not the stored session base). Used by
+     * detail screens whose pair may differ from Home's selected base.
+     */
+    override suspend fun getRatesForBase(base: String): MyResponse<List<ExchangeRate>> =
+        withContext(Dispatchers.Default) {
+            val response = currencyApi.getLiveRates(base)
+            val rates = response.getOrNull()?.rates
+            if (rates != null) {
+                val now = currentEpochMillis()
+                MyResponse.Success(
+                    rates.entries.map { (target, rate) ->
+                        ExchangeRate(name = target, rate = rate, calculatedAmount = rate, time = now)
+                    },
+                )
+            } else {
+                MyResponse.Error(
+                    response.exceptionOrNull()?.message ?: "Rates unavailable for $base",
+                )
+            }
+        }
+
     // ---- historic-rate local cache (read-through) ------------------------
     // Historic daily rates are immutable: rows live in the HistoricRate
     // table (time = epoch-day) and only the missing date tail is fetched.

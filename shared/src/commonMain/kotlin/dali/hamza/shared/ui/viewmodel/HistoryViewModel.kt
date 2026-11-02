@@ -123,7 +123,10 @@ class HistoryViewModel(
     }
 
     private suspend fun refreshLiveRate(base: String, quote: String) {
-        when (val response = repository.getListRatesCurrencies(1.0)) {
+        // Pair-specific rates: History may show EUR/TND while the stored
+        // Home base is still USD. Using the session list would render USD/TND
+        // under an EUR/TND title.
+        when (val response = repository.getRatesForBase(base)) {
             is MyResponse.Success -> {
                 val rate = response.data.firstOrNull { it.name == quote }?.rate
                 if (rate != null) {

@@ -53,6 +53,9 @@ internal class FakeRepository : IRepository {
     override suspend fun getListRatesCurrencies(amount: Double): MyResponse<List<ExchangeRate>> =
         MyResponse.Success(ratesByBase[currentCurrency] ?: liveRates)
 
+    override suspend fun getRatesForBase(base: String): MyResponse<List<ExchangeRate>> =
+        MyResponse.Success(ratesByBase[base] ?: emptyList())
+
     override suspend fun getCurrentCurrency(): String = currentCurrency
 
     override suspend fun setCurrentCurrency(value: String) {
@@ -247,6 +250,41 @@ class HistoryViewModelTest {
         val fromDay = dali.hamza.shared.common.DateUtils.epochDayOf(second[2])!!
         val toDay = dali.hamza.shared.common.DateUtils.epochDayOf(second[3])!!
         assertTrue(toDay - fromDay >= 364, "expected a 1Y window, got ${second[2]}..${second[3]}")
+    }
+
+    @Test
+    fun liveRateUsesExplicitBaseNotSessionBase() = runTest(dispatcher) {
+        val repository = FakeRepository().apply {
+            // Home's stored base stays USD (session list => USD/TND), while
+            // History is viewing EUR/TND. Regression guard for showing an
+            // USD/TND rate under an EUR/TND header.
+            liveRates = listOf(
+                ExchangeRate(
+                    name = "TND", rate = 2.9945,
+                    calculatedAmount = 2.9945, time = 0L,
+                ),
+            )
+            ratesByBase = mapOf(
+                "EUR" to listOf(
+                    ExchangeRate(
+                        name = "TND", rate = 3.3469,
+                        calculatedAmount = 3.3469, time = 0L,
+                    ),
+                ),
+            )
+            series = listOf(
+                HistoricalRate("2026-10-26", 3.3673),
+                HistoricalRate("2026-10-27", 3.3472),
+            )
+        }
+        val viewModel = HistoryViewModel(repository)
+
+        viewModel.load("EUR", "TND")
+        advanceUntilIdle()
+
+        assertEquals(3.3469, viewModel.state.value.currentRate)
+        assertEquals("EUR", viewModel.state.value.base)
+        assertEquals("TND", viewModel.state.value.quote)
     }
 
     @Test
