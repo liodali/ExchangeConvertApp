@@ -1,7 +1,6 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// Android 0.13.2: Play's highest active code is 64, preflight allows 1–3 —
-// so this Android-only release uses 65 (iOS last consumed up to 67 on App
-// Store Connect; re-raise before the next iOS upload).
-MARKETING_VERSION = 0.13.2
-CURRENT_PROJECT_VERSION = 65
+// Android 0.14.0: build 68 sits above Play's active 65 (inside the 66–68
+// preflight window) and clears iOS's last consumed build 67.
+MARKETING_VERSION = 0.14.0
+CURRENT_PROJECT_VERSION = 68
