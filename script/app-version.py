@@ -31,7 +31,9 @@ def read_version(path=DEFAULT_FILE):
 
 
 def validate_tag(tag, version, build):
-    match = re.fullmatch(r'(?:app|ios)-v([0-9]+\.[0-9]+\.[0-9]+)(?:-dev)?(?:\+([1-9][0-9]*)(?:-dev)?)?', tag)
+    match = re.fullmatch(
+        r'(?:app|ios)-v([0-9]+\.[0-9]+\.[0-9]+)(?:-dev|-stg)?'
+        r'(?:\+([1-9][0-9]*)(?:-dev|-stg)?)?', tag)
     if not match:
         raise ValueError(f'Invalid app release tag: {tag}')
     if match[1] != version or (match[2] is not None and int(match[2]) != build):

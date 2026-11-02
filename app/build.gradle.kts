@@ -47,6 +47,11 @@ require(appVersionCode != null && appVersionCode in 1L..2100000000L) {
     "Build number must be 1..2100000000 (version.xcconfig: CURRENT_PROJECT_VERSION)"
 }
 
+// Staging-only default (same applicationId as release): the variable keeps
+// the backend host visible next to the build type. A server.host override
+// still wins if a future staging cutover needs a different domain.
+val stagingServerHost = "exchange-api-staging.op.dev.kahuna.adetify.com"
+
 android {
     compileSdk = 37
     namespace = "dali.hamza.echangecurrencyapp"
@@ -106,6 +111,27 @@ android {
     }
 
     buildTypes {
+        create("staging") {
+            // Same applicationId as release — one Play app, no package
+            // suffix. Known staging by: launcher label/source-set badge and
+            // "0.14.0-staging" versionName. Points at the staging backend
+            // unless -Pserver.host overrides it.
+            initWith(getByName("release"))
+            // initWith does not reliably inherit AGP release-only tasks in
+            // the deprecated Project.android DSL, so restate them.
+            isMinifyEnabled = true
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            versionNameSuffix = "-staging"
+            signingConfigs.findByName("release")?.let { signingConfig = it }
+            buildConfigField("String", "SERVER_HOST", "\"${prop("server.host", stagingServerHost)}\"")
+            matchingFallbacks.add("release")
+        }
         release {
             // Embed available native symbols in the AAB for Play crash/ANR reports.
             // FULL preserves function names, source files, and line numbers.

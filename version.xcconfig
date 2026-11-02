@@ -1,6 +1,7 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// Android 0.14.0: build 68 sits above Play's active 65 (inside the 66–68
-// preflight window) and clears iOS's last consumed build 67.
+// Staging internal build 69 follows internal 0.14.0 (68); the Android
+// staging flavor appends -staging to versionName while keeping app id
+// com.sovereignledger.app.
 MARKETING_VERSION = 0.14.0
-CURRENT_PROJECT_VERSION = 68
+CURRENT_PROJECT_VERSION = 69

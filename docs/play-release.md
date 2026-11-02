@@ -92,6 +92,41 @@ accepted but do not alter the app's numeric version. Increment the build number
 before every new upload. Testers get the opt-in link from Console → Internal
 testing; promote internal → closed → production from the Console when ready.
 
+## 5. Android staging build — same Play app, visible as staging
+
+The app has a `staging` Android **build type** (not a package/product flavor):
+
+- same `applicationId` (`com.sovereignledger.app`) — no new Play app, no new
+  Firebase package;
+- `versionName` becomes `X.Y.Z-staging` (the numeric `versionCode` still
+  advances normally);
+- launcher label is `Dinarly (staging)` and the launcher icon gets an STG
+  badge (`app/src/staging/res`);
+- `SERVER_HOST` defaults to the OpenShip staging API unless
+  `server.host` overrides it.
+
+A local build:
+
+```bash
+./gradlew :app:bundleStaging
+```
+
+A staged Play internal-test upload needs a normal version-code advance. For
+example, with `version.xcconfig` at `0.14.0 + 69`:
+
+```bash
+python3 script/whatsnew.py whatsnew.xml --out whatsnew
+git tag -a app-v0.14.0-stg+69 -F whatsnew.xml
+git push origin app-v0.14.0-stg+69
+```
+
+The `-stg` marker selects the staging build task; it does not change the
+numeric app version. A manual workflow run can also set
+`staging_build=true`. Do **not** create a staging package id if the goal is
+one Play listing — the same applicationId means installing the staging build
+overwrites the production/internal build on that test device (same app,
+same signer).
+
 ## Listing assets (ready in `qa/store/`)
 
 - Store icon `app-icon-512.png` ✅ (512×512 full-bleed, Play masks corners)

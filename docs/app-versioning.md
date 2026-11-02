@@ -51,6 +51,11 @@ version and use the file's build number. A `-dev` tag marker is accepted but doe
 not alter the numeric app version on either platform. To distribute an Android
 development build, select the appropriate testing track on a manual run.
 
+An additional Android `-stg` marker selects the staging build type (same Play
+applicationId, staging default host, launcher badge, and `-staging`
+versionName). The numeric tag values still use the shared file values. For
+example: `app-v0.14.0-stg+69` (see [Play release](play-release.md)).
+
 Explicit command-line overrides (`-PversionName`/`-PversionCode` for Gradle,
 `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` for Xcode) remain available for ad hoc
 builds. Neither `local.properties` nor the latest git tag controls the default

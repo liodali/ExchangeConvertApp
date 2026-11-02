@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Staging launcher foreground = the real icon + a STG badge tucked into
+     the adaptive-icon safe zone. Staging-only; release keeps the clean icon. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_foreground"/>
+    <item
+        android:drawable="@drawable/ic_staging_badge"
+        android:width="34dp"
+        android:height="34dp"
+        android:gravity="top|end"
+        android:top="14dp"
+        android:right="12dp"/>
+</layer-list>

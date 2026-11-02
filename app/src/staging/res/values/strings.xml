@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Staging builds share the release applicationId — the badge + label are
+         what tell them apart in the launcher and recents (same Play app). -->
+    <string name="app_name">Dinarly (staging)</string>
+</resources>

@@ -36,6 +36,11 @@ on:
         required: false
         default: "0"
         type: string
+      staging_build:
+        description: "Staging build: same app id/Play listing, staging host + launcher badge + '-staging' versionName"
+        required: false
+        default: "false"
+        type: boolean
 
 jobs:
   release:
@@ -86,6 +91,7 @@ jobs:
         env:
           PLAY_TRACK: ${{ inputs.track || 'internal' }}
           PLAY_PRIORITY: ${{ inputs.in_app_update_priority || '0' }}
+          PLAY_STAGING_BUILD: ${{ inputs.staging_build || false }}
         run: |
           set -euo pipefail
           VERSION_ARGS=()
@@ -99,6 +105,18 @@ jobs:
           fi
           echo "PLAY_TRACK=$PLAY_TRACK" >> "$GITHUB_ENV"
           echo "PLAY_UPDATE_PRIORITY=$PLAY_PRIORITY" >> "$GITHUB_ENV"
+          # Same Play listing / applicationId for staging and release; -stg
+          # tags and the manual switch choose APP_VARIANT=staging so the build
+          # points at staging and carries launcher badge/-staging versionName.
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" == *-stg* ]] || [[ "$PLAY_STAGING_BUILD" == "true" ]]; then
+            echo "APP_VARIANT=staging" >> "$GITHUB_ENV"
+            echo "AAB_PATH=app/build/outputs/bundle/staging/app-staging.aab" >> "$GITHUB_ENV"
+            echo "MAPPING_PATH=app/build/outputs/mapping/staging/mapping.txt" >> "$GITHUB_ENV"
+          else
+            echo "APP_VARIANT=release" >> "$GITHUB_ENV"
+            echo "AAB_PATH=app/build/outputs/bundle/release/app-release.aab" >> "$GITHUB_ENV"
+            echo "MAPPING_PATH=app/build/outputs/mapping/release/mapping.txt" >> "$GITHUB_ENV"
+          fi
           python3 script/app-version.py
 
       - name: Check version code against Google Play
@@ -109,9 +127,14 @@ jobs:
           python3 -m pip install 'google-auth[requests]>=2,<3'
           python3 script/check-play-version.py
 
-      - name: Build release AAB
+      - name: Build app bundle
         run: |
-          ./gradlew :app:bundleRelease \
+          if [[ "$APP_VARIANT" == "staging" ]]; then
+            GRADLE_TASK=":app:bundleStaging"
+          else
+            GRADLE_TASK=":app:bundleRelease"
+          fi
+          ./gradlew "$GRADLE_TASK" \
             -PversionCode="$VERSION_CODE" \
             -PversionName="$VERSION_NAME" \
             -Pglitchtip.dsn="${{ secrets.GLITCHTIP_DSN }}" \
@@ -146,7 +169,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.sovereignledger.app
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: ${{ env.AAB_PATH }}
           tracks: ${{ env.PLAY_TRACK }}
           status: completed
           inAppUpdatePriority: ${{ env.PLAY_UPDATE_PRIORITY }}
@@ -163,5 +186,5 @@ jobs:
             --title "Sovereign Ledger $VERSION_NAME (build $VERSION_CODE)" \
             --notes-file github-release-notes.md \
             --verify-tag \
-            app/build/outputs/bundle/release/app-release.aab \
-            app/build/outputs/mapping/release/mapping.txt
+            "$AAB_PATH" \
+            "$MAPPING_PATH"
