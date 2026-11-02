@@ -3,7 +3,7 @@
 `app-v*` tag → GitHub Actions → **signed release AAB** → **internal testing track**.
 
 - Workflow: [`.github/workflows/android-release.yml`](../.github/workflows/android-release.yml)
-- Store identity: `com.sovereignledger.app` · display name **Sovereign Ledger**
+- Store identity: `com.sovereignledger.app` · display name **Dinarly**
 - Privacy policy (live after backend ≥ v0.4.3-dev.18): https://api.exchange.dev.adetify.com/privacy
 
 ## 1. Keystore — managed by `script/keystore.sh`

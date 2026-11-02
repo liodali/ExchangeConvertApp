@@ -205,7 +205,7 @@ jobs:
         run: |
           gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" && exit 0
           gh release create "$GITHUB_REF_NAME" \
-            --title "Sovereign Ledger $VERSION_NAME (build $VERSION_CODE)" \
+            --title "Dinarly $VERSION_NAME (build $VERSION_CODE)" \
             --notes-file github-release-notes.md \
             --verify-tag \
             "$AAB_PATH" \
