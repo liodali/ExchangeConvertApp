@@ -174,6 +174,24 @@ class HistoryViewModel(
                         currentRate = current,
                     )
                 }
+
+                // Some pairs have a live quote but no cached/upstream history.
+                // Render the current quote as a one-point chart instead of a
+                // blank card; later backend points merge naturally on refresh.
+                if (series.isEmpty() && current != null) {
+                    val today = DateUtils.toIsoDate(today)
+                    val fallbackSeries = listOf(HistoricalRate(today, current))
+                    _state.update {
+                        it.copy(
+                            series = fallbackSeries,
+                            delta = null,
+                            changePercent = null,
+                            topPercentile = null,
+                            lastUpdatedLabel = today,
+                            bestRate = it.bestRate ?: current,
+                        )
+                    }
+                }
             }
 
             is MyResponse.Error -> _state.update {

@@ -22,6 +22,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -38,6 +39,8 @@ internal class FakeRepository : IRepository {
     var ratesByBase: Map<String, List<ExchangeRate>> = emptyMap()
     var historicalGate: CompletableDeferred<Unit>? = null
     var series: List<HistoricalRate> = emptyList()
+    /** Normal fake behavior: empty series means backend error. Set false to test a 200/empty response. */
+    var emptySeriesIsError: Boolean = true
     var transactions: List<Transaction> = emptyList()
 
     override suspend fun getListCurrencies(): MyResponse<List<Currency>> =
@@ -72,7 +75,7 @@ internal class FakeRepository : IRepository {
         to: String,
     ): MyResponse<List<HistoricalRate>> {
         historicalRequests.add(listOf(base, symbol, from, to))
-        return if (series.isEmpty()) {
+        return if (series.isEmpty() && emptySeriesIsError) {
             MyResponse.Error("no data")
         } else {
             MyResponse.Success(series)
@@ -285,6 +288,31 @@ class HistoryViewModelTest {
         assertEquals(3.3469, viewModel.state.value.currentRate)
         assertEquals("EUR", viewModel.state.value.base)
         assertEquals("TND", viewModel.state.value.quote)
+    }
+
+    @Test
+    fun emptyHistoryFallsBackToCurrentLivePoint() = runTest(dispatcher) {
+        val repository = FakeRepository().apply {
+            ratesByBase = mapOf(
+                "EUR" to listOf(
+                    ExchangeRate(name = "TND", rate = 3.35, calculatedAmount = 3.35, time = 0L),
+                ),
+            )
+            // backend returned a successful empty historic series
+            series = emptyList()
+            emptySeriesIsError = false
+        }
+        val viewModel = HistoryViewModel(repository)
+
+        viewModel.load("EUR", "TND")
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals(3.35, state.currentRate)
+        assertEquals(1, state.series.size)
+        assertEquals(3.35, state.series.single().rate)
+        assertNull(state.changePercent)
+        assertEquals(null, state.delta)
     }
 
     @Test
