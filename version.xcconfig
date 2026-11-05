@@ -1,7 +1,6 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// Internal 0.14.0 (70) follows staging internal 69; the Android
-// staging flavor appends -staging to versionName while keeping app id
-// com.sovereignledger.app.
-MARKETING_VERSION = 0.14.0
-CURRENT_PROJECT_VERSION = 70
+// 0.14.1 (71) ships the pair-specific live-rate fix, a one-point history
+// fallback, and follows Android build 70.
+MARKETING_VERSION = 0.14.1
+CURRENT_PROJECT_VERSION = 71
