@@ -9,12 +9,13 @@ name: Android Release
 #   ANDROID_KEY_ALIAS
 #   ANDROID_KEY_PASSWORD
 #   PLAY_SERVICE_ACCOUNT_JSON — Play Console service account JSON
+#   EXCHANGE_SERVER_HOST — production backend hostname
+#   EXCHANGE_SERVER_HOST_STG — staging backend hostname
+#     Only the selected environment's host secret is required for a build.
 #
-# Optional repository VARIABLES (Settings → Secrets and variables → Actions
-# → Variables):
-#   EXCHANGE_SERVER_HOST — backend host baked into the app (defaults to the
-#     shared module's DEFAULT_HOST, currently the dev deployment; set this
-#     when the production backend gets its own domain).
+# Optional repository secrets:
+#   GLITCHTIP_DSN — production crash reporting; empty disables it.
+#   GLITCHTIP_DSN_STG — staging crash reporting; never falls back to production.
 #
 # Signing: the runner materializes key.properties from the keystore
 # secrets (same file format local builds use) — app/build.gradle.kts
@@ -92,13 +93,15 @@ jobs:
           PLAY_TRACK: ${{ inputs.track || 'internal' }}
           PLAY_PRIORITY: ${{ inputs.in_app_update_priority || '0' }}
           PLAY_STAGING_BUILD: ${{ inputs.staging_build || false }}
+          PRODUCTION_SERVER_HOST: ${{ secrets.EXCHANGE_SERVER_HOST }}
+          STAGING_SERVER_HOST: ${{ secrets.EXCHANGE_SERVER_HOST_STG }}
         run: |
           set -euo pipefail
-          VERSION_ARGS=()
+          VERSION_ARGS=(--format android-env)
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
             VERSION_ARGS+=(--tag "$GITHUB_REF_NAME")
           fi
-          python3 script/app-version.py --format android-env "${VERSION_ARGS[@]}" >> "$GITHUB_ENV"
+          python3 script/app-version.py "${VERSION_ARGS[@]}" >> "$GITHUB_ENV"
           if ! [[ "$PLAY_PRIORITY" =~ ^[0-5]$ ]]; then
             echo "::error::in_app_update_priority must be 0–5 (got '$PLAY_PRIORITY')"
             exit 1
@@ -108,15 +111,24 @@ jobs:
           # Same Play listing / applicationId for staging and release; -stg
           # tags and the manual switch choose APP_VARIANT=staging so the build
           # points at staging and carries launcher badge/-staging versionName.
-          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" == *-stg* ]] || [[ "$PLAY_STAGING_BUILD" == "true" ]]; then
+          if [[ "$GITHUB_REF_TYPE" == "tag" && ( "$GITHUB_REF_NAME" == *-stg || "$GITHUB_REF_NAME" == *-stg+* ) ]] || [[ "$PLAY_STAGING_BUILD" == "true" ]]; then
+            SERVER_HOST="${STAGING_SERVER_HOST:-}"
+            HOST_SECRET=EXCHANGE_SERVER_HOST_STG
             echo "APP_VARIANT=staging" >> "$GITHUB_ENV"
             echo "AAB_PATH=app/build/outputs/bundle/staging/app-staging.aab" >> "$GITHUB_ENV"
             echo "MAPPING_PATH=app/build/outputs/mapping/staging/mapping.txt" >> "$GITHUB_ENV"
           else
+            SERVER_HOST="${PRODUCTION_SERVER_HOST:-}"
+            HOST_SECRET=EXCHANGE_SERVER_HOST
             echo "APP_VARIANT=release" >> "$GITHUB_ENV"
             echo "AAB_PATH=app/build/outputs/bundle/release/app-release.aab" >> "$GITHUB_ENV"
             echo "MAPPING_PATH=app/build/outputs/mapping/release/mapping.txt" >> "$GITHUB_ENV"
           fi
+          if [[ -z "$SERVER_HOST" ]]; then
+            echo "::error::Missing repository secret $HOST_SECRET; refusing to use a fallback."
+            exit 1
+          fi
+          echo "SERVER_HOST=$SERVER_HOST" >> "$GITHUB_ENV"
           python3 script/app-version.py
 
       - name: Check version code against Google Play
@@ -128,17 +140,23 @@ jobs:
           python3 script/check-play-version.py
 
       - name: Build app bundle
+        env:
+          PRODUCTION_GLITCHTIP_DSN: ${{ secrets.GLITCHTIP_DSN }}
+          STAGING_GLITCHTIP_DSN: ${{ secrets.GLITCHTIP_DSN_STG }}
         run: |
+          set -euo pipefail
           if [[ "$APP_VARIANT" == "staging" ]]; then
             GRADLE_TASK=":app:bundleStaging"
+            GLITCHTIP_DSN="${STAGING_GLITCHTIP_DSN:-}"
           else
             GRADLE_TASK=":app:bundleRelease"
+            GLITCHTIP_DSN="${PRODUCTION_GLITCHTIP_DSN:-}"
           fi
           ./gradlew "$GRADLE_TASK" \
             -PversionCode="$VERSION_CODE" \
             -PversionName="$VERSION_NAME" \
-            -Pglitchtip.dsn="${{ secrets.GLITCHTIP_DSN }}" \
-            -Pserver.host="${{ vars.EXCHANGE_SERVER_HOST }}"
+            -Pglitchtip.dsn="$GLITCHTIP_DSN" \
+            -Pserver.host="$SERVER_HOST"
 
       - name: Prepare release notes (whatsnew)
         # Notes live locally in the git-ignored whatsnew.xml (Play Console
@@ -194,7 +212,7 @@ jobs:
               echo "  Upload this AAB in Play Console → Internal app sharing, then save its returned link as the \`PLAY_APP_SHARING_URL\` repo variable to show it here."
             fi
             echo
-            echo "Backend: exchange-api-staging.op.dev.kahuna.adetify.com"
+            echo "Backend: staging (configured via repository secret)"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish GitHub release (tag message + AAB)

@@ -1,16 +1,19 @@
 #!/bin/sh
-# Xcode Cloud Kotlin Multiplatform prerequisite: install JDK 21.
+# Xcode Cloud prerequisites: generate Secrets.swift and install JDK 21.
 #
 # Xcode Cloud starts clean, has Homebrew, but does not prime the JDK needed
 # by Gradle to run the shared framework task. The ExchangeConvertApp scheme
 # pre-action builds `:shared:embedAndSignAppleFrameworkForXcode` inside the
-# normal `xcodebuild` action, so this script only adds the prerequisite.
+# normal `xcodebuild` action. Prepare the Swift configuration before that build.
 set -euo pipefail
 
-if [[ "$CI_XCODE_CLOUD" != "TRUE" ]]; then
+if [[ "${CI_XCODE_CLOUD:-}" != "TRUE" ]]; then
   # Local runs never need this expensive setup.
   exit 0
 fi
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+/bin/sh "$SCRIPT_DIR/prepare_secrets.sh"
 
 if ! command -v brew >/dev/null 2>&1; then
   echo "error: Homebrew is unavailable in this Xcode Cloud image" >&2

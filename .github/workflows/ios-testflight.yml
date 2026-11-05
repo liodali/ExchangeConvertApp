@@ -12,14 +12,14 @@ name: iOS → TestFlight (asc)
 #   ASC_PRIVATE_KEY_B64  base64 of the AuthKey_<KEY_ID>.p8 file
 #   IOS_DISTRIBUTION_KEY_B64  base64 of the distribution private key (PEM)
 #   IOS_DISTRIBUTION_CERT_ID  ASC certificate id created from that key’s CSR
+#   IOS_SECRETS_SWIFT_B64      base64 of production Secrets.swift
+#   IOS_SECRETS_SWIFT_B64_STG  base64 of staging Secrets.swift (-stg tags)
+#                              The selected configuration is required.
 # Optional:
 #   RUNNER_READ_TOKEN    Fine-grained PAT for this repo with Administration: read
 #                        (needed to prefer the self-hosted Mac automatically)
 #   ASC_APP_ID           App id (auto-resolved from the bundle id when empty)
 #   TESTFLIGHT_GROUP     Beta group name — set to also distribute to testers
-#   IOS_SECRETS_SWIFT_B64  base64 of iosApp/ExchangeConvertApp/Secrets.swift
-#                          (when unset, the Xcode "Prepare Secrets" phase
-#                           copies Secrets.swift.example — placeholder key)
 
 on:
   workflow_dispatch:
@@ -267,24 +267,44 @@ jobs:
             --private-key "$KEY"
           asc auth status --validate
 
-      - name: Inject Secrets.swift (runtime API key)
+      - name: Inject environment-specific Secrets.swift
+        shell: bash
         env:
           IOS_SECRETS_SWIFT_B64: ${{ secrets.IOS_SECRETS_SWIFT_B64 }}
+          IOS_SECRETS_SWIFT_B64_STG: ${{ secrets.IOS_SECRETS_SWIFT_B64_STG }}
         run: |
-          # Secrets.swift is a declared compile source but is NOT declared
-          # as an output of the "Prepare Secrets" phase — the build graph
-          # therefore requires it to exist BEFORE xcodebuild starts (it
-          # exists locally from earlier Xcode builds; on a fresh runner it
-          # must be created here).
-          if [ -n "$IOS_SECRETS_SWIFT_B64" ]; then
-            printf '%s' "$IOS_SECRETS_SWIFT_B64" | base64 -d \
-              > iosApp/ExchangeConvertApp/Secrets.swift
-            echo "Injected Secrets.swift from secret"
-          else
-            cp iosApp/ExchangeConvertApp/Secrets.swift.example \
-               iosApp/ExchangeConvertApp/Secrets.swift
-            echo "Copied Secrets.swift template (no secret set)"
+          set -euo pipefail
+          # Create the declared Swift compile source before xcodebuild.
+          # Untagged/manual branch builds use production, just like Xcode Cloud.
+          case "$GITHUB_REF" in
+            refs/tags/*-stg|refs/tags/*-stg+*)
+              BUILD_ENVIRONMENT=staging
+              SECRET_NAME=IOS_SECRETS_SWIFT_B64_STG
+              ENCODED="${IOS_SECRETS_SWIFT_B64_STG:-}"
+              ;;
+            *)
+              BUILD_ENVIRONMENT=production
+              SECRET_NAME=IOS_SECRETS_SWIFT_B64
+              ENCODED="${IOS_SECRETS_SWIFT_B64:-}"
+              ;;
+          esac
+          if [ -z "$ENCODED" ]; then
+            echo "::error::Missing $SECRET_NAME for $BUILD_ENVIRONMENT; refusing to use a fallback."
+            exit 1
           fi
+          umask 077
+          TEMP_FILE=$(mktemp iosApp/ExchangeConvertApp/.Secrets.swift.XXXXXX)
+          trap 'rm -f "$TEMP_FILE"' EXIT
+          if ! printf '%s' "$ENCODED" | /usr/bin/base64 --decode > "$TEMP_FILE"; then
+            echo "::error::$SECRET_NAME is not valid Base64."
+            exit 1
+          fi
+          if [ ! -s "$TEMP_FILE" ]; then
+            echo "::error::$SECRET_NAME decoded to an empty Secrets.swift."
+            exit 1
+          fi
+          mv -f "$TEMP_FILE" iosApp/ExchangeConvertApp/Secrets.swift
+          echo "Prepared Secrets.swift for $BUILD_ENVIRONMENT."
 
       - name: Resolve app id and read shared app version
         id: ids

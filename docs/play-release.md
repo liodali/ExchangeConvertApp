@@ -36,22 +36,39 @@ somewhere safe** (lose them → the app can never be updated on Play).
 | `ANDROID_KEY_ALIAS` | `sovereign-ledger` |
 | `ANDROID_KEY_PASSWORD` | key password |
 | `PLAY_SERVICE_ACCOUNT_JSON` | service-account JSON (step 3) |
-| `GLITCHTIP_DSN` | GlitchTip client DSN (`https://…@glitchtip.dev.adetify.com/N`) — crash reporting; releases without it simply ship without telemetry |
+| `EXCHANGE_SERVER_HOST` | Production backend hostname (no `https://`); required for production builds |
+| `EXCHANGE_SERVER_HOST_STG` | Staging backend hostname (no `https://`); required for staging builds |
+| `GLITCHTIP_DSN` | Production GlitchTip client DSN — unset disables production crash reporting |
+| `GLITCHTIP_DSN_STG` | Staging GlitchTip client DSN — unset disables staging crash reporting; never falls back to production |
 
 Local builds read the same DSN from `local.properties` (`glitchtip.dsn=`); empty = disabled.
 
-### Backend host (optional repo variable)
+### Environment-specific backend secrets
 
-The app talks to our exchange-api backend. The host defaults to the shared
-module's `DEFAULT_HOST` (`api.exchange.dev.adetify.com` — currently the only
-deployment). To point a release at a different host without a code change:
+Android does **not** read the iOS `Secrets.swift` or its Base64 secrets. The
+workflow passes environment-specific host and DSN values as Gradle properties.
+Configure both under **Settings → Secrets and variables → Actions → Secrets**
+(not Variables):
 
-- **CI**: repo variable `EXCHANGE_SERVER_HOST` (Settings → Secrets and
-  variables → Actions → **Variables**, not Secrets) — unset = default host.
-- **Local builds**: `local.properties` → `server.host=…` (or `-Pserver.host=…`).
+| Build | Required host secret | Optional DSN secret |
+| --- | --- | --- |
+| Production | `EXCHANGE_SERVER_HOST` | `GLITCHTIP_DSN` |
+| Staging | `EXCHANGE_SERVER_HOST_STG` | `GLITCHTIP_DSN_STG` |
 
-When the production backend gets its own domain, set the variable and tag —
-that's the whole cutover.
+Staging never uses the production host or DSN. A missing selected host fails
+the build, with no hardcoded workflow fallback. An unset DSN disables crash
+reporting for that environment; signing and Play service-account secrets
+remain shared. If hosts were previously saved as repository **Variables**,
+copy their values into **Secrets** using the same names; the workflow no
+longer reads the Variables entries. The host is not written to the public
+workflow summary.
+
+Secrets protect CI configuration and provide log masking; they do not make
+an embedded hostname confidential. Existing source defaults and compiled
+apps still expose hostnames. Privileged credentials belong on the backend.
+
+Local builds can override the host using `local.properties` → `server.host=…`
+(or `-Pserver.host=…`). Local staging builds otherwise use the staging host.
 
 ## 3. Play Console one-time setup (~15 min, needs your Google account)
 
