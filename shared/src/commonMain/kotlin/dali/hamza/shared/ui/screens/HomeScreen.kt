@@ -79,6 +79,7 @@ import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
+import dali.hamza.shared.ui.components.MarketCardSkeleton
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
@@ -105,7 +106,6 @@ import echangecurrencyapp.shared.generated.resources.home_greeting_night
 import echangecurrencyapp.shared.generated.resources.home_history
 import echangecurrencyapp.shared.generated.resources.home_live
 import echangecurrencyapp.shared.generated.resources.home_loading_7d
-import echangecurrencyapp.shared.generated.resources.home_loading_rates
 import echangecurrencyapp.shared.generated.resources.home_market_overview
 import echangecurrencyapp.shared.generated.resources.home_no_exchanges
 import echangecurrencyapp.shared.generated.resources.home_open_full_converter
@@ -170,6 +170,13 @@ fun HomeScreen(
             .filter { it != marketBase }
             .mapNotNull { code -> state.rates.firstOrNull { it.name == code } }
             .let { selected -> if (marketPreferences.isEmpty()) topRates.take(3) else selected }
+    }
+    // skeleton count mirrors the loaded card list: one per tracked market
+    // (minus the base), or the design default of 3 while nothing is chosen
+    val expectedCardCount = if (marketPreferences.isEmpty()) {
+        3
+    } else {
+        marketPreferences.count { it != marketBase }.coerceAtLeast(1)
     }
 
     // pair cards: reload when the market base or selected rates change
@@ -238,6 +245,7 @@ fun HomeScreen(
                             expanded = true,
                             selectedQuote = selectedCard?.quote,
                             onSelectQuote = { selectedQuote = it },
+                            skeletonCount = expectedCardCount,
                         )
 
                         selectedCard?.let { card ->
@@ -290,6 +298,7 @@ fun HomeScreen(
                     onAddAlert = { alertQuote = it },
                     onOpenRateAlerts = onOpenRateAlerts,
                     chartStyle = chartStyle,
+                    skeletonCount = expectedCardCount,
                 )
 
                 Spacer(Modifier.height(32.dp))
@@ -380,6 +389,9 @@ private fun MarketOverviewSection(
     // panel (selected card outlined, click switches the chart/favorites)
     selectedQuote: String? = null,
     onSelectQuote: ((String) -> Unit)? = null,
+    // how many skeleton cards to show while pairCards is empty — pass the
+    // user's market count so loading mirrors the loaded layout
+    skeletonCount: Int = 3,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -395,12 +407,23 @@ private fun MarketOverviewSection(
     Spacer(Modifier.height(16.dp))
 
     if (pairCards.isEmpty()) {
-        BentoCard(fill = LedgerColors.Card) {
-            Text(
-                text = stringResource(Res.string.home_loading_rates),
-                style = MaterialTheme.typography.bodyMedium,
-                color = LedgerColors.TextTertiary,
-            )
+        // Skeleton loading: placeholder cards mirror the real ones (same
+        // shell, same geometry, fake chart silhouette) and match the number
+        // of markets the user tracks — one per market, default 3 — so the
+        // section is fully laid out before data lands and nothing reflows.
+        val count = skeletonCount.coerceIn(1, 6)
+        if (expanded) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                repeat(count) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        MarketCardSkeleton(modifier = Modifier.fillMaxWidth())
+                    }
+                }
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                repeat(count) { MarketCardSkeleton() }
+            }
         }
         return
     }
