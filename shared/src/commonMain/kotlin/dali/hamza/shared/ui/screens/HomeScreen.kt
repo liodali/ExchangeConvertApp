@@ -6,6 +6,8 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,7 +81,9 @@ import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
+import dali.hamza.shared.ui.components.ChartSkeleton
 import dali.hamza.shared.ui.components.MarketCardSkeleton
+import dali.hamza.shared.ui.components.ShimmerHost
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
@@ -106,6 +110,7 @@ import echangecurrencyapp.shared.generated.resources.home_greeting_night
 import echangecurrencyapp.shared.generated.resources.home_history
 import echangecurrencyapp.shared.generated.resources.home_live
 import echangecurrencyapp.shared.generated.resources.home_loading_7d
+import echangecurrencyapp.shared.generated.resources.home_loading_rates
 import echangecurrencyapp.shared.generated.resources.home_market_overview
 import echangecurrencyapp.shared.generated.resources.home_no_exchanges
 import echangecurrencyapp.shared.generated.resources.home_open_full_converter
@@ -246,6 +251,7 @@ fun HomeScreen(
                             selectedQuote = selectedCard?.quote,
                             onSelectQuote = { selectedQuote = it },
                             skeletonCount = expectedCardCount,
+                            historyLoading = homeState.isLoading,
                         )
 
                         selectedCard?.let { card ->
@@ -299,6 +305,7 @@ fun HomeScreen(
                     onOpenRateAlerts = onOpenRateAlerts,
                     chartStyle = chartStyle,
                     skeletonCount = expectedCardCount,
+                    historyLoading = homeState.isLoading,
                 )
 
                 Spacer(Modifier.height(32.dp))
@@ -392,6 +399,9 @@ private fun MarketOverviewSection(
     // how many skeleton cards to show while pairCards is empty — pass the
     // user's market count so loading mirrors the loaded layout
     skeletonCount: Int = 3,
+    // 7-day history still fetching? cards keep the chart slot shimmering
+    // instead of collapsing it (see PairCard)
+    historyLoading: Boolean = false,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -411,18 +421,28 @@ private fun MarketOverviewSection(
         // shell, same geometry, fake chart silhouette) and match the number
         // of markets the user tracks — one per market, default 3 — so the
         // section is fully laid out before data lands and nothing reflows.
+        // One announcement for the whole section; the bars stay decorative.
         val count = skeletonCount.coerceIn(1, 6)
-        if (expanded) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                repeat(count) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        MarketCardSkeleton(modifier = Modifier.fillMaxWidth())
+        val loadingDescription = stringResource(Res.string.home_loading_rates)
+        ShimmerHost {
+            if (expanded) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.semantics { contentDescription = loadingDescription },
+                ) {
+                    repeat(count) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            MarketCardSkeleton(modifier = Modifier.fillMaxWidth())
+                        }
                     }
                 }
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                repeat(count) { MarketCardSkeleton() }
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.semantics { contentDescription = loadingDescription },
+                ) {
+                    repeat(count) { MarketCardSkeleton() }
+                }
             }
         }
         return
@@ -468,6 +488,7 @@ private fun MarketOverviewSection(
                             if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
                         },
                         chartStyle = chartStyle,
+                        historyLoading = historyLoading,
                     )
                 }
             }
@@ -485,6 +506,7 @@ private fun MarketOverviewSection(
                         if (hasAlert) onOpenRateAlerts() else onAddAlert(card.quote)
                     },
                     chartStyle = chartStyle,
+                    historyLoading = historyLoading,
                 )
             }
         }
@@ -504,6 +526,10 @@ private fun PairCard(
     hasAlert: Boolean,
     onAlert: () -> Unit,
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
+    // true while the 7-day history is still being fetched; the chart slot
+    // is ALWAYS reserved (loading/success/unavailable) so the card never
+    // changes height when history lands — the skeleton reserves it too
+    historyLoading: Boolean = false,
 ) {
     val pairTitle = base?.let { "${card.quote}/$it" } ?: card.quote
     BentoCard(
@@ -553,6 +579,34 @@ private fun PairCard(
                     .fillMaxWidth()
                     .height(64.dp),
             )
+        } else if (historyLoading) {
+            // history on its way — shimmering chart silhouette in the
+            // reserved slot (same 16+64dp geometry as the real chart)
+            Spacer(Modifier.height(16.dp))
+            ShimmerHost {
+                ChartSkeleton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
+                )
+            }
+        } else {
+            // history unavailable — keep the slot reserved with a quiet
+            // baseline instead of collapsing the card
+            Spacer(Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(LedgerColors.GridLine),
+                )
+            }
         }
     }
 }

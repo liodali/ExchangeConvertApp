@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,21 +14,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -39,22 +36,28 @@ import dali.hamza.shared.ui.theme.LedgerColors
  * the real components (market cards, charts, text lines) while data loads,
  * so the layout never reflows when content arrives.
  *
- * Design notes:
- *  - the base tone is [LedgerColors.CardHigh] (one step above the card fill)
- *    so skeletons read as "content-shaped holes" in both light and dark
- *  - a light band ([LedgerColors.TextMuted] @ 45%) sweeps left → right in a
- *    1.4s loop — the classic shimmer that says "loading", never "error"
- *  - every box runs its own transition; slightly different element widths
- *    naturally desynchronize the sweeps, which reads organic
+ * Performance model: [ShimmerHost] runs ONE infinite transition per skeleton
+ * section and exposes the progress via [LocalShimmerProgress]. Placeholder
+ * boxes read that state only inside [Modifier.drawBehind] (drawing phase):
+ * animation frames re-draw without recomposition, layout, or per-frame
+ * allocations — the sweep is drawn with plain color rects, not rebuilt
+ * gradient brushes.
+ */
+internal val LocalShimmerProgress = staticCompositionLocalOf<State<Float>?> { null }
+
+/**
+ * Runs a single shimmer clock for [content]. Idempotent: when a host is
+ * already present (e.g. a card skeleton inside a skeleton section) the
+ * existing clock is reused instead of creating another transition.
  */
 @Composable
-fun ShimmerBox(
-    modifier: Modifier = Modifier,
-    cornerRadius: Dp = 6.dp,
-) {
-    var widthPx by remember { mutableStateOf(0f) }
+fun ShimmerHost(content: @Composable () -> Unit) {
+    if (LocalShimmerProgress.current != null) {
+        content()
+        return
+    }
     val transition = rememberInfiniteTransition(label = "shimmer")
-    val shift by transition.animateFloat(
+    val progress = transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -62,26 +65,51 @@ fun ShimmerBox(
         ),
         label = "shimmerShift",
     )
-    val band = (widthPx * 0.6f).coerceAtLeast(48f)
-    // sweep the band from off-left to off-right so the loop never pops
-    val startX = -band + shift * (widthPx + 2f * band)
+    CompositionLocalProvider(LocalShimmerProgress provides progress) {
+        content()
+    }
+}
+
+/**
+ * A rounded placeholder box with the shimmer sweep. The base tone is
+ * [LedgerColors.CardHigh] (one step above the card fill) so skeletons read
+ * as "content-shaped holes" in both light and dark themes. Outside a
+ * [ShimmerHost] it renders as a quiet static block (no animation, no
+ * allocation) — used for permanent "unavailable" placeholders.
+ */
+@Composable
+fun ShimmerBox(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 6.dp,
+) {
+    val progress = LocalShimmerProgress.current
+    // highlight colors are derived here, once per composition — the draw
+    // phase below only reads them
     val base = LedgerColors.CardHigh
-    val highlight = LedgerColors.TextMuted.copy(alpha = 0.45f)
+    val soft = LedgerColors.TextMuted.copy(alpha = 0.16f)
+    val core = LedgerColors.TextMuted.copy(alpha = 0.42f)
     Box(
         modifier
-            .onSizeChanged { widthPx = it.width.toFloat() }
             .clip(RoundedCornerShape(cornerRadius))
-            .background(
-                Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to base,
-                        0.5f to highlight,
-                        1f to base,
-                    ),
-                    start = Offset(startX, 0f),
-                    end = Offset(startX + band, band.coerceAtMost(48f)),
-                ),
-            ),
+            .drawBehind {
+                drawRect(color = base)
+                val clock = progress ?: return@drawBehind
+                // sweep a soft band from off-left to off-right so the loop
+                // never pops; two stacked color rects approximate a gradient
+                // without shader/brush allocations per frame
+                val bandWidth = (size.width * 0.55f).coerceAtLeast(36f)
+                val x = -bandWidth + clock.value * (size.width + 2f * bandWidth)
+                drawRect(
+                    color = soft,
+                    topLeft = Offset(x, 0f),
+                    size = Size(bandWidth, size.height),
+                )
+                drawRect(
+                    color = core,
+                    topLeft = Offset(x + bandWidth * 0.32f, 0f),
+                    size = Size(bandWidth * 0.36f, size.height),
+                )
+            },
     )
 }
 
@@ -122,50 +150,53 @@ fun ChartSkeleton(
 /**
  * Skeleton twin of the Home market card (PairCard): same BentoCard shell,
  * same 20dp padding, same title/subtitle/delta-chip/bell row, same 30sp
- * rate line, same 64dp chart slot — so the swap from skeleton to data is
- * pixel-stable and nothing jumps.
+ * rate line, same reserved 64dp chart slot — so the swap from skeleton to
+ * data is pixel-stable and nothing jumps. Self-hosting: wraps itself in a
+ * [ShimmerHost] when used standalone, reuses an outer host when nested.
  */
 @Composable
 fun MarketCardSkeleton(
     modifier: Modifier = Modifier,
 ) {
-    BentoCard(
-        modifier = modifier,
-        fill = LedgerColors.Card,
-        padding = PaddingValues(20.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                // pair title (EUR/USD, bold 18sp)
-                ShimmerBox(modifier = Modifier.size(width = 84.dp, height = 18.dp))
-                Spacer(Modifier.height(6.dp))
-                // currency name (bodySmall)
-                ShimmerBox(modifier = Modifier.size(width = 56.dp, height = 12.dp))
+    ShimmerHost {
+        BentoCard(
+            modifier = modifier,
+            fill = LedgerColors.Card,
+            padding = PaddingValues(20.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    // pair title (EUR/USD, bold 18sp — bar matches line box)
+                    ShimmerBox(modifier = Modifier.size(width = 84.dp, height = 22.dp))
+                    Spacer(Modifier.height(4.dp))
+                    // currency name (bodySmall line box)
+                    ShimmerBox(modifier = Modifier.size(width = 56.dp, height = 14.dp))
+                }
+                // 7-day delta chip
+                ShimmerBox(
+                    modifier = Modifier.size(width = 52.dp, height = 26.dp),
+                    cornerRadius = 4.dp,
+                )
+                Spacer(Modifier.width(12.dp))
+                // alert bell slot (36dp, 12dp corner — same as the real one)
+                ShimmerBox(
+                    modifier = Modifier.size(36.dp),
+                    cornerRadius = 12.dp,
+                )
             }
-            // 7-day delta chip
+            // live rate (bold 30sp — bar matches its line box)
+            Spacer(Modifier.height(16.dp))
             ShimmerBox(
-                modifier = Modifier.size(width = 52.dp, height = 26.dp),
-                cornerRadius = 4.dp,
+                modifier = Modifier.size(width = 128.dp, height = 34.dp),
+                cornerRadius = 8.dp,
             )
-            Spacer(Modifier.width(12.dp))
-            // alert bell slot (36dp, 12dp corner — same as the real one)
-            ShimmerBox(
-                modifier = Modifier.size(36.dp),
-                cornerRadius = 12.dp,
+            // sparkline slot (always reserved — see PairCard)
+            Spacer(Modifier.height(16.dp))
+            ChartSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
             )
         }
-        // live rate (bold 30sp)
-        Spacer(Modifier.height(16.dp))
-        ShimmerBox(
-            modifier = Modifier.size(width = 128.dp, height = 30.dp),
-            cornerRadius = 8.dp,
-        )
-        // sparkline slot
-        Spacer(Modifier.height(16.dp))
-        ChartSkeleton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp),
-        )
     }
 }
