@@ -1,6 +1,7 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// 0.14.1 (71) ships the pair-specific live-rate fix, a one-point history
-// fallback, and follows Android build 70.
+// 0.14.1 (72) is the production internal/TestFlight release: real 1W
+// history (backend 0.5.41), pair-specific live rates, history fallback,
+// and the market-overview skeleton loading; follows staging build 71.
 MARKETING_VERSION = 0.14.1
-CURRENT_PROJECT_VERSION = 71
+CURRENT_PROJECT_VERSION = 72
