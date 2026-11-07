@@ -1,8 +1,8 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// 0.15.1 (75): the GOLD widget (per-oz/gram/kilo price, runtime currency,
-// follow-the-app) + widget data/resize fixes; gold section needs backend
-// 0.5.42 (already deployed prod). Xcode Cloud builds iOS with these exact
-// values — keep its automatic build number OFF.
+// 0.15.1 (80): gold widget release; jump from 75 to 80 skips build
+// numbers consumed by early Xcode Cloud runs (76) and the unfixed
+// archive runs 77-79 (crashing font-less builds, GlitchTip). Keep
+// Xcode Cloud's automatic build number OFF — xcconfig rules.
 MARKETING_VERSION = 0.15.1
-CURRENT_PROJECT_VERSION = 75
+CURRENT_PROJECT_VERSION = 80
