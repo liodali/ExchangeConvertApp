@@ -163,9 +163,14 @@ both simultaneously on `ios-v*` tags (same build number race).
 
 At present, `version.xcconfig` is intentionally shared between Android and
 iOS as the source of truth. Apple lets Xcode Cloud define its own next iOS
-build number in App Store Connect. If you want Xcode Cloud builds to use
-Apple's auto-increment, pin that next value once (e.g. 70 or higher). Future
-Android build numbers can then move independently from iOS.
+build number in App Store Connect. **Keep Xcode Cloud's automatic build
+number OFF** (workflow → Actions → Archive → Build Number): when it is on,
+Xcode Cloud passes its own counter as an xcodebuild argument, which
+OVERRIDES `CURRENT_PROJECT_VERSION` from the (lower-precedence) xcconfig —
+uploads then appear as tiny numbers like (22) instead of 74+. If you ever
+want Xcode Cloud's auto-increment instead, pin that next value once
+(e.g. 70 or higher) and stop bumping iOS in `version.xcconfig` — but then
+Android build numbers move independently from iOS.
 
 ## Build failure hints
 
