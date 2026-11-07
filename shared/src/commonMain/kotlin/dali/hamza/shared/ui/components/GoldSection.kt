@@ -165,21 +165,23 @@ private fun GoldCard(
             }
         }
         Spacer(Modifier.height(14.dp))
-        // spot footer — unit and currency explicit: "1 g", "1 oz", "1 kg"
+        // spot footer — ONE line: "Gold spot · 1 g  372.93 TND"
+        // (unit and currency stay explicit)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(Res.string.gold_spot_label, unit.label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = LedgerColors.TextTertiary,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "${formatGoldAmount(MetalPricing.spotPerUnit(snapshot.spotPerTroyOunce, unit))} ${snapshot.currency}",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = LedgerColors.TextPrimary,
-                )
-            }
+            Text(
+                text = stringResource(Res.string.gold_spot_label, unit.label),
+                style = MaterialTheme.typography.labelMedium,
+                color = LedgerColors.TextTertiary,
+                maxLines = 1,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "${formatGoldAmount(MetalPricing.spotPerUnit(snapshot.spotPerTroyOunce, unit))} ${snapshot.currency}",
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+                maxLines = 1,
+                modifier = Modifier.weight(1f, fill = false),
+            )
             // change vs previous close: not comparable yet (mixed
             // spot/futures provenance) — em dash, never a fabricated %
             Text(
@@ -331,9 +333,8 @@ fun GoldCardSkeleton(modifier: Modifier = Modifier) {
             }
         }
         Spacer(Modifier.height(14.dp))
-        ShimmerBox(modifier = Modifier.size(width = 132.dp, height = 16.dp))
-        Spacer(Modifier.height(4.dp))
-        ShimmerBox(modifier = Modifier.size(width = 160.dp, height = 22.dp))
+        // one-line spot footer silhouette
+        ShimmerBox(modifier = Modifier.size(width = 210.dp, height = 18.dp))
         Spacer(Modifier.height(10.dp))
         ShimmerBox(modifier = Modifier.size(width = 110.dp, height = 12.dp))
         Spacer(Modifier.height(14.dp))
