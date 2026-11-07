@@ -44,6 +44,27 @@ interface IRepository {
     suspend fun getRatesForBase(base: String): MyResponse<List<ExchangeRate>>
 
     /**
+     * Live rate for ONE explicit pair (`/latest?base=[base]&symbol=[symbol]`).
+     * Metals need the symbol-filtered call so the backend's all-fiat USD
+     * pivot applies to the requested target (plans/gold-section.md §4) — a
+     * full-base fetch returns only directly-quoted fiats.
+     *
+     * [MyResponse.Empty] means the pair is quotable nowhere (e.g. a
+     * non-quotable fiat or an asset-as-display-base) — distinct from
+     * [MyResponse.Error] (transport/backend failure), so callers can fall
+     * back to an explicitly labeled USD quote instead of showing stale data.
+     */
+    suspend fun getLiveRateForPair(base: String, symbol: String): MyResponse<Double> =
+        when (val rates = getRatesForBase(base)) {
+            is MyResponse.Success ->
+                rates.data.firstOrNull { it.name == symbol }
+                    ?.let { MyResponse.Success(it.rate) }
+                    ?: MyResponse.Empty
+            is MyResponse.Empty -> MyResponse.Empty
+            is MyResponse.Error -> MyResponse.Error(rates.error)
+        }
+
+    /**
      * Get current selected currency (ISO code)
      */
     suspend fun getCurrentCurrency(): String

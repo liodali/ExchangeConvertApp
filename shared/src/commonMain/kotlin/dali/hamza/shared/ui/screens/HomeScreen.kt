@@ -81,12 +81,15 @@ import dali.hamza.shared.ui.components.LedgerLogoMark
 import dali.hamza.shared.ui.components.LedgerTopAppBar
 import dali.hamza.shared.ui.components.Sparkline
 import dali.hamza.shared.ui.components.SectionHeader
+import dali.hamza.shared.ui.components.GoldSection
 import dali.hamza.shared.ui.components.ChartSkeleton
 import dali.hamza.shared.ui.components.MarketCardSkeleton
 import dali.hamza.shared.ui.components.ShimmerHost
 import dali.hamza.shared.ui.components.ledgerNavClearance
 import dali.hamza.shared.ui.theme.LedgerColors
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
+import dali.hamza.shared.ui.viewmodel.GoldViewModel
+import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.ui.viewmodel.PairCardData
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
@@ -150,6 +153,8 @@ fun HomeScreen(
     marketPreferences: List<String> = emptyList(),
     onOpenRateAlerts: () -> Unit = {},
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
+    goldViewModel: GoldViewModel? = null,
+    onConvertGold: (from: String, to: String) -> Unit = { _, _ -> },
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
@@ -162,6 +167,19 @@ fun HomeScreen(
             ?: error("initSharedKoin() must run before HomeScreen()")
     }
     var alertQuote by remember { mutableStateOf<String?>(null) }
+
+    // Gold section (plans/gold-section.md): loads independently of the
+    // market cards — its failure never blocks Home or clears fiat data.
+    // Resolves from Koin when the host didn't inject one (same pattern as
+    // RateAlertsViewModel above).
+    val goldVm = goldViewModel ?: remember {
+        KoinPlatform.getKoin()?.get<GoldViewModel>()
+            ?: GoldViewModel(
+                KoinPlatform.getKoin()?.get<IRepository>()
+                    ?: error("initSharedKoin() must run before HomeScreen()")
+            )
+    }
+    val goldState by goldVm.state.collectAsState()
 
     val topRates = state.rates.topPairs()
 
@@ -187,6 +205,11 @@ fun HomeScreen(
     // pair cards: reload when the market base or selected rates change
     LaunchedEffect(marketBase, cardsRates) {
         homeViewModel.load(marketBase, cardsRates)
+    }
+    // gold: keyed by the display base — the ViewModel coalesces duplicates,
+    // cancels outdated loads and keeps the last valid snapshot on failure
+    LaunchedEffect(marketBase) {
+        goldVm.load(marketBase)
     }
     // recent activity: keep fresh while Home is visible
     LaunchedEffect(Unit) {
@@ -263,6 +286,17 @@ fun HomeScreen(
                             )
                         }
 
+                        // ---- design order: Market Overview → Gold → Quick
+                        // Exchange (plans/gold-section.md) — same card spans
+                        // the market column on tablets; 16dp matches this
+                        // column's block rhythm
+                        Spacer(Modifier.height(16.dp))
+                        GoldSection(
+                            state = goldState,
+                            onConvertGold = onConvertGold,
+                            onRetry = goldVm::retry,
+                        )
+
                         Spacer(Modifier.height(16.dp))
                         QuickExchangeSection(
                             amount = state.amount,
@@ -306,6 +340,14 @@ fun HomeScreen(
                     chartStyle = chartStyle,
                     skeletonCount = expectedCardCount,
                     historyLoading = homeState.isLoading,
+                )
+
+                // ============ 2. Gold (per-gram by karat) ====================
+                Spacer(Modifier.height(32.dp))
+                GoldSection(
+                    state = goldState,
+                    onConvertGold = onConvertGold,
+                    onRetry = goldVm::retry,
                 )
 
                 Spacer(Modifier.height(32.dp))

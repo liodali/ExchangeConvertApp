@@ -371,4 +371,16 @@
     <string name="fb_stars_desc">%1$d star(s)</string>
     <string name="onb_name_title">Your name</string>
     <string name="onb_name_note">e.g. Alex — shown on your account</string>
+    <string name="gold_section_title">Gold</string>
+    <string name="gold_chip_purity">XAU · 24K</string>
+    <string name="gold_spot_label">Gold spot · 1 troy oz</string>
+    <string name="gold_fetched_at">Fetched at %1$s</string>
+    <string name="gold_stale_note">Last fetched rates — refresh failed</string>
+    <string name="gold_unavailable">Gold price unavailable right now.</string>
+    <string name="gold_retry">Retry</string>
+    <string name="gold_note">Indicative fine-gold value per gram — excludes premiums, making charges, taxes and dealer spreads.</string>
+    <string name="gold_usd_fallback">Not quoted in %1$s — showing USD</string>
+    <string name="gold_convert_cta">Convert gold</string>
+    <string name="gold_loading">Loading gold prices…</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s per gram</string>
 </resources>

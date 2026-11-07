@@ -370,4 +370,16 @@
     <string name="fb_stars_desc">%1$d Stern(e)</string>
     <string name="onb_name_title">Ihr Name</string>
     <string name="onb_name_note">z. B. Alex — erscheint auf Ihrem Konto</string>
+    <string name="gold_section_title">Gold</string>
+    <string name="gold_chip_purity">XAU · 24K</string>
+    <string name="gold_spot_label">Gold-Spotpreis · 1 Feinunze</string>
+    <string name="gold_fetched_at">Abgerufen um %1$s</string>
+    <string name="gold_stale_note">Zuletzt abgerufene Kurse — Aktualisierung fehlgeschlagen</string>
+    <string name="gold_unavailable">Goldpreis derzeit nicht verfügbar.</string>
+    <string name="gold_retry">Erneut versuchen</string>
+    <string name="gold_note">Indikativer Feingoldwert pro Gramm — ohne Aufschläge, Herstellungskosten, Steuern und Händlerspannen.</string>
+    <string name="gold_usd_fallback">In %1$s nicht notiert — USD wird angezeigt</string>
+    <string name="gold_convert_cta">Gold umrechnen</string>
+    <string name="gold_loading">Goldpreise werden geladen…</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s pro Gramm</string>
 </resources>

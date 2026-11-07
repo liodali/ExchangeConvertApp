@@ -240,6 +240,24 @@ class CurrencyRepositoryImpl(
             }
         }
 
+    override suspend fun getLiveRateForPair(base: String, symbol: String): MyResponse<Double> =
+        withContext(Dispatchers.Default) {
+            val response = currencyApi.convert(from = base, to = symbol, amount = 1.0)
+            when (val rate = response.getOrNull()) {
+                null -> when (val exception = response.exceptionOrNull()) {
+                    // transport/HTTP failure → caller shows stale/retry
+                    null -> MyResponse.Empty // 2xx with no quote row → USD fallback
+                    else -> MyResponse.Error(exception.message ?: "Rate unavailable for $base→$symbol")
+                }
+                else -> if (rate > 0.0 && rate.isFinite()) {
+                    MyResponse.Success(rate)
+                } else {
+                    // zero/negative/NaN quotes are rejected, never displayed
+                    MyResponse.Empty
+                }
+            }
+        }
+
     // ---- historic-rate local cache (read-through) ------------------------
     // Historic daily rates are immutable: rows live in the HistoricRate
     // table (time = epoch-day) and only the missing date tail is fetched.

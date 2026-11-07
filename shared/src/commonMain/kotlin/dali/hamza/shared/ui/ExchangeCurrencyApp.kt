@@ -352,6 +352,25 @@ fun ExchangeCurrencyApp(
                                 )
                         },
                         onOpenConverter = { navController.navigate(Routes.CONVERTER) },
+                        // Gold section CTA: prefill XAU → display fiat with
+                        // 1 troy oz (deep-link pattern — SharedViewModel
+                        // mutation, since nav args don't reliably propagate
+                        // in the JetBrains navigation fork). Prefill only:
+                        // NO convert() — that would record a ledger entry
+                        // the user never executed. Market base and saved
+                        // preferences stay untouched.
+                        onConvertGold = { from, to ->
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(from)
+                                ?.let(viewModel::selectFromCurrency)
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(to)
+                                ?.let(viewModel::selectToCurrency)
+                            viewModel.onAmountChange("1")
+                            navController.navigate(Routes.CONVERTER) {
+                                popUpTo(Routes.HOME) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         onOpenHistory = {
                             navController.navigate(Routes.HISTORY) {
                                 popUpTo(Routes.HOME) { saveState = true }

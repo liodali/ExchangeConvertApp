@@ -17,6 +17,7 @@ import dali.hamza.shared.database.AppDatabase
 import dali.hamza.shared.database.createDatabaseDriver
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.ui.viewmodel.AccountViewModel
+import dali.hamza.shared.ui.viewmodel.GoldViewModel
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
@@ -89,6 +90,7 @@ fun sharedModule(
     factory { AccountViewModel(storage = get(), repository = get(), pushSessionManager = get()) }
     factory { HistoryViewModel(get()) }
     factory { HomeViewModel(get()) }
+    factory { GoldViewModel(get()) }
     factory { RateAlertsViewModel(get(), get(), get(), get()) }
 }
 
