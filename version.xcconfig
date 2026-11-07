@@ -5,3 +5,7 @@
 // needs backend 0.5.42 (all-fiat gold quotes), already deployed.
 MARKETING_VERSION = 0.15.0
 CURRENT_PROJECT_VERSION = 74
+
+// Archives don't need the Swift index store — skipping it in Release cuts
+// ~10-15% off xcodebuild archive. Debug keeps it for Xcode IDE indexing.
+COMPILER_INDEX_STORE_ENABLE[config=Release] = NO
