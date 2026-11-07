@@ -4,6 +4,7 @@
     <string name="market_widget_wave_label">Tasso di mercato · Onda</string>
     <string name="market_widget_card_label">Tasso di mercato · Card</string>
     <string name="market_grid_widget_label">Mercati · Griglia</string>
+    <string name="gold_widget_label">Prezzo dell\'oro</string>
     <string name="quick_convert_widget_label">Conversione rapida</string>
     <string name="market_widget_config_label">Scegli mercato</string>
 </resources>

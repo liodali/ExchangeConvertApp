@@ -203,6 +203,9 @@
     <string name="wg_type">TYPE</string>
     <string name="wg_kind_card">Market · Card</string>
     <string name="wg_kind_wave">Market · Wave</string>
+    <string name="wg_kind_gold">Gold</string>
+    <string name="wg_kind_gold_desc">Gold spot per gram in your currency.</string>
+    <string name="wg_gold_base_fixed">Gold (fixed)</string>
     <string name="wg_kind_grid">Markets · Grid</string>
     <string name="wg_kind_convert">Quick Convert</string>
     <string name="wg_kind_card_desc">One pair on a rounded card. Classic look.</string>

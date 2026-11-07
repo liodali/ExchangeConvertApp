@@ -202,6 +202,9 @@
     <string name="wg_type">TYP</string>
     <string name="wg_kind_card">Markt · Karte</string>
     <string name="wg_kind_wave">Markt · Welle</string>
+    <string name="wg_kind_gold">Gold</string>
+    <string name="wg_kind_gold_desc">Goldspotpreis pro Gramm in Ihrer Währung.</string>
+    <string name="wg_gold_base_fixed">Gold (fest)</string>
     <string name="wg_kind_grid">Märkte · Raster</string>
     <string name="wg_kind_convert">Schnellumrechnung</string>
     <string name="wg_kind_card_desc">Ein Paar auf einer abgerundeten Karte. Klassischer Look.</string>

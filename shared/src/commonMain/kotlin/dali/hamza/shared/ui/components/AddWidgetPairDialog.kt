@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.platform.WidgetKind
 import dali.hamza.shared.ui.theme.LedgerColors
@@ -47,10 +49,13 @@ import echangecurrencyapp.shared.generated.resources.wg_kind_card
 import echangecurrencyapp.shared.generated.resources.wg_kind_card_desc
 import echangecurrencyapp.shared.generated.resources.wg_kind_convert
 import echangecurrencyapp.shared.generated.resources.wg_kind_convert_desc
+import echangecurrencyapp.shared.generated.resources.wg_kind_gold
+import echangecurrencyapp.shared.generated.resources.wg_kind_gold_desc
 import echangecurrencyapp.shared.generated.resources.wg_kind_grid
 import echangecurrencyapp.shared.generated.resources.wg_kind_grid_desc
 import echangecurrencyapp.shared.generated.resources.wg_kind_wave
 import echangecurrencyapp.shared.generated.resources.wg_kind_wave_desc
+import echangecurrencyapp.shared.generated.resources.wg_gold_base_fixed
 import echangecurrencyapp.shared.generated.resources.wg_new_pair
 import echangecurrencyapp.shared.generated.resources.wg_type
 import echangecurrencyapp.shared.generated.resources.wg_your_markets
@@ -63,6 +68,7 @@ private fun kindTitle(kind: WidgetKind): String = when (kind) {
     WidgetKind.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave)
     WidgetKind.MARKET_GRID -> stringResource(Res.string.wg_kind_grid)
     WidgetKind.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert)
+    WidgetKind.GOLD -> stringResource(Res.string.wg_kind_gold)
 }
 
 /** Localized widget-kind description (was LedgerStrings.Widgets.kindDescription). */
@@ -72,6 +78,7 @@ private fun kindDescription(kind: WidgetKind): String = when (kind) {
     WidgetKind.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave_desc)
     WidgetKind.MARKET_GRID -> stringResource(Res.string.wg_kind_grid_desc)
     WidgetKind.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert_desc)
+    WidgetKind.GOLD -> stringResource(Res.string.wg_kind_gold_desc)
 }
 
 /**
@@ -99,6 +106,17 @@ fun AddWidgetPairDialog(
     val needsPair = kind != WidgetKind.MARKET_GRID
     val gridCustom = kind == WidgetKind.MARKET_GRID && !gridFollowDefault
     val gridValid = kind != WidgetKind.MARKET_GRID || gridFollowDefault || gridPairs.size >= 2
+    // the gold widget is always XAU → fiat: the base is fixed, only the
+    // display currency is picked (metals convert one way only)
+    val goldKind = kind == WidgetKind.GOLD
+    val effectiveBase = if (goldKind) "XAU" else base
+    // quote must survive a fiat-only picker: gold or fiat pairs never put a
+    // metal on the To side
+    LaunchedEffect(goldKind) {
+        if (goldKind) {
+            if (CurrenciesCatalog.assetCodes.contains(quote)) quote = "USD"
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -136,7 +154,7 @@ fun AddWidgetPairDialog(
                 }
 
                 if (needsPair) {
-                    if (suggestedPairs.isNotEmpty()) {
+                    if (suggestedPairs.isNotEmpty() && !goldKind) {
                         Spacer(Modifier.height(16.dp))
                         Text(
                             stringResource(Res.string.wg_your_markets),
@@ -161,12 +179,22 @@ fun AddWidgetPairDialog(
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        PairField(
-                            label = stringResource(Res.string.common_from),
-                            code = base,
-                            modifier = Modifier.weight(1f),
-                            onClick = { pickingBase = true },
-                        )
+                        if (goldKind) {
+                            // gold: base is FIXED — static chip, no picker
+                            PairField(
+                                label = stringResource(Res.string.wg_gold_base_fixed),
+                                code = "XAU",
+                                modifier = Modifier.weight(1f),
+                                onClick = { /* fixed base — nothing to pick */ },
+                            )
+                        } else {
+                            PairField(
+                                label = stringResource(Res.string.common_from),
+                                code = base,
+                                modifier = Modifier.weight(1f),
+                                onClick = { pickingBase = true },
+                            )
+                        }
                         PairField(
                             label = stringResource(Res.string.common_to),
                             code = quote,
@@ -238,9 +266,9 @@ fun AddWidgetPairDialog(
 
                 LedgerButton(
                     text = stringResource(Res.string.wg_add_confirm),
-                    onClick = { onAdd(kind, base, quote, if (gridCustom) gridPairs else emptyList()) },
+                    onClick = { onAdd(kind, effectiveBase, quote, if (gridCustom) gridPairs else emptyList()) },
                     modifier = Modifier.padding(top = 24.dp).fillMaxWidth(),
-                    enabled = gridValid && (!needsPair || base != quote),
+                    enabled = gridValid && (!needsPair || effectiveBase != quote),
                 )
                 TextButton(
                     onClick = onDismiss,
@@ -266,6 +294,8 @@ fun AddWidgetPairDialog(
         currencies = currencies,
         title = stringResource(Res.string.alerts_pick_quote),
         onDismiss = { pickingQuote = false },
+        // metals convert one way only: the To side is always fiat
+        fiatOnly = true,
         onCurrencySelected = { c ->
             if (c.name == base) base = quote
             quote = c.name

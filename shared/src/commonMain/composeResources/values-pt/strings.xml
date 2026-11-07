@@ -202,6 +202,9 @@
     <string name="wg_type">TIPO</string>
     <string name="wg_kind_card">Mercado · Cartão</string>
     <string name="wg_kind_wave">Mercado · Onda</string>
+    <string name="wg_kind_gold">Ouro</string>
+    <string name="wg_kind_gold_desc">Preço do ouro por grama na sua moeda.</string>
+    <string name="wg_gold_base_fixed">Ouro (fixo)</string>
     <string name="wg_kind_grid">Mercados · Grade</string>
     <string name="wg_kind_convert">Conversão Rápida</string>
     <string name="wg_kind_card_desc">Um par em um cartão arredondado. Visual clássico.</string>

@@ -75,6 +75,7 @@ class MarketRateWidgetUpdateWorker(
                 MarketRateCardWidget(),
                 MarketGridWidget(),
                 QuickConvertWidget(),
+                GoldWidget(),
             )) {
                 runCatching {
                     manager.getGlanceIds(widget.javaClass).forEach { glanceId ->

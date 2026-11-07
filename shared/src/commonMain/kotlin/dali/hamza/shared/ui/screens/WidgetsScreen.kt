@@ -67,6 +67,7 @@ import echangecurrencyapp.shared.generated.resources.wg_ios_message
 import echangecurrencyapp.shared.generated.resources.wg_ios_title
 import echangecurrencyapp.shared.generated.resources.wg_kind_card
 import echangecurrencyapp.shared.generated.resources.wg_kind_convert
+import echangecurrencyapp.shared.generated.resources.wg_kind_gold
 import echangecurrencyapp.shared.generated.resources.wg_kind_grid
 import echangecurrencyapp.shared.generated.resources.wg_kind_wave
 import echangecurrencyapp.shared.generated.resources.wg_not_placed
@@ -386,4 +387,5 @@ private fun typeLabel(type: WidgetType): String = when (type) {
     WidgetType.MARKET_WAVE -> stringResource(Res.string.wg_kind_wave)
     WidgetType.MARKET_GRID -> stringResource(Res.string.wg_kind_grid)
     WidgetType.QUICK_CONVERT -> stringResource(Res.string.wg_kind_convert)
+    WidgetType.GOLD -> stringResource(Res.string.wg_kind_gold)
 }

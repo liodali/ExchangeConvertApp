@@ -50,3 +50,6 @@ class MarketGridWidgetReceiver : BaseMarketRateReceiver(MarketGridWidget())
 
 /** Quick convert (`GDiky` sketch) — amount presets over the cached rate. */
 class QuickConvertWidgetReceiver : BaseMarketRateReceiver(QuickConvertWidget())
+
+/** Gold spot per gram (plans/gold-section.md) — base always XAU. */
+class GoldWidgetReceiver : BaseMarketRateReceiver(GoldWidget())

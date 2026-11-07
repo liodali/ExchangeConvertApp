@@ -201,6 +201,9 @@
     <string name="wg_type">TIPO</string>
     <string name="wg_kind_card">Mercato · Scheda</string>
     <string name="wg_kind_wave">Mercato · Onda</string>
+    <string name="wg_kind_gold">Oro</string>
+    <string name="wg_kind_gold_desc">Prezzo dell'oro al grammo nella tua valuta.</string>
+    <string name="wg_gold_base_fixed">Oro (fisso)</string>
     <string name="wg_kind_grid">Mercati · Griglia</string>
     <string name="wg_kind_convert">Conversione rapida</string>
     <string name="wg_kind_card_desc">Una coppia su una scheda arrotondata. Stile classico.</string>

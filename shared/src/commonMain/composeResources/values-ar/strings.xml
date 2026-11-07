@@ -202,6 +202,9 @@
     <string name="wg_type">النوع</string>
     <string name="wg_kind_card">سوق · بطاقة</string>
     <string name="wg_kind_wave">سوق · موجة</string>
+    <string name="wg_kind_gold">الذهب</string>
+    <string name="wg_kind_gold_desc">سعر الذهب لكل غرام بعملتك.</string>
+    <string name="wg_gold_base_fixed">الذهب (ثابت)</string>
     <string name="wg_kind_grid">أسواق · شبكة</string>
     <string name="wg_kind_convert">تحويل سريع</string>
     <string name="wg_kind_card_desc">زوج واحد على بطاقة مستديرة الحواف. مظهر كلاسيكي.</string>

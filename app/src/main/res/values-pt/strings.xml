@@ -4,6 +4,7 @@
     <string name="market_widget_wave_label">Cotação de mercado · Onda</string>
     <string name="market_widget_card_label">Cotação de mercado · Card</string>
     <string name="market_grid_widget_label">Mercados · Grade</string>
+    <string name="gold_widget_label">Preço do ouro</string>
     <string name="quick_convert_widget_label">Conversão rápida</string>
     <string name="market_widget_config_label">Escolher mercado</string>
 </resources>

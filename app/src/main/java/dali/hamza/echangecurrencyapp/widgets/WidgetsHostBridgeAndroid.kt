@@ -37,6 +37,7 @@ class WidgetsHostBridgeAndroid(
                 WidgetKind.MARKET_WAVE -> MarketRateWidgetReceiver::class.java
                 WidgetKind.MARKET_GRID -> MarketGridWidgetReceiver::class.java
                 WidgetKind.QUICK_CONVERT -> QuickConvertWidgetReceiver::class.java
+                WidgetKind.GOLD -> GoldWidgetReceiver::class.java
             },
         )
         val extras = Bundle().apply {

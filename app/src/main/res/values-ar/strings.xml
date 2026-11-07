@@ -5,6 +5,7 @@
     <string name="market_widget_wave_label">سعر السوق · موجة</string>
     <string name="market_widget_card_label">سعر السوق · بطاقة</string>
     <string name="market_grid_widget_label">الأسواق · شبكة</string>
+    <string name="gold_widget_label">سعر الذهب</string>
     <string name="quick_convert_widget_label">تحويل سريع</string>
     <string name="market_widget_config_label">اختر السوق</string>
 </resources>

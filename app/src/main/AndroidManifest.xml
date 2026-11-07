@@ -85,6 +85,17 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/quick_convert_widget_info" />
         </receiver>
+        <receiver
+            android:name=".widgets.GoldWidgetReceiver"
+            android:exported="false"
+            android:label="@string/gold_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/gold_widget_info" />
+        </receiver>
         <activity
             android:name=".widgets.MarketRateWidgetConfigActivity"
             android:exported="true"

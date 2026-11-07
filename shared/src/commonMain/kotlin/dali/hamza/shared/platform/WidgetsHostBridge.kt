@@ -1,7 +1,7 @@
 package dali.hamza.shared.platform
 
 /** Widget kinds offered in the add flow (mirrors the picker entries). */
-enum class WidgetKind { MARKET_CARD, MARKET_WAVE, MARKET_GRID, QUICK_CONVERT }
+enum class WidgetKind { MARKET_CARD, MARKET_WAVE, MARKET_GRID, QUICK_CONVERT, GOLD }
 
 /**
  * Intent/launch-extra keys for the widget pin handoff (was

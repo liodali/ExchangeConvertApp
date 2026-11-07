@@ -83,6 +83,9 @@
     <string name="wg_header">Os seus widgets de mercado no ecrã inicial. Adicione um par aqui ou mantenha premido o ecrã inicial.</string>
     <string name="wg_empty_message">Adicione um widget de mercado para ver uma cotação em direto num relance.</string>
     <string name="wg_your_markets">OS SEUS MERCADOS</string>
+    <string name="wg_kind_gold">Ouro</string>
+    <string name="wg_kind_gold_desc">Preço do ouro por grama na sua moeda.</string>
+    <string name="wg_gold_base_fixed">Ouro (fixo)</string>
     <string name="wg_kind_grid">Mercados · Grelha</string>
     <string name="wg_kind_card_desc">Um par num cartão arredondado. Visual clássico.</string>
     <string name="wg_kind_convert_desc">Introduza um valor e veja o valor convertido.</string>

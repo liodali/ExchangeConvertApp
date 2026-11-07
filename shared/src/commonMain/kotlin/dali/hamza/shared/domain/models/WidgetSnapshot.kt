@@ -13,6 +13,8 @@ enum class WidgetType {
     MARKET_WAVE,
     MARKET_GRID,
     QUICK_CONVERT,
+    /** Gold spot per gram (base is always XAU; quote = display fiat). */
+    GOLD,
 }
 
 /**

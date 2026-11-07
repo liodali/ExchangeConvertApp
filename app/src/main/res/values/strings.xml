@@ -202,6 +202,7 @@
     <string name="market_widget_wave_label">Market rate · Wave</string>
     <string name="market_widget_card_label">Market rate · Card</string>
     <string name="market_grid_widget_label">Markets · Grid</string>
+    <string name="gold_widget_label">Gold Price</string>
     <string name="quick_convert_widget_label">Quick Convert</string>
     <string name="market_widget_config_label">Select market</string>
 </resources>

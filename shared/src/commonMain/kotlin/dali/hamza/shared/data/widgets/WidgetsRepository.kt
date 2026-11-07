@@ -1,5 +1,6 @@
 package dali.hamza.shared.data.widgets
 
+import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.data.network.CurrencyApi
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.WidgetConfig
@@ -83,34 +84,11 @@ class WidgetsRepository(
 
         val now = currentEpochMillis()
         val yesterday = isoDateOf(now - DAY_MS)
-        val out = mutableListOf<WidgetSnapshot>()
         val wanted = (
             configs.filterNot { it.removed }.map { it.base to it.quote } + defaultGridPairs
             ).distinct()
 
-        for ((base, quote) in wanted) {
-            val live = runCatching { currencyApi.getLiveRates(base) }
-                .getOrNull()?.getOrNull()
-            if (live?.rates == null) {
-                Napier.w(tag = TAG) { "live rates fetch failed for base=$base — skipping" }
-                continue
-            }
-            // Previous close for the day-Δ chip (best effort).
-            val historicQuotes = runCatching { currencyApi.getHistoricRates(yesterday, base) }
-                .getOrNull()?.getOrNull()?.quotes
-            val rate = live.rates[quote] ?: continue
-            val prevClose = historicQuotes?.let {
-                // key format varies by backend shape: "BASEQUOTE" or plain quote
-                it["$base$quote"] ?: it[quote]
-            }
-            out += WidgetSnapshot(
-                base = base,
-                quote = quote,
-                rate = rate,
-                prevClose = prevClose,
-                fetchedAt = now,
-            )
-        }
+        val out = fetchSnapshots(currencyApi, wanted, now, yesterday)
         if (out.isNotEmpty()) {
             store.saveSnapshots(out)
         }
@@ -122,6 +100,59 @@ class WidgetsRepository(
         const val TAG = "WidgetsRepo"
         const val DAY_MS = 24L * 60 * 60 * 1000
     }
+}
+
+/**
+ * One snapshot per pair, best-effort (internal for tests — no store).
+ *
+ * Asset bases (XAU/XAG/BTC) never ride in the no-symbol `latest` payload:
+ * they resolve through the symbol-filtered pair call so the backend's
+ * all-fiat USD pivot applies (plans/gold-section.md). Their day-Δ is
+ * omitted — the historic waterfall mixes spot and futures quotes, so no
+ * comparable previous close exists (same decision as the Home gold card).
+ */
+internal suspend fun fetchSnapshots(
+    api: CurrencyApi,
+    wanted: List<Pair<String, String>>,
+    now: Long,
+    yesterday: String,
+): List<WidgetSnapshot> {
+    val out = mutableListOf<WidgetSnapshot>()
+    for ((base, quote) in wanted) {
+        val isAssetBase = base in CurrenciesCatalog.assetCodes
+        val rate: Double? = if (isAssetBase) {
+            runCatching { api.convert(from = base, to = quote, amount = 1.0) }
+                .getOrNull()?.getOrNull()
+        } else {
+            val live = runCatching { api.getLiveRates(base) }
+                .getOrNull()?.getOrNull()
+            if (live?.rates == null) {
+                Napier.w(tag = "WidgetsRepo") { "live rates fetch failed for base=$base — skipping" }
+                null
+            } else {
+                live.rates[quote]
+            }
+        }
+        val validRate = rate?.takeIf { it > 0.0 && it.isFinite() } ?: continue
+        val prevClose = if (isAssetBase) {
+            null // metals: no comparable previous close (mixed provenance)
+        } else {
+            runCatching { api.getHistoricRates(yesterday, base) }
+                .getOrNull()?.getOrNull()?.quotes
+                ?.let { historicQuotes ->
+                    // key format varies by backend shape: "BASEQUOTE" or plain quote
+                    historicQuotes["$base$quote"] ?: historicQuotes[quote]
+                }
+        }
+        out += WidgetSnapshot(
+            base = base,
+            quote = quote,
+            rate = validRate,
+            prevClose = prevClose,
+            fetchedAt = now,
+        )
+    }
+    return out
 }
 
 /**
