@@ -1,7 +1,7 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// 0.14.1 (72) is the production internal/TestFlight release: real 1W
-// history (backend 0.5.41), pair-specific live rates, history fallback,
-// and the market-overview skeleton loading; follows staging build 71.
-MARKETING_VERSION = 0.14.1
-CURRENT_PROJECT_VERSION = 72
+// 0.15.0 (73) ships the Home Gold section (per-gram karat prices, unit
+// suffix g/oz/kg in the converter, Gold Rates page) and needs backend
+// 0.5.42 (all-fiat gold quotes); follows production build 72.
+MARKETING_VERSION = 0.15.0
+CURRENT_PROJECT_VERSION = 73
