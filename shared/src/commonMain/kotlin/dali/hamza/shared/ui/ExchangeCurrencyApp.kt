@@ -353,17 +353,17 @@ fun ExchangeCurrencyApp(
                         },
                         onOpenConverter = { navController.navigate(Routes.CONVERTER) },
                         // Gold section CTA: prefill XAU → display fiat with
-                        // 1 gram — selectFromCurrency defaults the metal's
-                        // amount unit to grams, so the converter shows the
-                        // "1 [g]" suffix and its result matches the Home
-                        // card's 24K per-gram value. Prefill only: NO
-                        // convert() — that would record a ledger entry the
-                        // user never executed.
-                        onConvertGold = { from, to ->
+                        // 1 of the unit picked on the card — the converter
+                        // receives the same unit on its amount chip, so the
+                        // result equals the cell the user was looking at.
+                        // Prefill only: NO convert() — that would record a
+                        // ledger entry the user never executed.
+                        onConvertGold = { from, to, unit ->
                             dali.hamza.shared.data.CurrenciesCatalog.byCode(from)
                                 ?.let(viewModel::selectFromCurrency)
                             dali.hamza.shared.data.CurrenciesCatalog.byCode(to)
                                 ?.let(viewModel::selectToCurrency)
+                            viewModel.selectFromUnit(unit)
                             viewModel.onAmountChange("1")
                             navController.navigate(Routes.CONVERTER) {
                                 popUpTo(Routes.HOME) { saveState = true }
