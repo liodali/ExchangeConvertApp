@@ -29,6 +29,7 @@ import androidx.glance.unit.ColorProvider
 import dali.hamza.shared.common.MetalPricing
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.data.widgets.WidgetsRepository
+import dali.hamza.shared.data.widgets.resolveGoldQuote
 import dali.hamza.shared.domain.models.WidgetConfig
 import dali.hamza.shared.domain.models.WidgetSnapshot
 import dali.hamza.shared.domain.models.WidgetType
@@ -75,11 +76,16 @@ class GoldWidget : GlanceAppWidget() {
                     }
                 }
         }
-        val snapshot = config?.let { repository.snapshotFor(it) }
-
         val palette = LedgerColorPalette.fromStored(storage?.getColorPalette())
         val mode = LedgerThemeMode.fromStored(storage?.getThemeMode())
         val gold = resolvePalette(mode, palette, systemDark = true).gold.toArgb()
+
+        // follow mode: gold configs with a blank quote track the app's
+        // display base at runtime (USD when that base is not fiat)
+        val effectiveQuote = config?.let { resolveGoldQuote(it, storage?.getCurrency()) }
+        val snapshot = config?.let { config ->
+            repository?.snapshotFor(config.copy(quote = effectiveQuote ?: ""))
+        }
 
         val pickIntent = Intent(
             context,
@@ -89,7 +95,7 @@ class GoldWidget : GlanceAppWidget() {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         provideContent {
-            GoldContent(config, snapshot, gold, pickIntent)
+            GoldContent(config, effectiveQuote, snapshot, gold, pickIntent)
         }
     }
 }
@@ -107,16 +113,18 @@ private fun goldConverterIntent(context: Context, quote: String): Intent =
 @Composable
 private fun GoldContent(
     config: WidgetConfig?,
+    effectiveQuote: String?,
     snapshot: WidgetSnapshot?,
     goldArgb: Int,
     pickIntent: Intent,
 ) {
     val gold = Color(goldArgb)
+    val quote = effectiveQuote ?: config?.quote ?: "USD"
     val action = when {
         config?.removed == true ->
-            actionStartActivity(goldConverterIntent(LocalContext.current, config.quote))
+            actionStartActivity(goldConverterIntent(LocalContext.current, quote))
         config == null -> actionStartActivity(pickIntent)
-        else -> actionStartActivity(goldConverterIntent(LocalContext.current, config.quote))
+        else -> actionStartActivity(goldConverterIntent(LocalContext.current, quote))
     }
     val options = androidx.glance.appwidget.LocalAppWidgetOptions.current
     val widthDp = options?.getInt(
@@ -160,7 +168,7 @@ private fun GoldContent(
                 val spot = snapshot?.rate?.takeIf { it > 0.0 && it.isFinite() }
                 Text(
                     // same shape as the market card: pair on top, price below
-                    "XAU/${config.quote}",
+                    "XAU/$quote",
                     style = TextStyle(
                         ColorProvider(Color(0xFFC5C6CD)),
                         if (compact) 9.sp else 11.sp,
@@ -176,7 +184,7 @@ private fun GoldContent(
                     val perUnit = MetalPricing.spotPerUnit(spot, unit)
                     Text(
                         // e.g. "11,599.05 TND/oz" (or /g, /kg per options)
-                        "${formatWidgetAmount(perUnit)} ${config.quote}/${unit.label}",
+                        "${formatWidgetAmount(perUnit)} $quote/${unit.label}",
                         style = TextStyle(
                             ColorProvider(Color(0xFFF4F4F6)),
                             if (compact) 14.sp else 18.sp,

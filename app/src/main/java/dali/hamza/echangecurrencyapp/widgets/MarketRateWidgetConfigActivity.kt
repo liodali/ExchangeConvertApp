@@ -132,6 +132,7 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
                         initialQuote = (existing?.quote ?: pending?.second ?: fallbackBase)
                             .takeIf { it.isNotBlank() && it !in CurrenciesCatalog.assetCodes }
                             ?: "USD",
+                        initialFollow = existing?.quote.isNullOrBlank() || existing == null,
                         initialUnit = existing?.unit ?: dali.hamza.shared.common.MetalPricing.GoldUnit.TROY_OUNCE.name,
                         onConfirm = { quote, unit ->
                             lifecycleScope.launch {
@@ -374,12 +375,16 @@ private fun ConfigScreen(
 private fun GoldConfigScreen(
     fiatCodes: List<String>,
     initialQuote: String,
+    initialFollow: Boolean,
     initialUnit: String,
     onConfirm: (quote: String, unit: String) -> Unit,
     onCancel: () -> Unit,
 ) {
     var quote by remember { mutableStateOf(initialQuote) }
     var unitName by remember { mutableStateOf(initialUnit) }
+    // by default the widget follows the app's display base at RUNTIME;
+    // "Pick a currency" pins a fixed fiat (blank quote = follow)
+    var follow by remember { mutableStateOf(initialFollow) }
     val units = dali.hamza.shared.common.MetalPricing.GoldUnit.entries
     val unit = units.firstOrNull { it.name == unitName }
         ?: dali.hamza.shared.common.MetalPricing.GoldUnit.TROY_OUNCE
@@ -464,9 +469,41 @@ private fun GoldConfigScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text("Gold price", fontSize = 20.sp, color = Color(0xFFE5E2E1))
-                    Text("XAU (troy ounce) is fixed — choose the display currency.", fontSize = 12.sp, color = Color(0xFF8F9097))
-                    PairField("XAU (fixed)", "XAU", Modifier.fillMaxWidth()) { }
-                    PairField("CURRENCY", quote, Modifier.fillMaxWidth()) { pickerOpen = true; query = "" }
+                    Text("XAU (troy ounce) is fixed — choose the price currency.", fontSize = 12.sp, color = Color(0xFF8F9097))
+                    Text("CURRENCY", fontSize = 10.sp, color = Color(0xFF8F9097))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        androidx.compose.material3.Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (follow) Color(0x294EDEA3) else Color(0xFF2A2A2A),
+                            contentColor = if (follow) Color(0xFF4EDEA3) else Color(0xFFE5E2E1),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { follow = true },
+                        ) {
+                            Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                                Text("Follow the app", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                Text("tracks your currency live", fontSize = 10.sp, color = Color(0xFF8F9097))
+                            }
+                        }
+                        androidx.compose.material3.Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (!follow) Color(0x294EDEA3) else Color(0xFF2A2A2A),
+                            contentColor = if (!follow) Color(0xFF4EDEA3) else Color(0xFFE5E2E1),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { follow = false },
+                        ) {
+                            Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                                Text("Pick a currency", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                Text(quote, fontSize = 10.sp, color = Color(0xFF8F9097))
+                            }
+                        }
+                    }
+                    if (follow) {
+                        PairField("APP (tracks your currency)", "auto", Modifier.fillMaxWidth()) { }
+                    } else {
+                        PairField("CURRENCY", quote, Modifier.fillMaxWidth()) { pickerOpen = true; query = "" }
+                    }
                     Text("UNIT", fontSize = 10.sp, color = Color(0xFF8F9097))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         units.forEach { candidate ->
@@ -493,7 +530,7 @@ private fun GoldConfigScreen(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onCancel) { Text("Cancel", color = Color(0xFF8F9097)) }
                     Spacer(Modifier.width(12.dp))
-                    OutlinedButton(onClick = { onConfirm(quote, unit.name) }) {
+                    OutlinedButton(onClick = { onConfirm(if (follow) "" else quote, unit.name) }) {
                         Text("Add widget", color = Color(0xFF4EDEA3))
                     }
                 }

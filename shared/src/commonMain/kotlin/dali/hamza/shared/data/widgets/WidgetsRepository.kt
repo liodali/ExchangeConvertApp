@@ -5,9 +5,23 @@ import dali.hamza.shared.data.network.CurrencyApi
 import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.domain.models.WidgetConfig
 import dali.hamza.shared.domain.models.WidgetSnapshot
+import dali.hamza.shared.domain.models.WidgetType
 import dali.hamza.shared.platform.currentEpochMillis
 import io.github.aakira.napier.Napier
 import kotlin.math.floor
+
+/**
+ * Effective display fiat for a gold widget ([WidgetType.GOLD]): the
+ * explicitly picked currency, else "FOLLOW" the app's session base
+ * at runtime (config quote blank), else USD for a non-fiat session base.
+ * Never another asset — metals quote one way only.
+ */
+fun resolveGoldQuote(config: WidgetConfig, sessionBase: String?): String =
+    config.quote
+        .takeIf { it.isNotBlank() && it !in CurrenciesCatalog.assetCodes }
+        ?: sessionBase
+            ?.takeIf { it.isNotBlank() && it !in CurrenciesCatalog.assetCodes }
+            ?: "USD"
 
 /**
  * Shared data source for home-screen widgets (`plans/widgets.md`).
@@ -84,8 +98,16 @@ class WidgetsRepository(
 
         val now = currentEpochMillis()
         val yesterday = isoDateOf(now - DAY_MS)
+        val sessionBase = storage?.getCurrency()
         val wanted = (
-            configs.filterNot { it.removed }.map { it.base to it.quote } + defaultGridPairs
+            configs.filterNot { it.removed }.map { config ->
+                // gold "follow" configs (blank quote) track the app's base
+                if (config.type == WidgetType.GOLD) {
+                    config.base to resolveGoldQuote(config, sessionBase)
+                } else {
+                    config.base to config.quote
+                }
+            } + defaultGridPairs
             ).distinct()
 
         val out = fetchSnapshots(currencyApi, wanted, now, yesterday)

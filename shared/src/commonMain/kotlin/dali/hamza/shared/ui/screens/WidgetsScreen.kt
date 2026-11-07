@@ -318,7 +318,11 @@ private fun SwipeWidgetRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = "${config.base}/${config.quote}",
+                        text = if (config.type == WidgetType.GOLD && config.quote.isBlank()) {
+                            "XAU/APP"
+                        } else {
+                            "${config.base}/${config.quote}"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = LedgerColors.TextPrimary,

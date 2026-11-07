@@ -8,6 +8,7 @@ import dali.hamza.shared.data.storage.ISessionStorage
 import dali.hamza.shared.data.widgets.WidgetsRepository
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.WidgetConfig
+import dali.hamza.shared.domain.models.WidgetType
 import dali.hamza.shared.domain.models.WidgetSnapshot
 import dali.hamza.shared.platform.DefaultWidgetsHostBridge
 import dali.hamza.shared.platform.WidgetKind
@@ -95,16 +96,36 @@ class WidgetsViewModel(
         // hidden configs are forgotten-but-still-placed — never listed
         configs = repository.configs().filterNot { it.removed }
         snapshots = repository.readSnapshotsForPairs()
+        val session = storage?.getCurrency()
         val fromPrefs = storage?.let { store ->
             val base = store.getCurrency().ifBlank { "USD" }
             store.getMarketPreferences().filter { it != base }.map { base to it }
         }.orEmpty()
-        val fromWidgets = configs.map { it.base to it.quote }
+        val fromWidgets = configs
+            .map { config ->
+                // gold follow widgets show their runtime-resolved currency
+                if (config.type == WidgetType.GOLD) {
+                    config.base to dali.hamza.shared.data.widgets.resolveGoldQuote(config, session)
+                } else {
+                    config.base to config.quote
+                }
+            }
+            .filter { it.second.isNotBlank() }
         suggestedPairs = (fromWidgets + fromPrefs).distinct()
     }
 
-    fun snapshotFor(config: WidgetConfig): WidgetSnapshot? =
-        snapshots["${config.base}/${config.quote}"]
+    fun snapshotFor(config: WidgetConfig): WidgetSnapshot? {
+        // gold follow widgets resolve against the current session base
+        val lookupQuote = if (config.type == WidgetType.GOLD) {
+            dali.hamza.shared.data.widgets.resolveGoldQuote(
+                config,
+                storage?.getCurrency(),
+            )
+        } else {
+            config.quote
+        }
+        return snapshots["${config.base}/$lookupQuote"]
+    }
 
     /** Pin request — the pair is stashed for the widget's self-configuration. */
     fun add(kind: WidgetKind, base: String, quote: String, gridPairs: List<Pair<String, String>> = emptyList()) {
