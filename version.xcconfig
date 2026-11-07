@@ -1,11 +1,8 @@
 // Shared Android and iOS app version. Edit only these two values.
 // Increment CURRENT_PROJECT_VERSION before every new store upload.
-// 0.15.0 (74): gold section with the g/oz/kg unit picker on Home AND in
-// the converter amount chip (73 went out without the Home toggle);
-// needs backend 0.5.42 (all-fiat gold quotes), already deployed.
-MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 74
-
-// Archives don't need the Swift index store — skipping it in Release cuts
-// ~10-15% off xcodebuild archive. Debug keeps it for Xcode IDE indexing.
-COMPILER_INDEX_STORE_ENABLE[config=Release] = NO
+// 0.15.1 (75): the GOLD widget (per-oz/gram/kilo price, runtime currency,
+// follow-the-app) + widget data/resize fixes; gold section needs backend
+// 0.5.42 (already deployed prod). Xcode Cloud builds iOS with these exact
+// values — keep its automatic build number OFF.
+MARKETING_VERSION = 0.15.1
+CURRENT_PROJECT_VERSION = 75
