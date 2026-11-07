@@ -1,15 +1,14 @@
 #!/bin/sh
-# After a successful archive: (1) ASSERT the build number came from
-# version.xcconfig — Xcode Cloud's "automatic build number" passes its own
-# counter as an xcodebuild argument, which silently overrides
-# CURRENT_PROJECT_VERSION from the lower-precedence xcconfig (uploads then
-# appear as build 22 instead of 74+, Nov 2026). (2) Save the built Kotlin
-# framework (and, on the run that downloaded it, the Kotlin/Native
-# toolchain) to the S3 cache so the next build skips the Gradle build.
+# After a successful archive: (1) STAGE the Compose resources (fonts!) into
+# the archived .app — the cache fast-path restores the framework but NOT
+# the resources; without them the theme throws MissingResourceException at
+# launch (SIGABRT, GlitchTip Jan crash pattern). (2) ASSERT the build
+# number came from version.xcconfig (Xcode Cloud's automatic-build-number
+# override caught Nov 2026 as build 22). (3) Save the framework + toolchain
+# to the S3 cache for the next build's fast path.
 #
-# The assertion fails the build on a REAL number mismatch; if the archive
-# can't be located the guard logs and continues (never blocks on its own
-# plumbing). The cache save is best-effort regardless.
+# The resource staging FAILS THE BUILD when it cannot find them (missing
+# fonts = guaranteed crash), and the cache save stays best-effort.
 set -euo pipefail
 
 if [[ "${CI_XCODE_CLOUD:-}" != "TRUE" ]]; then
@@ -20,29 +19,52 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
-# ---- 1. build-number guard --------------------------------------------
-EXPECTED="$(sed -n 's/^CURRENT_PROJECT_VERSION *= *//p' version.xcconfig | tr -d '[:space:]')"
-APP_PATH=""
+# ---- 1. stage Compose resources into the archived .app -----------------
+APP_DIR=""
 for CANDIDATE in \
-  "${CI_XCODEBUILD_ARCHIVE:-}/Products/Applications"/*.app \
-  "${CI_XCODEBUILD_DERIVED_DATA_PATH:-}"/Build/Products/*/*-iphoneos/*.app; do
-  if [[ -d "$CANDIDATE" ]]; then
-    APP_PATH="$CANDIDATE"
+  "${CI_ARCHIVE_PATH:-}/Products/Applications"/*.app \
+  "${CI_ARCHIVE_PATH:-}" \
+  "${CI_APP_STORE_SIGNED_APP_PATH:-}"; do
+  if [[ -n "$CANDIDATE" && -d "$CANDIDATE" && -f "$CANDIDATE/Info.plist" ]]; then
+    APP_DIR="$CANDIDATE"
     break
   fi
 done
-
-if [[ -n "$APP_PATH" && -n "$EXPECTED" ]]; then
-  ACTUAL="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PATH/Info.plist" 2>/dev/null || true)"
-  echo "build number check: xcconfig=$EXPECTED archive=$ACTUAL"
-  if [[ -n "$ACTUAL" && "$ACTUAL" != "$EXPECTED" ]]; then
-    echo "::error::Build number mismatch — the archive is $ACTUAL but version.xcconfig says $EXPECTED. Xcode Cloud's automatic build number is probably ON (workflow → Actions → Archive → Build Number). Turn it OFF so version.xcconfig rules." >&2
-    exit 1
-  fi
-else
-  echo "build number check: archive not found (guard skipped) expected=$EXPECTED"
+if [[ -z "$APP_DIR" ]]; then
+  # fallback: Xcode Cloud archives under the workspace volume
+  APP_DIR="$(find /Volumes/workspace -maxdepth 8 -type d -name "*.app" -path "*Products/Applications*" 2>/dev/null | head -1)"
 fi
 
-# ---- 2. cache save ------------------------------------------------------
+if [[ -z "$APP_DIR" ]]; then
+  echo "::error::archived .app not found — cannot stage compose resources; a TestFlight build without fonts crashes at launch" >&2
+  exit 1
+fi
+echo "app archive: $APP_DIR"
+
+if [[ -d "$APP_DIR/compose-resources" ]]; then
+  echo "compose-resources already present (full Gradle ran)"
+else
+  RES="$(ls -d shared/build/generated/compose/resourceGenerator/assembledResources/iosArm64*/composeResources 2>/dev/null | head -1 || true)"
+  if [[ -z "$RES" ]]; then
+    echo "::error::compose resources missing — the app would crash at launch without fonts" >&2
+    exit 1
+  fi
+  mkdir -p "$APP_DIR/compose-resources"
+  cp -R "$RES" "$APP_DIR/compose-resources/"
+  echo "staged compose resources (fonts) into the archive app"
+fi
+
+# ---- 2. build-number guard --------------------------------------------
+EXPECTED="$(sed -n 's/^CURRENT_PROJECT_VERSION *= *//p' version.xcconfig | tr -d '[:space:]')"
+if [[ -n "$EXPECTED" && -f "$APP_DIR/Info.plist" ]]; then
+  ACTUAL="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_DIR/Info.plist" 2>/dev/null || true)"
+  echo "build number check: xcconfig=$EXPECTED archive=$ACTUAL"
+  if [[ -n "$ACTUAL" && "$ACTUAL" != "$EXPECTED" ]]; then
+    echo "::error::Build number mismatch — the archive is $ACTUAL but version.xcconfig says $EXPECTED (automatic build number is probably ON: workflow → Actions → Archive → Build Number)." >&2
+    exit 1
+  fi
+fi
+
+# ---- 3. cache save ------------------------------------------------------
 (. "$SCRIPT_DIR/ci_cache.sh"; xc_cache_save) \
   || echo "xc-cache: save failed — the next build just runs cold"
