@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Gold widget (plans/gold-section.md) — small 2x2, XAU base fixed -->
+<!-- Gold widget (plans/gold-section.md) — small 2x2, XAU base fixed,
+     freely resizable like the market card -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="110dp"
-    android:minHeight="110dp"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
     android:updatePeriodMillis="0"

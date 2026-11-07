@@ -96,6 +96,11 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
             return
         }
         val storage = koin.get<ISessionStorage>()
+        // gold widgets get their own config surface: XAU base is fixed, the
+        // user picks the display FIAT and the mass unit (g/oz/kg, oz default)
+        val isGold = AppWidgetManager.getInstance(this)
+            .getAppWidgetInfo(appWidgetId)?.provider?.className
+            ?.endsWith("GoldWidgetReceiver") == true
         val codes = CurrenciesCatalog.currencies.map { it.name }
         // quick-select: existing widget pairs + Account market preferences
         val suggestions = buildList {
@@ -108,7 +113,7 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
         // forward pin extras) → session defaults
         val existing = repository.configs().firstOrNull { it.id == appWidgetId.toString() }
         // keep the widget's kind on reconfigure (set at self-configuration)
-        val existingType = existing?.type ?: WidgetType.MARKET_CARD
+        val existingType = existing?.type ?: if (isGold) WidgetType.GOLD else WidgetType.MARKET_CARD
         val prefillBase = intent?.extras?.getString(dali.hamza.shared.platform.WidgetExtras.PREFILL_BASE)
         val prefillQuote = intent?.extras?.getString(dali.hamza.shared.platform.WidgetExtras.PREFILL_QUOTE)
         val pending = runCatching { repository.takePendingPair() }.getOrNull()
@@ -121,6 +126,43 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(background = Color(0xFF131313))) {
+                if (isGold) {
+                    GoldConfigScreen(
+                        fiatCodes = codes.filterNot { it in CurrenciesCatalog.assetCodes },
+                        initialQuote = (existing?.quote ?: pending?.second ?: fallbackBase)
+                            .takeIf { it.isNotBlank() && it !in CurrenciesCatalog.assetCodes }
+                            ?: "USD",
+                        initialUnit = existing?.unit ?: dali.hamza.shared.common.MetalPricing.GoldUnit.TROY_OUNCE.name,
+                        onConfirm = { quote, unit ->
+                            lifecycleScope.launch {
+                                repository.saveConfig(
+                                    WidgetConfig(
+                                        id = appWidgetId.toString(),
+                                        type = WidgetType.GOLD,
+                                        base = "XAU",
+                                        quote = quote,
+                                        unit = unit,
+                                    ),
+                                )
+                                runCatching {
+                                    val manager = GlanceAppWidgetManager(this@MarketRateWidgetConfigActivity)
+                                    GoldWidget().update(
+                                        this@MarketRateWidgetConfigActivity,
+                                        manager.getGlanceIdBy(appWidgetId),
+                                    )
+                                }
+                                WidgetRefreshScheduler.refreshNow(this@MarketRateWidgetConfigActivity)
+                                WidgetRefreshScheduler.update(this@MarketRateWidgetConfigActivity, hasWidgets = true)
+                                setResult(
+                                    RESULT_OK,
+                                    Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId),
+                                )
+                                finish()
+                            }
+                        },
+                        onCancel = { finish() },
+                    )
+                } else {
                 ConfigScreen(
                     codes = codes,
                     initialBase = defaultBase,
@@ -156,6 +198,7 @@ class MarketRateWidgetConfigActivity : ComponentActivity() {
                     },
                     onCancel = { finish() },
                 )
+                }
             }
         }
     }
@@ -314,6 +357,143 @@ private fun ConfigScreen(
                     TextButton(onClick = onCancel) { Text("Cancel", color = Color(0xFF8F9097)) }
                     Spacer(Modifier.width(12.dp))
                     OutlinedButton(onClick = { onConfirm(base, quote) }, enabled = base != quote) {
+                        Text("Add widget", color = Color(0xFF4EDEA3))
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+/**
+ * Gold widget configuration (same bottom-sheet recipe): pick the display
+ * FIAT (base is fixed XAU) and the mass unit — g / oz / kg, oz default.
+ */
+@Composable
+private fun GoldConfigScreen(
+    fiatCodes: List<String>,
+    initialQuote: String,
+    initialUnit: String,
+    onConfirm: (quote: String, unit: String) -> Unit,
+    onCancel: () -> Unit,
+) {
+    var quote by remember { mutableStateOf(initialQuote) }
+    var unitName by remember { mutableStateOf(initialUnit) }
+    val units = dali.hamza.shared.common.MetalPricing.GoldUnit.entries
+    val unit = units.firstOrNull { it.name == unitName }
+        ?: dali.hamza.shared.common.MetalPricing.GoldUnit.TROY_OUNCE
+    var pickerOpen by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    val sheetInteraction = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xB3000000))
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+            ))
+            .clickable(interactionSource = sheetInteraction, indication = null) { onCancel() },
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .clickable(interactionSource = sheetInteraction, indication = null) {}
+                .background(
+                    Color(0xFF1C1B1B),
+                    RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                )
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .size(width = 44.dp, height = 4.dp)
+                    .background(Color(0xFF4A4A4A), RoundedCornerShape(2.dp)),
+            )
+            Spacer(Modifier.height(14.dp))
+
+            if (pickerOpen) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color(0xFFC5C6CD),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { pickerOpen = false; query = "" },
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        "Gold price currency",
+                        fontSize = 16.sp,
+                        color = Color(0xFFE5E2E1),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Picker(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp),
+                    codes = fiatCodes,
+                    query = query,
+                    onQueryChange = { query = it },
+                    onPick = { code ->
+                        quote = code
+                        pickerOpen = false
+                        query = ""
+                    },
+                )
+                Spacer(Modifier.height(12.dp))
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text("Gold price", fontSize = 20.sp, color = Color(0xFFE5E2E1))
+                    Text("XAU (troy ounce) is fixed — choose the display currency.", fontSize = 12.sp, color = Color(0xFF8F9097))
+                    PairField("XAU (fixed)", "XAU", Modifier.fillMaxWidth()) { }
+                    PairField("CURRENCY", quote, Modifier.fillMaxWidth()) { pickerOpen = true; query = "" }
+                    Text("UNIT", fontSize = 10.sp, color = Color(0xFF8F9097))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        units.forEach { candidate ->
+                            val selected = candidate == unit
+                            androidx.compose.material3.Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (selected) Color(0x29E9C349) else Color(0xFF2A2A2A),
+                                contentColor = if (selected) Color(0xFFE9C349) else Color(0xFFE5E2E1),
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { unitName = candidate.name },
+                            ) {
+                                Text(
+                                    candidate.label,
+                                    fontSize = 13.sp,
+                                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onCancel) { Text("Cancel", color = Color(0xFF8F9097)) }
+                    Spacer(Modifier.width(12.dp))
+                    OutlinedButton(onClick = { onConfirm(quote, unit.name) }) {
                         Text("Add widget", color = Color(0xFF4EDEA3))
                     }
                 }

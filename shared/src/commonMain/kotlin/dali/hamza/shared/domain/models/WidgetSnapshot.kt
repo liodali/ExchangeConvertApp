@@ -40,6 +40,12 @@ data class WidgetConfig(
      * means "follow the Account market preferences" (the default grid).
      */
     val pairs: List<String> = emptyList(),
+    /**
+     * GOLD only: mass unit the price is shown in — [dali.hamza.shared.common
+     * .MetalPricing.GoldUnit] name (`GRAM`/`TROY_OUNCE`/`KILOGRAM`); null
+     * renders the oz default.
+     */
+    val unit: String? = null,
 ) {
     val pair: String get() = "$base/$quote"
 

@@ -100,7 +100,9 @@ private fun goldConverterIntent(context: Context, quote: String): Intent =
         .putExtra(DeepLinkNav.EXTRA_ROUTE, "converter")
         .putExtra(DeepLinkNav.EXTRA_PAIR_BASE, "XAU")
         .putExtra(DeepLinkNav.EXTRA_PAIR_QUOTE, quote)
-        .putExtra(DeepLinkNav.EXTRA_AMOUNT, 1.0)
+        // MainActivity reads the amount as a string — other widget tappable
+        // (QuickConvert) established that contract
+        .putExtra(DeepLinkNav.EXTRA_AMOUNT, "1")
 
 @Composable
 private fun GoldContent(
@@ -121,6 +123,11 @@ private fun GoldContent(
         android.appwidget.AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
     ) ?: 110
     val compact = widthDp < 90
+
+    // unit comes from the widget options (config activity); oz default
+    val unit = config?.unit
+        ?.let { name -> MetalPricing.GoldUnit.entries.firstOrNull { it.name == name } }
+        ?: MetalPricing.GoldUnit.TROY_OUNCE
 
     Column(
         modifier = GlanceModifier
@@ -151,39 +158,29 @@ private fun GoldContent(
             }
             else -> {
                 val spot = snapshot?.rate?.takeIf { it > 0.0 && it.isFinite() }
+                Text(
+                    // same shape as the market card: pair on top, price below
+                    "XAU/${config.quote}",
+                    style = TextStyle(
+                        ColorProvider(Color(0xFFC5C6CD)),
+                        if (compact) 9.sp else 11.sp,
+                        FontWeight.Bold,
+                    ),
+                )
                 if (spot == null) {
                     Text(
-                        "GOLD · XAU/${config.quote}",
-                        style = TextStyle(ColorProvider(Color(0xFFC5C6CD)), 11.sp, FontWeight.Bold),
-                    )
-                    Text(
                         "…",
-                        style = TextStyle(ColorProvider(Color(0xFF6E6E6E)), 12.sp),
+                        style = TextStyle(ColorProvider(Color(0xFF6E6E6E)), 14.sp),
                     )
                 } else {
-                    val perGram = MetalPricing.fineGoldPerGram(spot)
+                    val perUnit = MetalPricing.spotPerUnit(spot, unit)
                     Text(
-                        "GOLD 24K",
-                        style = TextStyle(
-                            ColorProvider(gold),
-                            if (compact) 9.sp else 11.sp,
-                            FontWeight.Bold,
-                        ),
-                    )
-                    Text(
-                        // per-gram price, e.g. "372.93 TND/g"
-                        "${formatWidgetAmount(perGram)} ${config.quote}/g",
+                        // e.g. "11,599.05 TND/oz" (or /g, /kg per options)
+                        "${formatWidgetAmount(perUnit)} ${config.quote}/${unit.label}",
                         style = TextStyle(
                             ColorProvider(Color(0xFFF4F4F6)),
-                            if (compact) 15.sp else 20.sp,
+                            if (compact) 14.sp else 18.sp,
                             FontWeight.Bold,
-                        ),
-                    )
-                    Text(
-                        "1 oz = ${formatWidgetAmount(spot)}",
-                        style = TextStyle(
-                            ColorProvider(Color(0xFF8F9097)),
-                            if (compact) 8.sp else 10.sp,
                         ),
                     )
                 }
