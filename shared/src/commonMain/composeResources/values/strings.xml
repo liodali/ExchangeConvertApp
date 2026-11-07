@@ -69,6 +69,10 @@
 
     <!-- ===== Converter screen ===== -->
     <string name="conv_title">Exchange Rates</string>
+    <string name="conv_title_gold">Gold Rates</string>
+    <string name="conv_title_silver">Silver Rates</string>
+    <string name="conv_title_crypto">Crypto Rates</string>
+    <string name="conv_metal_unit_hint">1 %1$s = 1 troy oz = 31.10 g</string>
     <string name="conv_live_base">Live rates based on %1$s base currency</string>
     <string name="conv_quick_desc">Convert currencies using live rates</string>
     <string name="conv_full_converter">FULL CONVERTER</string>

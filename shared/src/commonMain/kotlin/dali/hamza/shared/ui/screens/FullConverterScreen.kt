@@ -55,6 +55,7 @@ import echangecurrencyapp.shared.generated.resources.fconv_execute
 import echangecurrencyapp.shared.generated.resources.fconv_from_label
 import echangecurrencyapp.shared.generated.resources.fconv_rate_line
 import echangecurrencyapp.shared.generated.resources.fconv_title
+import echangecurrencyapp.shared.generated.resources.conv_metal_unit_hint
 import echangecurrencyapp.shared.generated.resources.fconv_to_label
 import echangecurrencyapp.shared.generated.resources.home_execute_exchange
 import echangecurrencyapp.shared.generated.resources.home_from_currency
@@ -112,6 +113,16 @@ fun FullConverterScreen(
                     placeholder = stringResource(Res.string.quick_amount_placeholder),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
+                // metal amounts are troy ounces — fixed informational hint
+                // (unit switching lives in Home's Gold section)
+                if (base?.name == "XAU" || base?.name == "XAG") {
+                    Text(
+                        modifier = Modifier.padding(top = 6.dp),
+                        text = stringResource(Res.string.conv_metal_unit_hint, base.name),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = LedgerColors.TextTertiary,
+                    )
+                }
 
                 Row(
                     modifier = Modifier.padding(top = 24.dp),

@@ -68,6 +68,10 @@
 
     <!-- ===== Converter screen ===== -->
     <string name="conv_title">أسعار الصرف</string>
+    <string name="conv_title_gold">أسعار الذهب</string>
+    <string name="conv_title_silver">أسعار الفضة</string>
+    <string name="conv_title_crypto">أسعار العملات الرقمية</string>
+    <string name="conv_metal_unit_hint">1 %1$s = 1 أونصة طروادة = 31.10 غ</string>
     <string name="conv_live_base">أسعار مباشرة استناداً إلى العملة الأساسية %1$s</string>
     <string name="conv_quick_desc">حوّل بين العملات بأسعار مباشرة</string>
     <string name="conv_full_converter">المحوّل الكامل</string>

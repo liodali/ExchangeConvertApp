@@ -67,6 +67,10 @@
 
     <!-- ===== Converter screen ===== -->
     <string name="conv_title">Tassi di cambio</string>
+    <string name="conv_title_gold">Prezzi dell'oro</string>
+    <string name="conv_title_silver">Prezzi dell'argento</string>
+    <string name="conv_title_crypto">Prezzi delle cripto</string>
+    <string name="conv_metal_unit_hint">1 %1$s = 1 oncia troy = 31,10 g</string>
     <string name="conv_live_base">Tassi in tempo reale basati sulla valuta base %1$s</string>
     <string name="conv_quick_desc">Converti le valute con tassi in tempo reale</string>
     <string name="conv_full_converter">CONVERTITORE COMPLETO</string>

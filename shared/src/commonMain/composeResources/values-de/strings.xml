@@ -68,6 +68,10 @@
 
     <!-- ===== Converter screen ===== -->
     <string name="conv_title">Wechselkurse</string>
+    <string name="conv_title_gold">Goldkurse</string>
+    <string name="conv_title_silver">Silberkurse</string>
+    <string name="conv_title_crypto">Krypto-Kurse</string>
+    <string name="conv_metal_unit_hint">1 %1$s = 1 Feinunze = 31,10 g</string>
     <string name="conv_live_base">Live-Kurse auf Basis der Währung %1$s</string>
     <string name="conv_quick_desc">Währungen mit Live-Kursen umrechnen</string>
     <string name="conv_full_converter">VOLLSTÄNDIGER KONVERTER</string>

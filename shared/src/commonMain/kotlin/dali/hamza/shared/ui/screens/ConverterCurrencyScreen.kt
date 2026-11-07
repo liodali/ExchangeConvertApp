@@ -67,6 +67,10 @@ import echangecurrencyapp.shared.generated.resources.conv_live_base
 import echangecurrencyapp.shared.generated.resources.conv_price_history
 import echangecurrencyapp.shared.generated.resources.conv_quick_desc
 import echangecurrencyapp.shared.generated.resources.conv_title
+import echangecurrencyapp.shared.generated.resources.conv_title_crypto
+import echangecurrencyapp.shared.generated.resources.conv_title_gold
+import echangecurrencyapp.shared.generated.resources.conv_title_silver
+import echangecurrencyapp.shared.generated.resources.conv_metal_unit_hint
 import echangecurrencyapp.shared.generated.resources.home_from_currency
 import echangecurrencyapp.shared.generated.resources.home_to_currency
 import echangecurrencyapp.shared.generated.resources.quick_amount_placeholder
@@ -124,9 +128,17 @@ fun ConverterCurrencyScreen(
         )
 
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
+            // contextual subject title: converting a metal/crypto isn't
+            // "Exchange Rates" — gold gets gold rates, etc.
+            val fromCode = state.fromCurrency?.name
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = stringResource(Res.string.conv_title),
+                text = when (fromCode) {
+                    "XAU" -> stringResource(Res.string.conv_title_gold)
+                    "XAG" -> stringResource(Res.string.conv_title_silver)
+                    "BTC" -> stringResource(Res.string.conv_title_crypto)
+                    else -> stringResource(Res.string.conv_title)
+                },
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = LedgerColors.TextPrimary,
             )
@@ -190,6 +202,18 @@ fun ConverterCurrencyScreen(
                             value = state.amount,
                             onValueChange = viewModel::onAmountChange,
                         )
+                        // metal amounts are troy ounces — say so, right
+                        // where the amount is typed. Fixed on purpose: the
+                        // unit toggle lives in Home's Gold section and the
+                        // handoff already converts (1 g → 0.032151 oz)
+                        if (base == "XAU" || base == "XAG") {
+                            Text(
+                                modifier = Modifier.padding(top = 6.dp),
+                                text = stringResource(Res.string.conv_metal_unit_hint, base),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = LedgerColors.TextTertiary,
+                            )
+                        }
 
                         Row(
                             modifier = Modifier.padding(top = 20.dp),

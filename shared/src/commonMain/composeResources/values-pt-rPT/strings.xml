@@ -29,6 +29,10 @@
     <string name="quick_title">Câmbio Rápido</string>
 
     <!-- ===== Converter screen ===== -->
+    <string name="conv_title_gold">Cotações do ouro</string>
+    <string name="conv_title_silver">Cotações da prata</string>
+    <string name="conv_title_crypto">Cotações de cripto</string>
+    <string name="conv_metal_unit_hint">1 %1$s = 1 onça troy = 31,10 g</string>
     <string name="conv_live_base">Cotações em direto com %1$s como moeda base</string>
     <string name="conv_quick_desc">Converta moedas com cotações em direto</string>
     <string name="conv_loading_history">A carregar o histórico de preços…</string>
