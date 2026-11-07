@@ -154,7 +154,7 @@ fun HomeScreen(
     onOpenRateAlerts: () -> Unit = {},
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
     goldViewModel: GoldViewModel? = null,
-    onConvertGold: (from: String, to: String) -> Unit = { _, _ -> },
+    onConvertGold: (from: String, to: String, amountOz: String) -> Unit = { _, _, _ -> },
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()

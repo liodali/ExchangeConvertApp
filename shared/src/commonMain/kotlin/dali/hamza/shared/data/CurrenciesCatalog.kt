@@ -186,4 +186,12 @@ object CurrenciesCatalog {
     }
 
     fun byCode(code: String): Currency? = currencies.firstOrNull { it.name == code }
+
+    /**
+     * Non-fiat codes in the catalog (metals, crypto). The base-quoted
+     * rates table never carries these (the backend only resolves assets
+     * on explicit `symbol` requests), so converter pairs touching them
+     * resolve through on-demand pair fetches instead of cross rates.
+     */
+    val assetCodes: Set<String> = setOf("BTC", "XAU", "XAG")
 }

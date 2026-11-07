@@ -187,6 +187,16 @@ class SharedViewModel(
     fun convert() {
         viewModelScope.launch {
             loadRates()
+            // assets (XAU…) aren't in the base table: settle the on-demand
+            // pair rate BEFORE reading the result, so Execute records the
+            // real conversion instead of skipping a still-pending one
+            _state.value.let { state ->
+                val from = state.fromCurrency?.name
+                val to = state.toCurrency?.name
+                if (from != null && to != null && from != to && pairNeedsFetch(state)) {
+                    ensurePairRate(from, to)
+                }
+            }
             // Phase 4: record every successful exchange in the ledger
             // (the only permitted SharedViewModel data hook — see plan §3.3)
             val current = _state.value
@@ -215,6 +225,9 @@ class SharedViewModel(
         viewModelScope.launch {
             ratesMutex.withLock {
                 repository.refreshExchangeRates()
+                // pair quotes go stale with the table — re-quote metals on
+                // the next conversion instead of serving the old cache
+                pairRates.clear()
                 loadRatesLocked()
             }
         }
@@ -237,16 +250,81 @@ class SharedViewModel(
         val toRate = state.rates.firstOrNull { it.name == to }?.rate
         val fromRate = state.rates.firstOrNull { it.name == from }?.rate
         val base = state.ratesBase
-        return when {
+        val tableRate = when {
             base.isNotEmpty() && from == base -> toRate
             base.isNotEmpty() && to == base ->
                 fromRate?.takeIf { it != 0.0 }?.let { 1.0 / it }
             toRate != null && fromRate != null && fromRate != 0.0 -> toRate / fromRate
             else -> null
         }
+        // assets (XAU, XAG, BTC) never ride in the base-quoted table —
+        // their pairs resolve from the on-demand pair cache instead
+        return tableRate ?: cachedPairRate(from, to)
+    }
+
+    /**
+     * On-demand pair rates for legs missing from the base table:
+     * "FROM:TO" → (rate, fetchedAtMs). Metals need the symbol-filtered
+     * backend call (plans/gold-section.md all-fiat pivot); the cache keeps
+     * keystroke recomputes offline after the first fetch.
+     */
+    private val pairRates = mutableMapOf<String, Pair<Double, Long>>()
+    private var pairFetchJob: kotlinx.coroutines.Job? = null
+    private var pairFetchKey: String? = null
+
+    private fun cachedPairRate(from: String, to: String): Double? {
+        val now = nowMillis()
+        pairRates["$from:$to"]?.let { (rate, at) ->
+            if (now - at < PAIR_RATE_TTL_MS) return rate
+        }
+        pairRates["$to:$from"]?.let { (rate, at) ->
+            if (now - at < PAIR_RATE_TTL_MS && rate != 0.0) return 1.0 / rate
+        }
+        return null
+    }
+
+    /** True when the active pair involves an asset the table can't quote. */
+    private fun pairNeedsFetch(state: SharedUiState): Boolean {
+        val from = state.fromCurrency?.name ?: return false
+        val to = state.toCurrency?.name ?: return false
+        if (from == to) return false
+        if (crossRate(from, to, state) != null) return false
+        // fiat-only pairs are always table-derivable (or the table is still
+        // loading) — never fetch pair rates for them
+        return CurrenciesCatalog.assetCodes.any { it == from || it == to }
+    }
+
+    /**
+     * Fetch and cache the active pair's rate, then recompute — suspends so
+     * [convert] can await a settled result before recording the ledger.
+     */
+    private suspend fun ensurePairRate(from: String, to: String) {
+        when (val response = repository.getLiveRateForPair(from, to)) {
+            is MyResponse.Success ->
+                response.data
+                    .takeIf { it > 0.0 && it.isFinite() }
+                    ?.let { pairRates["$from:$to"] = it to nowMillis() }
+            // quotable nowhere / transport failure: leave the cache empty —
+            // the UI shows no result rather than a fabricated one
+            is MyResponse.Empty, is MyResponse.Error -> Unit
+        }
+        recomputeNow()
     }
 
     private fun recomputeConversion() {
+        recomputeNow()
+        val state = _state.value
+        if (!pairNeedsFetch(state)) return
+        val key = "${state.fromCurrency?.name}:${state.toCurrency?.name}"
+        if (pairFetchJob?.isActive == true && pairFetchKey == key) return
+        pairFetchKey = key
+        pairFetchJob?.cancel()
+        val from = state.fromCurrency?.name ?: return
+        val to = state.toCurrency?.name ?: return
+        pairFetchJob = viewModelScope.launch { ensurePairRate(from, to) }
+    }
+
+    private fun recomputeNow() {
         _state.update { current ->
             val amountValue = current.amount.replace(',', '.').toDoubleOrNull()
             val from = current.fromCurrency?.name
@@ -262,4 +340,9 @@ class SharedViewModel(
     }
 
     private suspend fun currentBase(): String = repository.getCurrentCurrency()
+
+    private companion object {
+        /** Pair quotes go stale like the table: refetch at most half-hourly. */
+        const val PAIR_RATE_TTL_MS = 30L * 60L * 1000L
+    }
 }

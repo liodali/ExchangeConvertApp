@@ -373,7 +373,7 @@
     <string name="onb_name_note">e.g. Alex — shown on your account</string>
     <string name="gold_section_title">Gold</string>
     <string name="gold_chip_purity">XAU · 24K</string>
-    <string name="gold_spot_label">Gold spot · 1 troy oz</string>
+    <string name="gold_spot_label">Gold spot · 1 %1$s</string>
     <string name="gold_fetched_at">Fetched at %1$s</string>
     <string name="gold_stale_note">Last fetched rates — refresh failed</string>
     <string name="gold_unavailable">Gold price unavailable right now.</string>
@@ -382,5 +382,6 @@
     <string name="gold_usd_fallback">Not quoted in %1$s — showing USD</string>
     <string name="gold_convert_cta">Convert gold</string>
     <string name="gold_loading">Loading gold prices…</string>
-    <string name="gold_karat_value_desc">%1$s: %2$s %3$s per gram</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s per %4$s</string>
+    <string name="gold_unit_desc">Mass unit</string>
 </resources>

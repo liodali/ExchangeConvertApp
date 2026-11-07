@@ -372,7 +372,7 @@
     <string name="onb_name_note">مثال: علي — يظهر في حسابك</string>
     <string name="gold_section_title">الذهب</string>
     <string name="gold_chip_purity">XAU · 24K</string>
-    <string name="gold_spot_label">سعر الذهب الفوري · 1 أونصة طروادة</string>
+    <string name="gold_spot_label">سعر الذهب الفوري · 1 %1$s</string>
     <string name="gold_fetched_at">تم الجلب عند %1$s</string>
     <string name="gold_stale_note">آخر الأسعار المجلوبة — فشل التحديث</string>
     <string name="gold_unavailable">سعر الذهب غير متوفر حاليًا.</string>
@@ -381,5 +381,6 @@
     <string name="gold_usd_fallback">غير مقوّم بـ %1$s — يتم عرض USD</string>
     <string name="gold_convert_cta">تحويل الذهب</string>
     <string name="gold_loading">جارٍ تحميل أسعار الذهب…</string>
-    <string name="gold_karat_value_desc">%1$s: %2$s %3$s لكل غرام</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s لكل %4$s</string>
+    <string name="gold_unit_desc">وحدة الكتلة</string>
 </resources>

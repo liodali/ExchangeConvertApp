@@ -84,4 +84,52 @@ class MetalPricingTest {
         // 75.2949 → 75.29 — intermediate rounding would give 75.30
         assertEquals("75.29", formatGoldAmount(75.2949))
     }
+
+    // ---- unit selection (g | troy oz | kg) -------------------------------
+
+    @Test
+    fun perUnitValuesScaleExactlyByGramsPerUnit() {
+        val oz = MetalPricing.karatValue(spot, 24, MetalPricing.GoldUnit.TROY_OUNCE)
+        assertEquals(spot, oz, absoluteTolerance = 1e-9, message = "24K per troy oz is the spot itself")
+        val gram = MetalPricing.karatValue(spot, 24, MetalPricing.GoldUnit.GRAM)
+        assertEquals(75.300264, gram, absoluteTolerance = 1e-6)
+        val kilogram = MetalPricing.karatValue(spot, 24, MetalPricing.GoldUnit.KILOGRAM)
+        assertEquals(gram * 1000.0, kilogram, absoluteTolerance = 1e-9)
+        // karat fraction holds in every unit: 22K is 11/12 of 24K
+        assertEquals(
+            MetalPricing.karatValue(spot, 24, MetalPricing.GoldUnit.KILOGRAM) * 11.0 / 12.0,
+            MetalPricing.karatValue(spot, 22, MetalPricing.GoldUnit.KILOGRAM),
+            absoluteTolerance = 1e-9,
+        )
+    }
+
+    @Test
+    fun spotPerUnitCoversAllThreeUnits() {
+        val units = listOf(
+            MetalPricing.GoldUnit.GRAM to 75.300264,
+            MetalPricing.GoldUnit.TROY_OUNCE to spot,
+            MetalPricing.GoldUnit.KILOGRAM to 75_300.2635,
+        )
+        units.forEach { (unit, expected) ->
+            assertEquals(expected, MetalPricing.spotPerUnit(spot, unit), absoluteTolerance = 1e-3)
+        }
+    }
+
+    @Test
+    fun troyOunceHandoffConvertsEachUnitExactly() {
+        assertEquals(1.0, MetalPricing.toTroyOunces(1.0, MetalPricing.GoldUnit.TROY_OUNCE), absoluteTolerance = 1e-12)
+        assertEquals(0.032151, MetalPricing.toTroyOunces(1.0, MetalPricing.GoldUnit.GRAM), absoluteTolerance = 1e-6)
+        assertEquals(32.150747, MetalPricing.toTroyOunces(1.0, MetalPricing.GoldUnit.KILOGRAM), absoluteTolerance = 1e-6)
+        // 5 troy ounces in grams: 5 × 31.1034768
+        assertEquals(
+            5.0 * MetalPricing.TROY_OUNCE_GRAMS,
+            MetalPricing.toTroyOunces(5.0, MetalPricing.GoldUnit.TROY_OUNCE) * MetalPricing.TROY_OUNCE_GRAMS,
+            absoluteTolerance = 1e-9,
+        )
+    }
+
+    @Test
+    fun unitLabelsAreShortUniversalSymbols() {
+        assertEquals(listOf("g", "oz", "kg"), MetalPricing.GoldUnit.entries.map { it.label })
+    }
 }

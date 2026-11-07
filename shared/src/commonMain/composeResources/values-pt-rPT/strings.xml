@@ -156,7 +156,7 @@
     <string name="onb_name_note">ex.: Alex — aparece na sua conta</string>
     <string name="gold_section_title">Ouro</string>
     <string name="gold_chip_purity">XAU · 24K</string>
-    <string name="gold_spot_label">Spot do ouro · 1 onça troy</string>
+    <string name="gold_spot_label">Spot do ouro · 1 %1$s</string>
     <string name="gold_fetched_at">Obtido às %1$s</string>
     <string name="gold_stale_note">Últimos preços obtidos — falha ao atualizar</string>
     <string name="gold_unavailable">Preço do ouro indisponível de momento.</string>
@@ -165,5 +165,6 @@
     <string name="gold_usd_fallback">Sem cotação em %1$s — a mostrar USD</string>
     <string name="gold_convert_cta">Converter ouro</string>
     <string name="gold_loading">A carregar preços do ouro…</string>
-    <string name="gold_karat_value_desc">%1$s: %2$s %3$s por grama</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s por %4$s</string>
+    <string name="gold_unit_desc">Unidade de massa</string>
 </resources>

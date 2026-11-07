@@ -372,7 +372,7 @@
     <string name="onb_name_note">p. ej., Alex — se muestra en tu cuenta</string>
     <string name="gold_section_title">Oro</string>
     <string name="gold_chip_purity">XAU · 24K</string>
-    <string name="gold_spot_label">Spot del oro · 1 onza troy</string>
+    <string name="gold_spot_label">Spot del oro · 1 %1$s</string>
     <string name="gold_fetched_at">Obtenido a las %1$s</string>
     <string name="gold_stale_note">Últimos precios obtenidos: la actualización falló</string>
     <string name="gold_unavailable">El precio del oro no está disponible ahora.</string>
@@ -381,5 +381,6 @@
     <string name="gold_usd_fallback">Sin cotización en %1$s: se muestra USD</string>
     <string name="gold_convert_cta">Convertir oro</string>
     <string name="gold_loading">Cargando precios del oro…</string>
-    <string name="gold_karat_value_desc">%1$s: %2$s %3$s por gramo</string>
+    <string name="gold_karat_value_desc">%1$s: %2$s %3$s por %4$s</string>
+    <string name="gold_unit_desc">Unidad de masa</string>
 </resources>

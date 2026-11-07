@@ -282,40 +282,4 @@ fun AddRateAlertDialog(
     }
 }
 
-/**
- * Two-or-more-option segmented control — the app's preset recipe (used
- * for the Appearance mode and delivery/mode rows).
- */
-@Composable
-private fun <T> SegmentedRow(
-    options: List<Pair<String, T>>,
-    selected: T,
-    onSelect: (T) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(LedgerColors.SurfaceElevated)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        options.forEach { (label, option) ->
-            val isSelected = option == selected
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (isSelected) LedgerColors.Green else LedgerColors.TextSecondary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(
-                        if (isSelected) LedgerColors.GreenSoft else Color.Transparent
-                    )
-                    .clickable { onSelect(option) }
-                    .padding(vertical = 8.dp),
-            )
-        }
-    }
-}
+
