@@ -2,6 +2,8 @@ package dali.hamza.shared.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.ui.components.BentoCard
+import dali.hamza.shared.common.MetalPricing
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerButton
 import dali.hamza.shared.ui.components.LedgerInput
@@ -56,6 +59,7 @@ import echangecurrencyapp.shared.generated.resources.fconv_from_label
 import echangecurrencyapp.shared.generated.resources.fconv_rate_line
 import echangecurrencyapp.shared.generated.resources.fconv_title
 import echangecurrencyapp.shared.generated.resources.conv_metal_unit_hint
+import echangecurrencyapp.shared.generated.resources.gold_unit_desc
 import echangecurrencyapp.shared.generated.resources.fconv_to_label
 import echangecurrencyapp.shared.generated.resources.home_execute_exchange
 import echangecurrencyapp.shared.generated.resources.home_from_currency
@@ -112,6 +116,31 @@ fun FullConverterScreen(
                     label = stringResource(Res.string.fconv_amount_label),
                     placeholder = stringResource(Res.string.quick_amount_placeholder),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    // unit suffix inside the field (metals): cycles g → oz → kg
+                    trailing = state.fromUnit?.let { unit ->
+                        {
+                            val unitDescription = stringResource(Res.string.gold_unit_desc)
+                            Text(
+                                text = unit.label,
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                ),
+                                color = LedgerColors.Gold,
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(LedgerColors.GoldGlow)
+                                    .clickable {
+                                        val entries = MetalPricing.GoldUnit.entries
+                                        viewModel.selectFromUnit(
+                                            entries[(unit.ordinal + 1) % entries.size],
+                                        )
+                                    }
+                                    .semantics { contentDescription = unitDescription }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                            )
+                        }
+                    },
                 )
                 // metal amounts are troy ounces — fixed informational hint
                 // (unit switching lives in Home's Gold section)

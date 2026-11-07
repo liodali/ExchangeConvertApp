@@ -18,10 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +42,6 @@ import echangecurrencyapp.shared.generated.resources.gold_spot_label
 import echangecurrencyapp.shared.generated.resources.gold_stale_note
 import echangecurrencyapp.shared.generated.resources.gold_unavailable
 import echangecurrencyapp.shared.generated.resources.gold_usd_fallback
-import echangecurrencyapp.shared.generated.resources.gold_unit_desc
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -70,14 +65,10 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun GoldSection(
     state: GoldUiState,
-    onConvertGold: (from: String, to: String, amountOz: String) -> Unit,
+    onConvertGold: (from: String, to: String) -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // mass unit for the displayed prices (1 g / 1 oz / 1 kg) — survives
-    // tab switches; stored as name for cross-platform saveable safety
-    var unitName by rememberSaveable { mutableStateOf(MetalPricing.GoldUnit.GRAM.name) }
-    val unit = MetalPricing.GoldUnit.valueOf(unitName)
     Column(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -93,12 +84,7 @@ fun GoldSection(
         }
         Spacer(Modifier.height(16.dp))
         when {
-            state.snapshot != null -> GoldCard(
-                state = state,
-                unit = unit,
-                onUnitChange = { unitName = it.name },
-                onConvertGold = onConvertGold,
-            )
+            state.snapshot != null -> GoldCard(state, onConvertGold)
             state.loading -> {
                 val loadingDescription = stringResource(Res.string.gold_loading)
                 ShimmerHost {
@@ -131,29 +117,22 @@ private fun PurityChip() {
 @Composable
 private fun GoldCard(
     state: GoldUiState,
-    unit: MetalPricing.GoldUnit,
-    onUnitChange: (MetalPricing.GoldUnit) -> Unit,
-    onConvertGold: (from: String, to: String, amountOz: String) -> Unit,
+    onConvertGold: (from: String, to: String) -> Unit,
 ) {
     val snapshot = state.snapshot ?: return
+    // the Home card is per GRAM (jewellery convention, the design's
+    // per-gram pricing) — the g/oz/kg selector lives in the converter's
+    // amount suffix, not here
+    val unit = MetalPricing.GoldUnit.GRAM
     BentoCard(
         modifier = Modifier.fillMaxWidth(),
         fill = LedgerColors.Card,
         padding = PaddingValues(20.dp),
     ) {
-        // mass unit toggle — every price below is for 1 of this unit
-        val unitDescription = stringResource(Res.string.gold_unit_desc)
-        SegmentedRow(
-            options = MetalPricing.GoldUnit.entries.map { it.label to it },
-            selected = unit,
-            onSelect = onUnitChange,
-            modifier = Modifier.semantics { contentDescription = unitDescription },
-        )
-        Spacer(Modifier.height(12.dp))
-        // adaptive karat grid: gram values fit 4 cells across, but oz/kg
-        // amounts (11,599.05 … 1,226,967.43) wrap at that width — when the
-        // longest formatted price exceeds 7 chars, drop to 2 per row so
-        // every price stays on ONE line
+        // adaptive karat grid: short per-gram values fit 4 cells across,
+        // but high-price currencies (1,226.97 MAD/g …) wrap at that width —
+        // when the longest formatted price exceeds 7 chars, drop to 2 per
+        // row so every price stays on ONE line
         val karatCells = MetalPricing.GOLD_KARATS.map { karat ->
             karat to MetalPricing.karatValue(snapshot.spotPerTroyOunce, karat, unit)
         }
@@ -236,9 +215,9 @@ private fun GoldCard(
         LedgerButton(
             text = stringResource(Res.string.gold_convert_cta),
             onClick = {
-                // converter XAU units are troy ounces — carry 1 selected
-                // unit as its exact ounce amount (1 g → 0.032151 oz)
-                onConvertGold("XAU", snapshot.currency, formatOzAmount(MetalPricing.toTroyOunces(1.0, unit)))
+                // 1 gram of gold — the converter's unit suffix defaults to
+                // grams for metals, so the prefilled "1" matches this card
+                onConvertGold("XAU", snapshot.currency)
             },
             modifier = Modifier.fillMaxWidth(),
             variant = LedgerButtonVariant.PREMIUM,
@@ -325,18 +304,6 @@ fun GoldCardSkeleton(modifier: Modifier = Modifier) {
         padding = PaddingValues(20.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // unit toggle silhouette (same 12dp-corner segmented shape)
-            repeat(3) {
-                ShimmerBox(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(28.dp),
-                    cornerRadius = 8.dp,
-                )
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             repeat(4) {
                 ShimmerBox(
                     modifier = Modifier
@@ -375,15 +342,6 @@ internal fun formatGoldAmount(value: Double): String {
     val fracPart = text.substringAfter('.', "").padEnd(2, '0').take(2)
     val grouped = intPart.reversed().chunked(3).joinToString(",").reversed()
     return "$grouped.$fracPart"
-}
-
-/**
- * Converter-handoff amount in troy ounces: 6 significant decimals,
- * trailing zeros trimmed — `1`, `0.032151`, `32.150747`.
- */
-internal fun formatOzAmount(value: Double): String {
-    val rounded = kotlin.math.round(value * 1e6) / 1e6
-    return rounded.toString().trimEnd('0').trimEnd('.')
 }
 
 /**

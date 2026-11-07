@@ -38,6 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.ui.components.BentoCard
+import dali.hamza.shared.common.MetalPricing
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
 import dali.hamza.shared.ui.components.LedgerChart
 import dali.hamza.shared.ui.components.LedgerChartStyle
@@ -71,6 +74,7 @@ import echangecurrencyapp.shared.generated.resources.conv_title_crypto
 import echangecurrencyapp.shared.generated.resources.conv_title_gold
 import echangecurrencyapp.shared.generated.resources.conv_title_silver
 import echangecurrencyapp.shared.generated.resources.conv_metal_unit_hint
+import echangecurrencyapp.shared.generated.resources.gold_unit_desc
 import echangecurrencyapp.shared.generated.resources.home_from_currency
 import echangecurrencyapp.shared.generated.resources.home_to_currency
 import echangecurrencyapp.shared.generated.resources.quick_amount_placeholder
@@ -201,11 +205,37 @@ fun ConverterCurrencyScreen(
                         AmountField(
                             value = state.amount,
                             onValueChange = viewModel::onAmountChange,
+                            // unit suffix INSIDE the field (metals): shows
+                            // what the typed number means and cycles
+                            // g → oz → kg on tap
+                            unitSuffix = state.fromUnit?.let { unit ->
+                                {
+                                    val unitDescription = stringResource(Res.string.gold_unit_desc)
+                                    Text(
+                                        text = unit.label,
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                        ),
+                                        color = LedgerColors.Gold,
+                                        modifier = Modifier
+                                            .padding(start = 8.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(LedgerColors.GoldGlow)
+                                            .clickable {
+                                                val entries = MetalPricing.GoldUnit.entries
+                                                viewModel.selectFromUnit(
+                                                    entries[(unit.ordinal + 1) % entries.size],
+                                                )
+                                            }
+                                            .semantics { contentDescription = unitDescription }
+                                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    )
+                                }
+                            },
                         )
-                        // metal amounts are troy ounces — say so, right
-                        // where the amount is typed. Fixed on purpose: the
-                        // unit toggle lives in Home's Gold section and the
-                        // handoff already converts (1 g → 0.032151 oz)
+                        // base-unit explainer under the field: the XAU unit
+                        // itself is a troy ounce (suffix picks what the
+                        // TYPED number means; this explains the catalog unit)
                         if (base == "XAU" || base == "XAG") {
                             Text(
                                 modifier = Modifier.padding(top = 6.dp),
@@ -410,6 +440,7 @@ fun ConverterCurrencyScreen(
 private fun AmountField(
     value: String,
     onValueChange: (String) -> Unit,
+    unitSuffix: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -446,6 +477,7 @@ private fun AmountField(
                 field()
             },
         )
+        unitSuffix?.invoke()
     }
 }
 

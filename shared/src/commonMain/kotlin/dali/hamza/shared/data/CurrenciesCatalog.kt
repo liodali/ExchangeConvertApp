@@ -194,4 +194,7 @@ object CurrenciesCatalog {
      * resolve through on-demand pair fetches instead of cross rates.
      */
     val assetCodes: Set<String> = setOf("BTC", "XAU", "XAG")
+
+    /** Asset codes priced by mass: their converter amounts carry a unit suffix. */
+    val metalCodes: Set<String> = setOf("XAU", "XAG")
 }

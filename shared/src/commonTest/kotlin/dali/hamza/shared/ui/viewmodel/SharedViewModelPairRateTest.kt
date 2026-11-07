@@ -1,5 +1,6 @@
 package dali.hamza.shared.ui.viewmodel
 
+import dali.hamza.shared.common.MetalPricing
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.domain.models.HistoricalRate
@@ -163,6 +164,7 @@ class SharedViewModelPairRateTest {
         advanceUntilIdle()
 
         vm.selectFromCurrency(Currency("XAU", "Gold (troy ounce)"))
+        vm.selectFromUnit(MetalPricing.GoldUnit.TROY_OUNCE)
         vm.selectToCurrency(Currency("TND", "Dinar"))
         vm.onAmountChange("1")
         advanceUntilIdle()
@@ -170,6 +172,48 @@ class SharedViewModelPairRateTest {
         assertNotNull(vm.state.value.convertedAmount, "the bug: XAU pairs used to stay 0/null")
         assertEquals(11_599.05, vm.state.value.convertedAmount!!, 1e-9)
         assertEquals(listOf("XAU:TND"), fake.pairRequests)
+    }
+
+    @Test
+    fun metalAmountDefaultsToGramsAndCoheresWithPerGramPricing() = runTest(dispatcher) {
+        val fake = repository()
+        fake.pairResponses["XAU:TND"] = MyResponse.Success(11_599.05)
+        val vm = SharedViewModel(fake)
+        advanceUntilIdle()
+
+        // selecting a metal From defaults the amount unit to grams
+        vm.selectFromCurrency(Currency("XAU", "Gold (troy ounce)"))
+        assertEquals(MetalPricing.GoldUnit.GRAM, vm.state.value.fromUnit)
+        vm.selectToCurrency(Currency("TND", "Dinar"))
+        vm.onAmountChange("1")
+        advanceUntilIdle()
+
+        // 1 g of gold = spot/31.1034768 — matches the Home card's 24K cell
+        assertEquals(
+            11_599.05 / MetalPricing.TROY_OUNCE_GRAMS,
+            vm.state.value.convertedAmount!!,
+            1e-6,
+        )
+
+        // switching the unit to oz re-prices to the full spot
+        vm.selectFromUnit(MetalPricing.GoldUnit.TROY_OUNCE)
+        assertEquals(11_599.05, vm.state.value.convertedAmount!!, 1e-6)
+        // ...and kg scales by a thousand grams
+        vm.selectFromUnit(MetalPricing.GoldUnit.KILOGRAM)
+        assertEquals(11_599.05 * 1000.0 / MetalPricing.TROY_OUNCE_GRAMS, vm.state.value.convertedAmount!!, 1e-3)
+    }
+
+    @Test
+    fun fiatFromClearsTheUnit() = runTest(dispatcher) {
+        val fake = repository()
+        fake.pairResponses["XAU:TND"] = MyResponse.Success(11_599.05)
+        val vm = SharedViewModel(fake)
+        advanceUntilIdle()
+
+        vm.selectFromCurrency(Currency("XAU", "Gold (troy ounce)"))
+        assertNotNull(vm.state.value.fromUnit)
+        vm.selectFromCurrency(Currency("EUR", "Euro"))
+        assertNull(vm.state.value.fromUnit, "fiat amounts are plain currency units")
     }
 
     @Test
@@ -217,6 +261,7 @@ class SharedViewModelPairRateTest {
         advanceUntilIdle()
 
         vm.selectFromCurrency(Currency("XAU", "Gold (troy ounce)"))
+        vm.selectFromUnit(MetalPricing.GoldUnit.TROY_OUNCE)
         vm.selectToCurrency(Currency("TND", "Dinar"))
         vm.onAmountChange("2")
         vm.convert()
@@ -254,6 +299,7 @@ class SharedViewModelPairRateTest {
         advanceUntilIdle()
 
         vm.selectFromCurrency(Currency("XAU", "Gold (troy ounce)"))
+        vm.selectFromUnit(MetalPricing.GoldUnit.TROY_OUNCE)
         vm.selectToCurrency(Currency("TND", "Dinar"))
         vm.onAmountChange("1")
         advanceUntilIdle()

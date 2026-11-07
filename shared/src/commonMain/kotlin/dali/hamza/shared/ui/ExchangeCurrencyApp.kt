@@ -353,19 +353,18 @@ fun ExchangeCurrencyApp(
                         },
                         onOpenConverter = { navController.navigate(Routes.CONVERTER) },
                         // Gold section CTA: prefill XAU → display fiat with
-                        // the chosen mass unit converted to troy ounces
-                        // (deep-link pattern — SharedViewModel mutation,
-                        // since nav args don't reliably propagate in the
-                        // JetBrains navigation fork). Prefill only: NO
+                        // 1 gram — selectFromCurrency defaults the metal's
+                        // amount unit to grams, so the converter shows the
+                        // "1 [g]" suffix and its result matches the Home
+                        // card's 24K per-gram value. Prefill only: NO
                         // convert() — that would record a ledger entry the
-                        // user never executed. Market base and saved
-                        // preferences stay untouched.
-                        onConvertGold = { from, to, amountOz ->
+                        // user never executed.
+                        onConvertGold = { from, to ->
                             dali.hamza.shared.data.CurrenciesCatalog.byCode(from)
                                 ?.let(viewModel::selectFromCurrency)
                             dali.hamza.shared.data.CurrenciesCatalog.byCode(to)
                                 ?.let(viewModel::selectToCurrency)
-                            viewModel.onAmountChange(amountOz)
+                            viewModel.onAmountChange("1")
                             navController.navigate(Routes.CONVERTER) {
                                 popUpTo(Routes.HOME) { saveState = true }
                                 launchSingleTop = true

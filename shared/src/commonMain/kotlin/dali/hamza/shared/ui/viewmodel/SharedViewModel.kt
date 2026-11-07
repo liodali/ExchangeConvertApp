@@ -1,6 +1,7 @@
 package dali.hamza.shared.ui.viewmodel
 
 import dali.hamza.shared.data.CurrenciesCatalog
+import dali.hamza.shared.common.MetalPricing
 import dali.hamza.shared.common.nowMillis
 import dali.hamza.shared.domain.models.Currency
 import dali.hamza.shared.domain.models.ExchangeRate
@@ -34,6 +35,12 @@ data class SharedUiState(
     val amount: String = "",
     val fromCurrency: Currency? = null,
     val toCurrency: Currency? = null,
+    /**
+     * Mass unit of [amount] when From is a metal (XAU/XAG): the user types
+     * grams/ounces/kilos, conversions convert to troy ounces internally.
+     * Null for fiat — the amount is then plain currency units.
+     */
+    val fromUnit: dali.hamza.shared.common.MetalPricing.GoldUnit? = null,
     val convertedAmount: Double? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -147,9 +154,27 @@ class SharedViewModel(
      * stored market base: conversions use cross rates from the cached
      * base-quoted table (see [crossRate]). Changing From in the converter
      * must never rebase Market Overview.
+     *
+     * Metals default their amount unit to grams; fiat clears it.
      */
     fun selectFromCurrency(currency: Currency) {
-        _state.update { it.copy(fromCurrency = currency, convertedAmount = null) }
+        _state.update {
+            it.copy(
+                fromCurrency = currency,
+                convertedAmount = null,
+                fromUnit = if (currency.name in CurrenciesCatalog.metalCodes) {
+                    MetalPricing.GoldUnit.GRAM
+                } else {
+                    null
+                },
+            )
+        }
+        recomputeConversion()
+    }
+
+    /** Mass-unit suffix of the amount input (metals only; g → oz → kg). */
+    fun selectFromUnit(unit: MetalPricing.GoldUnit) {
+        _state.update { it.copy(fromUnit = unit) }
         recomputeConversion()
     }
 
@@ -179,6 +204,8 @@ class SharedViewModel(
                 fromCurrency = newFrom,
                 toCurrency = current.fromCurrency,
                 convertedAmount = null,
+                // To is fiat-only, so the new From never carries a mass unit
+                fromUnit = null,
             )
         }
         recomputeConversion()
@@ -200,9 +227,14 @@ class SharedViewModel(
             // Phase 4: record every successful exchange in the ledger
             // (the only permitted SharedViewModel data hook — see plan §3.3)
             val current = _state.value
-            val amount = current.amount.replace(',', '.').toDoubleOrNull()
+            val amountText = current.amount.replace(',', '.').toDoubleOrNull()
             val from = current.fromCurrency?.name
             val to = current.toCurrency?.name
+            // ledger amounts are in base-currency units: troy ounces for
+            // metals (the unit the rate is quoted against)
+            val amount = amountText?.let { amount ->
+                current.fromUnit?.let { MetalPricing.toTroyOunces(amount, it) } ?: amount
+            }
             val converted = current.convertedAmount
             if (amount != null && amount > 0.0 && from != null && to != null &&
                 from != to && converted != null && converted > 0.0
@@ -333,7 +365,14 @@ class SharedViewModel(
                 amountValue == null || amountValue == 0.0 -> null
                 from == null || to == null -> null
                 from == to -> amountValue
-                else -> crossRate(from, to, current)?.let { amountValue * it }
+                else -> {
+                    // metal amounts arrive in the selected mass unit —
+                    // convert to troy ounces before applying the rate
+                    val amountInBase = current.fromUnit
+                        ?.let { MetalPricing.toTroyOunces(amountValue, it) }
+                        ?: amountValue
+                    crossRate(from, to, current)?.let { amountInBase * it }
+                }
             }
             current.copy(convertedAmount = converted)
         }
