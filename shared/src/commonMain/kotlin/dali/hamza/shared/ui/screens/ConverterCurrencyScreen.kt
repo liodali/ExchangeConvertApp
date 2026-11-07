@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dali.hamza.shared.data.CurrenciesCatalog
 import dali.hamza.shared.domain.models.ExchangeRate
 import dali.hamza.shared.ui.components.BentoCard
 import dali.hamza.shared.ui.components.CurrencyPickerSheet
@@ -200,7 +201,12 @@ fun ConverterCurrencyScreen(
                                 modifier = Modifier.weight(1f),
                                 onClick = { pickerFor = true },
                             )
-                            IconButton(onClick = viewModel::swapCurrencies) {
+                            // metals convert one way only — a metal From
+                            // can never move to the fiat-only To side
+                            IconButton(
+                                onClick = viewModel::swapCurrencies,
+                                enabled = state.fromCurrency?.name !in CurrenciesCatalog.assetCodes,
+                            ) {
                                 Icon(
                                     imageVector = Icons.Outlined.SwapHoriz,
                                     contentDescription = stringResource(Res.string.quick_swap_desc),
@@ -365,6 +371,8 @@ fun ConverterCurrencyScreen(
                 else viewModel.selectToCurrency(currency)
                 pickerFor = null
             },
+            // metals convert one way only: To is always fiat
+            fiatOnly = !pickingFrom,
         )
     }
 }

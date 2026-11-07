@@ -1,6 +1,7 @@
 package dali.hamza.shared.ui.components
 
 import androidx.compose.foundation.clickable
+import dali.hamza.shared.data.CurrenciesCatalog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -49,16 +50,24 @@ fun CurrencyPickerSheet(
     title: String,
     onDismiss: () -> Unit,
     onCurrencySelected: (Currency) -> Unit,
+    /**
+     * Hide metals/crypto (asset codes): the To side of a conversion is
+     * always fiat — metals convert one way only (metal → currency).
+     */
+    fiatOnly: Boolean = false,
 ) {
     if (!visible) return
 
     var query by remember { mutableStateOf("") }
 
-    val filtered = remember(query, currencies) {
+    val selectable = remember(currencies, fiatOnly) {
+        if (fiatOnly) currencies.filter { it.name !in CurrenciesCatalog.assetCodes } else currencies
+    }
+    val filtered = remember(query, selectable) {
         if (query.isBlank()) {
-            currencies
+            selectable
         } else {
-            currencies.filter {
+            selectable.filter {
                 it.name.contains(query, ignoreCase = true) ||
                         it.fullCountryName.contains(query, ignoreCase = true)
             }

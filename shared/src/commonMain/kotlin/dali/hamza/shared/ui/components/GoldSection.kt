@@ -150,18 +150,31 @@ private fun GoldCard(
             modifier = Modifier.semantics { contentDescription = unitDescription },
         )
         Spacer(Modifier.height(12.dp))
-        // per-karat cells: 24K highlighted, values for one selected unit in
-        // the snapshot's (fiat) currency — never rounded before formatting
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetalPricing.GOLD_KARATS.forEach { karat ->
-                KaratCell(
-                    karat = karat,
-                    valuePerUnit = MetalPricing.karatValue(snapshot.spotPerTroyOunce, karat, unit),
-                    currency = snapshot.currency,
-                    unitLabel = unit.label,
-                    highlight = karat == 24,
-                    modifier = Modifier.weight(1f),
-                )
+        // adaptive karat grid: gram values fit 4 cells across, but oz/kg
+        // amounts (11,599.05 … 1,226,967.43) wrap at that width — when the
+        // longest formatted price exceeds 7 chars, drop to 2 per row so
+        // every price stays on ONE line
+        val karatCells = MetalPricing.GOLD_KARATS.map { karat ->
+            karat to MetalPricing.karatValue(snapshot.spotPerTroyOunce, karat, unit)
+        }
+        val perRow = if (karatCells.maxOf { formatGoldAmount(it.second).length } > 7) 2 else 4
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            karatCells.chunked(perRow).forEach { rowCells ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    rowCells.forEach { (karat, valuePerUnit) ->
+                        KaratCell(
+                            karat = karat,
+                            valuePerUnit = valuePerUnit,
+                            currency = snapshot.currency,
+                            unitLabel = unit.label,
+                            highlight = karat == 24,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
         }
         Spacer(Modifier.height(14.dp))
@@ -268,6 +281,7 @@ private fun KaratCell(
             text = formatGoldAmount(valuePerUnit),
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             color = LedgerColors.TextPrimary,
+            maxLines = 1,
         )
         Text(
             text = "$currency/$unitLabel",

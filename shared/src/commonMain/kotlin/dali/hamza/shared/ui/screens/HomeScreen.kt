@@ -309,6 +309,7 @@ fun HomeScreen(
                             onPickFrom = { pickerFor = true },
                             onPickTo = { pickerFor = false },
                             onSwap = viewModel::swapCurrencies,
+                            swapEnabled = state.fromCurrency?.name !in CurrenciesCatalog.assetCodes,
                             onExecute = viewModel::convert,
                             onOpenConverter = onOpenConverter,
                         )
@@ -362,6 +363,7 @@ fun HomeScreen(
                     onPickFrom = { pickerFor = true },
                     onPickTo = { pickerFor = false },
                     onSwap = viewModel::swapCurrencies,
+                    swapEnabled = state.fromCurrency?.name !in CurrenciesCatalog.assetCodes,
                     onExecute = viewModel::convert,
                     onOpenConverter = onOpenConverter,
                 )
@@ -389,6 +391,8 @@ fun HomeScreen(
                 else viewModel.selectToCurrency(currency)
                 pickerFor = null
             },
+            // metals convert one way only: To is always fiat
+            fiatOnly = !pickingFrom,
         )
     }
 
@@ -772,6 +776,9 @@ private fun QuickExchangeSection(
     onSwap: () -> Unit,
     onExecute: () -> Unit,
     onOpenConverter: () -> Unit,
+    // metals convert one way only: no swap when From is a metal (it
+    // would land on the fiat-only To side)
+    swapEnabled: Boolean = true,
 ) {
     SectionHeader(title = stringResource(Res.string.quick_title), icon = Icons.Outlined.SwapHoriz)
     Spacer(Modifier.height(16.dp))
@@ -800,13 +807,13 @@ private fun QuickExchangeSection(
                     .size(36.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(LedgerColors.GreenSoft)
-                    .clickable(onClick = onSwap),
+                    .then(if (swapEnabled) Modifier.clickable(onClick = onSwap) else Modifier),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     Icons.Outlined.SwapHoriz,
                     contentDescription = stringResource(Res.string.quick_swap_desc),
-                    tint = LedgerColors.Green,
+                    tint = LedgerColors.Green.copy(alpha = if (swapEnabled) 1f else 0.35f),
                     modifier = Modifier.size(20.dp),
                 )
             }
