@@ -118,16 +118,46 @@ In Xcode:
 3. Apple signs in and connects the repository.
 4. If App Store Connect already has the app, keep the existing product.
 5. Name the workflow: `Dinarly iOS Archive`.
-6. Start Condition: on a push to `main` and tags matching `ios-v*`.
-   This single pattern includes both production and `-stg` tags; the secrets
-   script selects the appropriate environment.
+6. Start Condition: **Tag** with pattern `ios-v*` — TAGS ONLY. Do not add a
+   push-to-`main` condition: every main push would archive and try to upload
+   the same `CURRENT_PROJECT_VERSION` again (duplicate build number → failed
+   distribution). One pattern covers both environments — `-stg` tags match
+   `ios-v*` too, and the secrets script selects the backend.
 7. Action: **Archive** (Release only).
 8. Destination: generic/iOS.
-9. Post-Action: **Internal TestFlight** (and optionally App Store later).
+9. Post-Action: **Internal TestFlight**, with automatic release to the
+   internal group (no review needed internally).
 
 Then manually run the workflow for the first build. On success, keep
 `App Store Connect → Xcode Cloud → Settings` alive for the next build
 number.
+
+## Staging → internal testing → production (iOS release cadence)
+
+Staging goes through the SAME workflow — the `-stg` tag selects the staging
+backend via `prepare_secrets.sh`, everything else (Archive, signing,
+TestFlight internal group) is identical. Build numbers strictly increase
+across both environments because they share `version.xcconfig`:
+
+```text
+1. bump version.xcconfig to e.g. 0.15.1 (75)
+2. tag + push  ios-v0.15.1-stg+75   → staging backend, TestFlight internal
+3. verify on a device (staging API, gold section, conversions)
+4. bump to 76, tag  ios-v0.15.1+76  → production backend, TestFlight internal
+5. promote/external from ASC when ready
+```
+
+Testers distinguish the two entries in TestFlight by build number and
+uploaded time; the staging build itself talks to the staging API. (Android
+parity note: Android staging additionally carries a `-staging`
+versionName suffix + launcher badge; an in-app iOS staging badge could ride
+on a flag inside the staging `Secrets.swift` later — no CI change needed.)
+
+The GitHub Actions iOS workflow (`.github/workflows/ios-testflight.yml`) is
+**disabled** (`gh workflow disable "iOS → TestFlight (asc)"`) since Nov 2026 —
+Xcode Cloud is the only iOS TestFlight pipeline. Re-enable with
+`gh workflow enable "iOS → TestFlight (asc)"` as a rollback path; never run
+both simultaneously on `ios-v*` tags (same build number race).
 
 ## Build number note
 
