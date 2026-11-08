@@ -20,23 +20,22 @@ REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 # ---- 1. stage Compose resources into the archived .app -----------------
-APP_DIR=""
-for CANDIDATE in \
-  "${CI_ARCHIVE_PATH:-}/Products/Applications"/*.app \
-  "${CI_ARCHIVE_PATH:-}" \
-  "${CI_APP_STORE_SIGNED_APP_PATH:-}"; do
-  if [[ -n "$CANDIDATE" && -d "$CANDIDATE" && -f "$CANDIDATE/Info.plist" ]]; then
-    APP_DIR="$CANDIDATE"
-    break
-  fi
-done
-if [[ -z "$APP_DIR" ]]; then
-  # fallback: Xcode Cloud archives under the workspace volume
-  APP_DIR="$(find /Volumes/workspace -maxdepth 8 -type d -name "*.app" -path "*Products/Applications*" 2>/dev/null | head -1)"
+APP_DIR="${CI_ARCHIVE_PATH:-}"
+if [[ -n "$APP_DIR" && ! -d "$APP_DIR" ]]; then
+  echo "xc: CI_ARCHIVE_PATH=$APP_DIR archive not found" >&2
+  APP_DIR=""
 fi
+if [[ -n "$APP_DIR" && ! -f "$APP_DIR/Products/Applications/ExchangeConvertApp.app/Info.plist" ]]; then
+  APP_DIR="$APP_DIR/Products/Applications/ExchangeConvertApp.app"
+fi
+if [[ -z "$APP_DIR" || ! -f "$APP_DIR/Info.plist" ]]; then
+  echo "::error::CI_ARCHIVE_PATH did not locate the archived .app (path='${CI_ARCHIVE_PATH:-<unset>}') — refusing to guess: a font-less build crashes at launch" >&2
+  exit 1
+fi
+echo "app archive: $APP_DIR"
 
 if [[ -z "$APP_DIR" ]]; then
-  echo "::error::archived .app not found — cannot stage compose resources; a TestFlight build without fonts crashes at launch" >&2
+  echo "::error::CI_ARCHIVE_PATH did not locate the archived .app (path='${CI_ARCHIVE_PATH:-<unset>}') — refusing to guess: a font-less build crashes at launch" >&2
   exit 1
 fi
 echo "app archive: $APP_DIR"
