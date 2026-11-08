@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalance
-import androidx.compose.material.icons.outlined.Help
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.TrendingUp
+import dali.hamza.shared.ui.icons.Icons
+import dali.hamza.shared.ui.icons.outlined.AccountBalance
+import dali.hamza.shared.ui.icons.outlined.Help
+import dali.hamza.shared.ui.icons.outlined.Settings
+import dali.hamza.shared.ui.icons.outlined.TrendingUp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

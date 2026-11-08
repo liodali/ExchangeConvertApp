@@ -17,11 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MailOutline
-import androidx.compose.material.icons.outlined.QueryStats
-import androidx.compose.material.icons.outlined.Security
-import androidx.compose.material.icons.outlined.Settings
+import dali.hamza.shared.ui.icons.Icons
+import dali.hamza.shared.ui.icons.outlined.QueryStats
+import dali.hamza.shared.ui.icons.outlined.Security
+import dali.hamza.shared.ui.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

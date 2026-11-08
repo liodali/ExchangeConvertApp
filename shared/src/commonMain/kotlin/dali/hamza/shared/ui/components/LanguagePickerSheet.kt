@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Label
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Smartphone
+import dali.hamza.shared.ui.icons.Icons
+import dali.hamza.shared.ui.icons.automirrored.outlined.Label
+import dali.hamza.shared.ui.icons.outlined.Check
+import dali.hamza.shared.ui.icons.outlined.Language
+import dali.hamza.shared.ui.icons.outlined.Smartphone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
