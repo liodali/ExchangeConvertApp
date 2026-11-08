@@ -4,4 +4,5 @@
 //固化 rule: each upload must be only 1-3 above Play's highest = 75).
 // iOS continues on 80 — its Xcode Cloud run #83 picked this up live.
 MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 76
+CURRENT_PROJECT_VERSION = 87
+// iOS: 87 > 86 skips the font-less Xcode Cloud uploads 76-86.
