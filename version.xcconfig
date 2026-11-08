@@ -1,12 +1,12 @@
 // Shared Android and iOS app version. Edit only these two values.
 // 0.15.0: gold widget release.
-//  iOS: 87 via the ios-v0.15.0+87 Xcode Cloud tag run (above the
-//       font-less builds 76-86; the font-staging fix landed in the
-//       ci_post_xcodebuild flow).
-// Android: 78 — Play's internal-track rule is +1..3 above its highest
-//       versionCode (75); iOS's +87 is fine because App Store Connect's
-//       version code namespace is a separate store from Google Play's.
+//  iOS: 91 — first build carrying the Copy Compose Resources phase
+//       (9aada71, fonts in every archive); clears TestFlight's font-less
+//       build 90. Staging run: ios-v0.15.0-stg+91 → prod follow-up:
+//       ios-v0.15.0+92 (build numbers are unique across both, same app).
+// Android: the next Play tag must match THIS build number — re-bump it
+//       into Play's +1..3 window when the Android release fires.
 // Keep xcconfig the single build-number source — Xcode Cloud's
-// automatic build number stays OFF.
+// automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 78
+CURRENT_PROJECT_VERSION = 91
