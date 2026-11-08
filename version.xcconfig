@@ -1,8 +1,12 @@
 // Shared Android and iOS app version. Edit only these two values.
-// Increment CURRENT_PROJECT_VERSION before every new store upload.
-// 0.15.0: gold widget release — AndroidPlay internal takes 76 (Play
-//固化 rule: each upload must be only 1-3 above Play's highest = 75).
-// iOS continues on 80 — its Xcode Cloud run #83 picked this up live.
+// 0.15.0: gold widget release.
+//  iOS: 87 via the ios-v0.15.0+87 Xcode Cloud tag run (above the
+//       font-less builds 76-86; the font-staging fix landed in the
+//       ci_post_xcodebuild flow).
+// Android: 78 — Play's internal-track rule is +1..3 above its highest
+//       versionCode (75); iOS's +87 is fine because App Store Connect's
+//       version code namespace is a separate store from Google Play's.
+// Keep xcconfig the single build-number source — Xcode Cloud's
+// automatic build number stays OFF.
 MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 87
-// iOS: 87 > 86 skips the font-less Xcode Cloud uploads 76-86.
+CURRENT_PROJECT_VERSION = 78
