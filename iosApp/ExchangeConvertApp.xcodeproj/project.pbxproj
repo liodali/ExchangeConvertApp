@@ -184,6 +184,7 @@
 				A6000004 /* Prepare Secrets */,
 				A6000002 /* Sources */,
 				A4000001 /* Frameworks */,
+				A600000D0C0000000000000D /* Copy Compose Resources */,
 				A6000003 /* Resources */,
 				E1000000000000000000010B /* CopyFiles */,
 			);
@@ -308,6 +309,21 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ ! -f \"$SRCROOT/ExchangeConvertApp/Secrets.swift\" ]; then\n    cp \"$SRCROOT/ExchangeConvertApp/Secrets.swift.example\" \"$SRCROOT/ExchangeConvertApp/Secrets.swift\"\n    echo \"Created Secrets.swift from template - fill in your exchangerate.host access key.\"\nfi\n";
 			showEnvVarsInLog = 0;
+		};
+
+		A600000D0C0000000000000D /* Copy Compose Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Compose Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "case \"$PLATFORM_NAME\" in iphoneos) SDKGEN=iosArm64 ;; iphonesimulator*) SDKGEN=iosSimulatorArm64 ;; *) SDKGEN=\"\" ;; esac; [ -d \"$TARGET_BUILD_DIR/compose-resources\" ] && exit 0; [ -z \"$SDKGEN\" ] && exit 0; RES=$(ls -d \"$PROJECT_DIR/../shared/build/generated/compose/resourceGenerator/assembledResources/${SDKGEN}\"*/composeResources 2>/dev/null | head -1 || true); [ -z \"$RES\" ] && { echo \"warning: compose resources not generated yet - run the framework build first\" >&2; exit 0; }; mkdir -p \"$TARGET_BUILD_DIR/compose-resources\"; cp -R \"$RES/\" \"$TARGET_BUILD_DIR/compose-resources/\"; echo \"compose resources staged: $RES\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
