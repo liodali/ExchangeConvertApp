@@ -1,22 +1,55 @@
 name: spm-cdn-probe
-# Throwaway probe: is GitHub release-assets CDN serving datacenter IPs?
-# GET https://github.com/getsentry/sentry-cocoa/releases/download/8.58.4/Sentry-Dynamic.xcframework.zip
-# 504 = CDN still throttling Azure egress (runs 93-95 + GH ios run). 200/302 = recovered.
+# Throwaway probe: compare anonymous release-asset download (what SwiftPM
+# does) against the authenticated API endpoint, from a real macOS runner.
 on:
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   probe:
-    runs-on: ubuntu-latest
+    runs-on: macos-26
     steps:
-      - name: Probe
+      - name: Anonymous download (SwiftPM path), 8 tries x 3 files
         run: |
-          for i in 1 2 3; do
-            CODE=$(curl -sIL -o /dev/null -w "%{http_code}" --max-time 30 \
-              "https://github.com/getsentry/sentry-cocoa/releases/download/8.58.4/Sentry-Dynamic.xcframework.zip")
-            echo "attempt $i → HTTP $CODE"
-            [ "$CODE" = "200" ] && exit 0
-            sleep 5
+          for n in Sentry Sentry-Dynamic Sentry-WithoutUIKitOrAppKit; do
+            out=""
+            for i in 1 2 3 4 5 6 7 8; do
+              c=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 60 -r 0-1023 \
+                "https://github.com/getsentry/sentry-cocoa/releases/download/9.29.2/$n.xcframework.zip")
+              out="$out $c"
+            done
+            echo "anon  $n:$out"
           done
-          echo "::error::CDN still blocking datacenter egress"
-          exit 1
+
+      - name: Authenticated API download, 8 tries x 3 files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for n in Sentry Sentry-Dynamic Sentry-WithoutUIKitOrAppKit; do
+            ID=$(gh api repos/getsentry/sentry-cocoa/releases/tags/9.29.2 \
+              --jq ".assets[]|select(.name==\"$n.xcframework.zip\")|.id")
+            out=""
+            for i in 1 2 3 4 5 6 7 8; do
+              c=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 60 -r 0-1023 \
+                -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+                "https://api.github.com/repos/getsentry/sentry-cocoa/releases/assets/$ID")
+              out="$out $c"
+            done
+            echo "api   $n (id $ID):$out"
+          done
+
+      - name: Full authenticated download of Sentry.xcframework.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ID=$(gh api repos/getsentry/sentry-cocoa/releases/tags/9.29.2 \
+            --jq '.assets[]|select(.name=="Sentry.xcframework.zip")|.id')
+          for i in 1 2 3; do
+            gh api -H "Accept: application/octet-stream" \
+              repos/getsentry/sentry-cocoa/releases/assets/$ID > Sentry.zip \
+              && unzip -tq Sentry.zip && { echo "FULL DOWNLOAD OK ($(stat -f%z Sentry.zip) bytes)"; exit 0; }
+            sleep 10
+          done
+          echo "::error::full authenticated download failed"; exit 1
