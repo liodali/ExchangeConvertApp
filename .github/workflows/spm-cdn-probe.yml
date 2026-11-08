@@ -1,0 +1,22 @@
+name: spm-cdn-probe
+# Throwaway probe: is GitHub release-assets CDN serving datacenter IPs?
+# GET https://github.com/getsentry/sentry-cocoa/releases/download/8.58.4/Sentry-Dynamic.xcframework.zip
+# 504 = CDN still throttling Azure egress (runs 93-95 + GH ios run). 200/302 = recovered.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe
+        run: |
+          for i in 1 2 3; do
+            CODE=$(curl -sIL -o /dev/null -w "%{http_code}" --max-time 30 \
+              "https://github.com/getsentry/sentry-cocoa/releases/download/8.58.4/Sentry-Dynamic.xcframework.zip")
+            echo "attempt $i → HTTP $CODE"
+            [ "$CODE" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "::error::CDN still blocking datacenter egress"
+          exit 1
