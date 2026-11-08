@@ -49,3 +49,32 @@ echo "JDK 21 ready: $JDK_HOME"
 cd "$REPO_ROOT"
 (. "$SCRIPT_DIR/ci_cache.sh"; xc_cache_restore) \
   || echo "xc-cache: restore failed — continuing with a cold build"
+
+# ---- Pre-resolve SwiftPM dependencies with retries ----------------------
+# Xcode Cloud's own resolution is single-shot: one transient 504 from a
+# github.com release download kills the whole run (runs 93/94 failed on
+# sentry-cocoa binary artifacts, Nov 2026). Resolve into the SAME
+# DerivedData the archive uses (see the xcodebuild invocation log) so the
+# archive-time resolution becomes a cache hit. Fail loudly after 5 tries.
+if [[ -n "${CI_PRIMARY_REPOSITORY_PATH:-}" ]]; then
+  resolve_ok=""
+  for attempt in 1 2 3 4 5; do
+    echo "package resolve attempt $attempt/5..."
+    if xcodebuild \
+        -project "$CI_PRIMARY_REPOSITORY_PATH/iosApp/ExchangeConvertApp.xcodeproj" \
+        -scheme ExchangeConvertApp \
+        -destination 'generic/platform=iOS' \
+        -derivedDataPath /Volumes/workspace/DerivedData \
+        -resolvePackageDependencies; then
+      resolve_ok=1
+      break
+    fi
+    echo "resolve failed — waiting 20s before retrying"
+    sleep 20
+  done
+  if [[ -z "$resolve_ok" ]]; then
+    echo "::error::SwiftPM dependencies failed to resolve after 5 attempts (GitHub release downloads keep 504ing) — failing fast; re-run the build later" >&2
+    exit 1
+  fi
+  echo "SwiftPM dependencies resolved."
+fi
