@@ -397,6 +397,14 @@ open iosApp/ExchangeConvertApp.xcodeproj
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64  # plain simulator framework
 ```
 
+### iOS release memory — required before every `ios-v*` tag
+
+- The version file is **`version.xcconfig`** at the repository root (not `version.xconfig`). Before creating or pushing any `ios-v*` release tag, including staging tags, update `MARKETING_VERSION` and increment `CURRENT_PROJECT_VERSION` for the intended release. Do not create a tag first and bump the file afterward.
+- Validate the exact proposed tag with `python3 script/app-version.py --tag '<tag>'`. For example, `ios-v0.15.1+75` or `ios-v0.15.1-stg+75` requires version `0.15.1`, build `75`. These are examples, not the next release values.
+- Commit the version update with the release changes, then tag that commit. Never reuse an uploaded version/build pair; check current store uploads before choosing the next build number. Remember the file also controls Android's version code.
+- Xcode Cloud is the active iOS release pipeline; do not re-enable GitHub iOS releases in parallel. **Cloud's built-in distribution currently assigns its own build number. Updating this file does not synchronize that counter.** Check Cloud's Next Build Number before release; exact project-controlled uploads require the custom archive/export/upload flow, which is not yet implemented or validated. Do not claim otherwise or rely on an unverified “disable automatic numbering” toggle.
+- See [`docs/app-versioning.md`](docs/app-versioning.md) and [`docs/xcode-cloud.md`](docs/xcode-cloud.md) for release context; this rule supersedes conflicting Cloud-numbering guidance there.
+
 ### 7.3 Shared KMP Module
 ```bash
 ./gradlew :shared:build
