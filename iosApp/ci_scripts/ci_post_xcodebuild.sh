@@ -19,13 +19,22 @@ SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
-# ---- 1. stage Compose resources into the archived .app -----------------
+# ---- 1. VERIFY Compose resources in the archived .app ------------------
 # CI_ARCHIVE_PATH is the .xcarchive ROOT; the .app always lives at
 # Products/Applications/<name>.app inside it. Resolving anything else
 # silently stages resources next to the app instead of inside it (and
 # the stray folder beside the .app also made xcodebuild skip the archive's
 # ApplicationProperties — every export then rejects the archive: run 91,
 # Nov 2026, "expected one {}").
+#
+# This runs AFTER the exports, so anything staged here can never reach
+# the exported .ipa TestFlight distributes — staging is a NO-OP for
+# shipping. The only pre-export hook is the Copy Compose Resources build
+# phase (which must produce compose-resources/composeResources/<tree> —
+# the extra composeResources level is REQUIRED: the static-framework
+# resource reader resolves paths under it; a flattened copy is exactly
+# as fatal as no fonts at all — run 92, Nov 2026). So this block only
+# VERIFIES and fails loudly; it never "fixes" an unshippable build.
 ARCHIVE_DIR="${CI_ARCHIVE_PATH:-}"
 if [[ -n "$ARCHIVE_DIR" && ! -d "$ARCHIVE_DIR" ]]; then
   echo "xc: CI_ARCHIVE_PATH=$ARCHIVE_DIR archive not found" >&2
@@ -37,20 +46,15 @@ if [[ -z "$ARCHIVE_DIR" || ! -f "$APP_DIR/Info.plist" ]]; then
   exit 1
 fi
 echo "app archive: $APP_DIR"
-echo "app archive: $APP_DIR"
 
-if [[ -d "$APP_DIR/compose-resources" ]]; then
-  echo "compose-resources already present (full Gradle ran)"
-else
-  RES="$(ls -d shared/build/generated/compose/resourceGenerator/assembledResources/iosArm64*/composeResources 2>/dev/null | head -1 || true)"
-  if [[ -z "$RES" ]]; then
-    echo "::error::compose resources missing — the app would crash at launch without fonts" >&2
-    exit 1
-  fi
-  mkdir -p "$APP_DIR/compose-resources"
-  cp -R "$RES" "$APP_DIR/compose-resources/"
-  echo "staged compose resources (fonts) into the archive app"
+# NOTE: resources must be under compose-resources/composeResources/ (the
+# generated tree itself), NOT flattened into compose-resources/.
+CR="$APP_DIR/compose-resources/composeResources"
+if [[ ! -f "$CR/font/manrope_bold.ttf" || ! -f "$CR/font/inter_regular.ttf" ]]; then
+  echo "::error::compose fonts NOT in the archived .app under compose-resources/composeResources/ — the exported .ipa WILL crash at launch (theme MissingResourceException). Fix the Copy Compose Resources build phase; staging here cannot help (exports already ran)." >&2
+  exit 1
 fi
+echo "compose resources verified in the archived .app (fonts present)"
 
 # ---- 2. build-number guard --------------------------------------------
 EXPECTED="$(sed -n 's/^CURRENT_PROJECT_VERSION *= *//p' version.xcconfig | tr -d '[:space:]')"
