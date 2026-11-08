@@ -189,8 +189,9 @@ dependencies {
 
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
-    // crash reporting → self-hosted GlitchTip (Sentry protocol)
-    implementation(libs.sentry.android)
+    // crash reporting → self-hosted GlitchTip (Sentry protocol) — KMP SDK
+    // (drives sentry-android on Android; the shared module reports through it)
+    implementation(libs.sentry.kotlin.multiplatform)
     // logging — Napier sink is planted by shared's AndroidAppContext; the
     // app module logs too (FCM service / token lifecycle)
     implementation(libs.napier)

@@ -507,6 +507,31 @@ jobs:
           PY
           plutil -lint "$PROJECT/project.pbxproj"
 
+      - name: Pre-resolve SwiftPM packages (retries — GitHub CDN 504s)
+        run: |
+          set -euo pipefail
+          # sentry-cocoa's binary artifacts download from GitHub's release
+          # CDN, which intermittently 504s datacenter egress (Nov 2026:
+          # Xcode Cloud runs 93-95 + a GH run all died on it). Resolve into
+          # the SAME DerivedData the archive uses so its resolution is a
+          # cache hit; retry until the CDN lets a request through.
+          ok=""
+          for attempt in 1 2 3 4 5 6; do
+            echo "resolve attempt $attempt/6..."
+            if xcodebuild \
+                -project "$PROJECT" \
+                -scheme "$SCHEME" \
+                -destination 'generic/platform=iOS' \
+                -derivedDataPath "$RUNNER_TEMP/xcode-dd" \
+                -resolvePackageDependencies; then
+              ok=1
+              break
+            fi
+            echo "resolve failed — waiting 20s before retrying"
+            sleep 20
+          done
+          [ -n "$ok" ] || { echo "::error::SwiftPM resolution failed after 6 attempts"; exit 1; }
+
       - name: Archive (Release · generic/iOS · manual signing)
         env:
           VERSION: ${{ steps.ids.outputs.version }}

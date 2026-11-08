@@ -14,7 +14,7 @@ import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.LocalNotifier
 import dali.hamza.shared.platform.RateAlertScheduler
 import io.github.aakira.napier.Napier
-import io.sentry.android.core.SentryAndroid
+import dali.hamza.shared.platform.SentrySetup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,16 +36,14 @@ class ExchangeApplication : Application() {
         // DSN comes from local.properties / CI secret; empty = disabled
         // (local dev without a DSN stays fully functional). PII stays off
         // and only crashes/ANRs are reported — no tracing, no user ids.
-        if (BuildConfig.GLITCHTIP_DSN.isNotBlank()) {
-            SentryAndroid.init(this) { options ->
-                options.dsn = BuildConfig.GLITCHTIP_DSN
-                options.environment = if (BuildConfig.DEBUG) "debug" else "production"
-                options.release = "sovereign-ledger@${BuildConfig.VERSION_NAME}"
-                options.isSendDefaultPii = false
-                options.tracesSampleRate = 0.0 // crashes/ANRs only
-                options.isDebug = BuildConfig.DEBUG // SDK transport logs in dev builds
-            }
-        }
+        // One init for both platforms via the shared KMP SDK — on Android
+        // it drives sentry-android internally.
+        dali.hamza.shared.platform.SentrySetup.start(
+            dsn = BuildConfig.GLITCHTIP_DSN,
+            environment = if (BuildConfig.DEBUG) "debug" else "production",
+            release = "sovereign-ledger@${BuildConfig.VERSION_NAME}",
+            debug = BuildConfig.DEBUG,
+        )
 
         // shared HTTP timing → GlitchTip breadcrumbs (slow/failed → events)
         dali.hamza.shared.platform.installHttpTelemetry(

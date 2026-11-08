@@ -8,6 +8,7 @@ appUpdate = "2.1.0"
 appfunctions = "1.0.0-alpha13"
 coilCompose = "2.7.0"
 sentryAndroid = "8.61.0"
+sentryKmp = "0.29.0"
 converterMoshi = "3.0.0"
 firebaseBom = "35.0.2"
 googleServices = "4.5.0"
@@ -78,6 +79,7 @@ androidx-appfunctions-compiler = { module = "androidx.appfunctions:appfunctions-
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
 sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }
+sentry-kotlin-multiplatform = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentryKmp" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:navigation-dynamic-features-fragment", version.ref = "navigationCompose" }
 androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationCompose" }
@@ -163,6 +165,7 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 [plugins]
 org_jetbrains_kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+sentryKmp = { id = "io.sentry.kotlin.multiplatform.gradle", version.ref = "sentryKmp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 # Add the Compose Compiler Gradle plugin, the version matches the Kotlin plugin

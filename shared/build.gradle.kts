@@ -1,14 +1,29 @@
+// Sentry KMP Gradle plugin: configures the Sentry Cocoa linker on Apple
+// targets. The Cocoa SDK itself comes from the Xcode project's SwiftPM
+// package (provider NONE — see sentryKmp block below); the SDK artifact
+// and this plugin both ship from Maven Central / the Plugin Portal, so
+// Gradle builds never depend on GitHub's release CDN.
+import io.sentry.kotlin.multiplatform.gradle.AppleDependencyProvider
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinxSerialization)
+    alias(libs.plugins.sentryKmp)
     id("com.google.devtools.ksp")
     id("app.cash.sqldelight")
 }
 
 val sqlDelightVersion = libs.versions.sqlDelightVersion.get()
+
+// The Sentry Cocoa SDK is linked by the Xcode project (SwiftPM package,
+// exact 9.29.2 — the version KMP 0.29 is built against), so the plugin
+// must not install a second copy. Provider NONE = link-only.
+sentryKmp {
+    autoInstall.apple.provider = AppleDependencyProvider.NONE
+}
 
 kotlin {
     androidTarget()
@@ -59,6 +74,11 @@ kotlin {
 
             // Koin
             implementation(libs.koin.core)
+
+            // Crash reporting — one Sentry init for both platforms
+            // (sentry-android / sentry-cocoa under the hood). Cocoa SDK
+            // itself is linked from the Xcode project's SwiftPM package.
+            implementation(libs.sentry.kotlin.multiplatform)
             implementation(libs.napier)
         }
 

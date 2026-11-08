@@ -83,13 +83,22 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         // Crash reporting → self-hosted GlitchTip (Sentry protocol), same
-        // server as the Android build. Captures native AND Kotlin crashes
-        // (kfun symbols survive). Empty DSN (CI template) = disabled.
-        if !ExchangeSecrets.glitchTipDSN.isEmpty {
-            SentrySDK.start { options in
-                options.dsn = ExchangeSecrets.glitchTipDSN
-            }
-        }
+        // server as the Android build. One init for both platforms via the
+        // shared KMP SDK — it drives sentry-cocoa internally, so native AND
+        // Kotlin crashes both land (kfun symbols survive). Empty DSN (CI
+        // template) = disabled.
+        #if DEBUG
+        let sentryEnv = "debug"
+        #else
+        let sentryEnv = "production"
+        #endif
+        let sentryRelease = "sovereign-ledger@\((Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "0.0.0")"
+        SentrySetup.shared.start(
+            dsn: ExchangeSecrets.glitchTipDSN,
+            environment: sentryEnv,
+            release: sentryRelease,
+            debug: false,
+        )
         // Shared HTTP timing → GlitchTip breadcrumbs (slow/failed → events)
         TelemetryKt.installHttpTelemetry(sink: GlitchTipHttpTelemetry())
         // Kotlin exports init*-named functions with a "do" prefix to ObjC
