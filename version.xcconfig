@@ -1,13 +1,14 @@
 // Shared Android and iOS app version. Edit only these two values.
 // 0.15.0: gold widget release.
-//  iOS: 93 — TestFlight builds follow the Xcode Cloud RUN number at
-//       upload (87/90/92 observed), not this value; this still feeds the
-//       archive + the ci_post guard. 92 (staging) crashed: the Copy
-//       Compose Resources phase flattened the composeResources level —
-//       fixed in e6cf235+this. Prod follow-up: ios-v0.15.0+94.
+//  iOS PROD tomorrow: tag ios-v0.15.0+94 — staging 93 (ios-v0.15.0-stg+93)
+//       verified on-device: launch crash fixed (composeResources layout),
+//       Sentry KMP 0.29 (cocoa exact 9.29.2 — keep this pin, 9.33.0 is
+//       untested against KMP 0.29), Xcode 26.6 image.
+//  TestFlight build numbers follow the CI RUN number (93 observed), not
+//       this value; this still feeds the archive + the ci_post guard.
 // Android: the next Play tag must match THIS build number — re-bump it
 //       into Play's +1..3 window when the Android release fires.
 // Keep xcconfig the single build-number source — Xcode Cloud's
 // automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 93
+CURRENT_PROJECT_VERSION = 94
