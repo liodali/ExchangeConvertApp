@@ -313,6 +313,7 @@
 
 		A600000D0C0000000000000D /* Copy Compose Resources */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -323,7 +324,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "case \"$PLATFORM_NAME\" in iphoneos) SDKGEN=iosArm64 ;; iphonesimulator*) SDKGEN=iosSimulatorArm64 ;; *) SDKGEN=\"\" ;; esac; [ -d \"$TARGET_BUILD_DIR/compose-resources\" ] && exit 0; [ -z \"$SDKGEN\" ] && exit 0; RES=$(ls -d \"$PROJECT_DIR/../shared/build/generated/compose/resourceGenerator/assembledResources/${SDKGEN}\"*/composeResources 2>/dev/null | head -1 || true); [ -z \"$RES\" ] && { echo \"warning: compose resources not generated yet - run the framework build first\" >&2; exit 0; }; mkdir -p \"$TARGET_BUILD_DIR/compose-resources\"; cp -R \"$RES/\" \"$TARGET_BUILD_DIR/compose-resources/\"; echo \"compose resources staged: $RES\"";
+			shellScript = "case \"$PLATFORM_NAME\" in iphoneos) SDKGEN=iosArm64 ;; iphonesimulator*) SDKGEN=iosSimulatorArm64 ;; *) SDKGEN=\"\" ;; esac; APP_BUNDLE=\"$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME\"; [ -d \"$APP_BUNDLE/compose-resources\" ] && exit 0; [ -z \"$SDKGEN\" ] && exit 0; RES=$(ls -d \"$PROJECT_DIR/../shared/build/generated/compose/resourceGenerator/assembledResources/${SDKGEN}\"*/composeResources 2>/dev/null | head -1 || true); [ -z \"$RES\" ] && { echo \"warning: compose resources not generated yet - run the framework build first\" >&2; exit 0; }; mkdir -p \"$APP_BUNDLE/compose-resources\"; cp -R \"$RES/\" \"$APP_BUNDLE/compose-resources/\"; echo \"compose resources staged into app bundle: $RES\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
