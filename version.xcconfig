@@ -1,12 +1,13 @@
 // Shared Android and iOS app version. Edit only these two values.
 // 0.15.0: gold widget release.
-//  ANDROID PROD: app-v0.15.0+79 — Play's +1..3 guard requires the code to
-//       sit next to Play's highest (78), so xcconfig is 79 for that tag.
-//       iOS prod already cut at ios-v0.15.0+97 (its run validates against
-//       its own checkout, not live main).
+//  iOS PROD: build 98 (ios-v0.15.0+98) — same verified 0.15.0 code as
+//       build 97, fresh build number for the next TestFlight/App Store
+//       round. sentry-cocoa pinned exact 9.29.2 (KMP 0.29's version).
+//  ANDROID PROD shipped: app-v0.15.0+79 on the internal track (Play
+//       +1..3 window over 78) — promote to production in Console.
 //  TestFlight build numbers follow the CI RUN number (93/94 observed),
 //       not this value; this still feeds the archive + the ci_post guard.
 // Keep xcconfig the single build-number source — Xcode Cloud's
 // automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.15.0
-CURRENT_PROJECT_VERSION = 79
+CURRENT_PROJECT_VERSION = 98
