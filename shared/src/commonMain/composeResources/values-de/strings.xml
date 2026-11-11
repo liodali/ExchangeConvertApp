@@ -390,4 +390,24 @@
     <string name="gold_loading">Goldpreise werden geladen…</string>
     <string name="gold_karat_value_desc">%1$s: %2$s %3$s pro %4$s</string>
     <string name="gold_unit_desc">Masseneinheit</string>
+    <string name="metals_section_title">Metalle</string>
+    <string name="metals_assets_badge">%1$d METALLE</string>
+    <string name="metals_price_unit">pro Feinunze</string>
+    <string name="metals_per_gram">%1$s / g</string>
+    <string name="metal_name_gold">Gold</string>
+    <string name="metal_name_silver">Silber</string>
+    <string name="metal_name_platinum">Platin</string>
+    <string name="metal_name_palladium">Palladium</string>
+    <string name="metals_ratio_title">Gold-/Silber-Ratio</string>
+    <string name="metals_ratio_30d">30-T-Bereich %1$s – %2$s</string>
+    <string name="metals_ratio_desc">1 oz Gold ≈ %1$s oz Silber</string>
+    <string name="metals_convert_cta">Metalle umrechnen</string>
+    <string name="metals_open_entry">Weitere Metalle</string>
+    <string name="metals_open_entry_desc">Übersicht Silber, Platin und Palladium</string>
+    <string name="metals_loading">Metallpreise werden geladen…</string>
+    <string name="metals_unavailable">Metallpreise derzeit nicht verfügbar.</string>
+    <string name="metals_retry">Erneut versuchen</string>
+    <string name="metals_stale_note">Zuletzt geladene Kurse — Aktualisierung fehlgeschlagen</string>
+    <string name="metals_usd_fallback">Nicht in %1$s notiert — USD wird angezeigt</string>
+    <string name="metals_selected_desc">%1$s ausgewählt</string>
 </resources>

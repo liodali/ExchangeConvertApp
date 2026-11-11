@@ -72,6 +72,7 @@ import dali.hamza.shared.ui.screens.FaqScreen
 import dali.hamza.shared.ui.screens.FeedbackScreen
 import dali.hamza.shared.ui.screens.FullConverterScreen
 import dali.hamza.shared.ui.screens.HistoryScreen
+import dali.hamza.shared.ui.screens.MetalsScreen
 import dali.hamza.shared.ui.screens.RateAlertsScreen
 import dali.hamza.shared.ui.screens.WidgetsScreen
 import dali.hamza.shared.ui.screens.SupportScreen
@@ -114,6 +115,7 @@ object Routes {
     const val CONVERTER = "converter"
     const val FULL_CONVERTER = "full-converter"
     const val RATE_ALERTS = "rate-alerts"
+    const val METALS = "metals"
     const val WIDGETS = "widgets"
     const val FAQ = "faq"
     const val SUPPORT = "support"
@@ -379,6 +381,7 @@ fun ExchangeCurrencyApp(
                             }
                         },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
+                        onOpenMetals = { navController.navigate(Routes.METALS) },
                     )
                     }
                 }
@@ -451,6 +454,33 @@ fun ExchangeCurrencyApp(
                         },
                         currencies = sharedState.currencies,
                         defaultBase = sharedState.fromCurrency?.name,
+                        onBack = { navController.popBackStack() },
+                    )
+                    }
+                }
+                composable(Routes.METALS) {
+                    PageCanvas {
+                    MetalsScreen(
+                        // display fiat = the stored market base, same rule as
+                        // the Gold section (labels its own USD fallback)
+                        displayCurrency = sharedState.marketBase.ifEmpty { "USD" },
+                        // CTA prefill mirrors onConvertGold: 1 troy oz of the
+                        // selected metal → display fiat. Prefill only — no
+                        // convert(), which would record a ledger entry the
+                        // user never executed.
+                        onConvertMetal = { metalCode, fiat ->
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(metalCode)
+                                ?.let(viewModel::selectFromCurrency)
+                            dali.hamza.shared.data.CurrenciesCatalog.byCode(fiat)
+                                ?.let(viewModel::selectToCurrency)
+                            viewModel.selectFromUnit(dali.hamza.shared.common.MetalPricing.GoldUnit.TROY_OUNCE)
+                            viewModel.onAmountChange("1")
+                            navController.navigate(Routes.CONVERTER) {
+                                popUpTo(Routes.HOME) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         onBack = { navController.popBackStack() },
                     )
                     }

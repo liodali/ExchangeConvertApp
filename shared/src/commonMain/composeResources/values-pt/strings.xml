@@ -390,4 +390,24 @@
     <string name="gold_loading">Carregando preços do ouro…</string>
     <string name="gold_karat_value_desc">%1$s: %2$s %3$s por %4$s</string>
     <string name="gold_unit_desc">Unidade de massa</string>
+    <string name="metals_section_title">Metais</string>
+    <string name="metals_assets_badge">%1$d METAIS</string>
+    <string name="metals_price_unit">por onça troy</string>
+    <string name="metals_per_gram">%1$s / g</string>
+    <string name="metal_name_gold">Ouro</string>
+    <string name="metal_name_silver">Prata</string>
+    <string name="metal_name_platinum">Platina</string>
+    <string name="metal_name_palladium">Paládio</string>
+    <string name="metals_ratio_title">Ratio ouro / prata</string>
+    <string name="metals_ratio_30d">Faixa 30D %1$s – %2$s</string>
+    <string name="metals_ratio_desc">1 oz de ouro ≈ %1$s oz de prata</string>
+    <string name="metals_convert_cta">Converter metais</string>
+    <string name="metals_open_entry">Outros metais</string>
+    <string name="metals_open_entry_desc">Visão geral de prata, platina e paládio</string>
+    <string name="metals_loading">Carregando preços dos metais…</string>
+    <string name="metals_unavailable">Preços dos metais indisponíveis no momento.</string>
+    <string name="metals_retry">Tentar novamente</string>
+    <string name="metals_stale_note">Últimas cotações carregadas — falha ao atualizar</string>
+    <string name="metals_usd_fallback">Sem cotação em %1$s — exibindo USD</string>
+    <string name="metals_selected_desc">%1$s selecionado</string>
 </resources>

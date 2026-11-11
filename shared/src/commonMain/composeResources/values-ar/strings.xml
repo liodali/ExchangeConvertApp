@@ -390,4 +390,24 @@
     <string name="gold_loading">جارٍ تحميل أسعار الذهب…</string>
     <string name="gold_karat_value_desc">%1$s: %2$s %3$s لكل %4$s</string>
     <string name="gold_unit_desc">وحدة الكتلة</string>
+    <string name="metals_section_title">المعادن</string>
+    <string name="metals_assets_badge">%1$d معادن</string>
+    <string name="metals_price_unit">للاونصة</string>
+    <string name="metals_per_gram">%1$s / غ</string>
+    <string name="metal_name_gold">الذهب</string>
+    <string name="metal_name_silver">الفضة</string>
+    <string name="metal_name_platinum">البلاتين</string>
+    <string name="metal_name_palladium">البالاديوم</string>
+    <string name="metals_ratio_title">نسبة الذهب / الفضة</string>
+    <string name="metals_ratio_30d">نطاق 30 يومًا %1$s – %2$s</string>
+    <string name="metals_ratio_desc">أونصة ذهب ≈ %1$s أونصة فضة</string>
+    <string name="metals_convert_cta">تحويل المعادن</string>
+    <string name="metals_open_entry">معادن أخرى</string>
+    <string name="metals_open_entry_desc">نظرة عامة على الفضة والبلاتين والبالاديوم</string>
+    <string name="metals_loading">جارٍ تحميل أسعار المعادن…</string>
+    <string name="metals_unavailable">أسعار المعادن غير متوفرة حاليًا.</string>
+    <string name="metals_retry">إعادة المحاولة</string>
+    <string name="metals_stale_note">آخر الأسعار المحمّلة — فشل التحديث</string>
+    <string name="metals_usd_fallback">غير مقوّم بـ %1$s — يتم عرض الدولار</string>
+    <string name="metals_selected_desc">تم اختيار %1$s</string>
 </resources>

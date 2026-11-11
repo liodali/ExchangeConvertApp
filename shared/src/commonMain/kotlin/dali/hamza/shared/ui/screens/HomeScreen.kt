@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import dali.hamza.shared.ui.icons.Icons
+import dali.hamza.shared.ui.icons.automirrored.outlined.ArrowForward
 import dali.hamza.shared.ui.icons.automirrored.outlined.ArrowRightAlt
 import dali.hamza.shared.ui.icons.outlined.ArrowDropDown
 import dali.hamza.shared.ui.icons.outlined.ArrowDropUp
@@ -94,6 +95,8 @@ import dali.hamza.shared.ui.viewmodel.PairCardData
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 import echangecurrencyapp.shared.generated.resources.Res
+import echangecurrencyapp.shared.generated.resources.metals_open_entry
+import echangecurrencyapp.shared.generated.resources.metals_open_entry_desc
 import echangecurrencyapp.shared.generated.resources.alerts_active_for
 import echangecurrencyapp.shared.generated.resources.alerts_add_for
 import echangecurrencyapp.shared.generated.resources.common_amount
@@ -155,6 +158,7 @@ fun HomeScreen(
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
     goldViewModel: GoldViewModel? = null,
     onConvertGold: (from: String, to: String, unit: dali.hamza.shared.common.MetalPricing.GoldUnit) -> Unit = { _, _, _ -> },
+    onOpenMetals: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
@@ -297,6 +301,14 @@ fun HomeScreen(
                             onRetry = goldVm::retry,
                         )
 
+                        // metals v3 (plans/metals-v3.md §2): the Home Gold
+                        // section stays authoritative for gold — the 4-asset
+                        // overview (silver/platinum/palladium + gold card) is
+                        // a pushed route entered from here, NOT a second
+                        // gold pricing block in the feed
+                        Spacer(Modifier.height(12.dp))
+                        OtherMetalsEntry(onOpenMetals = onOpenMetals)
+
                         Spacer(Modifier.height(16.dp))
                         QuickExchangeSection(
                             amount = state.amount,
@@ -350,6 +362,11 @@ fun HomeScreen(
                     onConvertGold = onConvertGold,
                     onRetry = goldVm::retry,
                 )
+
+                // metals v3 entry — same placement rule as the expanded branch:
+                // Home Gold stays authoritative, the 4-asset overview is pushed
+                Spacer(Modifier.height(12.dp))
+                OtherMetalsEntry(onOpenMetals = onOpenMetals)
 
                 Spacer(Modifier.height(32.dp))
                 QuickExchangeSection(
@@ -694,9 +711,49 @@ private fun AlertBell(
     }
 }
 
+/**
+ * Metals v3 Home entry (plans/metals-v3.md §2): secondary row under the
+ * Gold section pushing the 4-asset Metals overview route. Gold itself
+ * stays in its own section — this only navigates, no duplicate pricing.
+ */
+@Composable
+private fun OtherMetalsEntry(onOpenMetals: () -> Unit) {
+    val entryDescription = stringResource(Res.string.metals_open_entry_desc)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onOpenMetals)
+            .semantics { contentDescription = entryDescription }
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(Res.string.metals_open_entry),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = LedgerColors.TextSecondary,
+            )
+            Text(
+                text = entryDescription,
+                style = MaterialTheme.typography.labelSmall,
+                color = LedgerColors.TextMuted,
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = null,
+            tint = LedgerColors.Gold,
+            modifier = Modifier.size(16.dp),
+        )
+    }
+}
+
 /** 7-day change chip: tiny direction arrow + Inter 600/14, green/red. */
 @Composable
 private fun DeltaChip(percent: Double) {
+
     val positive = percent >= 0
     Row(
         verticalAlignment = Alignment.CenterVertically,

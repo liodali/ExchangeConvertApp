@@ -176,7 +176,9 @@ object CurrenciesCatalog {
             add(Currency("XCD", "East Caribbean Dollar"))
             add(Currency("XDR", "Special Drawing Rights"))
             add(Currency("XOF", "CFA Franc BCEAO"))
+            add(Currency("XPD", "Palladium (troy ounce)"))
             add(Currency("XPF", "CFP Franc"))
+            add(Currency("XPT", "Platinum (troy ounce)"))
             add(Currency("YER", "Yemeni Rial"))
             add(Currency("ZAR", "South African Rand"))
             add(Currency("ZMK", "Zambian Kwacha (pre-2013)"))
@@ -193,8 +195,8 @@ object CurrenciesCatalog {
      * on explicit `symbol` requests), so converter pairs touching them
      * resolve through on-demand pair fetches instead of cross rates.
      */
-    val assetCodes: Set<String> = setOf("BTC", "XAU", "XAG")
+    val assetCodes: Set<String> = setOf("BTC", "XAU", "XAG", "XPT", "XPD")
 
     /** Asset codes priced by mass: their converter amounts carry a unit suffix. */
-    val metalCodes: Set<String> = setOf("XAU", "XAG")
+    val metalCodes: Set<String> = setOf("XAU", "XAG", "XPT", "XPD")
 }

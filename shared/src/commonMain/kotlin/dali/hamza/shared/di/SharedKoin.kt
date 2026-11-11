@@ -20,6 +20,7 @@ import dali.hamza.shared.ui.viewmodel.AccountViewModel
 import dali.hamza.shared.ui.viewmodel.GoldViewModel
 import dali.hamza.shared.ui.viewmodel.HomeViewModel
 import dali.hamza.shared.ui.viewmodel.HistoryViewModel
+import dali.hamza.shared.ui.viewmodel.MetalsViewModel
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 import org.koin.core.Koin
@@ -91,6 +92,7 @@ fun sharedModule(
     factory { HistoryViewModel(get()) }
     factory { HomeViewModel(get()) }
     factory { GoldViewModel(get()) }
+    factory { MetalsViewModel(get()) }
     factory { RateAlertsViewModel(get(), get(), get(), get()) }
 }
 
