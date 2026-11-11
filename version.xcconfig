@@ -1,12 +1,11 @@
 // Shared Android and iOS app version. Edit only these two values.
 // 0.15.1: metals v3 — platinum + palladium overview screen.
-//  iOS STAGING: ios-v0.15.1-stg+99 (ASC highest 98; staging points at the
-//       staging backend which gains XPT/XPD in v0.5.44-stg).
-//  ANDROID PROD shipped: app-v0.15.0+79 on the internal track (Play
-//       +1..3 window over 78) — promote to production in Console.
+//  iOS STAGING cut: ios-v0.15.1-stg+99 (ASC highest was 98; staging points
+//       at the staging backend v0.5.44-stg with XPT/XPD).
+//  ANDROID STAGING: app-v0.15.1-stg+80 — Play +1..3 window (highest 79).
 //  TestFlight build numbers follow the CI RUN number (93/94 observed),
 //       not this value; this still feeds the archive + the ci_post guard.
 // Keep xcconfig the single build-number source — Xcode Cloud's
 // automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.15.1
-CURRENT_PROJECT_VERSION = 99
+CURRENT_PROJECT_VERSION = 80
