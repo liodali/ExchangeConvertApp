@@ -58,6 +58,10 @@ data class MetalsUiState(
     val ratio: GoldSilverRatio = GoldSilverRatio(),
     /** Display currency the current load targets (labels the USD fallback). */
     val requestedCurrency: String = "USD",
+    /** Asset shown on the detail card (design: selector chips). */
+    val selected: PreciousMetal = PreciousMetal.GOLD,
+    /** True while only the Home strip assets (non-gold) are loaded. */
+    val stripOnly: Boolean = false,
 )
 
 /**
@@ -92,11 +96,39 @@ class MetalsViewModel(
     private var generation = 0
 
     /**
-     * Load all four metals in [displayCurrency]. Safe to call repeatedly:
-     * a same-currency load with fresh data or one in flight is a no-op
-     * unless [forceRefresh].
+     * Load all four metals in [displayCurrency] (detail route). Safe to call
+     * repeatedly: a same-currency load with fresh data or one in flight is a
+     * no-op unless [forceRefresh].
      */
-    fun load(displayCurrency: String?, forceRefresh: Boolean = false) {
+    fun load(displayCurrency: String?, forceRefresh: Boolean = false) =
+        loadCore(displayCurrency, forceRefresh, PreciousMetal.entries, withRatio = true, strip = false)
+
+    /**
+     * Load only the Home strip assets (silver, platinum, palladium — the
+     * Gold section above the strip carries its own quote). Skips the ratio
+     * history windows: the strip is three pair fetches + three delta legs.
+     */
+    fun loadStrip(displayCurrency: String?, forceRefresh: Boolean = false) =
+        loadCore(
+            displayCurrency,
+            forceRefresh,
+            listOf(PreciousMetal.SILVER, PreciousMetal.PLATINUM, PreciousMetal.PALLADIUM),
+            withRatio = false,
+            strip = true,
+        )
+
+    /** Selector chips — swaps the detail card, no refetch (quotes cover all). */
+    fun select(metal: PreciousMetal) {
+        _state.update { it.copy(selected = metal) }
+    }
+
+    private fun loadCore(
+        displayCurrency: String?,
+        forceRefresh: Boolean,
+        metals: List<PreciousMetal>,
+        withRatio: Boolean,
+        strip: Boolean,
+    ) {
         val currency = displayCurrency
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
@@ -120,9 +152,9 @@ class MetalsViewModel(
             requestedCurrency = currency,
         )
         loadJob = viewModelScope.launch {
-            // four pair fetches, bounded to exactly this set — no unbounded
-            // fan-out, each metal fails/succeeds on its own
-            val quotes = PreciousMetal.entries.map { metal ->
+            // bounded to exactly the requested set — no unbounded fan-out,
+            // each metal fails/succeeds on its own
+            val quotes = metals.map { metal ->
                 async { fetchQuote(metal, currency) }
             }.map { it.await() }
 
@@ -130,7 +162,7 @@ class MetalsViewModel(
 
             val quoteMap = quotes.mapNotNull { q -> q?.let { it.metal to it } }.toMap()
             val stale = _state.value.quotes.keys - quoteMap.keys
-            val unavailable = PreciousMetal.entries.toSet() - quoteMap.keys - stale
+            val unavailable = metals.toSet() - quoteMap.keys - stale
             val usdFallback = quoteMap.values
                 .filter { it.currency != currency }
                 .map { it.metal }
@@ -142,22 +174,25 @@ class MetalsViewModel(
                     staleMetals = stale,
                     unavailableMetals = unavailable,
                     usdFallbackMetals = usdFallback,
+                    stripOnly = strip,
                 )
             }
 
-            // ratio legs: LIVE current + joined 30D history, same currency
-            val liveRatio = liveRatio(quoteMap, currency)
-            val historyRatio = historyRatio(currency, gen)
-            if (gen != generation) return@launch
-            _state.update {
-                it.copy(
-                    ratio = GoldSilverRatio(
-                        current = liveRatio,
-                        rangeLow = historyRatio?.first,
-                        rangeHigh = historyRatio?.second,
-                        currency = if (liveRatio != null || historyRatio != null) currency else null,
-                    ),
-                )
+            if (withRatio) {
+                // ratio legs: LIVE current + joined 30D history, same currency
+                val liveRatio = liveRatio(quoteMap, currency)
+                val historyRatio = historyRatio(currency, gen)
+                if (gen != generation) return@launch
+                _state.update {
+                    it.copy(
+                        ratio = GoldSilverRatio(
+                            current = liveRatio,
+                            rangeLow = historyRatio?.first,
+                            rangeHigh = historyRatio?.second,
+                            currency = if (liveRatio != null || historyRatio != null) currency else null,
+                        ),
+                    )
+                }
             }
 
             // day-Δ per metal, painted after the prices (a slow historic leg
@@ -168,9 +203,13 @@ class MetalsViewModel(
         }
     }
 
-    /** Section-local retry for the unavailable state. */
+    /** Section-local retry — re-runs whichever mode loaded last. */
     fun retry() {
-        load(loadedCurrency, forceRefresh = true)
+        if (_state.value.stripOnly) {
+            loadStrip(loadedCurrency, forceRefresh = true)
+        } else {
+            load(loadedCurrency, forceRefresh = true)
+        }
     }
 
     /**

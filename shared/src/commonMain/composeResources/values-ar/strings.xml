@@ -394,6 +394,7 @@
     <string name="metals_assets_badge">%1$d معادن</string>
     <string name="metals_price_unit">للاونصة</string>
     <string name="metals_per_gram">%1$s / غ</string>
+    <string name="metals_per_gram_title">%1$s للجرام</string>
     <string name="metal_name_gold">الذهب</string>
     <string name="metal_name_silver">الفضة</string>
     <string name="metal_name_platinum">البلاتين</string>
@@ -402,6 +403,14 @@
     <string name="metals_ratio_30d">نطاق 30 يومًا %1$s – %2$s</string>
     <string name="metals_ratio_desc">أونصة ذهب ≈ %1$s أونصة فضة</string>
     <string name="metals_convert_cta">تحويل المعادن</string>
+    <string name="metals_strip_title">الفضة · البلاتين · البلاديوم</string>
+    <string name="metals_tag_live">مباشر</string>
+    <string name="metals_spot_line">السعر الفوري %1$s دولار / أونصة</string>
+    <string name="metals_live_suffix">· مباشر</string>
+    <string name="metals_convert_metal_cta">تحويل %1$s</string>
+    <string name="metals_row_desc">%1$s — فتح تفاصيل المعدن</string>
+    <string name="metals_purity_oz">1 oz</string>
+    <string name="metals_purity_g">1 g</string>
     <string name="metals_open_entry">معادن أخرى</string>
     <string name="metals_open_entry_desc">نظرة عامة على الفضة والبلاتين والبالاديوم</string>
     <string name="metals_loading">جارٍ تحميل أسعار المعادن…</string>

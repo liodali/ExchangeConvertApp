@@ -15,6 +15,9 @@ object MetalPricing {
     /** Karat purities the Gold section displays, finest first. */
     val GOLD_KARATS: List<Int> = listOf(24, 22, 18, 14)
 
+    /** Silver fineness rows (‰) the Metals detail displays, finest first. */
+    val SILVER_PURITIES: List<Int> = listOf(999, 950, 925, 900)
+
     /**
      * Mass units for gold pricing display. `oz` is the **troy** ounce —
      * the gold market convention (31.1034768 g, not the 28.35 g avoirdupois
@@ -47,6 +50,17 @@ object MetalPricing {
      *  caller when formatting. */
     fun goldKaratValues(spotPerTroyOunce: Double): List<Double> =
         GOLD_KARATS.map { karatPerGram(spotPerTroyOunce, it) }
+
+    /**
+     * Indicative value per gram of a silver [fineness] alloy — the
+     * fine-silver fraction f/1000. Same no-premium rule as the karat math.
+     */
+    fun silverPurityPerGram(spotPerTroyOunce: Double, fineness: Int): Double =
+        spotPerUnit(spotPerTroyOunce, GoldUnit.GRAM) * fineness / 1000.0
+
+    /** Per-fineness values for [SILVER_PURITIES] in one pass. */
+    fun silverPurityValues(spotPerTroyOunce: Double): List<Double> =
+        SILVER_PURITIES.map { silverPurityPerGram(spotPerTroyOunce, it) }
 
     /** Indicative [karat] value for ONE [unit] (g / troy oz / kg). */
     fun karatValue(spotPerTroyOunce: Double, karat: Int, unit: GoldUnit): Double =

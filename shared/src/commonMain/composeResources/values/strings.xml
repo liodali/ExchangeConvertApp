@@ -394,6 +394,7 @@
     <string name="metals_assets_badge">%1$d ASSETS</string>
     <string name="metals_price_unit">per troy oz</string>
     <string name="metals_per_gram">%1$s / g</string>
+    <string name="metals_per_gram_title">%1$s per gram</string>
     <string name="metal_name_gold">Gold</string>
     <string name="metal_name_silver">Silver</string>
     <string name="metal_name_platinum">Platinum</string>
@@ -402,6 +403,14 @@
     <string name="metals_ratio_30d">30D range %1$s – %2$s</string>
     <string name="metals_ratio_desc">1 oz gold ≈ %1$s oz silver</string>
     <string name="metals_convert_cta">Convert metals</string>
+    <string name="metals_strip_title">Silver · Platinum · Palladium</string>
+    <string name="metals_tag_live">LIVE</string>
+    <string name="metals_spot_line">Spot %1$s USD / oz</string>
+    <string name="metals_live_suffix">· LIVE</string>
+    <string name="metals_convert_metal_cta">Convert %1$s</string>
+    <string name="metals_row_desc">%1$s — open metal detail</string>
+    <string name="metals_purity_oz">1 oz</string>
+    <string name="metals_purity_g">1 g</string>
     <string name="metals_open_entry">Other metals</string>
     <string name="metals_open_entry_desc">Silver, platinum and palladium overview</string>
     <string name="metals_loading">Loading metal prices…</string>

@@ -32,12 +32,17 @@ import dali.hamza.shared.ui.icons.automirrored.outlined.ArrowForward
 import dali.hamza.shared.ui.icons.automirrored.outlined.ArrowRightAlt
 import dali.hamza.shared.ui.icons.outlined.ArrowDropDown
 import dali.hamza.shared.ui.icons.outlined.ArrowDropUp
+import dali.hamza.shared.ui.icons.outlined.ChevronRight
 import dali.hamza.shared.ui.icons.outlined.CurrencyExchange
 import dali.hamza.shared.ui.icons.outlined.History
 import dali.hamza.shared.ui.icons.outlined.NotificationsActive
 import dali.hamza.shared.ui.icons.outlined.NotificationsNone
 import dali.hamza.shared.ui.icons.outlined.SwapHoriz
 import dali.hamza.shared.ui.icons.outlined.Sync
+import dali.hamza.shared.domain.models.MetalQuote
+import dali.hamza.shared.domain.models.PreciousMetal
+import dali.hamza.shared.ui.viewmodel.MetalsUiState
+import dali.hamza.shared.ui.viewmodel.MetalsViewModel
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -95,8 +100,16 @@ import dali.hamza.shared.ui.viewmodel.PairCardData
 import dali.hamza.shared.ui.viewmodel.RateAlertsViewModel
 import dali.hamza.shared.ui.viewmodel.SharedViewModel
 import echangecurrencyapp.shared.generated.resources.Res
-import echangecurrencyapp.shared.generated.resources.metals_open_entry
-import echangecurrencyapp.shared.generated.resources.metals_open_entry_desc
+import echangecurrencyapp.shared.generated.resources.metals_retry
+import echangecurrencyapp.shared.generated.resources.metals_row_desc
+import echangecurrencyapp.shared.generated.resources.metals_stale_note
+import echangecurrencyapp.shared.generated.resources.metals_strip_title
+import echangecurrencyapp.shared.generated.resources.metals_unavailable
+import echangecurrencyapp.shared.generated.resources.metals_usd_fallback
+import echangecurrencyapp.shared.generated.resources.metal_name_gold
+import echangecurrencyapp.shared.generated.resources.metal_name_palladium
+import echangecurrencyapp.shared.generated.resources.metal_name_platinum
+import echangecurrencyapp.shared.generated.resources.metal_name_silver
 import echangecurrencyapp.shared.generated.resources.alerts_active_for
 import echangecurrencyapp.shared.generated.resources.alerts_add_for
 import echangecurrencyapp.shared.generated.resources.common_amount
@@ -158,7 +171,8 @@ fun HomeScreen(
     chartStyle: LedgerChartStyle = LedgerChartStyle.LINE,
     goldViewModel: GoldViewModel? = null,
     onConvertGold: (from: String, to: String, unit: dali.hamza.shared.common.MetalPricing.GoldUnit) -> Unit = { _, _, _ -> },
-    onOpenMetals: () -> Unit = {},
+    metalsViewModel: MetalsViewModel? = null,
+    onOpenMetal: (PreciousMetal) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val homeState by homeViewModel.state.collectAsState()
@@ -184,6 +198,20 @@ fun HomeScreen(
             )
     }
     val goldState by goldVm.state.collectAsState()
+
+    // Metals strip (metals v3, Option C): silver/platinum/palladium live
+    // below the Gold section — the strip loads its own three quotes via
+    // [MetalsViewModel.loadStrip], never the full detail route's history
+    // fan-out. Same Koin-fallback pattern as the Gold section above.
+    val metalsVm = metalsViewModel ?: remember {
+        KoinPlatform.getKoin()?.get<MetalsViewModel>()
+            ?: MetalsViewModel(
+                KoinPlatform.getKoin()?.get<IRepository>()
+                    ?: error("initSharedKoin() must run before HomeScreen()")
+            )
+    }
+    val metalsState by metalsVm.state.collectAsState()
+    LaunchedEffect(state.marketBase) { metalsVm.loadStrip(state.marketBase.ifEmpty { "USD" }) }
 
     val topRates = state.rates.topPairs()
 
@@ -301,13 +329,16 @@ fun HomeScreen(
                             onRetry = goldVm::retry,
                         )
 
-                        // metals v3 (plans/metals-v3.md §2): the Home Gold
-                        // section stays authoritative for gold — the 4-asset
-                        // overview (silver/platinum/palladium + gold card) is
-                        // a pushed route entered from here, NOT a second
-                        // gold pricing block in the feed
+                        // metals v3, Option C (design node kksWv): the Home
+                        // Gold section stays authoritative for gold — the
+                        // LIVE silver/platinum/palladium strip sits right
+                        // below it; a row pushes the metal detail screen
                         Spacer(Modifier.height(12.dp))
-                        OtherMetalsEntry(onOpenMetals = onOpenMetals)
+                        MetalsLiveStrip(
+                            state = metalsState,
+                            onOpenMetal = onOpenMetal,
+                            onRetry = metalsVm::retry,
+                        )
 
                         Spacer(Modifier.height(16.dp))
                         QuickExchangeSection(
@@ -363,10 +394,14 @@ fun HomeScreen(
                     onRetry = goldVm::retry,
                 )
 
-                // metals v3 entry — same placement rule as the expanded branch:
-                // Home Gold stays authoritative, the 4-asset overview is pushed
+                // metals v3, Option C — same placement rule as the expanded
+                // branch: Home Gold stays authoritative, the LIVE strip below
                 Spacer(Modifier.height(12.dp))
-                OtherMetalsEntry(onOpenMetals = onOpenMetals)
+                MetalsLiveStrip(
+                    state = metalsState,
+                    onOpenMetal = onOpenMetal,
+                    onRetry = metalsVm::retry,
+                )
 
                 Spacer(Modifier.height(32.dp))
                 QuickExchangeSection(
@@ -712,40 +747,176 @@ private fun AlertBell(
 }
 
 /**
- * Metals v3 Home entry (plans/metals-v3.md §2): secondary row under the
- * Gold section pushing the 4-asset Metals overview route. Gold itself
- * stays in its own section — this only navigates, no duplicate pricing.
+ * Metals live strip (metals v3, Option C — design node `kksWv`): a card
+ * under the Home Gold section with LIVE silver/platinum/palladium rows.
+ * Each row: code badge, name, trimmed spot, day-Δ chip, chevron — tapping
+ * pushes the metal detail screen. Gold itself stays in its own section.
  */
 @Composable
-private fun OtherMetalsEntry(onOpenMetals: () -> Unit) {
-    val entryDescription = stringResource(Res.string.metals_open_entry_desc)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+private fun MetalsLiveStrip(
+    state: MetalsUiState,
+    onOpenMetal: (PreciousMetal) -> Unit,
+    onRetry: () -> Unit,
+) {
+    val strip = listOf(PreciousMetal.SILVER, PreciousMetal.PLATINUM, PreciousMetal.PALLADIUM)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onOpenMetals)
-            .semantics { contentDescription = entryDescription }
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .background(LedgerColors.Card)
+            .border(1.dp, LedgerColors.GridLine, RoundedCornerShape(16.dp))
+            .padding(16.dp),
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(
-                text = stringResource(Res.string.metals_open_entry),
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = LedgerColors.TextSecondary,
+                text = stringResource(Res.string.metals_strip_title),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+                modifier = Modifier.weight(1f),
             )
+            LiveChip()
+        }
+        if (state.quotes.isEmpty() && !state.loading) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(Res.string.metals_unavailable),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LedgerColors.TextMuted,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    text = stringResource(Res.string.metals_retry),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = LedgerColors.Gold,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onRetry)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+        } else {
+            strip.forEach { metal ->
+                MetalStripRow(
+                    metal = metal,
+                    quote = state.quotes[metal],
+                    requestedCurrency = state.requestedCurrency,
+                    usdFallback = metal in state.usdFallbackMetals,
+                    onClick = { onOpenMetal(metal) },
+                )
+            }
+        }
+        if (state.staleMetals.isNotEmpty()) {
             Text(
-                text = entryDescription,
+                text = stringResource(Res.string.metals_stale_note),
                 style = MaterialTheme.typography.labelSmall,
                 color = LedgerColors.TextMuted,
             )
         }
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = LedgerColors.Gold,
-            modifier = Modifier.size(16.dp),
+    }
+}
+
+/** Accent per strip metal — mirrors the Metals overview badge palette. */
+@Composable
+private fun stripMetalAccent(metal: PreciousMetal) = when (metal) {
+    PreciousMetal.SILVER -> LedgerColors.TextSecondary
+    PreciousMetal.PLATINUM -> LedgerColors.BlueSoft
+    else -> LedgerColors.TextMuted
+}
+
+/** Localized strip metal name (design shows the full name, not the code). */
+@Composable
+private fun stripMetalLabel(metal: PreciousMetal): String = when (metal) {
+    PreciousMetal.SILVER -> stringResource(Res.string.metal_name_silver)
+    PreciousMetal.PLATINUM -> stringResource(Res.string.metal_name_platinum)
+    PreciousMetal.PALLADIUM -> stringResource(Res.string.metal_name_palladium)
+    PreciousMetal.GOLD -> stringResource(Res.string.metal_name_gold)
+}
+
+/** One strip row — design `Silver/Platinum/Palladium Row` (node kksWv). */
+@Composable
+private fun MetalStripRow(
+    metal: PreciousMetal,
+    quote: MetalQuote?,
+    requestedCurrency: String,
+    usdFallback: Boolean,
+    onClick: () -> Unit,
+) {
+    val accent = stripMetalAccent(metal)
+    val name = stripMetalLabel(metal)
+    val rowDescription = stringResource(Res.string.metals_row_desc, name)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(enabled = quote != null, onClick = onClick)
+            .semantics { contentDescription = rowDescription }
+            .padding(vertical = 2.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = metal.code,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = accent,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(accent.copy(alpha = 0.12f))
+                    .padding(horizontal = 6.dp, vertical = 3.dp),
+            )
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = LedgerColors.TextPrimary,
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = when {
+                    quote != null -> formatMetalNumber(quote.spotPerTroyOunce)
+                    else -> "…"
+                },
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = if (quote != null) LedgerColors.TextPrimary else LedgerColors.TextMuted,
+            )
+            val delta = quote?.deltaPercent
+            if (delta != null) {
+                DeltaChip(delta)
+            } else {
+                Text(
+                    text = "—",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = LedgerColors.TextMuted,
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.ChevronRight,
+                contentDescription = null,
+                tint = LedgerColors.TextTertiary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+    if (usdFallback && quote != null) {
+        Text(
+            text = stringResource(Res.string.metals_usd_fallback, requestedCurrency),
+            style = MaterialTheme.typography.labelSmall,
+            color = LedgerColors.TextMutedAlt,
+            modifier = Modifier.padding(start = 40.dp),
         )
     }
 }

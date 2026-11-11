@@ -394,6 +394,7 @@
     <string name="metals_assets_badge">%1$d METALLE</string>
     <string name="metals_price_unit">pro Feinunze</string>
     <string name="metals_per_gram">%1$s / g</string>
+    <string name="metals_per_gram_title">%1$s pro Gramm</string>
     <string name="metal_name_gold">Gold</string>
     <string name="metal_name_silver">Silber</string>
     <string name="metal_name_platinum">Platin</string>
@@ -402,6 +403,14 @@
     <string name="metals_ratio_30d">30-T-Bereich %1$s – %2$s</string>
     <string name="metals_ratio_desc">1 oz Gold ≈ %1$s oz Silber</string>
     <string name="metals_convert_cta">Metalle umrechnen</string>
+    <string name="metals_strip_title">Silber · Platin · Palladium</string>
+    <string name="metals_tag_live">LIVE</string>
+    <string name="metals_spot_line">Spot %1$s USD / oz</string>
+    <string name="metals_live_suffix">· LIVE</string>
+    <string name="metals_convert_metal_cta">%1$s umrechnen</string>
+    <string name="metals_row_desc">%1$s — Metalldetail öffnen</string>
+    <string name="metals_purity_oz">1 oz</string>
+    <string name="metals_purity_g">1 g</string>
     <string name="metals_open_entry">Weitere Metalle</string>
     <string name="metals_open_entry_desc">Übersicht Silber, Platin und Palladium</string>
     <string name="metals_loading">Metallpreise werden geladen…</string>

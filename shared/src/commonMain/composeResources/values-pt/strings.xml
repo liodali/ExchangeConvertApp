@@ -394,6 +394,7 @@
     <string name="metals_assets_badge">%1$d METAIS</string>
     <string name="metals_price_unit">por onça troy</string>
     <string name="metals_per_gram">%1$s / g</string>
+    <string name="metals_per_gram_title">%1$s por gramo</string>
     <string name="metal_name_gold">Ouro</string>
     <string name="metal_name_silver">Prata</string>
     <string name="metal_name_platinum">Platina</string>
@@ -402,6 +403,14 @@
     <string name="metals_ratio_30d">Faixa 30D %1$s – %2$s</string>
     <string name="metals_ratio_desc">1 oz de ouro ≈ %1$s oz de prata</string>
     <string name="metals_convert_cta">Converter metais</string>
+    <string name="metals_strip_title">Prata · Platina · Paládio</string>
+    <string name="metals_tag_live">AO VIVO</string>
+    <string name="metals_spot_line">Spot %1$s USD / oz</string>
+    <string name="metals_live_suffix">· AO VIVO</string>
+    <string name="metals_convert_metal_cta">Converter %1$s</string>
+    <string name="metals_row_desc">%1$s — abrir o detalhe do metal</string>
+    <string name="metals_purity_oz">1 oz</string>
+    <string name="metals_purity_g">1 g</string>
     <string name="metals_open_entry">Outros metais</string>
     <string name="metals_open_entry_desc">Visão geral de prata, platina e paládio</string>
     <string name="metals_loading">Carregando preços dos metais…</string>

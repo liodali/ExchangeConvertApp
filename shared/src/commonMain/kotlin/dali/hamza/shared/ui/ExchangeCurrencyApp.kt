@@ -45,10 +45,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dali.hamza.shared.data.storage.createSessionStorage
 import dali.hamza.shared.domain.repository.IRepository
 import dali.hamza.shared.platform.BiometricAuthenticator
@@ -115,7 +117,7 @@ object Routes {
     const val CONVERTER = "converter"
     const val FULL_CONVERTER = "full-converter"
     const val RATE_ALERTS = "rate-alerts"
-    const val METALS = "metals"
+    const val METALS = "metals?metalCode={metalCode}"
     const val WIDGETS = "widgets"
     const val FAQ = "faq"
     const val SUPPORT = "support"
@@ -381,7 +383,9 @@ fun ExchangeCurrencyApp(
                             }
                         },
                         onOpenRateAlerts = { navController.navigate(Routes.RATE_ALERTS) },
-                        onOpenMetals = { navController.navigate(Routes.METALS) },
+                        onOpenMetal = { metal ->
+                            navController.navigate("${Routes.METALS}?metalCode=${metal.code}")
+                        },
                     )
                     }
                 }
@@ -458,7 +462,16 @@ fun ExchangeCurrencyApp(
                     )
                     }
                 }
-                composable(Routes.METALS) {
+                composable(
+                    Routes.METALS,
+                    arguments = listOf(
+                        navArgument("metalCode") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        },
+                    ),
+                ) {
                     PageCanvas {
                     MetalsScreen(
                         // display fiat = the stored market base, same rule as
@@ -482,6 +495,7 @@ fun ExchangeCurrencyApp(
                             }
                         },
                         onBack = { navController.popBackStack() },
+                        initialMetal = it.arguments?.getString("metalCode"),
                     )
                     }
                 }
