@@ -9,19 +9,21 @@ package dali.hamza.shared.domain.models
  * - [spotPerTroyOunce] is spot in [currency] per 1 troy ounce (the
  *   `/latest?base=CODE&symbol=CUR` contract); per-gram values are derived
  *   via [dali.hamza.shared.common.MetalPricing] — never stored rounded;
- * - deltas follow Gold's comparable-close policy: the historic waterfall
- *   can mix spot and futures closes, so [deltaPercent] stays null and the
- *   chip renders an em dash instead of a fabricated change.
+ * - [deltaPercent] is the day-Δ vs the previous COMPLETED session close
+ *   (latest historic rate strictly before today, same currency), computed
+ *   by [dali.hamza.shared.ui.viewmodel.MetalsViewModel]. Null when no close
+ *   exists (weekend gaps, historic leg failed) — the chip renders an em
+ *   dash rather than a fabricated change. Accepted basis skew: the historic
+ *   waterfall may settle closes from futures legs while the live leg is
+ *   spot, so the delta is directional guidance, not a settlement figure.
  */
 data class MetalQuote(
     val metal: PreciousMetal,
     val currency: String,
     val spotPerTroyOunce: Double,
     val fetchedAtMs: Long,
-) {
-    /** Percent change vs a comparable close — null by policy (see class doc). */
-    val deltaPercent: Double? get() = null
-}
+    val deltaPercent: Double? = null,
+)
 
 /**
  * The four troy-ounce metals the v3 overview serves. Order matches the

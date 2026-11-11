@@ -266,7 +266,7 @@ private fun MetalCell(
         Spacer(Modifier.height(2.dp))
         Text(
             text = when {
-                quote != null -> "${formatLedgerNumber(quote.spotPerTroyOunce)} ${quote.currency}"
+                quote != null -> "${formatMetalNumber(quote.spotPerTroyOunce)} ${quote.currency}"
                 unavailable -> "—"
                 else -> "…"
             },
@@ -278,7 +278,7 @@ private fun MetalCell(
             text = when {
                 quote != null -> stringResource(
                     Res.string.metals_per_gram,
-                    formatLedgerNumber(
+                    formatMetalNumber(
                         MetalPricing.spotPerUnit(quote.spotPerTroyOunce, MetalPricing.GoldUnit.GRAM),
                     ) + " " + quote.currency,
                 )
@@ -335,22 +335,45 @@ private fun MetalCodeBadge(code: String, accent: androidx.compose.ui.graphics.Co
 }
 
 /**
- * Change chip — metals follow Gold's delta policy (comparable closes are
- * not establishable across the historic waterfall), so the chip shows the
- * policy em dash rather than a fabricated percent. Same shape as the
- * market-card DeltaChip, muted.
+ * Metal price formatting: ledger precision (3 fraction digits) with
+ * trailing zeros trimmed to one decimal — 1577.000 → "1577.0",
+ * 1577.500 → "1577.5", 495.065 → "495.065". Metals trade at scales where
+ * forced zero-padding reads as noise (unlike the fiat ledger grid).
+ */
+internal fun formatMetalNumber(value: Double): String {
+    val padded = formatLedgerNumber(value)
+    val whole = padded.substringBefore('.')
+    var frac = padded.substringAfter('.')
+    while (frac.length > 1 && frac.endsWith('0')) frac = frac.dropLast(1)
+    return "$whole.$frac"
+}
+
+/**
+ * Change chip — day-Δ vs the previous session close from
+ * [dali.hamza.shared.ui.viewmodel.MetalsViewModel]; em dash when no close
+ * exists (weekend gaps, historic leg failed). Gains pick up the ledger
+ * green; declines stay neutral (the palette has no red token — direction
+ * always rides the sign, never color alone).
  */
 @Composable
 private fun MetalDeltaChip(quote: MetalQuote?, unavailable: Boolean) {
+    val delta = quote?.deltaPercent
     val text = when {
-        unavailable -> "—"
-        quote?.deltaPercent == null -> "—"
-        else -> ""
+        unavailable || delta == null -> "—"
+        else -> {
+            val step = kotlin.math.round(delta * 10) / 10
+            (if (delta > 0) "+" else "") + step + "%"
+        }
+    }
+    val color = when {
+        delta == null -> LedgerColors.TextMuted
+        delta > 0 -> LedgerColors.Green
+        else -> LedgerColors.TextSecondary
     }
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = LedgerColors.TextMuted,
+        color = color,
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
             .background(LedgerColors.TextMuted.copy(alpha = 0.10f))
@@ -363,7 +386,7 @@ private fun MetalDeltaChip(quote: MetalQuote?, unavailable: Boolean) {
 private fun RatioCard(state: MetalsUiState) {
     val ratio = state.ratio
     val ratioDescription = ratio.current?.let {
-        stringResource(Res.string.metals_ratio_desc, formatLedgerNumber(it))
+        stringResource(Res.string.metals_ratio_desc, formatMetalNumber(it))
     }
     BentoCard(
         modifier = Modifier
@@ -390,8 +413,8 @@ private fun RatioCard(state: MetalsUiState) {
                 val rangeText = if (ratio.rangeLow != null && ratio.rangeHigh != null) {
                     stringResource(
                         Res.string.metals_ratio_30d,
-                        formatLedgerNumber(ratio.rangeLow),
-                        formatLedgerNumber(ratio.rangeHigh),
+                        formatMetalNumber(ratio.rangeLow),
+                        formatMetalNumber(ratio.rangeHigh),
                     )
                 } else {
                     "—"
@@ -403,7 +426,7 @@ private fun RatioCard(state: MetalsUiState) {
                 )
             }
             Text(
-                text = ratio.current?.let { formatLedgerNumber(it) } ?: "—",
+                text = ratio.current?.let { formatMetalNumber(it) } ?: "—",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = LedgerColors.Gold,
             )

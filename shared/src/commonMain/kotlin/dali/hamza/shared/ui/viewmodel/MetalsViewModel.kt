@@ -159,6 +159,12 @@ class MetalsViewModel(
                     ),
                 )
             }
+
+            // day-Δ per metal, painted after the prices (a slow historic leg
+            // must not delay the spot cards — chips arrive a beat later)
+            val withDeltas = attachDeltas(quoteMap, gen)
+            if (gen != generation) return@launch
+            _state.update { it.copy(quotes = withDeltas) }
         }
     }
 
@@ -260,6 +266,56 @@ class MetalsViewModel(
         return DateUtils.toIsoDate(fromDay) to DateUtils.toIsoDate(toDay)
     }
 
+    /**
+     * Day-Δ for every quoted metal, each fetched in the QUOTE's own currency
+     * (a USD-fallback card must not mix legs). One failed historic leg costs
+     * only that metal's chip (em dash) — never the card or its neighbors.
+     */
+    private suspend fun attachDeltas(
+        quotes: Map<PreciousMetal, MetalQuote>,
+        gen: Int,
+    ): Map<PreciousMetal, MetalQuote> = coroutineScope {
+        quotes.map { (metal, quote) ->
+            async { metal to quote.copy(deltaPercent = prevCloseDelta(quote, gen)) }
+        }.map { it.await() }.toMap()
+    }
+
+    /**
+     * Spot now vs the previous completed session close: the latest historic
+     * rate strictly BEFORE today (ISO dates sort lexicographically), same
+     * currency as the quote. Junk guard rejects non-finite or absurd moves
+     * (|Δ| > [MAX_ABS_DELTA_PERCENT] — a bad close must not print "+900%").
+     */
+    private suspend fun prevCloseDelta(quote: MetalQuote, gen: Int): Double? {
+        val (from, to) = deltaWindow()
+        val rates = when (
+            val response = repository.getHistoricalRates(
+                quote.metal.code,
+                quote.currency,
+                from,
+                to,
+            )
+        ) {
+            is MyResponse.Success -> response.data
+            else -> return null
+        }
+        if (gen != generation) return null
+        val today = DateUtils.toIsoDate(DateUtils.epochDayOf(clock()))
+        val prevClose = rates
+            .filter { MetalPricing.isValidSpot(it.rate) && it.date < today }
+            .maxByOrNull { it.date }
+            ?.rate
+            ?: return null
+        val delta = (quote.spotPerTroyOunce - prevClose) / prevClose * 100.0
+        return delta.takeIf { it.isFinite() && kotlin.math.abs(it) <= MAX_ABS_DELTA_PERCENT }
+    }
+
+    private fun deltaWindow(): Pair<String, String> {
+        val toDay = DateUtils.epochDayOf(clock())
+        val fromDay = toDay - DELTA_WINDOW_DAYS
+        return DateUtils.toIsoDate(fromDay) to DateUtils.toIsoDate(toDay)
+    }
+
     fun onCleared() {
         viewModelScope.cancel()
     }
@@ -269,5 +325,9 @@ class MetalsViewModel(
         const val RATIO_WINDOW_DAYS = 30L
         const val MIN_RATIO_MATCHED_DAYS = 10
         const val MIN_SILVER_FOR_RATIO = 0.01
+
+        /** Day-Δ lookback + junk guard (see [prevCloseDelta]). */
+        const val DELTA_WINDOW_DAYS = 7L
+        const val MAX_ABS_DELTA_PERCENT = 20.0
     }
 }
