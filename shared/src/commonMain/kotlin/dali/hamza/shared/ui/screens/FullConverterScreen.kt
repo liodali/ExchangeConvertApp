@@ -144,7 +144,7 @@ fun FullConverterScreen(
                 )
                 // metal amounts are troy ounces — fixed informational hint
                 // (unit switching lives in Home's Gold section)
-                if (base?.name == "XAU" || base?.name == "XAG") {
+                if (base != null && base.name in CurrenciesCatalog.metalCodes) {
                     Text(
                         modifier = Modifier.padding(top = 6.dp),
                         text = stringResource(Res.string.conv_metal_unit_hint, base.name),

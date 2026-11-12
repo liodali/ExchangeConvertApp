@@ -73,6 +73,7 @@ import echangecurrencyapp.shared.generated.resources.conv_title
 import echangecurrencyapp.shared.generated.resources.conv_title_crypto
 import echangecurrencyapp.shared.generated.resources.conv_title_gold
 import echangecurrencyapp.shared.generated.resources.conv_title_silver
+import echangecurrencyapp.shared.generated.resources.conv_title_metal
 import echangecurrencyapp.shared.generated.resources.conv_metal_unit_hint
 import echangecurrencyapp.shared.generated.resources.gold_unit_desc
 import echangecurrencyapp.shared.generated.resources.home_from_currency
@@ -137,10 +138,13 @@ fun ConverterCurrencyScreen(
             val fromCode = state.fromCurrency?.name
             Text(
                 modifier = Modifier.padding(top = 24.dp),
-                text = when (fromCode) {
-                    "XAU" -> stringResource(Res.string.conv_title_gold)
-                    "XAG" -> stringResource(Res.string.conv_title_silver)
-                    "BTC" -> stringResource(Res.string.conv_title_crypto)
+                text = when {
+                    fromCode == "XAU" -> stringResource(Res.string.conv_title_gold)
+                    fromCode == "XAG" -> stringResource(Res.string.conv_title_silver)
+                    // platinum & palladium — a metal, but neither gold nor
+                    // silver: they get the umbrella title
+                    fromCode != null && fromCode in CurrenciesCatalog.metalCodes -> stringResource(Res.string.conv_title_metal)
+                    fromCode == "BTC" -> stringResource(Res.string.conv_title_crypto)
                     else -> stringResource(Res.string.conv_title)
                 },
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
@@ -236,7 +240,7 @@ fun ConverterCurrencyScreen(
                         // base-unit explainer under the field: the XAU unit
                         // itself is a troy ounce (suffix picks what the
                         // TYPED number means; this explains the catalog unit)
-                        if (base == "XAU" || base == "XAG") {
+                        if (base != null && base in CurrenciesCatalog.metalCodes) {
                             Text(
                                 modifier = Modifier.padding(top = 6.dp),
                                 text = stringResource(Res.string.conv_metal_unit_hint, base),
@@ -418,8 +422,8 @@ fun ConverterCurrencyScreen(
         // the sheet mirrors the slot: metal slot lists metals only,
         // currency slot lists currencies only (fiats + cryptos); To stays
         // fiat-only (metals convert one way only)
-        val slotIsMetal = (if (pickingFrom) state.fromCurrency else state.toCurrency)
-            ?.name in CurrenciesCatalog.metalCodes
+        val slotCode = (if (pickingFrom) state.fromCurrency else state.toCurrency)?.name
+        val slotIsMetal = slotCode != null && slotCode in CurrenciesCatalog.metalCodes
         CurrencyPickerSheet(
             visible = true,
             currencies = state.currencies,

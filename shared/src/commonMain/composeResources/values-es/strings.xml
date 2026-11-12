@@ -70,6 +70,7 @@
     <string name="conv_title">Tasas de cambio</string>
     <string name="conv_title_gold">Precios del oro</string>
     <string name="conv_title_silver">Precios de la plata</string>
+    <string name="conv_title_metal">Tasas de metales</string>
     <string name="conv_title_crypto">Precios de cripto</string>
     <string name="conv_metal_unit_hint">1 %1$s = 1 onza troy = 31,10 g</string>
     <string name="conv_live_base">Tasas en vivo basadas en la moneda base %1$s</string>
