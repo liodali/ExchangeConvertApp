@@ -55,13 +55,32 @@ fun CurrencyPickerSheet(
      * always fiat — metals convert one way only (metal → currency).
      */
     fiatOnly: Boolean = false,
+    /**
+     * Metals only: the From slot currently holds a metal, so the sheet
+     * lists metals exclusively (metal ↔ metal never converts — the sheet
+     * still shows them; the ViewModel rejects same-code pairs).
+     */
+    metalOnly: Boolean = false,
+    /**
+     * Hide metals only (fiats + cryptos stay): the From slot currently
+     * holds a currency, so the metals group is irrelevant noise.
+     */
+    hideMetals: Boolean = false,
 ) {
     if (!visible) return
 
     var query by remember { mutableStateOf("") }
 
-    val selectable = remember(currencies, fiatOnly) {
-        if (fiatOnly) currencies.filter { it.name !in CurrenciesCatalog.assetCodes } else currencies
+    val selectable = remember(currencies, fiatOnly, metalOnly, hideMetals) {
+        currencies.filter { currency ->
+            val isMetal = currency.name in CurrenciesCatalog.metalCodes
+            when {
+                metalOnly -> isMetal
+                fiatOnly -> currency.name !in CurrenciesCatalog.assetCodes
+                hideMetals -> !isMetal
+                else -> true
+            }
+        }
     }
     val filtered = remember(query, selectable) {
         if (query.isBlank()) {

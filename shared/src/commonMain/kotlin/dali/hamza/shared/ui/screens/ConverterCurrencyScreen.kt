@@ -415,6 +415,11 @@ fun ConverterCurrencyScreen(
     }
 
     pickerFor?.let { pickingFrom ->
+        // the sheet mirrors the slot: metal slot lists metals only,
+        // currency slot lists currencies only (fiats + cryptos); To stays
+        // fiat-only (metals convert one way only)
+        val slotIsMetal = (if (pickingFrom) state.fromCurrency else state.toCurrency)
+            ?.name in CurrenciesCatalog.metalCodes
         CurrencyPickerSheet(
             visible = true,
             currencies = state.currencies,
@@ -427,6 +432,8 @@ fun ConverterCurrencyScreen(
             },
             // metals convert one way only: To is always fiat
             fiatOnly = !pickingFrom,
+            metalOnly = pickingFrom && slotIsMetal,
+            hideMetals = pickingFrom && !slotIsMetal,
         )
     }
 }
