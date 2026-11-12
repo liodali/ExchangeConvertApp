@@ -14,4 +14,4 @@
 // Keep xcconfig the single build-number source — Xcode Cloud's
 // automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.16.0
-CURRENT_PROJECT_VERSION = 82
+CURRENT_PROJECT_VERSION = 100
