@@ -64,6 +64,9 @@ import echangecurrencyapp.shared.generated.resources.metals_convert_cta
 import echangecurrencyapp.shared.generated.resources.metals_convert_metal_cta
 import echangecurrencyapp.shared.generated.resources.metals_stale_note
 import echangecurrencyapp.shared.generated.resources.metals_usd_fallback
+import echangecurrencyapp.shared.generated.resources.metals_per_gram_title
+import echangecurrencyapp.shared.generated.resources.metals_spot_line
+import echangecurrencyapp.shared.generated.resources.metals_live_suffix
 import echangecurrencyapp.shared.generated.resources.metals_loading
 import echangecurrencyapp.shared.generated.resources.metals_per_gram
 import echangecurrencyapp.shared.generated.resources.metals_price_unit
@@ -154,31 +157,21 @@ private fun MetalsContent(
     onSelect: (PreciousMetal) -> Unit,
     onConvertMetal: (metalCode: String, fiat: String) -> Unit,
 ) {
-    MetalSelectorChips(
-        selected = selectedMetal,
-        quotes = state.quotes,
-        onSelect = onSelect,
-    )
-    Spacer(Modifier.height(12.dp))
-    // one card per metal, all visible at once — the page never scrolls
-    // (user request: each chip owns its card; duplicates are intentional)
+    // one full detail card per metal — each card carries its own variant
+    // row (gold karats, silver fineness, pt/pd ounce+gram); duplicates are
+    // intentional (user request). Tapping a card selects it for the CTA.
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        PreciousMetal.entries.chunked(2).forEach { rowMetals ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                rowMetals.forEach { metal ->
-                    MetalCell(
-                        metal = metal,
-                        quote = state.quotes[metal],
-                        stale = metal in state.staleMetals,
-                        unavailable = metal in state.unavailableMetals,
-                        usdFallback = metal in state.usdFallbackMetals,
-                        requestedCurrency = state.requestedCurrency,
-                        selected = metal == selectedMetal,
-                        onClick = { onSelect(metal) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
+        PreciousMetal.entries.forEach { metal ->
+            MetalCard(
+                metal = metal,
+                quote = state.quotes[metal],
+                stale = metal in state.staleMetals,
+                unavailable = metal in state.unavailableMetals,
+                usdFallback = metal in state.usdFallbackMetals,
+                requestedCurrency = state.requestedCurrency,
+                selected = metal == selectedMetal,
+                onClick = { onSelect(metal) },
+            )
         }
     }
     Spacer(Modifier.height(12.dp))
@@ -198,67 +191,47 @@ private fun MetalsContent(
     }
 }
 
+
 /**
- * Design `Metal Selector` — four chips, the active one tinted with its
- * metal accent. A chip is tappable only once its quote exists (the card
- * behind shows live data; selecting a metal with no quote would read as
- * an empty pricing card).
+ * Purity-grid cells per metal — gold: karat rows (24/22/18/14K per gram),
+ * silver: fineness rows (999 F/950/925/900 per gram), platinum and
+ * palladium: per-ounce and per-gram only (no purity convention). Values
+ * come from [MetalPricing] — never stored rounded.
  */
-@Composable
-private fun MetalSelectorChips(
-    selected: PreciousMetal,
-    quotes: Map<PreciousMetal, MetalQuote>,
-    onSelect: (PreciousMetal) -> Unit,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-    ) {
-        PreciousMetal.entries.forEach { metal ->
-            val accent = metalAccent(metal)
-            val active = metal == selected
-            val chipDescription = stringResource(Res.string.metals_selected_desc, metalLabel(metal))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(if (active) accent.copy(alpha = 0.12f) else LedgerColors.CardAlt)
-                    .then(
-                        if (active) {
-                            Modifier
-                        } else {
-                            Modifier.border(1.dp, LedgerColors.GridLine, RoundedCornerShape(8.dp))
-                        },
-                    )
-                    .clickable(enabled = quotes.containsKey(metal)) { onSelect(metal) }
-                    .semantics { contentDescription = chipDescription }
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-            ) {
-                Text(
-                    text = metal.code,
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = accent,
-                )
-                Text(
-                    text = metalLabel(metal),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (active) LedgerColors.TextPrimary else LedgerColors.TextMuted,
-                )
+private fun purityCells(
+    metal: PreciousMetal,
+    quote: MetalQuote?,
+): List<Pair<String, String>> {
+    if (quote == null) return listOf("\u2014" to "\u2014")
+    return when (metal) {
+        PreciousMetal.GOLD -> MetalPricing.GOLD_KARATS
+            .zip(MetalPricing.goldKaratValues(quote.spotPerTroyOunce))
+            .map { (karat, value) -> "${karat}K" to formatMetalNumber(value) }
+        PreciousMetal.SILVER -> MetalPricing.SILVER_PURITIES
+            .zip(MetalPricing.silverPurityValues(quote.spotPerTroyOunce))
+            .map { (fineness, value) ->
+                val label = if (fineness == 999) "999 F" else "$fineness"
+                label to formatMetalNumber(value)
             }
-        }
+        else -> listOf(
+            "1 oz" to formatMetalNumber(quote.spotPerTroyOunce),
+            "1 g" to formatMetalNumber(
+                MetalPricing.spotPerUnit(quote.spotPerTroyOunce, MetalPricing.GoldUnit.GRAM),
+            ),
+        )
     }
 }
 
 /**
- * One per-metal card — design `XAU/XAG/XPT/XPD Cell` (the page shows all
- * four at once, one per chip; duplicates are intentional). Compact by
- * design so the 2x2 grid fits on screen without scrolling.
+ * One per-metal detail card — design node kksWv evolved: every card is a
+ * full variant sheet (badge + name + day-Δ on the header, its own purity
+ * row — gold karats / silver fineness / ounce+gram for platinum and
+ * palladium — then the per-ounce spot line with the LIVE tag). All four
+ * cards are visible at once; tapping selects the card for the Convert CTA
+ * (accent border marks the selection).
  */
 @Composable
-private fun MetalCell(
+private fun MetalCard(
     metal: PreciousMetal,
     quote: MetalQuote?,
     stale: Boolean,
@@ -267,12 +240,11 @@ private fun MetalCell(
     requestedCurrency: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val accent = metalAccent(metal)
     val selectedDescription = stringResource(Res.string.metals_selected_desc, metalLabel(metal))
     BentoCard(
-        modifier = modifier
+        modifier = Modifier
             .clickable(onClick = onClick)
             .semantics { contentDescription = selectedDescription },
         fill = LedgerColors.Card,
@@ -285,45 +257,75 @@ private fun MetalCell(
             modifier = Modifier.fillMaxWidth(),
         ) {
             MetalCodeBadge(code = metal.code, accent = accent)
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = metalLabel(metal),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = if (unavailable) LedgerColors.TextMuted else LedgerColors.TextPrimary,
+                modifier = Modifier.weight(1f),
+            )
             MetalDeltaChip(quote = quote, unavailable = unavailable)
         }
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+            val cells = purityCells(metal, quote)
+            cells.forEachIndexed { index, (label, value) ->
+                val highlight = index == 0
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (highlight) accent.copy(alpha = 0.10f) else LedgerColors.CardAlt)
+                        .padding(horizontal = 6.dp, vertical = 6.dp),
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = if (highlight) accent else LedgerColors.TextMuted,
+                    )
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = LedgerColors.TextPrimary,
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(8.dp))
-        Text(
-            text = metalLabel(metal),
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-            color = if (unavailable) LedgerColors.TextMuted else LedgerColors.TextPrimary,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = when {
-                quote != null -> "${formatMetalNumber(quote.spotPerTroyOunce)} ${quote.currency}"
-                unavailable -> "\u2014"
-                else -> "\u2026"
-            },
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = LedgerColors.TextPrimary,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = when {
-                quote != null -> stringResource(
-                    Res.string.metals_per_gram,
-                    formatMetalNumber(
-                        MetalPricing.spotPerUnit(quote.spotPerTroyOunce, MetalPricing.GoldUnit.GRAM),
-                    ) + " " + quote.currency,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = quote?.let {
+                    stringResource(Res.string.metals_spot_line, formatMetalNumber(it.spotPerTroyOunce))
+                } ?: if (unavailable) "\u2014" else "\u2026",
+                style = MaterialTheme.typography.bodySmall,
+                color = LedgerColors.TextMuted,
+                modifier = Modifier.weight(1f),
+            )
+            if (quote != null) {
+                Text(
+                    text = stringResource(Res.string.metals_live_suffix),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = accent,
                 )
-                else -> stringResource(Res.string.metals_price_unit)
-            },
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-            color = LedgerColors.TextMuted,
-        )
+            }
+        }
         if (usdFallback && quote != null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(Res.string.gold_usd_fallback, requestedCurrency),
+                text = stringResource(Res.string.metals_usd_fallback, requestedCurrency),
                 style = MaterialTheme.typography.labelSmall,
                 color = LedgerColors.TextMutedAlt,
+            )
+        }
+        if (stale) {
+            Text(
+                text = stringResource(Res.string.metals_stale_note),
+                style = MaterialTheme.typography.labelSmall,
+                color = LedgerColors.TextMuted,
             )
         }
     }
