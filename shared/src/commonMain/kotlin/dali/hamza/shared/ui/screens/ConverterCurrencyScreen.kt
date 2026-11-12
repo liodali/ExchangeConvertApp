@@ -214,21 +214,31 @@ fun ConverterCurrencyScreen(
                             // g → oz → kg on tap
                             unitSuffix = state.fromUnit?.let { unit ->
                                 {
+                                    // per-metal unit set + tint: platinum/
+                                    // palladium cycle oz <-> g (kg dropped —
+                                    // industrial metals quote per troy oz)
+                                    val units = MetalPricing.unitsFor(base ?: "")
+                                    val accent = when (base) {
+                                        "XAU" -> LedgerColors.Gold
+                                        "XAG" -> LedgerColors.TextSecondary
+                                        "XPT" -> LedgerColors.BlueSoft
+                                        else -> LedgerColors.TextMuted
+                                    }
                                     val unitDescription = stringResource(Res.string.gold_unit_desc)
                                     Text(
                                         text = unit.label,
                                         style = MaterialTheme.typography.labelLarge.copy(
                                             fontWeight = FontWeight.SemiBold,
                                         ),
-                                        color = LedgerColors.Gold,
+                                        color = accent,
                                         modifier = Modifier
                                             .padding(start = 8.dp)
                                             .clip(RoundedCornerShape(8.dp))
-                                            .background(LedgerColors.GoldGlow)
+                                            .background(accent.copy(alpha = 0.10f))
                                             .clickable {
-                                                val entries = MetalPricing.GoldUnit.entries
+                                                val entries = units
                                                 viewModel.selectFromUnit(
-                                                    entries[(unit.ordinal + 1) % entries.size],
+                                                    entries[(units.indexOf(unit) + 1) % entries.size],
                                                 )
                                             }
                                             .semantics { contentDescription = unitDescription }

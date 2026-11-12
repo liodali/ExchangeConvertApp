@@ -163,7 +163,9 @@ class SharedViewModel(
                 fromCurrency = currency,
                 convertedAmount = null,
                 fromUnit = if (currency.name in CurrenciesCatalog.metalCodes) {
-                    MetalPricing.GoldUnit.GRAM
+                    // per-metal default: g for gold/silver, troy oz for
+                    // platinum/palladium (their market convention)
+                    MetalPricing.unitsFor(currency.name).first()
                 } else {
                     null
                 },

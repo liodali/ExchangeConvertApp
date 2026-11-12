@@ -30,6 +30,24 @@ object MetalPricing {
     }
 
     /**
+     * Correct mass units per metal (converter unit suffix):
+     * - gold & silver: g / oz / kg — jewelry and bullion trade in all three;
+     * - platinum & palladium: oz / g only — they are industrial metals
+     *   quoted per troy ounce; a kilogram row would be noise.
+     * The FIRST entry is the metal's default unit.
+     */
+    val UNITS_PER_METAL: Map<String, List<GoldUnit>> = mapOf(
+        "XAU" to listOf(GoldUnit.GRAM, GoldUnit.TROY_OUNCE, GoldUnit.KILOGRAM),
+        "XAG" to listOf(GoldUnit.GRAM, GoldUnit.TROY_OUNCE, GoldUnit.KILOGRAM),
+        "XPT" to listOf(GoldUnit.TROY_OUNCE, GoldUnit.GRAM),
+        "XPD" to listOf(GoldUnit.TROY_OUNCE, GoldUnit.GRAM),
+    )
+
+    /** Units for [code], falling back to the full mass set for unknown metals. */
+    fun unitsFor(code: String): List<GoldUnit> =
+        UNITS_PER_METAL[code.uppercase()] ?: GoldUnit.entries
+
+    /**
      * A spot price fit for display: strictly positive and finite. Zero,
      * negative, NaN and infinite values must never render as 0.00.
      */
