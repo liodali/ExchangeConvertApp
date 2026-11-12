@@ -3,9 +3,14 @@ package dali.hamza.shared.ui.screens
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.border
@@ -41,6 +46,8 @@ import dali.hamza.shared.ui.icons.outlined.SwapHoriz
 import dali.hamza.shared.ui.icons.outlined.Sync
 import dali.hamza.shared.domain.models.MetalQuote
 import dali.hamza.shared.domain.models.PreciousMetal
+
+import kotlinx.coroutines.launch
 import dali.hamza.shared.ui.viewmodel.MetalsUiState
 import dali.hamza.shared.ui.viewmodel.MetalsViewModel
 import androidx.compose.material3.HorizontalDivider
@@ -54,6 +61,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -264,11 +272,38 @@ fun HomeScreen(
             greeting = greetingForHour(currentHourOfDay()),
             avatarInitials = state.username,
             trailing = {
-                IconButton(onClick = viewModel::refresh) {
+                // app-bar refresh: one tap force-refreshes every Home
+                // section — shared rate table (guest hourly window still
+                // applies there by design), gold section, metals strip —
+                // with a spinning icon while any of them is in flight
+                val refreshScope = rememberCoroutineScope()
+                var refreshing by remember { mutableStateOf(false) }
+                val spin by rememberInfiniteTransition(label = "refresh")
+                    .animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing)),
+                        label = "spin",
+                    )
+                IconButton(onClick = {
+                    if (refreshing) return@IconButton
+                    refreshing = true
+                    refreshScope.launch {
+                        viewModel.refresh()
+                        goldVm.retry()
+                        metalsVm.loadStrip(state.marketBase.ifEmpty { "USD" }, forceRefresh = true)
+                        refreshing = false
+                    }
+                }) {
                     Icon(
                         Icons.Outlined.Sync,
                         contentDescription = stringResource(Res.string.home_refresh_desc),
                         tint = LedgerColors.Blue,
+                        modifier = if (refreshing) {
+                            Modifier.graphicsLayer { rotationZ = spin }
+                        } else {
+                            Modifier
+                        },
                     )
                 }
             },
