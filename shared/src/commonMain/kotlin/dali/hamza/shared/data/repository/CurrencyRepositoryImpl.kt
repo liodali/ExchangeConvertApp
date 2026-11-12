@@ -54,9 +54,32 @@ class CurrencyRepositoryImpl(
                 .executeAsList()
                 .map { Currency(name = it.name, fullCountryName = it.fullCountryName) }
             if (stored.isEmpty()) {
+                // fresh install: seed the table straight from the static
+                // catalog (persist — do not rely on the in-memory fallback)
+                CurrenciesCatalog.currencies.forEach { currency ->
+                    database.currenciesQueries.insertCurrency(
+                        name = currency.name,
+                        fullCountryName = currency.fullCountryName,
+                    )
+                }
                 MyResponse.Success(CurrenciesCatalog.currencies)
             } else {
-                MyResponse.Success(stored)
+                // self-heal: the static catalog can grow after an install
+                // (metals v3 added XPT/XPD) — the seeded table must follow,
+                // or pickers silently drop the new codes
+                val known = stored.map { it.name }.toSet()
+                val missing = CurrenciesCatalog.currencies.filter { it.name !in known }
+                if (missing.isNotEmpty()) {
+                    missing.forEach { currency ->
+                        database.currenciesQueries.insertCurrency(
+                            name = currency.name,
+                            fullCountryName = currency.fullCountryName,
+                        )
+                    }
+                    MyResponse.Success(stored + missing)
+                } else {
+                    MyResponse.Success(stored)
+                }
             }
         }
 
