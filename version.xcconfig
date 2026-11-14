@@ -5,8 +5,10 @@
 //       converter units + refresh fixes against backend v0.5.47-stg.
 //  iOS STAGING: ios-v0.16.0-stg+101 (ASC highest 100) — catalog
 //       self-heal (metal picker gains XPT/XPD on existing installs).
-//  ANDROID STAGING: app-v0.16.0-stg+83 — Play +1..3 window (highest 82).
-//       iOS cut at +101 (its run validates against its own checkout).
+//  iOS PROD: ios-v0.16.0+102 (ASC highest 101) — metals UI + backend
+//       v0.5.47 (XPT/XPD + fixed fiat history) now live on prod.
+//  ANDROID PROD follows: app-v0.16.0+84 (Play window over 83) —
+//       xcconfig flips to 84 for that tag after the iOS tag is cut.
 //  iOS PROD: next tag ios-v0.16.0+NN — ASC highest is 99, so iOS builds
 //       continue from 100 (xcconfig flips back after the Android tag,
 //       the two tags validate against this file sequentially).
@@ -15,4 +17,4 @@
 // Keep xcconfig the single build-number source — Xcode Cloud's
 // automatic build number stays OFF (ci_post_xcodebuild guard enforces).
 MARKETING_VERSION = 0.16.0
-CURRENT_PROJECT_VERSION = 83
+CURRENT_PROJECT_VERSION = 102
